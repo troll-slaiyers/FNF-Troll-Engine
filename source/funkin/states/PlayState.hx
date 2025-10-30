@@ -1729,7 +1729,7 @@ class PlayState extends MusicBeatState
 				var prevNote:Note = (notes.length > 0) ? notes[notes.length - 1] : null;
 				var daType:String = noteData.noteType;
 
-				var swagNote:Note = new Note(daStrumTime, daColumn, prevNote, fieldIndex, noteData.sustainLength > 0 ? HEAD : TAP, false, hudSkin);
+				var swagNote:Note = new Note(daStrumTime, daColumn, prevNote, fieldIndex, noteData.sustainLength > 0 ? HEAD : TAP, false);
 				swagNote.strumTime += offset;
 				swagNote.visualTime = getNoteInitialTime(swagNote.strumTime);
 				swagNote.realColumn = realColumn;
@@ -1743,6 +1743,7 @@ class PlayState extends MusicBeatState
 					swagNote.characterMissAnimSuffix = '-altmiss';
 				}
 				swagNote.gfNote = section.gfSection && (section.mustHitSection ? (realColumn < keyCount) : (realColumn >= keyCount));
+				swagNote.noteMod = hudSkin;
 				swagNote.noteType = daType;
 				swagNote.field ??= (swagNote.fieldIndex >= 0) ? playfields[swagNote.fieldIndex] : null;
 
@@ -1764,7 +1765,7 @@ class PlayState extends MusicBeatState
 				prevNote = swagNote;
 
 				inline function makeSustain(segment:Int, susPart:SustainPart) {
-					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (segment + 1), daColumn, prevNote, fieldIndex, susPart, false, hudSkin);
+					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (segment + 1), daColumn, prevNote, fieldIndex, susPart, false);
 					sustainNote.strumTime += offset;
 					sustainNote.visualTime = getNoteInitialTime(sustainNote.strumTime);
 					sustainNote.realColumn = realColumn;
@@ -1774,6 +1775,7 @@ class PlayState extends MusicBeatState
 					sustainNote.characterHitAnimSuffix = swagNote.characterHitAnimSuffix;
 					sustainNote.characterMissAnimSuffix = swagNote.characterMissAnimSuffix;
 					sustainNote.gfNote = swagNote.gfNote;
+					sustainNote.noteMod = swagNote.noteMod;
 					sustainNote.noteType = daType;
 
 					if (callScripts)

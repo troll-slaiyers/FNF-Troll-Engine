@@ -3786,12 +3786,13 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 	function setupNoteData(i:NoteData, sectionNumber:Int):Note {
 		var daField:Int = Math.floor(i.column / _song.keyCount);
-		var note:Note = new Note(i.strumTime, i.column % _song.keyCount, null, daField, (i.sustainLength <= 0 ? TAP : HEAD), true, hudSkin);
+		var note:Note = new Note(i.strumTime, i.column % _song.keyCount, null, daField, (i.sustainLength <= 0 ? TAP : HEAD), true);
 		note.chartData = i;
 		note.realColumn = i.column;
 		note.mustPress = i.column < _song.keyCount;
 		note.sustainLength = i.sustainLength;
 		note.canQuant = useQuantNotes;
+		note.noteMod = hudSkin;
 		initNoteType(i.noteType);
 		note.noteType = i.noteType;
 
@@ -3829,7 +3830,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
     }
 
 	function setupEventData(i:PsychEventNote, sectionNumber:Int) {
-		var note:Note = new Note(i.strumTime, -1, null, -1, 0, true, hudSkin);
+		var note:Note = new Note(i.strumTime, -1, null, -1, 0, true);
 		note.realColumn -1;
 		note.chartData = i;
 		note.usesDefaultColours = false;

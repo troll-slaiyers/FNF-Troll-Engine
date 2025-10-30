@@ -368,16 +368,6 @@ class Note extends NoteObject {
 	private function set_noteType(value:String):String {
 		noteSplashTexture = PlayState.splashSkin;
 
-		updateColours();
-
-		// just to make sure they arent 0, 0, 0
-		colorSwap.hue += 0.0127;
-		colorSwap.saturation += 0.0127;
-		colorSwap.brightness += 0.0127;
-		var hue = colorSwap.hue;
-		var sat = colorSwap.saturation;
-		var brt = colorSwap.brightness;
-
 		if (noteType != value) {
 			noteType = value;
 			noteScript = instance?.notetypeScripts.get(value);
@@ -406,6 +396,9 @@ class Note extends NoteObject {
 
 		noteScript?.executeFunc("onSetupNotePost", [this]);
 		genScript?.executeFunc("onNoteTypeSetPost", [this]);
+
+		////
+		updateColours();
 
 		////
 		if (isQuant && Paths.imageExists('QUANT' + noteSplashTexture))
@@ -446,7 +439,7 @@ class Note extends NoteObject {
 		return '(column: $column | noteType: $noteType | strumTime: $strumTime | visible: $visible)';
 	}
 
-	public function new(strumTime:Float, column:Int, ?prevNote:Note, fieldIndex:Int = -1, susPart:SustainPart = TAP, ?inEditor:Bool = false, ?noteMod:String = 'default')
+	public function new(strumTime:Float, column:Int, ?prevNote:Note, fieldIndex:Int = -1, susPart:SustainPart = TAP, ?inEditor:Bool = false)
 	{
 		super(NOTE);
 
@@ -476,9 +469,6 @@ class Note extends NoteObject {
 
 		colorSwap = new NoteColorSwap();
 		shader = NoteColorSwap.shader;
-
-		if (column >= 0)
-			this.noteMod = noteMod;
 	}
 
 	public var tex:String;
