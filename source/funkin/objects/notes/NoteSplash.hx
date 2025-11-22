@@ -7,12 +7,12 @@ import funkin.objects.shaders.NoteColorSwap;
 
 class NoteSplash extends NoteObject
 {
-	private var idleAnim:String;
 	private var textureLoaded:String = null;
 
+	public var animationAmount:Int = 2;
+
 	public function new(x:Float = 0, y:Float = 0, ?note:Int = 0) {
-		super(x, y);
-		objType = SPLASH;
+		super(SPLASH);
 		
 		colorSwap = new NoteColorSwap();
 		shader = NoteColorSwap.shader;
@@ -21,30 +21,13 @@ class NoteSplash extends NoteObject
 		setupNoteSplash(x, y, note);
 		visible = false;
 	}
-
-	function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic{
-		if(FlxG.state == PlayState.instance)
-			return PlayState.instance.callOnScripts(event, args, ignoreStops, exclusions, PlayState.instance.hscriptArray, vars);
-		else
-			return Globals.Function_Continue;
-
-	}
 	
-	public var animationAmount:Int = 2;
 	public function setupNoteSplash(x:Float, y:Float, column:Int = 0, texture:String = null, hueColor:Float = 0, satColor:Float = 0, brtColor:Float = 0, ?note:Note) 
 	{
 		visible = true;
-		var doR:Bool = false;
-		if (note != null && note.genScript != null){
-			var ret:Dynamic = note.genScript.call("preSetupNoteSplash", [x, y, column, texture, hueColor, satColor, brtColor, note], ["this" => this, "noteData" => noteData, "column" => column]);
-			if(ret == Globals.Function_Stop) doR = true;
-		}
-		
-		if (callOnHScripts("preSetupNoteSplash", [x, y, column, texture, hueColor, satColor, brtColor, note], ["this" => this, "noteData" => noteData, "column" => column]) == Globals.Function_Stop)
-			return;
 
-		if (doR)return;
-		
+		if (scriptCall(note, "preSetupNoteSplash", [x, y, column, texture, hueColor, satColor, brtColor, note]) == STOP)
+			return;
 
 		setPosition(x, y);
 		animationAmount = 2;
@@ -55,21 +38,13 @@ class NoteSplash extends NoteObject
 		this.column = column;
 		if (texture == null) texture = PlayState.splashSkin;
 
-		if(note != null && note.genScript != null){
-			if (note.genScript.exists("texturePrefix")) texture = note.genScript.get("texturePrefix") + texture;
-
-			if (note.genScript.exists("textureSuffix")) texture += note.genScript.get("textureSuffix");
+		if (note?.genScript != null) {
+			if (note.genScript.exists("textureSuffix")) 
+				texture += note.genScript.get("textureSuffix");
 		}
 
 		if (textureLoaded != texture) {
-			var ret = Globals.Function_Continue;
-
-			if (note != null && note.genScript != null)
-				ret = note.genScript.call("loadSplashAnims", [texture], ["this" => this, "noteData" => noteData, "column" => column]);
-			
-			var ret2 = callOnHScripts("loadSplashAnims", [texture], ["this" => this, "noteData" => noteData, "column" => column]);
-
-			if (ret != Globals.Function_Stop && ret2 != Globals.Function_Stop) 
+			if (scriptCall(note, "loadSplashAnims", [texture]) != STOP)
 				loadAnims(texture);
 		}
 
@@ -77,13 +52,7 @@ class NoteSplash extends NoteObject
 		colorSwap.saturation = satColor;
 		colorSwap.brightness = brtColor;
 
-		var ret = Globals.Function_Continue;
-		if (note != null && note.genScript != null)
-			ret = note.genScript.call("postSetupNoteSplash", [x, y, column, texture, hueColor, satColor, brtColor, note], ["this" => this, "noteData" => noteData, "column" => column]);
-		
-		var ret2 = callOnHScripts("postSetupNoteSplash", [x, y, column, texture, hueColor, satColor, brtColor, note], ["this" => this, "noteData" => noteData, "column" => column]);
-
-		if (ret != Globals.Function_Stop && ret2 != Globals.Function_Stop){
+		if (scriptCall(note, "postSetupNoteSplash", [x, y, column, texture, hueColor, satColor, brtColor, note]) != STOP){
 			var playAnim = 'note$column';
 			if (animationAmount > 1) playAnim += '-${FlxG.random.int(1, animationAmount)}';
 
@@ -109,5 +78,25 @@ class NoteSplash extends NoteObject
 		if (animation.curAnim == null || animation.curAnim.finished)  kill();
 
 		super.update(elapsed);
+	}
+
+	private function scriptCall(note:Note, funcName:String, args:Array<Dynamic>):FunctionReturn {
+		var vars:Map<String, Dynamic> = [
+			"this" => this, 
+			#if ALLOW_DEPRECATION
+			"noteData" => this.column,
+			#end
+			"column" => this.column,
+		];
+
+		var ret:FunctionReturn = CONTINUE;
+		if (note?.genScript != null)
+			ret = note.genScript.call(funcName, args, vars);
+		
+		var ret2:FunctionReturn = CONTINUE;
+		if (FlxG.state == PlayState.instance)
+			ret2 = PlayState.instance.callOnScripts(funcName, args, false, null, null, vars);
+
+		return (ret == STOP || ret2 == STOP) ? STOP : CONTINUE;
 	}
 }

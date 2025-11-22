@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.input.InputFormatter;
 import flixel.util.FlxColor;
 import funkin.objects.hud.HealthIcon;
 
@@ -40,6 +41,7 @@ class FreeplayState extends MusicBeatState
 
 	var targetRating:Float = 0.0;
 	var lerpRating:Float = 0.0;
+	var fcDisplay:String = '';
 
 	var scoreBG:FlxSprite;
 	var scoreText:FlxText;
@@ -54,6 +56,7 @@ class FreeplayState extends MusicBeatState
 	var selectedSongData:BaseSong;
 	var selectedSongCharts:Array<String>;
 	
+	var hintBG:FlxSprite;
 	var hintText:FlxText;
 
 	public static function getFreeplaySongs():Array<BaseSong> {
@@ -112,6 +115,18 @@ class FreeplayState extends MusicBeatState
 
 			}
 		}
+
+		#if USING_MOONCHART
+		var time = Sys.time();
+		funkin.data.Moonchart.MoonchartContent.scanSongs();
+		time = Sys.time() - time;
+		var moonchartSongs = funkin.data.Moonchart.MoonchartContent.freeplaySongs;
+		print('Moonchart song scan took $time seconds, found ${moonchartSongs.length}');
+		for (song in moonchartSongs) {
+			list.push(song);
+		}
+		#end
+
 		return list;
 	} 
 
@@ -123,7 +138,7 @@ class FreeplayState extends MusicBeatState
 	override public function create()
 	{
 		#if DISCORD_ALLOWED
-		funkin.api.Discord.DiscordClient.changePresence('In the menus');
+		funkin.api.Discord.DiscordClient.changePresence({details: "In the Menus"});
 		#end
 
 		songList ??= getFreeplaySongs();
@@ -138,31 +153,39 @@ class FreeplayState extends MusicBeatState
 		add(menu);
 
 		////
-		var hintBG = CoolUtil.blankSprite(FlxG.width, 26, 0xFF999999);
-		hintBG.y = FlxG.height - 26;
-		hintBG.blend = MULTIPLY;
-		add(hintBG);
-
 		var hintStr = "";
-		hintStr += Paths.getString("actionhint_gameplayModsMenu").replace('{key}', 'CTRL');
-		hintStr += ' | ';
-		hintStr += Paths.getString("actionhint_resetScore").replace('{key}', 'R');
+		hintStr += '[R] ${Paths.getString('action_resetScore') ?? 'action_resetScore'}';
+		//InputFormatter.getKeyName(controls.getFirstBind('reset'));
+		hintStr += '\n';
+		hintStr += '[CTRL] ${Paths.getString('action_openGameplayChangers') ?? 'action_openGameplayChangers'}';
+		hintStr += '\n';
+		hintStr += '[SPACE] ${Paths.getString('action_listenToSong') ?? 'action_listenToSong'}';
 
-		hintText = new FlxText(hintBG.x, hintBG.y + 4, FlxG.width, hintStr);
-		hintText.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, RIGHT);
+		hintText = new FlxText(16, 16, 0, hintStr);
+		hintText.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, LEFT);
+		hintText.setBorderStyle(OUTLINE, 0xFF000000, 1);
 		hintText.scrollFactor.set();
+		hintText.drawFrame();
+		hintText.y = FlxG.height - hintText.height - hintText.y;
+
+		hintBG = CoolUtil.blankSprite(hintText.width + 8, hintText.height, 0xFF666666);
+		hintBG.setPosition(hintText.x, hintText.y);
+		hintBG.setGraphicSize(hintBG.width + 8, hintBG.height + 8);
+		hintBG.blend = MULTIPLY;
+
+		add(hintBG);
 		add(hintText);
 
 		////
-		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, 'PERSONAL BEST: 0', 32);
-		scoreText.setFormat(Paths.font("vcr.ttf"), 32, 0xFFFFFFFF, RIGHT);
+		scoreText = new FlxText(FlxG.width * 0.7, 5, 0);
+		scoreText.setFormat(Paths.font("vcr.ttf"), 28, 0xFFFFFFFF, RIGHT);
 
-		scoreBG = CoolUtil.blankSprite(FlxG.width * 0.3, 66, 0xFF999999);
+		scoreBG = CoolUtil.blankSprite(FlxG.width * 0.3, 66, 0xFF666666);
 		scoreBG.setPosition(scoreText.x - 6, 0);
 		scoreBG.blend = MULTIPLY;
 		add(scoreBG);
 
-		diffText = new FlxText(scoreText.x, scoreText.y + 36, 100, "", 24);
+		diffText = new FlxText(scoreText.x, scoreText.y + 36, 100, "", 22);
 		diffText.alignment = CENTER;
 		diffText.font = scoreText.font;
 		add(diffText);
@@ -242,8 +265,8 @@ class FreeplayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
-		super.update(elapsed);
 		updateInput(elapsed);
+		super.update(elapsed);
 	}
 
 	function updateInput(elapsed:Float) {
@@ -251,6 +274,8 @@ class FreeplayState extends MusicBeatState
 			shouldRestoreControl = false;
 			menu.controls = controls;
 		}
+
+		hintBG.exists = hintText.exists = menu.controls != null;
 
 		if (menu.controls == null)
 			return;
@@ -271,7 +296,7 @@ class FreeplayState extends MusicBeatState
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			MusicBeatState.switchState(new funkin.states.MainMenuState());	
 			
-		}else if (controls.RESET){
+		}else if (FlxG.keys.justPressed.R){
 			openResetScorePrompt();
 			
 		}else if (FlxG.keys.justPressed.CONTROL){
@@ -282,6 +307,7 @@ class FreeplayState extends MusicBeatState
 	function openResetScorePrompt() {
 		var songName:String = selectedSongData.getMetadata(curChartId).songName;
 		var displayName:String = songName;
+		persistentUpdate = false;
 
 		if (selectedSongCharts.length > 1) {
 			var diffName:String = Paths.getString('difficultyName_$curChartId') ?? curChartId;
@@ -302,6 +328,7 @@ class FreeplayState extends MusicBeatState
 	}
 
 	function openGameplayChangersMenu() {
+		persistentUpdate = false;
 		openSubState(new GameplayChangersSubstate());
 		menu.controls = null;
 		this.subStateClosed.addOnce(function(_) {
@@ -345,6 +372,15 @@ class FreeplayState extends MusicBeatState
 			targetHighscore = record.accuracyScore * 100;
 		else
 			targetHighscore = record.score;
+
+		fcDisplay = switch(record.fcMedal) {
+			case TIER4: 't5fc';
+			case TIER3: 't4fc';
+			case TIER2: 't3fc';
+			case TIER1: 'fc';
+			default: '';
+		}
+		fcDisplay = fcDisplay.length==0 ? fcDisplay : '${Paths.getString(fcDisplay) ?? fcDisplay}';
 	}
 
 	static function makeBgSprite(){
@@ -416,8 +452,9 @@ class FreeplayState extends MusicBeatState
 
 		final score = Math.round(lerpHighscore);
 		final rating = formatRating(lerpRating);
+		final fcDisplay = (fcDisplay.length==0 ? fcDisplay : ' • [$fcDisplay]');
 
-		scoreText.text = 'PERSONAL BEST: $score ($rating%)';
+		scoreText.text = 'PERSONAL BEST • $score • ($rating%)' + fcDisplay;
 		positionHighscore();
 
 		super.draw();

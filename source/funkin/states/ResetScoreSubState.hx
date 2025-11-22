@@ -8,7 +8,7 @@ import flixel.util.FlxColor;
 using StringTools;
 
 @:noScripting
-class ResetScoreSubState extends AlphabetPromptSubstate
+class ResetScoreSubState extends funkin.states.base.AlphabetPromptSubstate
 {
 	var id:String;
 	var chartId:String;
@@ -38,7 +38,7 @@ class ResetScoreSubState extends AlphabetPromptSubstate
 
 	function resetScore() {
 		if(isStoryMode)
-			Highscore.resetWeek(id);
+			Highscore.resetLevel(id, chartId);
 		else
 			Highscore.resetSong(id, chartId);
 	}

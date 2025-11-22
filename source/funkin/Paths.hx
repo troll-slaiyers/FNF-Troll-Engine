@@ -35,7 +35,7 @@ class Paths
 	];
 
 
-	public static function getFileWithExtensions(scriptPath:String, extensions:Array<String>) {
+	public static function getFileWithExtensions(scriptPath:String, extensions:Array<String>):Null<String> {
 		for (fileExt in extensions) {
 			var baseFile:String = '$scriptPath.$fileExt';
 			var file:String = getPath(baseFile);
@@ -53,7 +53,7 @@ class Paths
 		
 		return false;
 	}
-	public inline static function getHScriptPath(scriptPath:String)
+	public inline static function getHScriptPath(scriptPath:String):Null<String>
 	{
 		#if HSCRIPT_ALLOWED
 		return getFileWithExtensions(scriptPath, Paths.HSCRIPT_EXTENSIONS);
@@ -357,6 +357,16 @@ class Paths
 		);
 	}
 
+	inline static public function getTextureAtlas(key:String, ?library:String)
+	{
+		#if USING_FLXANIMATE
+		var path = animateAtlasPath(key, library);
+		return animate.FlxAnimateFrames.fromAnimate(path);
+		#else
+		return null;
+		#end
+	}
+
 	/** returns a FlxRuntimeShader but with file names lol **/ 
 	public static function getShader(fragFile:String = null, vertFile:String = null, version:Int = null):FlxRuntimeShader
 	{
@@ -491,6 +501,11 @@ class Paths
 		return getPath('$path/$key.$SOUND_EXT');
 	}
 
+	inline public static function animateAtlasPath(key:String, ?library:String):String
+	{
+		return getPath('images/$key');
+	}
+	
 	inline public static function returnFolderSound(path:String, key:String, ?library:String)
 		return returnSound(soundPath(path, key, library), library);
 

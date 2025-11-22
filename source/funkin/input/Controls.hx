@@ -98,7 +98,9 @@ class Controls {
 		firstActive.buttonBinds = default_buttonBinds;
 		instances[0] = firstActive;
 
-		trace("STARTED WITH CONTROLLER", firstActive.gamepad?.name);
+		if (firstActive.gamepad != null)
+			trace('Started with controller ${firstActive.gamepad.name}');
+
 		FlxG.gamepads.deviceConnected.add(onGamepadConnected);
 		FlxG.gamepads.deviceDisconnected.add(onGamepadDisconnected);
 	}
@@ -142,6 +144,7 @@ class Controls {
 	}
 
 	public function checkKey(id:String, state:FlxInputState):Bool {
+		#if FLX_KEYBOARD
 		if (keyboard != null && keyBinds.exists(id)) {
 			for (keyCode in keyBinds.get(id)) {
 				if(keyCode == NONE)
@@ -152,10 +155,12 @@ class Controls {
 				}
 			}
 		}
+		#end
 		return false;
 	}
 
 	public function checkButton(id:String, state:FlxInputState):Bool {
+		#if FLX_GAMEPAD
 		if (gamepad != null && gamepad.connected && buttonBinds.exists(id)) {
 			for (buttonCode in buttonBinds.get(id)) {
 				if (buttonCode == NONE)
@@ -166,6 +171,7 @@ class Controls {
 				}
 			}
 		}
+		#end
 		return false;
 	}
 

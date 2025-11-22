@@ -1,6 +1,8 @@
 package funkin.states.editors;
 
 #if USING_MOONCHART
+import funkin.states.base.Prompt;
+
 import lime.ui.FileDialog;
 import lime.utils.Resource;
 import lime.system.System;
@@ -217,6 +219,8 @@ class ChartConverterState extends MusicBeatState
 			return;
 		}
 
+		trace("convert beign");
+
 		var fromHandlers:Array<DynamicFormat> = [];
 
 		var prevCwd = Sys.getCwd();
@@ -271,16 +275,27 @@ class ChartConverterState extends MusicBeatState
 			var exportMeta = goalFormatData.hasMetaFile != FALSE;
 			
 			for (fromHandler in fromHandlers) {
-				var diff:String = fromHandler.diffs[0];
-				var chartPath:String = 'moonchartConverted/chart-$diff.json';
-				var metaPath:Null<String> = exportMeta ? 'moonchartConverted/meta-$diff.json' : null;
-				
-				var goalHandler = FormatDetector.createFormatInstance(goalFormat);
-				goalHandler = goalHandler.fromFormat(fromHandler);
-				goalHandler.save(chartPath, metaPath);
+				//var diff:String = fromHandler.diffs[0];
+				for (diff in fromHandler.diffs) {
+					var chartPath:String = 'moonchartConverted/chart-$diff.json';
+					var metaPath:Null<String> = exportMeta ? 'moonchartConverted/meta-$diff.json' : null;
+					
+					var goalHandler = FormatDetector.createFormatInstance(goalFormat);
+					goalHandler = goalHandler.fromFormat(fromHandler, diff);
+					trace(chartPath, metaPath);
+					goalHandler.save(chartPath, metaPath);
+				}
 			}
 		}
-		openSubState(new Prompt('Save success'));
+		openSubState(new Prompt(
+			'Files have been saved to the "moonchartConverted/" folder', 
+			0,
+			lime.system.System.openFile.bind(CoolUtil.getSystemPath("moonchartConverted/")),
+			null,
+			false,
+			'Open Folder',
+			'OK'
+		));
 	}
 
 	override function update(elapsed:Float) {

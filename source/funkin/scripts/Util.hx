@@ -8,13 +8,16 @@ import funkin.states.PlayState;
 import funkin.states.GameOverSubstate;
 import Type.ValueType;
 
-import animateatlas.AtlasFrameMaker;
 import openfl.display.BlendMode;
 import flixel.*;
 import flixel.text.FlxText;
 import flixel.math.FlxMath;
 import flixel.group.FlxGroup;
 import flixel.tweens.FlxEase;
+#if USING_FLXANIMATE
+import animate.FlxAnimate;
+import animate.FlxAnimateFrames;
+#end
 
 using SpriteTools;
 using StringTools;
@@ -222,12 +225,14 @@ class Util
 	{
 		switch(spriteType.toLowerCase().trim())
 		{
+			#if USING_FLXANIMATE
 			case "texture" | "textureatlas" | "tex":
-				spr.frames = AtlasFrameMaker.construct(image);
+				spr.frames = FlxAnimateFrames.fromAnimate(image);
 
 			case "texture_noaa" | "textureatlas_noaa" | "tex_noaa":
-				spr.frames = AtlasFrameMaker.construct(image, null, true);
+				spr.frames = FlxAnimateFrames.fromAnimate(image, null, true);
 
+			#end
 			case "packer" | "packeratlas" | "pac":
 				spr.frames = Paths.getPackerAtlas(image);
 

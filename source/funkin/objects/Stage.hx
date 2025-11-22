@@ -7,7 +7,10 @@ import funkin.Paths;
 import funkin.data.StageData;
 import funkin.scripts.*;
 import flixel.system.FlxAssets.FlxGraphicAsset;
-import animateatlas.AtlasFrameMaker;
+#if USING_FLXANIMATE
+import animate.FlxAnimate;
+import animate.FlxAnimateFrames;
+#end
 
 using StringTools;
 
@@ -60,9 +63,12 @@ class StageProp extends FlxSprite {
 	public static function buildFromData(propData:StagePropData) {
 		var prop:StageProp = new StageProp(propData.x ?? 0.0, propData.y ?? 0.0);
 
+		#if (USING_FLXANIMATE && false)
 		if (Paths.fileExists('images/${propData.graphic}/Animation.json', TEXT))
-			prop.frames = AtlasFrameMaker.construct(propData.graphic);
-		else if (Paths.fileExists('images/${propData.graphic}.txt', TEXT))
+			prop.frames = FlxAnimateFrames.fromAnimate(Paths.animateAtlasPath(propData.graphic));
+		else
+		#end
+		if (Paths.fileExists('images/${propData.graphic}.txt', TEXT))
 			prop.frames = Paths.getPackerAtlas(propData.graphic);
 		else if (Paths.fileExists('images/${propData.graphic}.xml', TEXT))
 			prop.frames = Paths.getSparrowAtlas(propData.graphic);
@@ -128,6 +134,8 @@ class Stage extends FlxTypedGroup<FlxBasic>
 
 	public var stageScript:FunkinHScript;
 
+	public var stageBuilt:Bool = false;
+
 	public function new(stageId:String, runScript:Bool = true)
 	{
 		super();
@@ -147,87 +155,66 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		};
 
 		if (runScript)
-			startScript(false);
+			startScript();
 	}
 
-	var stageBuilt:Bool = false;
-	public function startScript(?buildStage = false, ?additionalVars:Map<String, Any>)
+	public function startScript()
 	{
-		if (stageScript != null)
-		{
+		if (stageScript != null) {
 			trace("Stage script already started!");
 			return;
 		}   
 
 		var file = Paths.getHScriptPath('stages/$stageId');
-		if (file != null){
-			stageScript = FunkinHScript.fromFile(file, file, additionalVars);
-
-			// define variables lolol
-			stageScript.set("this", this);
-			stageScript.set("foreground", foreground);
-
-			#if ALLOW_DEPRECATION
-			stageScript.set("stage", this); // for backwards compat lol
-			#end
-
-			stageScript.set("add", add);
-			stageScript.set("remove", remove);
-			stageScript.set("insert", insert);
-
-
-			if (buildStage) {
-				stageScript.call("onLoad", [this, foreground]);
-				stageBuilt = true;
-			}
+		if (file == null) {
+			stageScript = null;
+			return;
 		}
+	
+		stageScript = FunkinHScript.fromFile(file);
+
+		// define variables lolol
+		stageScript.set("this", this);
+		stageScript.set("foreground", foreground);
+
+		stageScript.set("add", add);
+		stageScript.set("remove", remove);
+		stageScript.set("insert", insert);
 	}
 
 	public function buildStage()
 	{
-		if (!stageBuilt){
-			// In case you want to hardcode your stages
-			/* 
-			switch (stageId)
-			{
-				case "example":
-					var ground = new FlxSprite(-2048, -100);
-					ground.makeGraphic(4096, 1280, 0xFFEAEAEA);
-					this.add(ground);
+		if (stageBuilt)
+			return this;
 
-					var block1 = new FlxSprite(-1750, -250);
-					block1.makeGraphic(512, 512, 0xFF888888);
-					block1.offset.set(256, 256);
-					block1.scrollFactor.set(1.6, 1.2);
-					foreground.add(block1);
+		stageBuilt = true;
+		if (stageScript != null && stageScript.exists("buildStage"))
+			stageScript.call("buildStage", null, ["super" => _buildStage]);
+		else
+			_buildStage();
 
-					var block2 = new FlxSprite(1000, -250);
-					block2.makeGraphic(512, 512, 0xFF888888);
-					block2.offset.set(256, 256);
-					block2.scrollFactor.set(1.6, 1.2);
-					foreground.add(block2);
+		return this;
+	}
+
+	private function _buildStage()
+	{
+		if (stageData.props != null) {
+			for (propData in stageData.props) {
+				var prop:StageProp = StageProp.buildFromData(propData);
+				if (propData.id != null)
+					props.set(propData.id, prop);
+
+				if (propData.foreground)
+					foreground.insert(propData?.index ?? foreground.members.length, prop);
+				else
+					insert(propData?.index ?? members.length, prop);
 			}
-			*/
-			
-			if(stageData.props != null){
-				for (propData in stageData.props) {
-					var prop:StageProp = StageProp.buildFromData(propData);
-					if (propData.id != null)
-						props.set(propData.id, prop);
+		}
 
-					if (propData.foreground)
-						foreground.insert(propData?.index ?? foreground.members.length, prop);
-					else
-						insert(propData?.index ?? members.length, prop);
-				}
-			}
-
-			if (stageScript != null){
-				stageScript.call("onLoad", [this, foreground]);
-			}
-
-			stageBuilt = true;
-		} 
+		#if ALLOW_DEPRECATION
+		if (stageScript != null)
+			stageScript.call("onLoad", [this, foreground]);
+		#end
 
 		return this;
 	}

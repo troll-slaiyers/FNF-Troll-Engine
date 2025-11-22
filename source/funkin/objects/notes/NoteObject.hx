@@ -15,25 +15,32 @@ enum abstract ObjectType(#if cpp cpp.UInt8 #else Int #end)
 }
 
 class NoteObject extends FlxSprite {
-	public var zIndex:Float = 0;
-	public var objType:ObjectType = UNKNOWN;
-
 	public var extraData:Map<String, Dynamic> = [];
 
+	public var objType:ObjectType;
+	public var zIndex:Float = 0;
 	public var column:Int = 0;
-	@:isVar
-	public var noteData(get,set):Int; // backwards compat
-	inline function get_noteData()return column;
-	inline function set_noteData(v:Int)return column = v;
 
 	public var colorSwap:NoteColorSwap;
-
 	public var offsetX:Float = 0;
 	public var offsetY:Float = 0;
 	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
-	public var handleRendering:Bool = true;
 
+	public var handleRendering:Bool = true;
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
+
+	#if ALLOW_DEPRECATION
+	@:deprecated("noteData is deprecated! Use `column` instead.")
+	public var noteData(get, set):Int; // backwards compat
+	inline function get_noteData() return column;
+	inline function set_noteData(v) return column = v;
+	#end
+	
+	public function new(objType:ObjectType = UNKNOWN)
+	{
+		this.objType = objType;
+		super();
+	}
 	
 	override function toString()
 	{
@@ -44,11 +51,6 @@ class NoteObject extends FlxSprite {
 	{
 		if (handleRendering)
 			return super.draw();
-	}
-
-	public function new(?x:Float, ?y:Float)
-	{
-		super(x, y);
 	}
 
 	override function drawComplex(camera:FlxCamera):Void

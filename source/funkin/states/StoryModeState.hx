@@ -3,7 +3,6 @@ package funkin.states;
 import funkin.data.Highscore;
 import funkin.data.Song;
 import funkin.data.Level;
-import animateatlas.AtlasFrameMaker;
 import flixel.util.FlxSignal;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.tweens.FlxTween;
@@ -16,6 +15,10 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import haxe.io.Path;
+#if USING_FLXANIMATE
+import animate.FlxAnimate;
+import animate.FlxAnimateFrames;
+#end
 
 using funkin.CoolerStringTools;
 using StringTools;
@@ -94,9 +97,12 @@ class LevelStageProp extends FlxSprite
 		if (propData.characterId != null)
 			prop.x = (100 + (50 * (propData.characterId + 1)) + FlxG.width * 0.25 * propData.characterId) + (propData.x ?? 0.0); // not doing .x += because of templates. if you  set charsacterId on smth it should override lol!
 
+		#if USING_FLXANIMATE
 		if (Paths.fileExists('images/${propData.graphic}/Animation.json', TEXT))
-			prop.frames = AtlasFrameMaker.construct(propData.graphic);
-		else if (Paths.fileExists('images/${propData.graphic}.txt', TEXT))
+			prop.frames = FlxAnimateFrames.fromAnimate(Paths.animateAtlasPath(propData.graphic));
+		else 
+		#end
+		if (Paths.fileExists('images/${propData.graphic}.txt', TEXT))
 			prop.frames = Paths.getPackerAtlas(propData.graphic);
 		else if (Paths.fileExists('images/${propData.graphic}.xml', TEXT))
 			prop.frames = Paths.getSparrowAtlas(propData.graphic);
@@ -448,22 +454,19 @@ class StoryModeState extends MusicBeatState {
 		else if(newLevel >= levels.length)
 			newLevel = 0;
 
-		selectedLevelDifficulties = levels[newLevel].getDifficulties();
-		var newIdx = CoolUtil.updateDifficultyIndex(selectedDifficultyIdx, selectedDifficultyName, selectedLevelDifficulties);
-		changeDifficulty(newIdx, true);
+		selectedLevel = newLevel;
 
-		/* // TODO: level scoressss
-		targetHighscore = Highscore.getLevelScore(levels[newLevel].id, selectedDifficultyName);
-		*/
-
-		for (group in levelProps)
-			group.visible = group.ID == newLevel;
-		
 		if (!silent)
 			FlxG.sound.play(Paths.sound("scrollMenu"));
 
-		selectedLevel = newLevel;
-		updateTexts();
+		for (group in levelProps)
+			group.visible = group.ID == selectedLevel;
+
+		selectedLevelDifficulties = levels[selectedLevel].getDifficulties();
+		var newIdx = CoolUtil.updateDifficultyIndex(selectedDifficultyIdx, selectedDifficultyName, selectedLevelDifficulties);
+		changeDifficulty(newIdx, true);
+
+		//updateTexts();
 	}
 
 	function changeDifficulty(selection:Int, abs:Bool = false){
@@ -485,7 +488,7 @@ class StoryModeState extends MusicBeatState {
 
 		updateTexts();
 
-		trace(selectedDifficultyIdx, selectedDifficultyName);
+		targetHighscore = Highscore.getLevelScore(levels[selectedLevel].id, selectedDifficultyName);
 	}
 
 	function acceptLevel() {
@@ -517,7 +520,7 @@ class StoryModeState extends MusicBeatState {
 		PlayState.isStoryMode = true;
 		PlayState.level = level;
 
-		trace(PlayState.level.id, PlayState.difficultyName, PlayState.songPlaylist);
+		trace(PlayState.level.id, PlayState.difficultyName, PlayState.playlistSongs);
 
 		MusicBeatState.switchState(new PlayState());
 	}

@@ -1,7 +1,7 @@
 package;
 
 import funkin.*;
-import funkin.states.MusicBeatState;
+import funkin.states.base.MusicBeatState;
 import funkin.states.FadeTransitionSubstate;
 
 import funkin.data.Highscore;
@@ -57,6 +57,10 @@ class StartupState extends FlxTransitionableState
 		ClientPrefs.load();
 
 		Highscore.load();
+
+		#if USING_MOONCHART
+		funkin.data.Moonchart.MoonchartContent.init();
+		#end
 
 		FNFGame.specialKeysEnabled = true;
 		FlxG.keys.preventDefaultKeys = [TAB];

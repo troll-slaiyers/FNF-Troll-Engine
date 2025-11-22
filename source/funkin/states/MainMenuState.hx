@@ -16,7 +16,7 @@ import flixel.util.FlxColor;
 import lime.app.Application;
 import funkin.states.editors.MasterEditorMenu;
 import flixel.input.keyboard.FlxKey;
-import funkin.states.MusicBeatState.switchState;
+import funkin.states.base.MusicBeatState.switchState;
 
 using StringTools;
 
@@ -49,7 +49,7 @@ class MainMenuState extends MusicBeatState
 	{
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
-		DiscordClient.changePresence("In the Menus", null);
+		DiscordClient.changePresence({details: "In the Menus"});
 		#end
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 
@@ -152,7 +152,7 @@ class MainMenuState extends MusicBeatState
 	function onSelected() {		
 		var shitToDo:Void -> Void = switch (optionShit[curSelected])
 		{
-			case 'story_mode':
+			case 'storymode':
 				switchState.bind(new StoryModeState());
 			case 'freeplay':
 				switchState.bind(new FreeplayState());
@@ -161,7 +161,7 @@ class MainMenuState extends MusicBeatState
 			case 'credits':
 				switchState.bind(new CreditsState());
 			case 'options':
-				LoadingState.loadAndSwitchState.bind(new funkin.states.options.OptionsState());
+				switchState.bind(new funkin.states.options.OptionsState());
 			default:
 				MusicBeatState.resetState.bind();
 		}

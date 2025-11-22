@@ -284,17 +284,16 @@ class Note extends NoteObject
 		return tex;
 	}
 
-	public function updateColours(ignore:Bool=false){		
-		if (!ignore && !usesDefaultColours) return;
+	/**
+		@param force If `true`, forces the colours to update even if `usesDefaultColours` is `false`
+	**/
+	public function updateColours(force:Bool = false){
+		if (!force && !usesDefaultColours) return;
 		if (colorSwap==null) return;
 		if (column == -1) return; // FUCKING PSYCH EVENT NOTES!!!
 		
 		var hsb = isQuant ? ClientPrefs.quantHSV[quants.indexOf(quant)] : ClientPrefs.arrowHSV[column % 4];
-		(hsb == null) ? colorSwap.setHSB() : colorSwap.setHSB(
-			hsb[0] / 360, 
-			hsb[1] / 100, 
-			hsb[2] / 100
-		);
+		colorSwap.setHSBIntArray(hsb);
 
 		if (noteScript != null)
 			noteScript.executeFunc("onUpdateColours", [this], this);
@@ -430,10 +429,9 @@ class Note extends NoteObject
 
 	public function new(strumTime:Float, column:Int, ?prevNote:Note, fieldIndex:Int = -1, susPart:SustainPart = TAP, ?inEditor:Bool = false, ?noteMod:String = 'default')
 	{
-		super();
-		this.objType = NOTE;
+		super(NOTE);
 
-		this.strumTime = strumTime;
+		this.strumTime = this.visualTime = strumTime;
 		this.column = column;
 		this.prevNote = prevNote;
 		this.fieldIndex = fieldIndex;
@@ -453,14 +451,6 @@ class Note extends NoteObject
 			this.quant = getQuant(Conductor.getBeatSinceChange(this.strumTime));
 
 		this.baseAlpha = this.isSustainNote ? 0.6 : 1;
-
-		if ((FlxG.state is PlayState))
-			this.strumTime -= (cast FlxG.state).offset;
-
-		if (!inEditor) {
-			this.strumTime += ClientPrefs.noteOffset;			
-			visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
-		}
 
 		if (prevNote != null) 
 			prevNote.nextNote = this;
@@ -651,7 +641,7 @@ class Note extends NoteObject
 			wasGoodHit = true;
 
 		var diff = (strumTime - Conductor.songPosition);
-		if (diff < -Conductor.safeZoneOffset && !wasGoodHit)
+		if (diff < -ClientPrefs.hitWindow && !wasGoodHit)
 			tooLate = true;
 	}
 }
