@@ -51,9 +51,9 @@ class FunkinHScript extends FunkinScript
 	inline public static function parseFile(file:String, ?name:String):Null<Expr>
 		return parseString(Paths.getContent(file), (name == null ? file : name));
 
-	public static function blankScript(?name, ?additionalVars)
+	public static function blankScript(?name, ?additionalVars, ?interp:Interp)
 	{
-		return new FunkinHScript(null, name, additionalVars, false);
+		return new FunkinHScript(null, name, additionalVars, false, interp);
 	}
 
 	/**
@@ -65,8 +65,8 @@ class FunkinHScript extends FunkinScript
 		@param doCreateCall Whether to call `onCreate` on this script.
 		@returns A `FunkinHScript` instance.
 	**/
-	public static function _fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true):FunkinHScript
-		return new FunkinHScript(parseString(script, name), name, additionalVars, doCreateCall);
+	public static function _fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):FunkinHScript
+		return new FunkinHScript(parseString(script, name), name, additionalVars, doCreateCall, interp);
 
 	/**
 		Creates a `FunkinHScript` instance with code from a string.  
@@ -78,10 +78,10 @@ class FunkinHScript extends FunkinScript
 		@param doCreateCall Whether to call `onCreate` on this script.
 		@returns A `FunkinHScript` instance.
 	**/
-	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true):FunkinHScript
+	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):Null<FunkinHScript>
 	{
 		try {
-			return _fromString(script, name, additionalVars, doCreateCall);
+			return _fromString(script, name, additionalVars, doCreateCall, interp);
 		}
 		catch (e:haxe.Exception) {
 			var errMsg = 'Error parsing hscript! ' #if hscriptPos + '$name:' + parser.line + ', ' #end + e.message;
@@ -92,7 +92,7 @@ class FunkinHScript extends FunkinScript
 			#end
 		}
 
-		return new FunkinHScript(null, name, additionalVars, doCreateCall);
+		return null;
 	}
 
 	/**
@@ -105,7 +105,7 @@ class FunkinHScript extends FunkinScript
 		@param doCreateCall Whether to call `onCreate` on this script.
 		@returns A `FunkinHScript` instance.
 	**/
-	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true):FunkinHScript
+	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):Null<FunkinHScript>
 	{
 		name ??= file;
 
@@ -113,9 +113,9 @@ class FunkinHScript extends FunkinScript
 			var fileContent = Paths.getContent(file);
 			if (fileContent != null) {
 				print('Loading haxe script from: $file');
-				return _fromString(fileContent, name, additionalVars, doCreateCall);
+				return _fromString(fileContent, name, additionalVars, doCreateCall, interp);
 			}else {
-				print('HScript file: "$file" not found!');
+				print('HScript file "$file" not found!');
 			}
 		}
 		catch(e:haxe.Exception) {
@@ -127,14 +127,24 @@ class FunkinHScript extends FunkinScript
 
 			#if (cpp && windows)
 			if (Windows.msgBox(msg, title, RETRYCANCEL | ERROR) == RETRY)
-				return fromFile(file, name, additionalVars, doCreateCall);
+				return fromFile(file, name, additionalVars, doCreateCall, interp);
 			#else
 			Application.current.window.alert(msg, title);
 			#end
 			#end
 		}
 
-		return new FunkinHScript(null, name, additionalVars, doCreateCall);
+		return null;
+	}
+
+	public static function fromName(key:String, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):Null<FunkinHScript>
+	{
+		var file = Paths.getHScriptPath(key);
+		if (file != null)
+			return fromFile(file, name, additionalVars, doCreateCall, interp);
+		
+		print('HScript file "$key" not found!');
+		return null;
 	}
 
 	private static inline function trim_redundant_error_trace(message:String, posInfo:haxe.PosInfos):String
@@ -148,10 +158,11 @@ class FunkinHScript extends FunkinScript
 	}
 
 	////
-	private var interpreter(default, null):Interp = new Interp();
+	private var interpreter(default, null):Interp;
 
-	public function new(?parsed:Expr, ?name:String = "HScript", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true)
+	public function new(?parsed:Expr, ?name:String = "HScript", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp)
 	{
+		interpreter = interp ??= new Interp();
 		super(name, ScriptType.HSCRIPT);
 
 		set("Std", Std);
