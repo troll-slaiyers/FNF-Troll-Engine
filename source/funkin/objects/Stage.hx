@@ -1,5 +1,6 @@
 package funkin.objects;
 
+import funkin.scripts.ScriptedClassShit.InstanceInterp;
 import flixel.group.FlxGroup;
 import flixel.FlxBasic;
 import funkin.Paths;
@@ -56,15 +57,7 @@ class Stage extends FlxGroup
 			return;
 		}
 	
-		stageScript = FunkinHScript.fromFile(file);
-
-		// define variables lolol
-		stageScript.set("this", this);
-		stageScript.set("foreground", foreground);
-
-		stageScript.set("add", add);
-		stageScript.set("remove", remove);
-		stageScript.set("insert", insert);
+		stageScript = FunkinHScript.fromFile(file, null, null, true, new InstanceInterp(this));
 	}
 
 	public function buildStage()
