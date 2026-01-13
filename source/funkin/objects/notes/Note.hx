@@ -1,7 +1,5 @@
 package funkin.objects.notes;
 
-import math.Vector3;
-import flixel.math.FlxMath;
 import funkin.scripts.*;
 import funkin.states.PlayState;
 import funkin.states.editors.ChartingState;
@@ -206,6 +204,9 @@ class Note extends NoteObject {
 
 	public static final quantShitCache = new Map<String, Null<String>>();
 
+	public static var minKeyCOunt:Int = 1;
+	public static var maxKeyCount:Int = 9;
+
 	public static function getQuantTexture(dir:String, fileName:String, textureKey:String):Null<String> {
 		if (quantShitCache.exists(textureKey))
 			return quantShitCache.get(textureKey);
@@ -231,7 +232,8 @@ class Note extends NoteObject {
 		return quants[quants.length - 1]; // invalid
 	}
 
-	@:noCompletion private static function set_swagWidth(val:Float) {
+	@:noCompletion 
+	private inline static function set_swagWidth(val:Float) {
 		halfWidth = val * 0.5;
 		return swagWidth = val;
 	}
@@ -457,6 +459,7 @@ class Note extends NoteObject {
 			genScript.executeFunc("onUpdateColours", [this], this);
 	}
 
+	@:noCompletion
 	private function set_noteMod(value:String):String {
 		if (value == null)
 			value = 'default';
@@ -494,6 +497,7 @@ class Note extends NoteObject {
 		return noteMod = value;
 	}
 
+	@:noCompletion
 	private function set_noteType(value:String):String {
 		noteSplashTexture = PlayState.splashSkin;
 

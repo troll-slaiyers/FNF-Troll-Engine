@@ -12,10 +12,7 @@ using StringTools;
 // honestly we should make it so you can attach a hscript to receptors and type-less notes
 // maybe notetypes/default.hx and notetypes/receptor.hx
 // idk lol i'll explore it more once i get around to making skins/assetpacks (resource packs but troll engine)
-
-class StrumNote extends NoteObject
-{
-
+class StrumNote extends NoteObject {
 	public static var defaultStaticAnimNames:Array<Array<String>> = [
 		['arrowUP'],
 		['arrowLEFT', 'arrowRIGHT'],
@@ -23,23 +20,106 @@ class StrumNote extends NoteObject
 		['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT'],
 		['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowUP', 'arrowRIGHT'],
 		['arrowLEFT', 'arrowUP', 'arrowRIGHT', 'arrowLEFT', 'arrowDOWN', 'arrowRIGHT'],
-		['arrowLEFT', 'arrowUP', 'arrowRIGHT', 'arrowUP', 'arrowLEFT', 'arrowDOWN', 'arrowRIGHT'],
-		['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT', 'arrowLEFT', 'arrowDOWN',  'arrowUP', 'arrowRIGHT'],
-		['arrowLEFT', 'arrowDOWN',  'arrowUP', 'arrowRIGHT', 'arrowUP', 'arrowLEFT', 'arrowDOWN',  'arrowUP', 'arrowRIGHT'],
-		['arrowLEFT', 'arrowDOWN',  'arrowUP', 'arrowRIGHT', 'arrowDOWN', 'arrowUP', 'arrowLEFT', 'arrowDOWN',  'arrowUP', 'arrowRIGHT'],
+		[
+			'arrowLEFT',
+			'arrowUP',
+			'arrowRIGHT',
+			'arrowUP',
+			'arrowLEFT',
+			'arrowDOWN',
+			'arrowRIGHT'
+		],
+		[
+			'arrowLEFT',
+			'arrowDOWN',
+			'arrowUP',
+			'arrowRIGHT',
+			'arrowLEFT',
+			'arrowDOWN',
+			'arrowUP',
+			'arrowRIGHT'
+		],
+		[
+			'arrowLEFT',
+			'arrowDOWN',
+			'arrowUP',
+			'arrowRIGHT',
+			'arrowUP',
+			'arrowLEFT',
+			'arrowDOWN',
+			'arrowUP',
+			'arrowRIGHT'
+		],
+		[
+			'arrowLEFT',
+			'arrowDOWN',
+			'arrowUP',
+			'arrowRIGHT',
+			'arrowDOWN',
+			'arrowUP',
+			'arrowLEFT',
+			'arrowDOWN',
+			'arrowUP',
+			'arrowRIGHT'
+		],
 	];
-	
+
 	public static var defaultPressAnimNames:Array<Array<String>> = [
 		['up press'],
 		['left press', 'right press'],
 		['left press', 'up press', 'right press'],
 		['left press', 'down press', 'up press', 'right press'],
 		['left press', 'down press', 'up press', 'up press', 'right press'],
-		['left press', 'up press', 'right press', 'left press', 'down press', 'right press'],
-		['left press', 'up press', 'right press', 'up press', 'left press', 'down press', 'right press'],
-		['left press', 'down press', 'up press', 'right press', 'left press', 'down press',  'up press', 'right press'],
-		['left press', 'down press',  'up press', 'right press', 'up press', 'left press', 'down press',  'up press', 'right press'],
-		['left press', 'down press',  'up press', 'right press', 'down press', 'up press', 'left press', 'down press',  'up press', 'right press'],
+		[
+			'left press',
+			'up press',
+			'right press',
+			'left press',
+			'down press',
+			'right press'
+		],
+		[
+			'left press',
+			'up press',
+			'right press',
+			'up press',
+			'left press',
+			'down press',
+			'right press'
+		],
+		[
+			'left press',
+			'down press',
+			'up press',
+			'right press',
+			'left press',
+			'down press',
+			'up press',
+			'right press'
+		],
+		[
+			'left press',
+			'down press',
+			'up press',
+			'right press',
+			'up press',
+			'left press',
+			'down press',
+			'up press',
+			'right press'
+		],
+		[
+			'left press',
+			'down press',
+			'up press',
+			'right press',
+			'down press',
+			'up press',
+			'left press',
+			'down press',
+			'up press',
+			'right press'
+		],
 	];
 
 	public static var defaultConfirmAnimNames:Array<Array<String>> = [
@@ -48,14 +128,59 @@ class StrumNote extends NoteObject
 		['left confirm', 'up confirm', 'right confirm'],
 		['left confirm', 'down confirm', 'up confirm', 'right confirm'],
 		['left confirm', 'down confirm', 'up confirm', 'up confirm', 'right confirm'],
-		['left confirm', 'up confirm', 'right confirm', 'left confirm', 'down confirm', 'right confirm'],
-		['left confirm', 'up confirm', 'right confirm', 'up confirm', 'left confirm', 'down confirm', 'right confirm'],
-		['left confirm', 'down confirm', 'up confirm', 'right confirm', 'left confirm', 'down confirm',  'up confirm', 'right confirm'],
-		['left confirm', 'down confirm',  'up confirm', 'right confirm', 'up confirm', 'left confirm', 'down confirm',  'up confirm', 'right confirm'],
-		['left confirm', 'down confirm',  'up confirm', 'right confirm', 'down confirm', 'up confirm', 'left confirm', 'down confirm',  'up confirm', 'right confirm'],
+		[
+			'left confirm',
+			'up confirm',
+			'right confirm',
+			'left confirm',
+			'down confirm',
+			'right confirm'
+		],
+		[
+			'left confirm',
+			'up confirm',
+			'right confirm',
+			'up confirm',
+			'left confirm',
+			'down confirm',
+			'right confirm'
+		],
+		[
+			'left confirm',
+			'down confirm',
+			'up confirm',
+			'right confirm',
+			'left confirm',
+			'down confirm',
+			'up confirm',
+			'right confirm'
+		],
+		[
+			'left confirm',
+			'down confirm',
+			'up confirm',
+			'right confirm',
+			'up confirm',
+			'left confirm',
+			'down confirm',
+			'up confirm',
+			'right confirm'
+		],
+		[
+			'left confirm',
+			'down confirm',
+			'up confirm',
+			'right confirm',
+			'down confirm',
+			'up confirm',
+			'left confirm',
+			'down confirm',
+			'up confirm',
+			'right confirm'
+		],
 	];
 
-	public static var currentStaticAnimNames:Array<String> = ['arrowLEFT', 'arrowDOWN',  'arrowUP', 'arrowRIGHT'];
+	public static var currentStaticAnimNames:Array<String> = ['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT'];
 	public static var currentPressAnimNames:Array<String> = ["left press", "down press", "up press", "right press"];
 	public static var currentConfirmAnimNames:Array<String> = ["left confirm", "down confirm", "up confirm", "right confirm"];
 
@@ -87,9 +212,9 @@ class StrumNote extends NoteObject
 
 	override function toString()
 		return '(column: $column | texture $texture | visible: $visible)';
-	
+
 	private function set_texture(value:String):String {
-		if(texture != value) {
+		if (texture != value) {
 			texture = value;
 			reloadNote();
 		}
@@ -101,11 +226,9 @@ class StrumNote extends NoteObject
 
 		if (genScript == null) {
 			texture = PlayState.arrowSkin;
-
-		}else if (genScript.exists("setupReceptorTexture")) {
+		} else if (genScript.exists("setupReceptorTexture")) {
 			genScript.executeFunc("setupReceptorTexture", [this]);
-		
-		}else {
+		} else {
 			var newTex:String = PlayState.arrowSkin;
 
 			if (genScript.exists("texture"))
@@ -120,8 +243,7 @@ class StrumNote extends NoteObject
 		return noteMod = value;
 	}
 
-	public function reloadNote()
-	{
+	public function reloadNote() {
 		// TODO: add indices support n shit
 
 		var textureKey:String;
@@ -132,20 +254,50 @@ class StrumNote extends NoteObject
 			var folderPath = split.join('/') + '/';
 
 			textureKey = Note.getQuantTexture(folderPath, fileName, texture);
-			if (textureKey != null) isQuant = true;
-			else textureKey = texture;
-
-		}else
+			if (textureKey != null)
+				isQuant = true;
+			else
+				textureKey = texture;
+		} else
 			textureKey = texture;
 
 		var lastAnim:String = animation.name;
-		if (lastAnim == null) lastAnim = 'static';
+		if (lastAnim == null)
+			lastAnim = 'static';
 
 		frames = Paths.getSparrowAtlas(textureKey);
 
-		animation.addByPrefix('static', currentStaticAnimNames[column % currentStaticAnimNames.length], 24, false);
-		animation.addByPrefix('pressed', currentPressAnimNames[column % currentPressAnimNames.length], 24, false);
-		animation.addByPrefix('confirm', currentConfirmAnimNames[column % currentConfirmAnimNames.length], 24, false);
+		var currentNoteAnims:NoteAnimation = Reflect.copy(NoteAnimations.fourKey);
+
+		final halfKeyCount:Int = Math.floor(PlayState.keyCount / 2);
+		final keyCountFloor:Int = halfKeyCount * 2;
+
+		if (keyCountFloor % 6 == 0) {
+			currentNoteAnims = Reflect.copy(NoteAnimations.sixKey);
+		} else if (keyCountFloor == 2) {
+			currentNoteAnims = Reflect.copy(NoteAnimations.twoKey);
+		}
+
+		if (PlayState.keyCount % 2 == 1) { // Odd keycount, add middle note.
+			// haxe i am going to skin you alive.
+			// for some reason it keeps adding the odd note even tho its already there???
+			if (currentNoteAnims.staticAnimations[halfKeyCount] != 'arrowUP'
+				&& currentNoteAnims.staticAnimations.length != PlayState.keyCount) {
+				currentNoteAnims.staticAnimations.insert(halfKeyCount, 'arrowUP');
+			}
+			if (currentNoteAnims.pressAnimations[halfKeyCount] != 'up press'
+				&& currentNoteAnims.pressAnimations.length != PlayState.keyCount) {
+				currentNoteAnims.pressAnimations.insert(halfKeyCount, 'up press');
+			}
+			if (currentNoteAnims.confirmAnimations[halfKeyCount] != 'up confirm'
+				&& currentNoteAnims.confirmAnimations.length != PlayState.keyCount) {
+				currentNoteAnims.confirmAnimations.insert(halfKeyCount, 'up confirm');
+			}
+		}
+
+		animation.addByPrefix('static', currentNoteAnims.staticAnimations[column % currentNoteAnims.staticAnimations.length], 24, false);
+		animation.addByPrefix('pressed', currentNoteAnims.pressAnimations[column % currentNoteAnims.pressAnimations.length], 24, false);
+		animation.addByPrefix('confirm', currentNoteAnims.confirmAnimations[column % currentNoteAnims.confirmAnimations.length], 24, false);
 
 		playAnim(lastAnim, true);
 
@@ -154,8 +306,7 @@ class StrumNote extends NoteObject
 		updateHitbox();
 	}
 
-	public function postAddedToGroup()
-	{
+	public function postAddedToGroup() {
 		playAnim('static');
 		ID = column;
 	}
@@ -168,7 +319,7 @@ class StrumNote extends NoteObject
 				resetAnim = 0;
 				playAnim('static');
 			}
-		}else if (resetAnim < 0 && animation.finished) {
+		} else if (resetAnim < 0 && animation.finished) {
 			resetAnim = 0;
 			playAnim('static');
 		}
@@ -183,21 +334,18 @@ class StrumNote extends NoteObject
 
 		if (animation.name == 'static') {
 			colorSwap.setHSB();
-		} 
-		else if (note != null) {
+		} else if (note != null) {
 			// ok now the quants should b fine lol
 			colorSwap.copyFrom(note.colorSwap);
-		}
-		else if(!isQuant) {
+		} else if (!isQuant) {
 			colorSwap.setHSBIntArray(ClientPrefs.arrowHSV[column % 4]);
-		}
-		else {
+		} else {
 			colorSwap.setHSB();
 		}
 	}
 
-	public static function refreshKeyAnimations(count:Int = 4){
-		StrumNote.currentStaticAnimNames = StrumNote.defaultStaticAnimNames[count - 1]; 
+	public static function refreshKeyAnimations(count:Int = 4) {
+		StrumNote.currentStaticAnimNames = StrumNote.defaultStaticAnimNames[count - 1];
 		StrumNote.currentPressAnimNames = StrumNote.defaultPressAnimNames[count - 1];
 		StrumNote.currentConfirmAnimNames = StrumNote.defaultConfirmAnimNames[count - 1];
 	}

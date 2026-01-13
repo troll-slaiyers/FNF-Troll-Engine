@@ -1,13 +1,12 @@
 package funkin.objects.notes;
 
+import haxe.exceptions.NotImplementedException;
 import flixel.util.FlxDestroyUtil;
 import flixel.math.FlxPoint;
 import math.Vector3;
-
 import funkin.objects.shaders.NoteColorSwap;
 
-enum abstract ObjectType(#if cpp cpp.UInt8 #else Int #end)
-{
+enum abstract ObjectType(#if cpp cpp.UInt8 #else Int #end) {
 	var UNKNOWN = -1;
 	var NOTE;
 	var STRUM;
@@ -32,59 +31,49 @@ class NoteObject extends FlxSprite {
 	#if ALLOW_DEPRECATION
 	@:deprecated("noteData is deprecated! Use `column` instead.")
 	public var noteData(get, set):Int; // backwards compat
-	inline function get_noteData() return column;
-	inline function set_noteData(v) return column = v;
+
+	inline function get_noteData()
+		return column;
+
+	inline function set_noteData(v)
+		return column = v;
 	#end
-	
-	public function new(objType:ObjectType = UNKNOWN)
-	{
+
+	public function new(objType:ObjectType = UNKNOWN) {
 		this.objType = objType;
 		super();
 	}
-	
-	override function toString()
-	{
+
+	override function toString() {
 		return '(column: $column | visible: $visible)';
 	}
 
-	override function draw()
-	{
+	override function draw() {
 		if (handleRendering)
 			return super.draw();
 	}
 
-	override function drawComplex(camera:FlxCamera):Void
-	{
+	override function drawComplex(camera:FlxCamera):Void {
 		prepareMatrix(camera);
 		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader, colorSwap);
 	}
 
-	override function destroy()
-	{
+	override function destroy() {
 		defScale = FlxDestroyUtil.put(defScale);
 		super.destroy();
 	}
 
+	// gonna make this the thing you can call from all subclasses later
+	public static function getNoteAnimations(keyCount:Int) {
+		throw new NotImplementedException();
+	}
+
 	public static function getAnimsInd(data:Int, anims:Array<String>, ?targetArray:Array<String>):Int {
-		for(i in 0...4){
-			if(anims[data % anims.length] == targetArray[i]){
+		for (i in 0...4) {
+			if (anims[data % anims.length] == targetArray[i]) {
 				return i;
 			}
 		}
 		return 0;
-		/*
-		var down:String = targetArray[1];
-		var up:String = targetArray[2];
-		var right:String = targetArray[3];
-		switch(anims[data % anims.length]){
-			default:
-				return 0;
-			case down:
-				return 1;
-			case up:
-				return 2;
-			case right:
-				return 3;
-		}*/
 	}
 }
