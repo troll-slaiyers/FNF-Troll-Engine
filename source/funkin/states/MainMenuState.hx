@@ -232,6 +232,7 @@ class MainMenuState extends MusicBeatState
 			else if (FlxG.keys.anyJustPressed(debugKeys))
 			{
 				selectedSomethin = true;
+				FlxTransitionableState.skipNextTransOut = true;
 				switchState(new MasterEditorMenu());
 			}
 			#end

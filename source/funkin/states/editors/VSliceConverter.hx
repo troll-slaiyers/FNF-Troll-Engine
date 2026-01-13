@@ -71,8 +71,7 @@ class VSliceConverter extends MusicBeatState
 		add(menu);
 		super.create();
 
-		if (FlxG.sound.music == null || !FlxG.sound.music.playing)
-			MusicBeatState.playMenuMusic();
+		MusicBeatState.playMenuMusic();
 
 		var curMusicVolume = FlxG.sound.music.volume;
 		if (curMusicVolume < 0.8) {

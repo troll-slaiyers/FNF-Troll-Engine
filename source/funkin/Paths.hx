@@ -409,9 +409,9 @@ class Paths
 		#end
 	}
 
-	inline static public function fileExists(key:String, ?type:AssetType, ?library:String)
+	inline static public function fileExists(key:String, ?type:AssetType, ?library:String):Bool
 	{
-		return Paths.exists(getPath(key));
+		return getPath(key) != null;
 	}
 
 	/** Returns the contents of a file as a string. **/
@@ -486,11 +486,11 @@ class Paths
 	inline public static function cacheGraphic(path:String):Null<FlxGraphic>
 		return getGraphic(path, true);
 
-	inline public static function imagePath(key:String, ?folder:String):String
+	inline public static function imagePath(key:String, ?folder:String):Null<String>
 		return getPath('images/$key.$IMAGE_EXT');
 
 	inline public static function imageExists(key:String):Bool
-		return Paths.exists(imagePath(key));
+		return imagePath(key) != null;
 
 	public static function image(key:String, ?folder:String = null, allowGPU:Bool = true):Null<FlxGraphic>
 	{

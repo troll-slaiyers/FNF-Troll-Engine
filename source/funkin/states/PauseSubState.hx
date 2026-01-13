@@ -123,7 +123,9 @@ class PauseSubState extends MusicBeatSubstate
 		for (info in Song.getMetadataInfo(game.metadata))
 			songInfo.push(info);
 
-		songInfo.push("Difficulty: " + game.displayedDifficulty.toUpperCase());		
+		var charts = (PlayState.song==null) ? null : PlayState.song.getCharts(); 
+		if (charts != null && charts.length > 1)
+			songInfo.push("Difficulty: " + game.displayedDifficulty.toUpperCase());		
 		
 		if (game.practiceMode)
 			songInfo.push("PRACTICE MODE");
@@ -144,8 +146,8 @@ class PauseSubState extends MusicBeatSubstate
 		FlxG.mouse.visible = false;
 		persistentUpdate = false;
 
-		var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
-		this.cameras = [cam];
+		if (_cameras == null || _cameras.length == 0) 
+			camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 
 		@:privateAccess
 		_bgSprite._cameras = this._cameras;
@@ -316,6 +318,8 @@ class PauseSubState extends MusicBeatSubstate
 		c.cameras = this.cameras;
 		c.start(0.5);
 		add(c);
+		
+		FlxTween.tween(_bgSprite, {alpha: 0.0}, 0.3, {ease: FlxEase.quartInOut});
 	}
 
 	function restartSong() {

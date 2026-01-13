@@ -7,29 +7,37 @@ package flixel.addons.transition;
 
 import flixel.FlxState;
 import flixel.FlxSubState;
+import flixel.addons.transition.FlxTransitionSprite.TransitionStatus;
 
 class FlxTransitionableState extends FlxState
 {
 	/** Default intro transition. Used when `transIn` is null **/
-	public static var defaultTransIn:Class<TransitionSubstate> = null;
+	public static var defaultTransIn:Class<Transition> = null;
 	/** Default outro transition. Used when `transOut` is null **/
-	public static var defaultTransOut:Class<TransitionSubstate> = null;
+	public static var defaultTransOut:Class<Transition> = null;
 
 	public static var skipNextTransIn:Bool = false;
 	public static var skipNextTransOut:Bool = false;
 
 	/** Intro transition to use after switching to this state **/
-	public var transIn:Class<TransitionSubstate>;
+	public var transIn:Class<Transition>;
 	/** Outro transition to use before switching to another state **/
-	public var transOut:Class<TransitionSubstate>;
+	public var transOut:Class<Transition>;
 
 	public var hasTransIn(get, never):Bool;
 	public var hasTransOut(get, never):Bool;
 
+	/** Transition substate **/
+	public var transition:Transition;
+
 	////
+	var transitionCamera:FlxCamera = null;
 	var transOutFinished:Bool = false;
 
-	var _transSubState:TransitionSubstate;
+	var _requestedTransition:Transition;
+	var _requestTransitionReset:Bool;
+	var _requestedTransitionStatus:TransitionStatus;
+
 	var _exiting:Bool = false;
 	var _onExit:Void->Void;
 
@@ -40,7 +48,7 @@ class FlxTransitionableState extends FlxState
 	 * @param	TransIn		Plays when the state begins
 	 * @param	TransOut	Plays when the state ends
 	 */
-	public function new(?TransIn:Class<TransitionSubstate>, ?TransOut:Class<TransitionSubstate>)
+	public function new(?TransIn:Class<Transition>, ?TransOut:Class<Transition>)
 	{
 		this.transIn = (TransIn == null) ? defaultTransIn : TransIn;
 		this.transOut = (TransOut == null) ? defaultTransOut : TransOut;
@@ -50,6 +58,7 @@ class FlxTransitionableState extends FlxState
 
 	override public function destroy():Void
 	{
+		closeTransition();
 		super.destroy();
 		transIn = null;
 		transOut = null;
@@ -60,6 +69,30 @@ class FlxTransitionableState extends FlxState
 	{
 		super.create();
 		transitionIn();
+	}
+
+	override function tryUpdate(elapsed:Float)
+	{
+		if (persistentUpdate || transition == null)
+			super.tryUpdate(elapsed);
+		
+		if (_requestTransitionReset)
+		{
+			_requestTransitionReset = false;
+			resetTransition();
+		}
+		if (transition != null)
+		{
+			transition.update(elapsed);
+		}
+	}
+
+	override function draw():Void
+	{
+		super.draw();
+
+		if (transition != null)
+			transition.draw();
 	}
 
 	override function startOutro(onOutroComplete:() -> Void)
@@ -91,11 +124,9 @@ class FlxTransitionableState extends FlxState
 			return;
 		}
 
-		_transSubState = Type.createInstance(transIn, []);
-		openTransitionSubState(_transSubState);
-
-		_transSubState.finishCallback = finishTransIn;
-		_transSubState.start(OUT);
+		var transition = Type.createInstance(transIn, []);
+		transition.finishCallback = finishTransIn;
+		startTransition(transition, IN);
 	}
 
 	/**
@@ -106,18 +137,71 @@ class FlxTransitionableState extends FlxState
 		_onExit = OnExit;
 
 		if (hasTransOut){
-			_transSubState = Type.createInstance(transOut, []);
-			openTransitionSubState(_transSubState);
-
-			_transSubState.finishCallback = finishTransOut;
-			_transSubState.start(IN);
+			var transition = Type.createInstance(transOut, []);
+			transition.finishCallback = finishTransOut;
+			startTransition(transition, OUT);
 		}else{
 			_onExit();
 		}
 	}
 
-	function openTransitionSubState(_transSubState:TransitionSubstate)
-		openSubState(_transSubState);
+	public function startTransition(requestedTrans:Transition, status:TransitionStatus)
+	{
+		_requestedTransition = requestedTrans;
+		_requestedTransitionStatus = status;	
+		_requestTransitionReset = true;
+	}
+
+	public function closeTransition()
+	{
+		_requestedTransition = null;
+		_requestedTransitionStatus = NULL;
+		_requestTransitionReset = true;
+	}
+
+	public function resetTransition()
+	{
+		// Close the old state (if there is an old state)
+		if (transition != null) {
+			transition.destroy();
+			transition = null;
+		}
+
+		if (transitionCamera != null) {
+			FlxG.cameras.remove(transitionCamera, true);
+			transitionCamera = null;
+		}
+
+		// Assign the requested state (or set it to null)
+		transition = _requestedTransition;
+		_requestedTransition = null;
+
+		@:privateAccess
+		if (transition != null) {
+			transition._parentState = this;
+			transition.camera = getTransCamera();
+
+			if (!transition._created)
+			{
+				transition._created = true;
+				transition.create();
+			}
+
+			transition.start(_requestedTransitionStatus);
+		}
+	}
+
+	function getTransCamera() {
+		//return FlxG.cameras.list[FlxG.cameras.list.length-1];
+		return transitionCamera ??= makeTransCamera();
+	}
+
+	function makeTransCamera() {
+		var camera = new FlxCamera();
+		camera.bgColor = 0;
+		FlxG.cameras.add(camera, false);
+		return camera;
+	}
 
 	function get_hasTransIn():Bool
 	{
@@ -131,8 +215,8 @@ class FlxTransitionableState extends FlxState
 
 	function finishTransIn()
 	{
-		if (_transSubState != null)
-			_transSubState.close();
+		if (transition != null)
+			transition.close();
 	}
 
 	function finishTransOut()
@@ -141,7 +225,7 @@ class FlxTransitionableState extends FlxState
 
 		if (!_exiting)
 		{
-			_transSubState.close();
+			transition.close();
 		}
 
 		if (_onExit != null)

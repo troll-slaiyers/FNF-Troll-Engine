@@ -2753,20 +2753,8 @@ class ChartingState extends MusicBeatState
 	function openSongSelect() {
 		var ss = new SongSelectState(FlxColor.fromRGB(0,0,0,240));
 		ss.songs = SongSelectState.getEverySong();
-		/* TODO: Make a map of song instances
-		ss.curSelected = ss.songs.indexOf(PlayState.song);
-		*/
-		ss.curSelected = {
-			var idx = 0;
-			var curSong = PlayState.song;
-			if (curSong != null) for (i => song in ss.songs) {
-				if (song.songId == curSong.songId && song.folder == curSong.folder) {
-					idx = i;
-					break;
-				}
-			}
-			idx;
-		}
+		ss.curSelected = CoolUtil.indexOfSong(ss.songs, PlayState.song);
+		if (ss.curSelected == -1) ss.curSelected = 0;
 		ss.onSelectChart = function(song:BaseSong, chartId:String) {
 			Song.loadSong(song, chartId);
 			_song = PlayState.SONG;

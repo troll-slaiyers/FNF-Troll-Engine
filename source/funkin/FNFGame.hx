@@ -72,8 +72,15 @@ class FNFGame extends FlxGame
 			FlxG.fullscreen = !FlxG.fullscreen;
 
 		if (e.keyCode == FlxKey.F3) {
-			Main.fpsVar.visible = !Main.fpsVar.visible;
-			ClientPrefs.showFPS = Main.fpsVar.visible;
+			if (!Main.fpsVar.visible) {
+				Main.fpsVar.visible = true;
+				Main.fpsVar.showDebug = false;
+			}else if (!Main.fpsVar.showDebug) {
+				Main.fpsVar.showDebug = true;
+			}else {
+				Main.fpsVar.visible = false;
+				Main.fpsVar.showDebug = false;
+			}
 		}
 	}
 

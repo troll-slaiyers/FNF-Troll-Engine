@@ -1,5 +1,3 @@
-package funkin;
-
 class CoolerStringTools {
 	static public function isAlpha(s:String):Bool
 		return s.toLowerCase() != s.toUpperCase();

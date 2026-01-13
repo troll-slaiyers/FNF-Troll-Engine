@@ -25,30 +25,17 @@ class TitleState extends MusicBeatState
 {
 	public static var initialized:Bool = false;
 
-	public static function getIntroText():Array<Array<String>>
-	{
-		var swagGoodArray:Array<Array<String>> = [];
+	var titleTextColors:Array<FlxColor> = [0xFF33FFFF, 0xFF3333CC];
+	var titleTextAlphas:Array<Float> = [1, .64];
 
-		var rawFile:Null<String> = Paths.getText(Paths.getPath('data/introText.txt'));
-		if (rawFile != null) {
-			for (line in rawFile.rtrim().split('\n'))
-				swagGoodArray.push(line.split('--'));
-		}
-
-		return swagGoodArray;
-	}
+	var cheatCode:Array<FlxKey> = [UP, DOWN, LEFT, RIGHT];
 
 	var intro:IntroSequence;
-
 	var logoBl:TitleLogo;
 	var titleText:FlxSprite;
 	var swagShader:ColorSwap = null;
 	var bg:Stage;
 	var darkness:FlxSprite;
-
-	//
-	var titleTextColors:Array<FlxColor> = [0xFF33FFFF, 0xFF3333CC];
-	var titleTextAlphas:Array<Float> = [1, .64];
 
 	// cam shit raaahhhhh
 	public var camGame:FlxCamera;
@@ -60,13 +47,13 @@ class TitleState extends MusicBeatState
 	var blurFilter:BlurFilter;
 
 	////
-	var section:Int = -100;
-	var titleTimer:Float = 0;
-	var cheatProgress:Int = 0;
-	var cheatCode:Array<FlxKey> = [UP, DOWN, LEFT, RIGHT];
 	var skippedIntro:Bool = false;
 	var transitioning:Bool = false;
 	var leavingState:Bool = false;
+
+	var section:Int = -100;
+	var titleTimer:Float = 0;
+	var cheatProgress:Int = 0;
 
 	override public function create():Void
 	{
@@ -147,7 +134,7 @@ class TitleState extends MusicBeatState
 		logoBl.screenCenter(XY);
 		
 		logoBl.shader = swagShader.shader;
-		logoBl.cameras = [camHUD];
+		logoBl.camera = camHUD;
 		add(logoBl);
 
 		//
@@ -163,7 +150,7 @@ class TitleState extends MusicBeatState
 		titleText.screenCenter(X);
 		titleText.y -= titleText.height / 2;
 
-		titleText.cameras = [camHUD];
+		titleText.camera = camHUD;
 		add(titleText);
 
 		////
@@ -189,7 +176,6 @@ class TitleState extends MusicBeatState
 		ngSpr.scale.set(0.8, 0.8);
 		ngSpr.updateHitbox();
 		ngSpr.screenCenter(X);
-		ngSpr.cameras = [camHUD];
 		intro.add(ngSpr);
 
 		var curWacky = FlxG.random.getObject(getIntroText());
@@ -249,37 +235,41 @@ class TitleState extends MusicBeatState
 		skippedIntro = true;
 	}
 
+	override function stepHit()
+	{
+		super.stepHit();
+
+		if (skippedIntro) {
+			if (bg != null && bg.stageScript != null) {
+				bg.stageScript.set("curStep", curStep);
+				bg.stageScript.call('onStepHit', []);
+			}
+		}
+	}
+
 	override function beatHit()
 	{
 		super.beatHit();
+
 		if (skippedIntro) {
 			if (bg != null && bg.stageScript != null) {
 				bg.stageScript.set("curBeat", curBeat);
 				bg.stageScript.call('onBeatHit', []);
 			}
 		}
+
 		if (logoBl != null)
 			logoBl.time = 0;
 	}
 
-	override function stepHit()
+	override function sectionHit()
 	{
-		super.stepHit();
+		super.sectionHit();
 
-		if (bg != null && bg.stageScript != null)
-		{
-			if (skippedIntro){
-				bg.stageScript.set("curStep", curStep);
-				bg.stageScript.call('onStepHit', []);
-			}
-			var nuSection:Int = Math.floor(curBeat / 4);
-			if (section != nuSection)
-			{
-				section = nuSection;
-				if (skippedIntro){
-					bg.stageScript.set("curSection", section);
-					bg.stageScript.call('onSectionHit', []);
-				}
+		if (skippedIntro) {
+			if (bg != null && bg.stageScript != null) {
+				bg.stageScript.set("curSection", section);
+				bg.stageScript.call('onSectionHit', []);
 			}
 		}
 	}
@@ -422,6 +412,19 @@ class TitleState extends MusicBeatState
 			bg.stageScript.call('onUpdatePost', [elapsed]);
 
 	}
+
+	public static function getIntroText():Array<Array<String>>
+	{
+		var swagGoodArray:Array<Array<String>> = [];
+
+		var rawFile:Null<String> = Paths.text('data/introText.txt');
+		if (rawFile != null) {
+			for (line in rawFile.rtrim().split('\n'))
+				swagGoodArray.push(line.split('--'));
+		}
+
+		return swagGoodArray;
+	}
 }
 
 class TitleLogo extends FlxSprite
@@ -497,6 +500,11 @@ class TitleLogo extends FlxSprite
 	}
 }
 
+class TitleSequence extends FlxBasic {
+	public function generate() {}
+	public function start() {}
+}
+
 class IntroSequence extends FlxTypedGroup<FlxBasic> {
 	var bg:FlxSprite;
 	var textGroup:FlxTypedGroup<Alphabet>;
@@ -504,15 +512,10 @@ class IntroSequence extends FlxTypedGroup<FlxBasic> {
 	public function new() {
 		super();
 
-		// kinda annoying
-		@:privateAccess 
-		this.cameras = FlxCamera._defaultCameras.copy();
-
 		//
 		bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 		bg.scale.set(FlxG.width, FlxG.height);
 		bg.updateHitbox();
-		bg.cameras = this.cameras;
 		add(bg);
 		
 		FlxTween.tween(bg, {alpha: 0.86}, Conductor.crochet * 0.005, {
@@ -522,7 +525,6 @@ class IntroSequence extends FlxTypedGroup<FlxBasic> {
 
 		//
 		textGroup = new FlxTypedGroup<Alphabet>();
-		textGroup.cameras = this.cameras;
 		add(textGroup);
 	}
 
@@ -540,7 +542,6 @@ class IntroSequence extends FlxTypedGroup<FlxBasic> {
 		var lastObj = getLineObj();
 		var y = ((lastObj!=null) ? (lastObj.y+60) : 200) - offset;
 		var obj = new Alphabet(0, y, text, true);
-		obj.cameras = textGroup.cameras;
 		obj.screenCenter(X);
 		return textGroup.add(obj);
 	}

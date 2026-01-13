@@ -11,12 +11,11 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxStringUtil;
 import funkin.scripts.FunkinHScript;
-import funkin.states.base.SubstateState;
 import funkin.states.options.ComboPositionSubstate;
 
 using StringTools;
 
-class NoteOffsetState extends SubstateState
+class NoteOffsetState extends MusicBeatState
 {
 	var stage:Stage;
 	var stageScript:Null<FunkinHScript> = null;
@@ -56,8 +55,6 @@ class NoteOffsetState extends SubstateState
 		FlxG.cameras.add(camStageUnderlay, false);
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
-
-		FadeTransitionSubstate.nextCamera = camOther;
 
 		persistentUpdate = true;
 		FlxG.sound.pause();
@@ -173,7 +170,8 @@ class NoteOffsetState extends SubstateState
 		
 		camGame.follow(camFollowPos);
 
-		_create(comboSubstate);
+		openSubState(comboSubstate);
+		super.create();
 
 		updateMode();
 	}

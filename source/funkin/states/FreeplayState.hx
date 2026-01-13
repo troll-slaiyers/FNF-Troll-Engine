@@ -17,7 +17,7 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 
 using StringTools;
-using funkin.CoolerStringTools;
+using CoolerStringTools;
 
 @:injectMoreFunctions([
 	"onSelectSong",
@@ -195,8 +195,14 @@ class FreeplayState extends MusicBeatState
 		////
 		menu.setSongList(songList);
 		curChartId = FreeplayState.lastSelectedChart;
-		menu.curSelected = FreeplayState.lastSelectedIdx;
-		if (comingFromPlayState) playSelectedSongMusic();
+
+		if (comingFromPlayState) {
+			var idx = CoolUtil.indexOfSong(songList, PlayState.song);
+			if (idx == -1) idx = FreeplayState.lastSelectedIdx;
+			menu.curSelected = idx;
+			playSelectedSongMusic();
+		}else 
+			menu.curSelected = FreeplayState.lastSelectedIdx;
 
 		super.create();
 		persistentUpdate = true;

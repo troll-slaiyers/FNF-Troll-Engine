@@ -18,7 +18,10 @@ import moonchart.Moonchart;
 import sys.FileSystem;
 import sys.io.File;
 
-using funkin.CoolerStringTools;
+import funkin.CoolUtil.alphabeticalSort;
+import funkin.CoolUtil.stringSort;
+
+using CoolerStringTools;
 using StringTools;
 
 typedef StepManiaDynamic = moonchart.formats.StepMania.StepManiaBasic<moonchart.parsers.StepManiaParser.StepManiaFormat>;
@@ -155,7 +158,7 @@ class MoonchartContent
 				sowyData.diffFindFunc = (id, path, files) -> DiffFinder.fromFileSuffix(path, files, id);
 
 			if (formatId.startsWith("FNF"))
-				sowyData.diffSortFunc = SortUtil.stringSort.bind(FNF_DIFFICULTIES);
+				sowyData.diffSortFunc = stringSort.bind(FNF_DIFFICULTIES);
 			
 			FileSystem.createDirectory(sowyData.folderPath);
 		}
@@ -166,7 +169,7 @@ class MoonchartContent
 			var bf = cast(f.basicFormat, FNFVSlice);
 			f.diffFindFunc = (id, path, files) -> DiffFinder.fromVSliceFiles(bf, path, files, id);
 		}
-		formatMap.get(STEPMANIA).diffSortFunc = SortUtil.stringSort.bind(SM_DIFFICULTIES);
+		formatMap.get(STEPMANIA).diffSortFunc = stringSort.bind(SM_DIFFICULTIES);
 
 		////
 		initialized = true;
@@ -189,7 +192,7 @@ class MoonchartContent
 				//songs.set(song.songId, song);
 				formatSongs.push(song);
 			}
-			formatSongs.sort((a, b) -> SortUtil.alphabeticalSort(a.songId, b.songId));
+			formatSongs.sort((a, b) -> alphabeticalSort(a.songId, b.songId));
 			for (song in formatSongs) freeplaySongs.push(song);
 		}
 	}
@@ -207,7 +210,7 @@ class SowyFormatData
 	public var diffFindFunc:(songId:String, songFolderPath:String, songFolderFileNames:Array<String>) -> DiffMap;
 
 	/** Function to sort the songs difficulties **/
-	public var diffSortFunc:(String, String) -> Int = SortUtil.alphabeticalSort;
+	public var diffSortFunc:(String, String) -> Int = alphabeticalSort;
 
 	public final songs = new Array<SowySongData>();
 
@@ -380,32 +383,5 @@ class FileNameUtil {
 	public static function hasExtension(extension:String, fileName:String):Bool {
 		var fileExtension = FileNameUtil.getExtension(fileName);
 		return fileExtension == extension;
-	}
-}
-
-class SortUtil {
-	public static function alphabeticalSort(a:String, b:String):Int {
-		// https://haxe.motion-twin.narkive.com/BxeZgKeh/sort-an-array-string-alphabetically
-		a = a.toLowerCase();
-		b = b.toLowerCase();
-		if (a < b) return -1;
-		if (a > b) return 1;
-		return 0;	
-	}
-
-	public static function stringSort(ordering:Array<String>, a:String, b:String) {
-		// stolen from v-slice lol!
-		if(a==b) return 0;
-
-		var aHasDefault = ordering.contains(a);
-		var bHasDefault = ordering.contains(b);
-		if (aHasDefault && bHasDefault)
-			return ordering.indexOf(a) - ordering.indexOf(b);
-		else if(aHasDefault)
-			return 1;
-		else if(bHasDefault)
-			return -1;
-
-		return a > b ? -1 : 1;
 	}
 }

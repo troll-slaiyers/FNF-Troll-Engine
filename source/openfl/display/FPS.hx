@@ -32,7 +32,7 @@ class FPS extends TextField
 	/** The current state class name **/
 	public var currentState(default, null):String = "";
 	/** Whether to show a memory usage counter or not **/
-	public var showMemory:Bool = #if final false #else true #end;
+	public var showDebug:Bool = #if final false #else true #end;
 
 	public var align(default, set):TextFormatAlign;
 	function set_align(val) {		
@@ -99,11 +99,9 @@ class FPS extends TextField
 
 		FlxG.signals.gameResized.add(onGameResized);
 
-		#if (debug && false)
 		FlxG.signals.preStateCreate.add((nextState)->{
 			currentState = Type.getClassName(Type.getClass(nextState));
 		});
-		#end
 	}
 
 	inline static function formatMemory(Bytes:Float):String
@@ -131,6 +129,14 @@ class FPS extends TextField
 		#end
 	}
 
+	function _getDebugText():String {
+		return 'MEM: ' + get_memoryUsageString() + 
+			'\nState: $currentState' +
+			(getDebugText!=null ? "\n" + getDebugText() : "");
+	}
+
+	public var getDebugText:Void -> String = null;
+
 	// Event Handlers
 	@:noCompletion
 	private override function __enterFrame(deltaTime:Float):Void
@@ -155,12 +161,8 @@ class FPS extends TextField
 
 		var text:String = 'FPS: $currentFPS';
 		
-		if (showMemory)
-			text += ' • MEM: ' + get_memoryUsageString();
-
-		#if (debug && false)
-		text += '\nState: $currentState';
-		#end
+		if (showDebug)			
+			text += '\n' + _getDebugText();
 
 		if (currentFPS <= FlxG.drawFramerate * 0.5)
 			textColor = 0xFFFF0000;

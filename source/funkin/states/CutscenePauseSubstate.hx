@@ -32,8 +32,9 @@ class CutscenePauseSubstate extends MusicBeatSubstate {
 	}
 
 	override function create(){
-		var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
-		this.cameras = [cam];
+		if (_cameras == null || _cameras.length == 0) 
+			camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
+
 		prevTimeScale = FlxG.timeScale;
 		FlxG.timeScale = 1;
 

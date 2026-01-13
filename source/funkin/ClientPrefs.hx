@@ -600,20 +600,6 @@ class ClientPrefs {
 				value: "All",
 				data: ["recommendsRestart" => true, "options" => ["All", "Minimal", "None"]]
 			},
-			"showFPS" => {
-				display: "Show FPS",
-				desc: "When toggled, an FPS counter is showed in the top left.",
-				type: Toggle,
-				value: false,
-				data: []
-			},
-			"showMemory" => {
-				display: "Show Memory",
-				desc: "When toggled, a memory counter is showed in the top left.",
-				type: Toggle,
-				value: false,
-				data: []
-			},
 			"fpsBG" => {
 				display: "FPS Background",
 				desc: "When toggled, the FPS counter has a background.",
@@ -973,8 +959,6 @@ class ClientPrefs {
 		Paths.locale = ClientPrefs.locale;
 
 		if (Main.fpsVar != null) {
-			Main.fpsVar.visible = ClientPrefs.showFPS;
-			Main.fpsVar.showMemory = ClientPrefs.showMemory;
 			Main.fpsVar.background = ClientPrefs.fpsBG;
 		}
 
