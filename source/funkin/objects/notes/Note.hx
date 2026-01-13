@@ -756,6 +756,8 @@ class Note extends NoteObject {
 
 		if (keyCountFloor % 6 == 0) {
 			currentNoteAnims = Reflect.copy(NoteAnimations.sixKey);
+		} else if (keyCountFloor == 2) {
+			currentNoteAnims = Reflect.copy(NoteAnimations.twoKey);
 		}
 
 		if (PlayState.keyCount % 2 == 1) { // Odd keycount, add middle note.

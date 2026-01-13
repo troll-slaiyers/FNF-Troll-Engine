@@ -1,6 +1,15 @@
 package funkin.objects.notes;
 
 final class NoteAnimations {
+	public static final twoKey:NoteAnimation = {
+		noteAnimations: ['purple', 'red'],
+		holdAnimations: ['purple hold piece', 'red hold piece'],
+		tailAnimations: ['purple hold end', 'red hold end'],
+		staticAnimations: ['arrowLEFT', 'arrowRIGHT'],
+		pressAnimations: ['left press', 'right press'],
+		confirmAnimations: ['left confirm', 'right confirm']
+	};
+
 	public static final fourKey:NoteAnimation = {
 		noteAnimations: ['purple', 'blue', 'green', 'red'],
 		holdAnimations: ['purple hold piece', 'blue hold piece', 'green hold piece', 'red hold piece'],
