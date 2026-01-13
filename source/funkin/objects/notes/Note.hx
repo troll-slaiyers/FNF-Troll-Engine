@@ -48,8 +48,6 @@ class Note extends NoteObject {
 	public static var swagWidth(default, set):Float = 160 * spriteScale;
 	public static var halfWidth(default, null):Float = swagWidth * 0.5;
 
-	private static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
-
 	public static var defaultNoteAnimNames:Array<Array<String>> = [
 		['green'],
 		['purple', 'red'],
@@ -60,7 +58,9 @@ class Note extends NoteObject {
 		['purple', 'green', 'red', 'green', 'purple', 'blue', 'red'],
 		['purple', 'blue', 'green', 'red', 'purple', 'blue', 'green', 'red'],
 		['purple', 'blue', 'green', 'red', 'green', 'purple', 'blue', 'green', 'red'],
-		['purple', 'blue', 'green', 'red', 'blue', 'green', 'purple', 'blue', 'green', 'red']
+		[
+			'purple', 'blue', 'green', 'red', 'blue', 'green', 'purple', 'blue', 'green', 'red'
+		]
 	];
 
 	public static var defaultHoldAnimNames:Array<Array<String>> = [
@@ -195,19 +195,10 @@ class Note extends NoteObject {
 	public static var currentHoldAnimNames:Array<String> = defaultHoldAnimNames[3];
 	public static var currentTailAnimNames:Array<String> = defaultTailAnimNames[3];
 
-	public static var quants:Array<Int> = [
-		4, // quarter note
+	public static var quants:Array<Int> = [4, // quarter note
 		8, // eight
 		12, // etc
-		16,
-		20,
-		24,
-		32,
-		48, 
-		64, 
-		96, 
-		192
-	];
+		16, 20, 24, 32, 48, 64, 96, 192];
 
 	public static var defaultNotes = ['No Animation', 'GF Sing', ''];
 
@@ -719,13 +710,18 @@ class Note extends NoteObject {
 			_loadIndNoteAnims();
 	}
 
-
 	function _loadIndNoteAnims() {
 		final animName:String = 'default';
 		final animFrames:Array<Int> = switch (holdType) {
-			default: [NoteObject.getAnimsInd(column, Note.currentNoteAnimNames, Note.defaultNoteAnimNames[3]) + 4];
-			case PART: [NoteObject.getAnimsInd(column, Note.currentHoldAnimNames, Note.defaultHoldAnimNames[3])];
-			case END: [NoteObject.getAnimsInd(column, Note.currentTailAnimNames, Note.defaultTailAnimNames[3]) + 4];
+			default: [
+					NoteObject.getAnimsInd(column, Note.currentNoteAnimNames, Note.defaultNoteAnimNames[3]) + 4
+				];
+			case PART: [
+					NoteObject.getAnimsInd(column, Note.currentHoldAnimNames, Note.defaultHoldAnimNames[3])
+				];
+			case END: [
+					NoteObject.getAnimsInd(column, Note.currentTailAnimNames, Note.defaultTailAnimNames[3]) + 4
+				];
 		}
 		animation.add(animName, animFrames);
 		animation.play(animName, true);
@@ -752,21 +748,46 @@ class Note extends NoteObject {
 
 	function _loadNoteAnims() {
 		final animName:String = 'default';
-		final animPrefix:String = switch (holdType) {
-			default: '${currentNoteAnimNames[column % currentNoteAnimNames.length]}0';
-			case PART: currentHoldAnimNames[column % currentHoldAnimNames.length];
-			case END: currentTailAnimNames[column % currentTailAnimNames.length];
+
+		var currentNoteAnims:NoteAnimation = Reflect.copy(NoteAnimations.fourKey);
+
+		final halfKeyCount:Int = Math.floor(PlayState.keyCount / 2);
+		final keyCountFloor:Int = halfKeyCount * 2;
+
+		if (keyCountFloor % 6 == 0) {
+			currentNoteAnims = Reflect.copy(NoteAnimations.sixKey);
 		}
 
-		
+		if (PlayState.keyCount % 2 == 1) { // Odd keycount, add middle note.
+			// haxe i am going to skin you alive.
+			// for some reason it keeps adding the odd note even tho its already there???
+			if (currentNoteAnims.noteAnimations[halfKeyCount] != 'green' && currentNoteAnims.noteAnimations.length != PlayState.keyCount) {
+				currentNoteAnims.noteAnimations.insert(halfKeyCount, 'green');
+			}
+			if (currentNoteAnims.holdAnimations[halfKeyCount] != 'green hold piece'
+				&& currentNoteAnims.holdAnimations.length != PlayState.keyCount) {
+				currentNoteAnims.holdAnimations.insert(halfKeyCount, 'green hold piece');
+			}
+			if (currentNoteAnims.tailAnimations[halfKeyCount] != 'green hold piece'
+				&& currentNoteAnims.tailAnimations.length != PlayState.keyCount) {
+				currentNoteAnims.tailAnimations.insert(halfKeyCount, 'green hold end');
+			}
+		}
+
+		final animPrefix:String = switch (holdType) {
+			default: '${currentNoteAnims.noteAnimations[column % currentNoteAnims.noteAnimations.length]}0';
+			case PART: currentNoteAnims.holdAnimations[column % currentNoteAnims.holdAnimations.length];
+			case END: currentNoteAnims.tailAnimations[column % currentNoteAnims.tailAnimations.length];
+		}
+
 		// because phantomarcade cant spell
 		var hasThatStupidAssTypo:Bool = false;
 		if (holdType == END && animPrefix.contains("purple")) {
-			hasThatStupidAssTypo = attemptToAddAnimationByPrefix(animName, 'pruple end hold', 24, true); 		// ?????
+			hasThatStupidAssTypo = attemptToAddAnimationByPrefix(animName, 'pruple end hold', 24, true); // ?????
 		}
 		// this is autistic wtf
 
-		if(!hasThatStupidAssTypo){
+		if (!hasThatStupidAssTypo) {
 			animation.addByPrefix(animName, animPrefix);
 		}
 		animation.play(animName, true);
@@ -819,7 +840,7 @@ class Note extends NoteObject {
 			tooLate = true;
 	}
 
-	public static function refreshKeyAnimations(count:Int = 4){
+	public static function refreshKeyAnimations(count:Int = 4) {
 		Note.currentNoteAnimNames = Note.defaultNoteAnimNames[count - 1];
 		Note.currentHoldAnimNames = Note.defaultHoldAnimNames[count - 1];
 		Note.currentTailAnimNames = Note.defaultTailAnimNames[count - 1];

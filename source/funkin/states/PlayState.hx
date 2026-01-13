@@ -4,10 +4,8 @@ import funkin.objects.cutscenes.Cutscene;
 #if VIDEOS_ALLOWED
 import funkin.objects.cutscenes.VideoCutscene;
 #end
-import funkin.objects.playfields.PlayField.NoteCallback;
 import funkin.data.Cache;
 import funkin.data.Level;
-import funkin.data.Song;
 import funkin.data.BaseSong;
 import funkin.data.ChartData;
 import funkin.data.StageData;
@@ -19,7 +17,6 @@ import funkin.objects.Fish;
 import funkin.objects.Stage;
 import funkin.objects.Character;
 import funkin.objects.huds.*;
-import funkin.objects.hud.*;
 import funkin.objects.hud.RatingGroup;
 import funkin.objects.hud.Countdown;
 import funkin.objects.playfields.*;
@@ -28,15 +25,12 @@ import funkin.data.JudgmentManager;
 import funkin.data.Highscore;
 import funkin.states.GameOverSubstate;
 import funkin.states.PauseSubState;
-import funkin.modchart.Modifier;
 import funkin.modchart.ModManager;
 import funkin.states.editors.CharacterEditorState;
 import funkin.states.editors.ChartingState;
 import funkin.states.options.OptionsSubstate;
 import funkin.scripts.*;
 import funkin.scripts.Util;
-import funkin.scripts.Util as ScriptingUtil;
-import funkin.scripts.FunkinScript.ScriptType;
 import flixel.*;
 import flixel.util.*;
 import flixel.util.FlxSignal;
@@ -50,9 +44,7 @@ import flixel.group.FlxSpriteGroup;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.text.FlxText;
-import flixel.ui.FlxBar;
 
-import haxe.Json;
 
 #if lime_openal
 import lime.media.openal.AL;
@@ -61,8 +53,6 @@ import lime.media.openal.ALEffect;
 #end
 
 import openfl.events.KeyboardEvent;
-import openfl.filters.BitmapFilter;
-import openfl.filters.ShaderFilter;
 
 using StringTools;
 using CoolerStringTools;
