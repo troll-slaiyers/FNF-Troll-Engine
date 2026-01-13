@@ -634,7 +634,7 @@ class ModManager {
 		diff += getValue("transformPath", player);
 		diff += getValue("movePath", player) * FlxMath.lerp(
 			Note.swagWidth,
-			Conductor.crotchet * 0.45 * speed,
+			Conductor.crotchet * Note.pixelsPerMS * speed,
 			getValue("movePathType", player)
 		);
 		

@@ -202,6 +202,8 @@ class Note extends NoteObject {
 
 	public static var defaultNotes = ['No Animation', 'GF Sing', ''];
 
+	public static inline final pixelsPerMS:Float = 0.45;
+
 	public static final quantShitCache = new Map<String, Null<String>>();
 
 	public static function getQuantTexture(dir:String, fileName:String, textureKey:String):Null<String> {

@@ -579,7 +579,7 @@ class PlayState extends MusicBeatState
 		MusicBeatState.stopMenuMusic();
 
 		speedChanges.push({
-			position: -6000 * 0.45,
+			position: -6000 * Note.pixelsPerMS,
 			startTime: -6000,
 			speed: 1, 
 			#if EASED_SVs
@@ -1821,7 +1821,7 @@ class PlayState extends MusicBeatState
 		}else{
 			lastSVTime = -5000;
 			lastSVElapsed = 0;
-			lastSVPos = -5000 * 0.45;
+			lastSVPos = -5000 * Note.pixelsPerMS;
 		}
 	}
 	#end
@@ -1845,7 +1845,7 @@ class PlayState extends MusicBeatState
 		}
 		#end
 
-		return event.position + ((time - event.startTime) * 0.45 * event.speed);
+		return event.position + ((time - event.startTime) * Note.pixelsPerMS * event.speed);
 	}
 
 	public function getSV(time:Float){

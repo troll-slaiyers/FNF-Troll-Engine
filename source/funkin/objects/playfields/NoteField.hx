@@ -25,7 +25,7 @@ using StringTools;
 
 
 
-final scalePoint = new FlxPoint(1, 1);
+final scalePoint = FlxPoint.get(1, 1);
 
 class NoteField extends FieldBase
 {
@@ -446,7 +446,7 @@ class NoteField extends FieldBase
 			};
 
 			if (hold.copyAlpha)
-				info = modManager.getExtraInfo((visualDiff + ((strumOff + strumSub) * 0.45)) * -speed, strumDiff + strumOff + strumSub, curDecBeat, info, hold, modNumber, hold.column);
+				info = modManager.getExtraInfo((visualDiff + ((strumOff + strumSub) * Note.pixelsPerMS)) * -speed, strumDiff + strumOff + strumSub, curDecBeat, info, hold, modNumber, hold.column);
 
 			var topWidth = scalePoint.x * FlxMath.lerp(tWid, bWid, prog);
 			var botWidth = scalePoint.x * FlxMath.lerp(tWid, bWid, nextProg);
@@ -460,15 +460,15 @@ class NoteField extends FieldBase
 
 			if(lastMe == null) // first sexment
 			{
-				var basePos = modManager.getPos(-(visualDiff + ((strumOff + strumSub) * 0.45)) * speed, strumDiff + strumOff + strumSub, curDecBeat, hold.column, modNumber, hold, this,
+				var basePos = modManager.getPos(-(visualDiff + ((strumOff + strumSub) * Note.pixelsPerMS)) * speed, strumDiff + strumOff + strumSub, curDecBeat, hold.column, modNumber, hold, this,
 					perspectiveArrDontUse, hold.vec3Cache);
 
 				zIndex = basePos.z;
 			}
-			var top = lastMe ?? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff, useSpiralHolds, lookAheadTime);
-			var bot = getPoints(hold, botWidth, speed, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub, useSpiralHolds, lookAheadTime);
+			var top = lastMe ?? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * Note.pixelsPerMS)), strumDiff + strumOff, useSpiralHolds, lookAheadTime);
+			var bot = getPoints(hold, botWidth, speed, (visualDiff + ((strumOff + strumSub) * Note.pixelsPerMS)), strumDiff + strumOff + strumSub, useSpiralHolds, lookAheadTime);
 			if (!hold.copyY) {
-				var a:Float = (crotchet + 1) * 0.45 * speed;
+				var a:Float = (crotchet + 1) * Note.pixelsPerMS * speed;
 				
 				if (lastMe == null) {
 					var a:Float = FlxMath.lerp(0, a, prog);
