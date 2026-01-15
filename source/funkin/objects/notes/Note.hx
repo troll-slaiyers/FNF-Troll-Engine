@@ -46,152 +46,6 @@ class Note extends NoteObject {
 	public static var swagWidth(default, set):Float = 160 * spriteScale;
 	public static var halfWidth(default, null):Float = swagWidth * 0.5;
 
-	public static var defaultNoteAnimNames:Array<Array<String>> = [
-		['green'],
-		['purple', 'red'],
-		['purple', 'green', 'red'],
-		['purple', 'blue', 'green', 'red'],
-		['purple', 'blue', 'green', 'green', 'red',],
-		['purple', 'green', 'red', 'purple', 'blue', 'red'],
-		['purple', 'green', 'red', 'green', 'purple', 'blue', 'red'],
-		['purple', 'blue', 'green', 'red', 'purple', 'blue', 'green', 'red'],
-		['purple', 'blue', 'green', 'red', 'green', 'purple', 'blue', 'green', 'red'],
-		[
-			'purple', 'blue', 'green', 'red', 'blue', 'green', 'purple', 'blue', 'green', 'red'
-		]
-	];
-
-	public static var defaultHoldAnimNames:Array<Array<String>> = [
-		['green hold piece'],
-		['purple hold piece', 'red hold piece'],
-		['purple hold piece', 'green hold piece', 'red hold piece'],
-		['purple hold piece', 'blue hold piece', 'green hold piece', 'red hold piece'],
-		[
-			'purple hold piece',
-			'blue hold piece',
-			'green hold piece',
-			'green hold piece',
-			'red hold piece',
-		],
-		[
-			'purple hold piece',
-			'green hold piece',
-			'red hold piece',
-			'purple hold piece',
-			'blue hold piece',
-			'red hold piece'
-		],
-		[
-			'purple hold piece',
-			'green hold piece',
-			'red hold piece',
-			'green hold piece',
-			'purple hold piece',
-			'blue hold piece',
-			'red hold piece'
-		],
-		[
-			'purple hold piece',
-			'blue hold piece',
-			'green hold piece',
-			'red hold piece',
-			'purple hold piece',
-			'blue hold piece',
-			'green hold piece',
-			'red hold piece'
-		],
-		[
-			'purple hold piece',
-			'blue hold piece',
-			'green hold piece',
-			'red hold piece',
-			'green hold piece',
-			'purple hold piece',
-			'blue hold piece',
-			'green hold piece',
-			'red hold piece'
-		],
-		[
-			'purple hold piece',
-			'blue hold piece',
-			'green hold piece',
-			'red hold piece',
-			'blue hold piece',
-			'green hold piece',
-			'purple hold piece',
-			'blue hold piece',
-			'green hold piece',
-			'red hold piece'
-		]
-	];
-
-	public static var defaultTailAnimNames:Array<Array<String>> = [
-		['green hold end'],
-		['purple hold end', 'red hold end'],
-		['purple hold end', 'green hold end', 'red hold end'],
-		['purple hold end', 'blue hold end', 'green hold end', 'red hold end'],
-		[
-			'purple hold end',
-			'blue hold end',
-			'green hold end',
-			'green hold end',
-			'red hold end',
-		],
-		[
-			'purple hold end',
-			'green hold end',
-			'red hold end',
-			'purple hold end',
-			'blue hold end',
-			'red hold end'
-		],
-		[
-			'purple hold end',
-			'green hold end',
-			'red hold end',
-			'green hold end',
-			'purple hold end',
-			'blue hold end',
-			'red hold end'
-		],
-		[
-			'purple hold end',
-			'blue hold end',
-			'green hold end',
-			'red hold end',
-			'purple hold end',
-			'blue hold end',
-			'green hold end',
-			'red hold end'
-		],
-		[
-			'purple hold end',
-			'blue hold end',
-			'green hold end',
-			'red hold end',
-			'green hold end',
-			'purple hold end',
-			'blue hold end',
-			'green hold end',
-			'red hold end'
-		],
-		[
-			'purple hold end',
-			'blue hold end',
-			'green hold end',
-			'red hold end',
-			'blue hold end',
-			'green hold end',
-			'purple hold end',
-			'blue hold end',
-			'green hold end',
-			'red hold end'
-		]
-	];
-
-	public static var currentNoteAnimNames:Array<String> = defaultNoteAnimNames[3];
-	public static var currentHoldAnimNames:Array<String> = defaultHoldAnimNames[3];
-	public static var currentTailAnimNames:Array<String> = defaultTailAnimNames[3];
 
 	public static var quants:Array<Int> = [4, // quarter note
 		8, // eight
@@ -720,13 +574,13 @@ class Note extends NoteObject {
 		final animName:String = 'default';
 		final animFrames:Array<Int> = switch (holdType) {
 			default: [
-					NoteObject.getAnimsInd(column, Note.currentNoteAnimNames, Note.defaultNoteAnimNames[3]) + 4
+					NoteObject.getAnimsInd(column, NoteAnimations.fourKey.noteAnimations,  NoteAnimations.fourKey.noteAnimations) + 4
 				];
 			case PART: [
-					NoteObject.getAnimsInd(column, Note.currentHoldAnimNames, Note.defaultHoldAnimNames[3])
+					NoteObject.getAnimsInd(column, NoteAnimations.fourKey.holdAnimations, NoteAnimations.fourKey.holdAnimations)
 				];
 			case END: [
-					NoteObject.getAnimsInd(column, Note.currentTailAnimNames, Note.defaultTailAnimNames[3]) + 4
+					NoteObject.getAnimsInd(column, NoteAnimations.fourKey.tailAnimations, NoteAnimations.fourKey.tailAnimations) + 4
 				];
 		}
 		animation.add(animName, animFrames);
@@ -776,7 +630,7 @@ class Note extends NoteObject {
 				&& currentNoteAnims.holdAnimations.length != PlayState.keyCount) {
 				currentNoteAnims.holdAnimations.insert(halfKeyCount, 'green hold piece');
 			}
-			if (currentNoteAnims.tailAnimations[halfKeyCount] != 'green hold piece'
+			if (currentNoteAnims.tailAnimations[halfKeyCount] != 'green hold end'
 				&& currentNoteAnims.tailAnimations.length != PlayState.keyCount) {
 				currentNoteAnims.tailAnimations.insert(halfKeyCount, 'green hold end');
 			}
@@ -849,9 +703,6 @@ class Note extends NoteObject {
 	}
 
 	public static function refreshKeyAnimations(count:Int = 4) {
-		Note.currentNoteAnimNames = Note.defaultNoteAnimNames[count - 1];
-		Note.currentHoldAnimNames = Note.defaultHoldAnimNames[count - 1];
-		Note.currentTailAnimNames = Note.defaultTailAnimNames[count - 1];
 		Note.spriteScale = Note.spriteScales[count - 1];
 		Note.swagWidth = Note.spriteScale * 160;
 	}
