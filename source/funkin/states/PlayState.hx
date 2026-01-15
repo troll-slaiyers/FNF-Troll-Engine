@@ -3394,6 +3394,9 @@ class PlayState extends MusicBeatState
 			return;
 		commonNoteHit(note, field);
 
+		if (!note.isSustainNote && opponentHPDrain > 0 && health > opponentHPDrain)
+			health -= opponentHPDrain;
+
 		// Script shit
 		callOnScripts("opponentNoteHit", [note, field]);
 		if (note.noteScript != null)
@@ -3401,19 +3404,6 @@ class PlayState extends MusicBeatState
 
 		if (note.genScript != null)
 			callScript(note.genScript, "noteHit", [note, field]);
-
-		if (!note.isSustainNote)
-		{
-			if (opponentHPDrain > 0 && health > opponentHPDrain)
-				health -= opponentHPDrain;
-
-			if(note.sustainLength == 0)
-				field.removeNote(note);
-		}
-		else if (note.isSustainNote)
-			if (note.parent.unhitTail.contains(note))
-				note.parent.unhitTail.remove(note);
-		
 	}
 
 	function getNoteCharacters(note:Note, field:PlayField):Array<Character> {
@@ -3440,6 +3430,13 @@ class PlayState extends MusicBeatState
 			return;
 
 		note.wasGoodHit = true;
+
+		if (note.isSustainNote) {
+			if (note.parent != null)
+				note.parent.unhitTail.remove(note);
+		}
+		else if (note.sustainLength == 0)
+			field.removeNote(note);
 
 		for (track in field.tracks)
 			track.volume = 1;
@@ -3540,13 +3537,6 @@ class PlayState extends MusicBeatState
 
 		if (note.genScript != null)
 			callScript(note.genScript, "noteHit", [note, field]); // might be useful for some things i.e judge explosions
-		
-		if (note.isSustainNote) {
-			if (note.parent != null)
-				note.parent.unhitTail.remove(note);
-		}
-		else if (note.sustainLength == 0)
-			field.removeNote(note);
 	}
 
 	function getFieldFromNote(note:Note){
