@@ -6,6 +6,7 @@ import funkin.input.Controls;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.util.FlxSave;
+import flixel.addons.ui.U as FlxU;
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
@@ -806,65 +807,61 @@ class ClientPrefs {
 		'note_down' => [A, DPAD_DOWN],
 		'note_up' => [Y, DPAD_UP],
 		'note_right' => [B, DPAD_RIGHT],
-		
 		'dodge' => [],
-
 		'pause' => [START],
 		'reset' => [],
-
 		'ui_left' => [DPAD_LEFT],
 		'ui_down' => [DPAD_DOWN],
 		'ui_up' => [DPAD_UP],
 		'ui_right' => [DPAD_RIGHT],
-
 		'accept' => [A],
 		'back' => [B],
 	];
 	public static var defaultKeys:Map<String, Array<FlxKey>> = null;
 	public static var defaultButtons:Map<String, Array<FlxGamepadInputID>> = null;
 
-	public static function loadDefaultKeys() {
-		var keyDirections:Array<Array<FlxKey>> = [
-			[SPACE],
-			[F, K],
-			[F, SPACE, J],
-			[A, S, W, D],
-			[D, F, SPACE, J, K],
-			[S, D, F, J, K, L],
-			[S, D, F, SPACE, J, K, L],
-			[A, S, D, F, H, J, K, L],
-			[A, S, D, F, SPACE, H, J, K, L],
-			[Q, W, E, R, V, N, U, I, O, P],
-		];
+	public static final keyDirections:Array<Array<FlxKey>> = [
+		[SPACE],
+		[F, K],
+		[F, SPACE, J],
+		[A, S, W, D],
+		[D, F, SPACE, J, K],
+		[S, D, F, J, K, L],
+		[S, D, F, SPACE, J, K, L],
+		[A, S, D, F, H, J, K, L],
+		[A, S, D, F, SPACE, H, J, K, L]
+	];
 
-		for (i in 0...10) {
+	public static final buttonDirections:Array<Array<FlxGamepadInputID>> = [
+		[DPAD_UP],
+		[DPAD_LEFT, DPAD_RIGHT],
+		[DPAD_LEFT, DPAD_UP, DPAD_RIGHT],
+		[DPAD_LEFT, DPAD_DOWN, DPAD_UP, DPAD_RIGHT],
+		[DPAD_LEFT, DPAD_DOWN, RIGHT_SHOULDER, DPAD_UP, DPAD_RIGHT],
+		[DPAD_LEFT, DPAD_DOWN, DPAD_RIGHT, X, A, B],
+		[DPAD_LEFT, DPAD_DOWN, DPAD_RIGHT, RIGHT_SHOULDER, X, A, B],
+		[DPAD_LEFT, DPAD_DOWN, DPAD_UP, DPAD_RIGHT, X, A, Y, B],
+		[DPAD_LEFT, DPAD_DOWN, DPAD_UP, DPAD_RIGHT, RIGHT_SHOULDER, X, A, Y, B]
+	];
+
+	public static function loadDefaultKeys() {
+		final minKeyCount = funkin.objects.notes.Note.minKeyCount;
+		final maxKeyCount = funkin.objects.notes.Note.maxKeyCount;
+
+		for (i in minKeyCount - 1...maxKeyCount) {
 			for (j in 0...i + 1) {
 				keyBinds.set('${i + 1}_key_$j', [keyDirections[i][j]]);
 			}
 		}
 
-		var buttonDirections:Array<Array<FlxGamepadInputID>> = [
-			[DPAD_UP],
-			[DPAD_LEFT, DPAD_RIGHT],
-			[DPAD_LEFT, DPAD_UP, DPAD_RIGHT],
-			[DPAD_LEFT, DPAD_DOWN, DPAD_UP, DPAD_RIGHT],
-			[DPAD_LEFT, DPAD_DOWN, RIGHT_SHOULDER, DPAD_UP, DPAD_RIGHT],
-			[DPAD_LEFT, DPAD_DOWN, DPAD_RIGHT, X, A, B],
-			[DPAD_LEFT, DPAD_DOWN, DPAD_RIGHT, RIGHT_SHOULDER, X, A, B],
-			[DPAD_LEFT, DPAD_DOWN, DPAD_UP, DPAD_RIGHT, X, A, Y, B],
-			[DPAD_LEFT, DPAD_DOWN, DPAD_UP, DPAD_RIGHT, RIGHT_SHOULDER, X, A, Y, B],
-			[DPAD_LEFT, DPAD_DOWN, DPAD_UP, DPAD_RIGHT, LEFT_SHOULDER, RIGHT_SHOULDER, X, A, Y, B]
-		];
-
-		for (i in 0...10) {
+		for (i in minKeyCount - 1...maxKeyCount) {
 			for (j in 0...i + 1) {
 				buttonBinds.set('${i + 1}_key_$j', [buttonDirections[i][j]]);
 			}
 		}
 
-		flixel.addons.ui.U.clearArraySoft(keyDirections);
-		flixel.addons.ui.U.clearArraySoft(buttonDirections);
-
+		FlxU.clearArraySoft(keyDirections);
+		FlxU.clearArraySoft(buttonDirections);
 
 		defaultKeys = keyBinds.copy();
 		defaultButtons = buttonBinds.copy();
@@ -878,7 +875,7 @@ class ClientPrefs {
 		#else
 		defaultOptionDefinitions.get("framerate").value = FlxG.stage.application.window.displayMode.refreshRate;
 		#end
-		
+
 		// locale = openfl.system.Capabilities.language;
 
 		optionSave.bind("options_v2");

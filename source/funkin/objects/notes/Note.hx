@@ -38,7 +38,8 @@ private typedef NoteScriptState = {
 }
 
 class Note extends NoteObject {
-	public var holdGlow:Bool = true; // Whether holds should "glow" / increase in alpha when held
+	/** Whether holds should "glow" / increase in alpha when held */
+	public var holdGlow:Bool = true;
 	public var baseAlpha:Float = 1;
 
 	public static var spriteScales:Array<Float> = [0.9, 0.85, 0.8, 0.7, 0.66, 0.6, 0.55, 0.5, 0.46, 0.4];
@@ -46,11 +47,19 @@ class Note extends NoteObject {
 	public static var swagWidth(default, set):Float = 160 * spriteScale;
 	public static var halfWidth(default, null):Float = swagWidth * 0.5;
 
-
-	public static var quants:Array<Int> = [4, // quarter note
+	public static var quants:Array<Int> = [
+		4, // quarter note
 		8, // eight
 		12, // etc
-		16, 20, 24, 32, 48, 64, 96, 192];
+		16, 
+		20,
+		24,
+		32, 
+		48, 
+		64, 
+		96, 
+		192
+	];
 
 	public static var defaultNotes = ['No Animation', 'GF Sing', ''];
 
@@ -58,7 +67,7 @@ class Note extends NoteObject {
 
 	public static final quantShitCache = new Map<String, Null<String>>();
 
-	public static var minKeyCOunt:Int = 1;
+	public static var minKeyCount:Int = 1;
 	public static var maxKeyCount:Int = 9;
 
 	public static function getQuantTexture(dir:String, fileName:String, textureKey:String):Null<String> {
@@ -86,7 +95,7 @@ class Note extends NoteObject {
 		return quants[quants.length - 1]; // invalid
 	}
 
-	@:noCompletion 
+	@:noCompletion
 	private inline static function set_swagWidth(val:Float) {
 		halfWidth = val * 0.5;
 		return swagWidth = val;
@@ -128,7 +137,9 @@ class Note extends NoteObject {
 	// quant shit
 	public var row:Int = 0;
 	public var quant:Int = 4;
-	public var isQuant:Bool = false; // Whether the loaded texture is a quant texture.
+
+	/** Whether the loaded texture is a quant texture.*/
+	public var isQuant:Bool = false;
 
 	// note status
 	public var spawned:Bool = false;
@@ -574,7 +585,7 @@ class Note extends NoteObject {
 		final animName:String = 'default';
 		final animFrames:Array<Int> = switch (holdType) {
 			default: [
-					NoteObject.getAnimsInd(column, NoteAnimations.fourKey.noteAnimations,  NoteAnimations.fourKey.noteAnimations) + 4
+					NoteObject.getAnimsInd(column, NoteAnimations.fourKey.noteAnimations, NoteAnimations.fourKey.noteAnimations) + 4
 				];
 			case PART: [
 					NoteObject.getAnimsInd(column, NoteAnimations.fourKey.holdAnimations, NoteAnimations.fourKey.holdAnimations)
@@ -606,10 +617,10 @@ class Note extends NoteObject {
 			_loadNoteAnims();
 	}
 
+	var currentNoteAnims:NoteAnimation = Reflect.copy(NoteAnimations.fourKey);
+
 	function _loadNoteAnims() {
 		final animName:String = 'default';
-
-		var currentNoteAnims:NoteAnimation = Reflect.copy(NoteAnimations.fourKey);
 
 		final halfKeyCount:Int = Math.floor(PlayState.keyCount / 2);
 		final keyCountFloor:Int = halfKeyCount * 2;

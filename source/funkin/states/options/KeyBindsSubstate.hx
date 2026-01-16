@@ -1,5 +1,6 @@
 package funkin.states.options;
 
+import funkin.objects.notes.Note;
 import funkin.states.options.BindsBullshit.KeyboardNavHelper;
 import funkin.states.options.BindsBullshit.BindButton;
 import funkin.CoolUtil.overlapsMouse as overlaps;
@@ -11,6 +12,8 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.math.FlxPoint;
 import openfl.geom.Rectangle;
+import flixel.addons.ui.U as FlxU;
+
 
 using StringTools;
 
@@ -72,18 +75,17 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 			['Left', 'Down', 'Right', 'Left 2', 'Up', 'Right 2'],
 			['Left', 'Down', 'Right', 'Center', 'Left 2', 'Up', 'Right 2'],
 			['Left', 'Down', 'Up', 'Right', 'Left 2', 'Down 2', 'Up 2', 'Right 2'],
-			['Left', 'Down', 'Up', 'Right', 'Center', 'Left 2', 'Down 2', 'Up 2', 'Right 2'],
-			['Left', 'Down', 'Up', 'Right', 'Center', 'Center 2', 'Left 2', 'Down 2', 'Up 2', 'Right 2'],
+			['Left', 'Down', 'Up', 'Right', 'Center', 'Left 2', 'Down 2', 'Up 2', 'Right 2']
 		];
 
-		for (i in 0...10) {
+		for (i in Note.minKeyCount - 1...Note.maxKeyCount) {
 			noteBinds.push(['${i + 1} Key']);
 			for (j in 0...i + 1) {
 				noteBinds.push(['${directions[i][j]}', '${i + 1}_key_$j']);
 			}
 		}
 
-		flixel.addons.ui.U.clearArray(directions);
+		FlxU.clearArray(directions);
 
 		var otherBinds:Array<Array<String>> = [
 			[Paths.getString('control_pause'), 'pause'],
@@ -113,8 +115,8 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 
 		binds = noteBinds.concat(otherBinds);
 
-		flixel.addons.ui.U.clearArraySoft(noteBinds);
-		flixel.addons.ui.U.clearArraySoft(otherBinds);
+		FlxU.clearArraySoft(noteBinds);
+		FlxU.clearArraySoft(otherBinds);
 	}
 
 	override public function create() {

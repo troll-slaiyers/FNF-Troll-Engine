@@ -9,10 +9,7 @@ import funkin.data.CharacterData;
 import funkin.objects.AttachedFlxText;
 import funkin.objects.hud.HealthIcon;
 import funkin.scripts.FunkinHScript;
-import funkin.scripts.FunkinScript;
 
-import funkin.Conductor.BPMChangeEvent;
-import funkin.data.ChartData.defaultNoteTypeList;
 import funkin.data.ChartData;
 import funkin.data.BaseSong;
 import funkin.data.Song;
@@ -24,8 +21,6 @@ import math.CoolMath.floorDecimal;
 
 import flixel.*;
 import flixel.group.FlxGroup;
-import flixel.group.FlxSpriteGroup;
-import flixel.input.keyboard.FlxKey;
 import flixel.util.FlxGradient;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.ui.*;
@@ -40,10 +35,6 @@ import flixel.ui.FlxButton;
 import haxe.Json;
 import haxe.io.Path;
 import haxe.io.Bytes;
-import haxe.format.JsonParser;
-import openfl.utils.ByteArray;
-import openfl.utils.Assets as OpenFlAssets;
-import openfl.media.Sound;
 import flixel.system.FlxAssets.FlxSoundAsset;
 import lime.media.AudioBuffer;
 import lime.ui.FileDialog;
@@ -55,7 +46,6 @@ import funkin.api.Discord.DiscordClient;
 #end
 
 #if sys
-import sys.io.File;
 import sys.FileSystem;
 import openfl.media.Sound;
 #end
@@ -974,7 +964,7 @@ class ChartingState extends MusicBeatState
 		stepperBPM.name = 'song_bpm';
 		blockPressWhileTypingOnStepper.push(stepperBPM);
 
-		var stepperKeyCount = new CustomFlxUINumericStepper(10, stepperBPM.y + 35, 1, 4, 1, 10, 0);
+		var stepperKeyCount = new CustomFlxUINumericStepper(10, stepperBPM.y + 35, 1, 4, Note.minKeyCount, Note.maxKeyCount, 0);
 		stepperKeyCount.value = _song.keyCount;
 		stepperKeyCount.name = 'song_keyCount';
 		blockPressWhileTypingOnStepper.push(stepperKeyCount);
