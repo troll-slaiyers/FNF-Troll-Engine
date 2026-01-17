@@ -566,23 +566,13 @@ class ModManager {
 		var spaceWidth = FlxG.width / playerAmount;
 		var spaceX = spaceWidth * (playerAmount-1-player);
 
-		var correctionOffset = switch(receptorAmount){
-			case 6: 
-				0.9;
-			case 7:
-				0.85;
-			case 8: 
-				0.83;
-			case 9:
-				0.825;
-			case 10:
-				0.8;
-			default:
-				1;
-		}
+		// how much the note gap should scale by
+		// pushes notes closer together on higher keycounts to make them look less ugly
+		// does not go over 1 to prevent keycounts less than 4 from getting an increased gap, which they dont need.
+		var noteGapMult = Math.min(1, 1 - (1/30) * (receptorAmount - 4)); 
 
-		var baseX:Float = spaceX + (spaceWidth - Note.swagWidth * (receptorAmount * correctionOffset)) * 0.5 * correctionOffset;
-		var x:Float = baseX + Note.swagWidth * (direction * correctionOffset);
+		var baseX:Float = spaceX + (spaceWidth - Note.swagWidth * (receptorAmount * noteGapMult)) * 0.5 * noteGapMult;
+		var x:Float = baseX + Note.swagWidth * (direction * noteGapMult);
 
 		return x;
 	}
