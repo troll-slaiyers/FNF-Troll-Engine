@@ -822,7 +822,7 @@ class ClientPrefs {
 
 	public static final keyDirections:Array<Array<FlxKey>> = [
 		[SPACE],
-		[F, K],
+		[F, J],
 		[F, SPACE, J],
 		[A, S, W, D],
 		[D, F, SPACE, J, K],
