@@ -31,7 +31,7 @@ final class Version
 
 	public static final buildDate:String = Sowy.getBuildDate();
 	public static final githubRepo:RepoInfo = Github.getCompiledRepoInfo();
-	
+
 	public static final semanticVersion:SemanticVersion = isBeta ? '$engineVersion-$betaVersion' : engineVersion;
 	public static final displayedVersion:String = 'v$semanticVersion';
 }
@@ -42,13 +42,13 @@ class Main extends Sprite
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var adjustGameSize:Bool = true; // If true, the game size is adjusted to fit within the screen resolution
 	var initialState:Class<FlxState> = StartupState; // The FlxState the game starts with.
-	var nextState:Class<FlxState> = funkin.states.TitleState; 
+	var nextState:Class<FlxState> = funkin.states.TitleState;
 	var framerate:Int = 60; // How many frames per second the game should run at.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Null<Bool> = null; // Whether to start the game in fullscreen on desktop targets
 
 	public static final UserAgent:String = 'TrollEngine/${Version.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
-	
+
 	//// You can pretty much ignore everything from here on - your code should go in your states.
 
 	public static var showDebugTraces:Bool = #if (debug || SHOW_DEBUG_TRACES) true #else false #end;
@@ -63,7 +63,7 @@ class Main extends Sprite
 	public static var bread:Bitmap;
 
 	#if ALLOW_DEPRECATION
-	@:noCompletion @:deprecated("volumeChangedEvent is deprecated, use FlxG.sound.onVolumeChange, instead") 
+	@:noCompletion @:deprecated("volumeChangedEvent is deprecated, use FlxG.sound.onVolumeChange, instead")
 	public static var volumeChangedEvent(get, never):flixel.util.FlxSignal.FlxTypedSignal<Float -> Void>;
 	@:noCompletion inline static function get_volumeChangedEvent() return FlxG.sound.onVolumeChange;
 	#end
@@ -103,7 +103,7 @@ class Main extends Sprite
 		hxvlc.util.Handle.init(["--no-audio-time-stretch"]); // Makes it so videos when slowed/sped up have their audio pitch up/down
 		// imo better than with time stretch but remove if thats what u prefer lol
 		#end
-				
+
 		////
 		#if sys
 		var args = Sys.args();
@@ -143,7 +143,7 @@ class Main extends Sprite
 			if (screenWidth < gameWidth && screenHeight < gameWidth) {
 				var ratioX:Float = screenWidth / gameWidth;
 				var ratioY:Float = screenHeight / gameHeight;
-				
+
 				var zoom = Math.min(ratioX, ratioY);
 				gameWidth = Math.ceil(screenWidth / zoom);
 				gameHeight = Math.ceil(screenHeight / zoom);
@@ -155,12 +155,12 @@ class Main extends Sprite
 		if (scaleModifier > 1) {
 			var scaleModifier = Math.floor(scaleModifier);
 			resizeWindow(gameWidth * scaleModifier, gameHeight * scaleModifier);
-		}else 
+		}else
 			scaleWindow(scaleModifier);
 
 		centerWindow();
 
-		////		
+		////
 		StartupState.nextState = nextState;
 
 		game = new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
@@ -206,7 +206,7 @@ class Main extends Sprite
 
 	public static function scaleWindow(scale:Float) {
 		application.window.resize(
-			Math.floor(application.window.display.bounds.width * scale), 
+			Math.floor(application.window.display.bounds.width * scale),
 			Math.floor(application.window.display.bounds.height * scale)
 		);
 	}
@@ -250,7 +250,7 @@ class Main extends Sprite
 		} else {
 			process.close();
 		}
-		
+
 		return retVal;
 	}
 	#end

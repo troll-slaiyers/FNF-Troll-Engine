@@ -51,13 +51,13 @@ class Note extends NoteObject {
 		4, // quarter note
 		8, // eight
 		12, // etc
-		16, 
+		16,
 		20,
 		24,
-		32, 
-		48, 
-		64, 
-		96, 
+		32,
+		48,
+		64,
+		96,
 		192
 	];
 
@@ -499,11 +499,11 @@ class Note extends NoteObject {
 		////
 
 		/** Should join and check for shit in the following order:
-		 * 
-		 * `folder + "/" + "QUANT" + name + suffix` (If quants are enabled)  
-		 * `folder + "/" + name + suffix`  
-		 * `"QUANT" + name + suffix` (If quants are enabled)  
-		 * `name + suffix`  
+		 *
+		 * `folder + "/" + "QUANT" + name + suffix` (If quants are enabled)
+		 * `folder + "/" + name + suffix`
+		 * `"QUANT" + name + suffix` (If quants are enabled)
+		 * `name + suffix`
 		 *
 		 * Sets `isQuant` to `true` if a quant texture is to be returned
 		 */
@@ -617,40 +617,13 @@ class Note extends NoteObject {
 			_loadNoteAnims();
 	}
 
-	var currentNoteAnims:NoteAnimation = Reflect.copy(NoteAnimations.fourKey);
-
 	function _loadNoteAnims() {
 		final animName:String = 'default';
 
-		final halfKeyCount:Int = Math.floor(PlayState.keyCount / 2);
-		final keyCountFloor:Int = halfKeyCount * 2;
-
-		if (keyCountFloor % 6 == 0) {
-			currentNoteAnims = Reflect.copy(NoteAnimations.sixKey);
-		} else if (keyCountFloor == 2) {
-			currentNoteAnims = Reflect.copy(NoteAnimations.twoKey);
-		}
-
-		if (PlayState.keyCount % 2 == 1) { // Odd keycount, add middle note.
-			// haxe i am going to skin you alive.
-			// for some reason it keeps adding the odd note even tho its already there???
-			if (currentNoteAnims.noteAnimations[halfKeyCount] != 'green' && currentNoteAnims.noteAnimations.length != PlayState.keyCount) {
-				currentNoteAnims.noteAnimations.insert(halfKeyCount, 'green');
-			}
-			if (currentNoteAnims.holdAnimations[halfKeyCount] != 'green hold piece'
-				&& currentNoteAnims.holdAnimations.length != PlayState.keyCount) {
-				currentNoteAnims.holdAnimations.insert(halfKeyCount, 'green hold piece');
-			}
-			if (currentNoteAnims.tailAnimations[halfKeyCount] != 'green hold end'
-				&& currentNoteAnims.tailAnimations.length != PlayState.keyCount) {
-				currentNoteAnims.tailAnimations.insert(halfKeyCount, 'green hold end');
-			}
-		}
-
 		final animPrefix:String = switch (holdType) {
-			default: '${currentNoteAnims.noteAnimations[column % currentNoteAnims.noteAnimations.length]}0';
-			case PART: currentNoteAnims.holdAnimations[column % currentNoteAnims.holdAnimations.length];
-			case END: currentNoteAnims.tailAnimations[column % currentNoteAnims.tailAnimations.length];
+			default: '${currentAnimations.noteAnimations[column % currentAnimations.noteAnimations.length]}0';
+			case PART: currentAnimations.holdAnimations[column % currentAnimations.holdAnimations.length];
+			case END: currentAnimations.tailAnimations[column % currentAnimations.tailAnimations.length];
 		}
 
 		// because phantomarcade cant spell
@@ -711,10 +684,5 @@ class Note extends NoteObject {
 		var diff = (strumTime - Conductor.songPosition);
 		if (diff < -ClientPrefs.hitWindow && !wasGoodHit)
 			tooLate = true;
-	}
-
-	public static function refreshKeyAnimations(count:Int = 4) {
-		Note.spriteScale = Note.spriteScales[count - 1];
-		Note.swagWidth = Note.spriteScale * 160;
 	}
 }
