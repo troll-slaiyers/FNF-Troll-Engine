@@ -4,31 +4,44 @@ class MusicData
 {
 	////
 	public var path:String;
-	/** Whether or not this sound should loop. **/
-	public var looped:Bool; 
-	/** In case of looping, the point (in milliseconds) from where to restart the sound when it loops back **/
-	public var loopTime:Null<Float>;
-	/** At which point to stop playing the sound, in milliseconds. If not set / null, the sound completes normally. **/
-	public var endTime:Null<Float>;
+	
+	/** The display name of this song **/
+	public var songName:String = "Unknown";
 
-	public var bpm:Float;
+	public var artist:String;
+
+	/** Whether or not this song should loop. **/
+	public var looped:Bool = true;
+
+	/** At which point to start playing the song, in milliseconds. **/
+	public var startTime:Float = 0.0;
+	
+	/** In case of looping, the point (in milliseconds) from where to restart the song when it loops back **/
+	public var loopTime:Float = 0.0;
+	
+	/** At which point to stop playing the song, in milliseconds. If not set / null, the song completes normally. **/
+	public var endTime:Null<Float> = null;
+
+	public var bpm:Float = 100;
 
 	public function new(path:String) {
 		this.path = path;
 	}
 
-	public function makeFlxSound():FlxSound {
-		var snd:FlxSound = loadFlxSound();
-		snd.context = MUSIC;
-		FlxG.sound.defaultMusicGroup.add(snd);
-		return snd;
-	}
-
-	public function loadFlxSound(?snd:FlxSound):FlxSound {
-		snd ??= new FlxSound();
-		snd.loadEmbedded(Paths.returnSound(path), looped);
+	/**
+		@param snd Optional `FlxSound` instance to load and play music data onto.
+		@returns An `FlxSound` instance playing this song.
+	**/
+	public function play(?snd:FlxSound, volume:Float = 1.0):FlxSound {
+		if (snd == null) {
+			snd = new FlxSound();
+			snd.context = MUSIC;
+			FlxG.sound.defaultMusicGroup.add(snd);
+		};
+		snd.loadEmbedded(Paths.returnSound(path), looped, false);
+		snd.volume = volume;
+		snd.play(false, startTime, endTime);
 		snd.loopTime = loopTime;
-		snd.endTime = endTime;
 		return snd;
 	}
 
@@ -42,8 +55,11 @@ class MusicData
 			return null;
 		
 		var md = new MusicData(soundPath);
-		md.looped = jsonData.looped!=false;
-		md.loopTime = jsonData.loopTime;
+		md.songName = jsonData.songName ?? "Unknown";
+		md.artist = jsonData.artist ?? "Unknown";
+		md.looped = jsonData.looped != false;
+		md.startTime = jsonData.startTime ?? 0.0;
+		md.loopTime = jsonData.loopTime ?? 0.0;
 		md.endTime = jsonData.endTime;
 		md.bpm = jsonData.bpm ?? 100;
 		return md;
@@ -63,9 +79,15 @@ class MusicData
 }
 
 typedef MusicDataJSON = {
-	var bpm:Float;
-	var looped:Bool;
-	var endTime:Float;
-	var loopTime:Float;
-	//var bpmChangeMap:Array<Dynamic>;
+	@:optional var songName:String;
+	@:optional var artist:String;
+	
+	@:optional var looped:Bool;
+	@:optional var endTime:Float;
+	@:optional var loopTime:Float;
+	@:optional var startTime:Float;
+	
+	@:optional var bpm:Float;
+	//@:optional var bpmChangeMap:Array<Dynamic>;
+	// TODO: bpm change data that's not tied to sections¿
 }

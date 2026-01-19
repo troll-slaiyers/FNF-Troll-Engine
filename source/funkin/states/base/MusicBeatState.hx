@@ -319,6 +319,7 @@ class MusicBeatState extends FlxUIState
 		return section==null ? 4 : Conductor.sectionBeats(section);
 	}
 
+	public static var curMusic:String = "";
 	public static var menuVox:FlxSound; // jukebox
 
 	public static function stopMenuMusic(){
@@ -336,28 +337,33 @@ class MusicBeatState extends FlxUIState
 		}
 	}
 
-	public static function playMusic(key:String, volume:Float = 1, looped:Bool = true) {
+	public static inline function isPlayingMusic(?key:String):Bool
+		return (key != null && key == curMusic) && FlxG.sound.music?.playing;
+
+	public static function playMusic(key:String, force:Bool = false) {
+		if (!force && isPlayingMusic(key))
+			return;
 		MusicBeatState.stopMenuMusic();
 		
 		var md = MusicData.fromName(key);
 		if (md != null) {
-			FlxG.sound.music = md.loadFlxSound(FlxG.sound.music);
-			FlxG.sound.music.volume = volume;
-			FlxG.sound.music.looped = looped;
+			FlxG.sound.music = md.play();
 			FlxG.sound.music.persist = true;
-			FlxG.sound.music.play();
 			Conductor.changeBPM(md.bpm);
-			Conductor.songPosition = FlxG.sound.music.time;
 		}else {
-			FlxG.sound.playMusic(Paths.music(key), volume, looped);
+			FlxG.sound.playMusic(Paths.music(key));
 		}
+
+		Conductor.songPosition = FlxG.sound.music.time;
+		curMusic = key;
 	}
 
 	// TODO: check the jukebox selection n shit and play THAT instead? idk lol
-	public static function playMenuMusic(volume:Float=1, force:Bool = false){				
-		if (force != true && FlxG.sound.music != null && FlxG.sound.music.playing)
+	public static function playMenuMusic(force:Bool = false) {
+		if (!force && isPlayingMusic())
 			return;
 
-		MusicBeatState.playMusic('freakyMenu', volume, true);
+		MusicBeatState.playMusic('freakyMenu', true);
+		FlxG.sound.music.looped = true;
 	}	
 }

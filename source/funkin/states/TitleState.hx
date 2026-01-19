@@ -213,7 +213,7 @@ class TitleState extends MusicBeatState
 		if (key != null) 
 			MusicBeatState.playMusic(key);
 		if (FlxG.sound.music?.playing != true)
-			MusicBeatState.playMenuMusic(1, true);
+			MusicBeatState.playMenuMusic();
 	}
 
 	function skipIntro():Void
