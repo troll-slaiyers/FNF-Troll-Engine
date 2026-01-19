@@ -38,4 +38,14 @@
 	<SubTexture name="note splash blue 20002" x="282" y="605" width="291" height="284" />
 	<SubTexture name="note splash blue 20003" x="575" y="605" width="291" height="284" />
 
+
+	<SubTexture name="note splash square 10000" x="2" y="2" width="278" height="315" />
+	<SubTexture name="note splash square 10001" x="282" y="2" width="278" height="315" />
+	<SubTexture name="note splash square 10002" x="562" y="2" width="278" height="315" />
+	<SubTexture name="note splash square 10003" x="2" y="319" width="278" height="315" />
+	<SubTexture name="note splash square 20000" x="282" y="319" width="291" height="284" />
+	<SubTexture name="note splash square 20001" x="575" y="319" width="291" height="284" />
+	<SubTexture name="note splash square 20002" x="282" y="605" width="291" height="284" />
+	<SubTexture name="note splash square 20003" x="575" y="605" width="291" height="284" />
+
 </TextureAtlas>

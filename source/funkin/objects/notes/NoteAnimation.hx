@@ -34,28 +34,28 @@ class NoteAnimation {
        	}
 
        	if (count % 2 == 1) { // Odd keycount, add middle note.
-       		if ((current.staticAnimations[halfKeyCount] != 'arrowUP')
+       		if ((current.staticAnimations[halfKeyCount] != 'arrowSQUARE')
        			&& current.staticAnimations.length != count) {
-       			current.staticAnimations.insert(halfKeyCount, 'arrowUP');
+       			current.staticAnimations.insert(halfKeyCount, 'arrowSQUARE');
        		}
-       		if (current.pressAnimations[halfKeyCount] != 'up press'
+       		if (current.pressAnimations[halfKeyCount] != 'square press'
        			&& current.pressAnimations.length != count) {
-       			current.pressAnimations.insert(halfKeyCount, 'up press');
+       			current.pressAnimations.insert(halfKeyCount, 'square press');
        		}
-       		if (current.confirmAnimations[halfKeyCount] != 'up confirm'
+       		if (current.confirmAnimations[halfKeyCount] != 'square confirm'
        			&& current.confirmAnimations.length != count) {
-       			current.confirmAnimations.insert(halfKeyCount, 'up confirm');
+       			current.confirmAnimations.insert(halfKeyCount, 'square confirm');
        		}
-      		if (current.noteAnimations[halfKeyCount] != 'green' && current.noteAnimations.length != count) {
-				current.noteAnimations.insert(halfKeyCount, 'green');
+      		if (current.noteAnimations[halfKeyCount] != 'square0' && current.noteAnimations.length != count) {
+				current.noteAnimations.insert(halfKeyCount, 'square0');
 			}
-			if (current.holdAnimations[halfKeyCount] != 'green hold piece'
+			if (current.holdAnimations[halfKeyCount] != 'square hold piece'
 				&& current.holdAnimations.length != count) {
-				current.holdAnimations.insert(halfKeyCount, 'green hold piece');
+				current.holdAnimations.insert(halfKeyCount, 'square hold piece');
 			}
-			if (current.tailAnimations[halfKeyCount] != 'green hold end'
+			if (current.tailAnimations[halfKeyCount] != 'square hold end'
 				&& current.tailAnimations.length != count) {
-				current.tailAnimations.insert(halfKeyCount, 'green hold end');
+				current.tailAnimations.insert(halfKeyCount, 'square hold end');
 			}
        	}
 	}
