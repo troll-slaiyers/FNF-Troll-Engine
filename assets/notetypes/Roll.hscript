@@ -1,3 +1,5 @@
+import funkin.objects.notes.NoteAnimation;
+
 function setupNote(note:Note){
     note.maxReleaseTime = 0.5;
     note.isRoll = true;
@@ -8,7 +10,8 @@ function setupNote(note:Note){
 }
 
 function loadNoteAnims(note){
-    var prefix = Note.colArray[note.column];
+	var anims = NoteAnimation.current.noteAnimations;
+    var prefix = StringTools.replace(anims[note.column % anims.length], '0', '');
     
 	var animName = '';
     if(note.isQuant){
