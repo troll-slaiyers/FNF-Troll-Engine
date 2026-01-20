@@ -13,7 +13,6 @@ import openfl.net.URLLoader;
 import flixel.ui.FlxBar;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import Main;
 
 import funkin.api.Github;
 
@@ -380,9 +379,9 @@ class UpdaterState extends MusicBeatState {
 			
 			// hoping this works lol
 			var tagName:funkin.data.SemanticVersion = recentRelease.tag_name;
-			if (tagName > Version.semanticVersion){
+			if (tagName > Main.Version.semanticVersion){
 				outOfDate = true;
-				trace('New version found! Newest version: $tagName | Current: ${Version.semanticVersion}');
+				trace('New version found! Newest version: $tagName | Current: ${Main.Version.semanticVersion}');
 			}
 		}
 
