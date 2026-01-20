@@ -20,7 +20,7 @@ import animate.FlxAnimate;
 import animate.FlxAnimateFrames;
 #end
 
-using funkin.CoolerStringTools;
+using CoolerStringTools;
 using StringTools;
 
 class LevelStageProp extends FlxSprite

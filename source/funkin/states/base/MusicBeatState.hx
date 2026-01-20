@@ -187,8 +187,11 @@ class MusicBeatState extends FlxUIState
 		var curStep:Int = Conductor.curStep;
 
 		if (oldStep != curStep) {
-			if (curStep > 0)
+			if (curStep > 0) {
 				stepHit();
+				if (curStep % 4 == 0)
+					beatHit();
+			}
 
 			if (PlayState.SONG != null)
 			{
@@ -202,21 +205,20 @@ class MusicBeatState extends FlxUIState
 
 	override function update(elapsed:Float)
 	{
-		updateSteps();
-		if(updateSongPos){
+		if (updateSongPos) {
 			if (FlxG.sound.music != null)
 				Conductor.songPosition = FlxG.sound.music.time;
 			else
 				Conductor.songPosition += elapsed * 1000;
-
 		}
+		updateSteps();
 		super.update(elapsed);
 	}
 
 	private function updateSection():Void
 	{
-		if(stepsToDo < 1) stepsToDo = Math.round(getBeatsOnSection() * 4);
-		while(curStep >= stepsToDo)
+		if (stepsToDo < 1) stepsToDo = Math.round(getBeatsOnSection() * 4);
+		while (curStep >= stepsToDo)
 		{
 			curSection++;
 			var beats:Float = getBeatsOnSection();
@@ -290,9 +292,6 @@ class MusicBeatState extends FlxUIState
 
 	public function stepHit():Void
 	{
-		if (curStep % 4 == 0)
-			beatHit();
-
 		if (Conductor.playing) {
 			for (track in Conductor.tracks) {
 				if (track.playing && Math.abs(track.time - Conductor.getAccPosition()) > 30) {
@@ -359,7 +358,6 @@ class MusicBeatState extends FlxUIState
 		if (force != true && FlxG.sound.music != null && FlxG.sound.music.playing)
 			return;
 
-		MusicBeatState.stopMenuMusic();
 		MusicBeatState.playMusic('freakyMenu', volume, true);
 	}	
 }

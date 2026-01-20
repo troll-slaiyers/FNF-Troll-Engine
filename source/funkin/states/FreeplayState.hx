@@ -17,7 +17,7 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 
 using StringTools;
-using funkin.CoolerStringTools;
+using CoolerStringTools;
 
 @:injectMoreFunctions([
 	"onSelectSong",
@@ -195,8 +195,14 @@ class FreeplayState extends MusicBeatState
 		////
 		menu.setSongList(songList);
 		curChartId = FreeplayState.lastSelectedChart;
-		menu.curSelected = FreeplayState.lastSelectedIdx;
-		if (comingFromPlayState) playSelectedSongMusic();
+
+		if (comingFromPlayState) {
+			var idx = CoolUtil.indexOfSong(songList, PlayState.song);
+			if (idx == -1) idx = FreeplayState.lastSelectedIdx;
+			menu.curSelected = idx;
+			playSelectedSongMusic();
+		}else 
+			menu.curSelected = FreeplayState.lastSelectedIdx;
 
 		super.create();
 		persistentUpdate = true;
@@ -451,7 +457,7 @@ class FreeplayState extends MusicBeatState
 		lerpRating = CoolUtil.coolLerp(lerpRating, targetRating, FlxG.elapsed * 8);
 
 		final score = Math.round(lerpHighscore);
-		final rating = formatRating(lerpRating);
+		final rating = formatRating(Math.fround(lerpRating * 100.0) / 100.0);
 		final fcDisplay = (fcDisplay.length==0 ? fcDisplay : ' • [$fcDisplay]');
 
 		scoreText.text = 'PERSONAL BEST • $score • ($rating%)' + fcDisplay;
@@ -462,7 +468,7 @@ class FreeplayState extends MusicBeatState
 
 	private static function formatRating(val:Float):String
 	{
-		var str = Std.string(Math.floor(val * 100.0) / 100.0);
+		var str = Std.string(Math.ffloor(val * 100.0) / 100.0);
 		var dot = str.indexOf('.');
 
 		if (dot == -1)

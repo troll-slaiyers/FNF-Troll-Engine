@@ -3,32 +3,13 @@ package funkin;
 import funkin.scripts.Globals;
 import funkin.states.base.MusicBeatState;
 
+import flixel.addons.transition.FlxTransitionableState;
 import flixel.util.typeLimit.NextState;
 import flixel.input.keyboard.FlxKey;
 
 import lime.app.Application.current as application;
 
 import openfl.events.KeyboardEvent;
-
-#if CRASH_HANDLER
-import haxe.CallStack;
-import openfl.events.UncaughtErrorEvent;
-
-#if SAVE_CRASH_LOGS
-import sys.io.File;
-#end
-
-#if sys
-import lime.system.System;
-#end
-
-#if (windows && cpp)
-import funkin.api.Windows;
-#end
-#if linc_filedialogs
-import filedialogs.FileDialogs;
-#end
-#end
 
 #if SCRIPTABLE_STATES
 import funkin.states.scripting.HScriptOverridenState;
@@ -75,20 +56,7 @@ class FNFGame extends FlxGame
 
 		////
 		#if CRASH_HANDLER
-		openfl.Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
-			UncaughtErrorEvent.UNCAUGHT_ERROR, 
-			function(event:UncaughtErrorEvent) {
-				// one of these oughta do it
-				event.stopImmediatePropagation();
-				event.stopPropagation();
-				event.preventDefault();
-				onCrash(event.error);
-			}
-		);
-
-		#if cpp
-		untyped __global__.__hxcpp_set_critical_error_handler(onCrash);
-		#end
+		CrashHandler.init();
 		#end
 	}
 
@@ -104,8 +72,15 @@ class FNFGame extends FlxGame
 			FlxG.fullscreen = !FlxG.fullscreen;
 
 		if (e.keyCode == FlxKey.F3) {
-			Main.fpsVar.visible = !Main.fpsVar.visible;
-			ClientPrefs.showFPS = Main.fpsVar.visible;
+			if (!Main.fpsVar.visible) {
+				Main.fpsVar.visible = true;
+				Main.fpsVar.showDebug = false;
+			}else if (!Main.fpsVar.showDebug) {
+				Main.fpsVar.showDebug = true;
+			}else {
+				Main.fpsVar.visible = false;
+				Main.fpsVar.showDebug = false;
+			}
 		}
 	}
 
@@ -117,7 +92,10 @@ class FNFGame extends FlxGame
 			if (FlxG.keys.pressed.SHIFT) {
 				funkin.Paths.clearStoredMemory();
 				funkin.Paths.clearUnusedMemory();
-				FlxG.switchState(new funkin.states.MainMenuState());
+				FlxTransitionableState.skipNextTransIn = true;
+				FlxTransitionableState.skipNextTransOut = true;
+				if (_state != null) _state.visible = false;
+				MusicBeatState.switchState(new funkin.states.MainMenuState());
 			}else {
 				MusicBeatState.resetState();
 			}
@@ -231,80 +209,20 @@ class FNFGame extends FlxGame
 		Main.resetSpriteCache(this);
 	}
 
-	#if CRASH_HANDLER
-	private function onCrash(errorName:String):Void {
-		print("\nCall stack starts below");
-
-		var callstack:String = Main.callstackToString(CallStack.exceptionStack(true));
-		print('\n$callstack\n$errorName');
-
-		////
-		var boxMessage:String = '$callstack\n$errorName';
-
-		#if SAVE_CRASH_LOGS
-		final fileName:String = "crash.txt";
-		boxMessage += '\nCall stack was saved as $fileName';
-		File.saveContent(fileName, callstack);
-		#end
-
-		#if WINDOWS_CRASH_HANDLER
-		boxMessage += "\nWould you like to goto the main menu?";
-		var ret = Windows.msgBox(boxMessage, errorName, ERROR | MessageBoxOptions.YESNOCANCEL | MessageBoxDefaultButton.BUTTON3);
-		
-		switch(ret) {
-			case YES: 
-				toMainMenu();
-				return;
-			case CANCEL: 
-				// Continue with a possibly unstable state
-				return;
-			default:
-				// Close the game
-		}
-		#else
-		
-		#if (UNIX_CRASH_HANDLER && linc_filedialogs)
-		// class name is a bit misleading for the function used
-		// but it does also handle file dialogs, soooo
-		boxMessage += "\nWould you like to goto the main menu?";
-		final btn:Button = FileDialogs.message(
-			errorName, boxMessage,
-			Choice.Yes_No_Cancel, Icon.Error
-		);
-		switch(btn) {
-			case Yes: 
-				toMainMenu();
-				return;
-			case Cancel:
-				// Continue with a possibly unstable state
-				return;
-			default:
-				// Close the game
-		}
-		#else
-		application.window.alert(callstack, errorName); // this shit barely works on linux!
-		#end
-		#end
-
-		#if sys 
-		System.exit(1);
-		#end
+	public function set_antialiasing(v:Bool) {
+		FlxG.stage.quality = v ? BEST : LOW; // This affects ShaderFilter quality :o
+		FlxSprite.defaultAntialiasing = v;
 	}
 
-	@:unreflective private function toMainMenu() {
-		try{
-			if (_state != null) {
-				_state.destroy();
-				_state = null;
-			}
-		}catch(e){
-			print("Error destroying state: ", e);
-		}	
-		
-		FlxG.game._nextState = new funkin.states.MainMenuState();
-		FlxG.game.switchState();
+	public function set_framerate(v:Float) {
+		if (v > FlxG.drawFramerate) {
+			FlxG.updateFramerate = Math.ceil(v);
+			FlxG.drawFramerate = Math.ceil(v);
+		} else {
+			FlxG.drawFramerate = Math.ceil(v);
+			FlxG.updateFramerate = Math.ceil(v);
+		}
 	}
-	#end
 
 	@:noCompletion inline public static function set_specialKeysEnabled(val)
 	{

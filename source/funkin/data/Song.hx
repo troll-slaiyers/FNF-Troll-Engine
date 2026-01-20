@@ -6,7 +6,7 @@ import funkin.data.ChartData;
 import funkin.data.BaseSong;
 import haxe.io.Path;
 
-using funkin.CoolerStringTools;
+using CoolerStringTools;
 using StringTools;
 
 final defaultDifficultyOrdering:Array<String>  = ["easy", "normal", "hard", "erect", "nightmare"];

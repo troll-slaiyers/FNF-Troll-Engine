@@ -16,7 +16,7 @@ import haxe.Json;
 
 using StringTools;
 
-#if sys
+#if FILESYSTEM_ALLOWED
 import sys.FileSystem;
 import sys.io.File;
 #end
@@ -37,10 +37,9 @@ class Paths
 
 	public static function getFileWithExtensions(scriptPath:String, extensions:Array<String>):Null<String> {
 		for (fileExt in extensions) {
-			var baseFile:String = '$scriptPath.$fileExt';
-			var file:String = getPath(baseFile);
-			if (Paths.exists(file))
-				return file;
+			var fullPath = getPath('$scriptPath.$fileExt');
+			if (fullPath != null)
+				return fullPath;
 		}
 
 		return null;
@@ -57,6 +56,14 @@ class Paths
 	{
 		#if HSCRIPT_ALLOWED
 		return getFileWithExtensions(scriptPath, Paths.HSCRIPT_EXTENSIONS);
+		#else
+		return null;
+		#end
+	}
+
+	public inline static function hscript(key:String):Null<String> {
+		#if HSCRIPT_ALLOWED
+		return getFileWithExtensions(key, Paths.HSCRIPT_EXTENSIONS);
 		#else
 		return null;
 		#end
@@ -84,8 +91,8 @@ class Paths
 	}
 
 	public static function init() {
-		#if html5
-		HTML5Paths.initPaths();
+		#if !FILESYSTEM_ALLOWED
+		AltFilePaths.initPaths();
 		#end
 
 		#if MODS_ALLOWED
@@ -258,43 +265,43 @@ class Paths
 		return path.endsWith("/") ? path.substr(0, -1) : path;
 
 	inline static public function exists(path:String, ?type:AssetType):Bool {
-		#if sys 
+		#if FILESYSTEM_ALLOWED 
 		return FileSystem.exists(path);
 		#else
 		return Assets.exists(path, type);
 		#end
 	}
 	inline static public function getContent(path:String):Null<String> {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		return FileSystem.exists(path) ? File.getContent(path) : null;
 		#else
 		return Assets.exists(path) ? Assets.getText(path) : null;
 		#end
 	}
 	inline static public function getBytes(path:String):Null<haxe.io.Bytes> {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		return FileSystem.exists(path) ? File.getBytes(path) : null;
 		#else
 		return Assets.exists(path) ? Assets.getBytes(path) : null;
 		#end
 	}
 	inline static public function isDirectory(path:String):Bool {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		return FileSystem.exists(path) && FileSystem.isDirectory(path);
 		#else
-		return HTML5Paths.isDirectory(path);
+		return AltFilePaths.isDirectory(path);
 		#end
 	}
 	inline static public function getDirectoryFileList(path:String):Array<String> {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		return !isDirectory(path) ? [] : FileSystem.readDirectory(path);
 		#else
-		return HTML5Paths.getDirectoryFileList(path);
+		return AltFilePaths.getDirectoryFileList(path);
 		#end
 	}
 
 	inline public static function getText(path:String):Null<String> {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		if (FileSystem.exists(path))
 			return File.getContent(path);
 		#end
@@ -305,7 +312,7 @@ class Paths
 		return null;
 	}
 	inline public static function getBitmapData(path:String):Null<BitmapData> {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		if (FileSystem.exists(path))
 			return BitmapData.fromFile(path);
 		#end
@@ -316,7 +323,7 @@ class Paths
 		return null;
 	}
 	inline public static function getSound(path:String):Null<Sound> {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		if (FileSystem.exists(path))
 			return Sound.fromFile(path);
 		#end
@@ -388,7 +395,7 @@ class Paths
 	**/
 	inline static public function iterateDirectory(path:String, func:haxe.Constraints.Function):Bool
 	{
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		if (!FileSystem.exists(path) || !FileSystem.isDirectory(path))
 			return false;
 		
@@ -398,13 +405,13 @@ class Paths
 		return true;
 		
 		#else
-		return HTML5Paths.iterateDirectory(path, func);
+		return AltFilePaths.iterateDirectory(path, func);
 		#end
 	}
 
-	inline static public function fileExists(key:String, ?type:AssetType, ?library:String)
+	inline static public function fileExists(key:String, ?type:AssetType, ?library:String):Bool
 	{
-		return Paths.exists(getPath(key));
+		return getPath(key) != null;
 	}
 
 	/** Returns the contents of a file as a string. **/
@@ -479,11 +486,11 @@ class Paths
 	inline public static function cacheGraphic(path:String):Null<FlxGraphic>
 		return getGraphic(path, true);
 
-	inline public static function imagePath(key:String, ?folder:String):String
+	inline public static function imagePath(key:String, ?folder:String):Null<String>
 		return getPath('images/$key.$IMAGE_EXT');
 
 	inline public static function imageExists(key:String):Bool
-		return Paths.exists(imagePath(key));
+		return imagePath(key) != null;
 
 	public static function image(key:String, ?folder:String = null, allowGPU:Bool = true):Null<FlxGraphic>
 	{
@@ -801,8 +808,8 @@ class Paths
 		return currentStrings.get(key);
 }
 
-class HTML5Paths {
-	#if !sys 
+private class AltFilePaths {
+	#if !FILESYSTEM_ALLOWED 
 	// Directory => Array with file/sub-directory names
 	static var dirMap = new Map<String, Array<String>>();
 

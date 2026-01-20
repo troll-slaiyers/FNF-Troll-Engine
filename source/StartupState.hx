@@ -2,7 +2,7 @@ package;
 
 import funkin.*;
 import funkin.states.base.MusicBeatState;
-import funkin.states.FadeTransitionSubstate;
+import funkin.transitions.FadeTransition;
 
 import funkin.data.Highscore;
 import funkin.input.Controls;
@@ -76,8 +76,8 @@ class StartupState extends FlxTransitionableState
 		FlxG.stage.application.onExit.add((exitCode) -> funkin.api.Discord.DiscordClient.shutdown(true));
 		#end
 
-		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
-		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
+		FlxTransitionableState.defaultTransIn = FadeTransition;
+		FlxTransitionableState.defaultTransOut = FadeTransition;
 
 		#if FUNNY_ALLOWED
 		var bread = Main.bread;
