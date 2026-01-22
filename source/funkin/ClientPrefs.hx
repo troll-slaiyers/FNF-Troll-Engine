@@ -972,7 +972,7 @@ class ClientPrefs {
 
 		#if DISCORD_ALLOWED
 		DiscordClient.hideDetails = discordRPC_hideDetails;
-		discordRPC ? DiscordClient.start() : DiscordClient.shutdown();
+		DiscordClient.setActive(discordRPC, false);
 		#end
 
 		Main.downloadBetas = Version.isBeta || ClientPrefs.downloadBetas;

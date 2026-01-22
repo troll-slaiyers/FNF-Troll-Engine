@@ -71,10 +71,6 @@ class StartupState extends FlxTransitionableState
 		UpdaterState.checkOutOfDate();
 		UpdaterState.clearTemps("./");
 		#end
-		
-		#if DISCORD_ALLOWED
-		FlxG.stage.application.onExit.add((exitCode) -> funkin.api.Discord.DiscordClient.shutdown(true));
-		#end
 
 		FlxTransitionableState.defaultTransIn = FadeTransition;
 		FlxTransitionableState.defaultTransOut = FadeTransition;

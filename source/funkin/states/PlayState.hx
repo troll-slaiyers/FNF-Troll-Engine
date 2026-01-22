@@ -392,6 +392,7 @@ class PlayState extends MusicBeatState
 	public var isDead:Bool = false;
 	public var paused:Bool = false;
 	public var endingSong:Bool = false;
+	var goodTicks:Int = 0;
 
 	public var canReset:Bool = true;
 	public var canPause:Bool = true;
@@ -2231,7 +2232,6 @@ class PlayState extends MusicBeatState
 		setOnScripts('curDecBeat', curDecBeat);
 	}
 
-	var goodTicks:Int = 0;
 	override public function update(elapsed:Float)
 	{
 		if (paused){
@@ -2371,18 +2371,23 @@ class PlayState extends MusicBeatState
 			doPauseShit();
 
 		if (!paused) {
+			inline function lagSpikesEnded() {
+				return (elapsed < 0.3 ? ++goodTicks : goodTicks=0) >= 6;
+			}
+
 			if (!startedCountdown) {
 				if (!inCutscene) {
-					// wait a little for lag spikes to pass lol
-					if (elapsed < 0.3) goodTicks++; else goodTicks = 0;
-					if (goodTicks > 6) startCountdown();
+					if (lagSpikesEnded())
+						startCountdown();
 				}
 			}
 			else if (!startedSong) {
-				Conductor.songPosition += elapsed * 1000;
-				if (Conductor.songPosition >= PlayState.startOnTime) {
-					startSong(PlayState.startOnTime);
-					PlayState.startOnTime = 0;
+				if (lagSpikesEnded()) {
+					Conductor.songPosition += elapsed * 1000;
+					if (Conductor.songPosition >= PlayState.startOnTime) {
+						startSong(PlayState.startOnTime);
+						PlayState.startOnTime = 0;
+					}
 				}
 			}
 			else if (Conductor.songPosition >= 0)
