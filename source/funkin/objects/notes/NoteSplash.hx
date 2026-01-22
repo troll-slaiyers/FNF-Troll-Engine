@@ -5,6 +5,8 @@ import funkin.scripts.Globals;
 import flixel.FlxG;
 import funkin.objects.shaders.NoteColorSwap;
 
+using StringTools;
+
 class NoteSplash extends NoteObject {
 	private var textureLoaded:String = null;
 
@@ -70,7 +72,7 @@ class NoteSplash extends NoteObject {
 		for (i in 1...animationAmount + 1) {
 			for (j in 0...PlayState.keyCount) {
 				animation.addByPrefix('note$j-$i',
-					'note splash ${NoteAnimations.fourKey.noteAnimations[j % NoteAnimations.fourKey.noteAnimations.length]} $i', 24, false);
+					'note splash ${currentAnimations.noteAnimations[j % currentAnimations.noteAnimations.length].replace('0', '')} $i', 24, false);
 			}
 		}
 	}
