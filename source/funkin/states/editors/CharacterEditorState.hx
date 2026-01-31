@@ -361,7 +361,7 @@ class CharacterEditorState extends MusicBeatState {
 		var templateCharacter:FlxButton = new FlxButton(140, 50, "Load Template", function() {
 			var parsedJson:CharacterFile = cast Json.parse(TemplateCharacter);
 
-			inline function loadTemplate(char:Character){
+			inline function loadTemplate(char:Character) {
 				char.animOffsets.clear();
 				char.animationsArray = parsedJson.animations;
 				for (anim in char.animationsArray) {
@@ -386,7 +386,7 @@ class CharacterEditorState extends MusicBeatState {
 				reloadCharacterImage(char);
 			}
 			loadTemplate(char);
-			if(ghostMirrorsCharacter){
+			if (ghostMirrorsCharacter) {
 				loadTemplate(ghostChar);
 				updateGhostAnimationsList();
 				ghostCharName = "Current Character";
@@ -435,8 +435,7 @@ class CharacterEditorState extends MusicBeatState {
 
 		imageInputText = new FlxUIInputText(15, 30, 200, 'characters/BOYFRIEND', 8);
 		var reloadImage:FlxButton = new FlxButton(imageInputText.x + 210, imageInputText.y - 3, "Reload Image", function() {
-
-			inline function _reloadImage(char:Character){
+			inline function _reloadImage(char:Character) {
 				char.imageFile = imageInputText.text;
 				reloadCharacterImage(char);
 				if (char.animation.curAnim != null) {
@@ -445,19 +444,25 @@ class CharacterEditorState extends MusicBeatState {
 			}
 
 			_reloadImage(char);
-			if(ghostMirrorsCharacter){
+			if (ghostMirrorsCharacter) {
 				_reloadImage(ghostChar);
 			}
 		});
 
 		var decideIconColor:FlxButton = new FlxButton(reloadImage.x, reloadImage.y + 30, "Get Icon Color", function() {
-			var coolColor = FlxColor.fromInt(CoolUtil.dominantColor(leHealthIcon));
-			healthColorStepperR.value = coolColor.red;
-			healthColorStepperG.value = coolColor.green;
-			healthColorStepperB.value = coolColor.blue;
-			getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperR, null);
-			getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperG, null);
-			getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperB, null);
+			try {
+				var coolColor = FlxColor.fromInt(CoolUtil.dominantColor(leHealthIcon));
+				healthColorStepperR.value = coolColor.red;
+				healthColorStepperG.value = coolColor.green;
+				healthColorStepperB.value = coolColor.blue;
+				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperR, null);
+				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperG, null);
+				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperB, null);
+			} catch (e) {
+				if (Main.showDebugTraces) {
+					trace(e.details());
+				}
+			}
 		});
 
 		healthIconInputText = new FlxUIInputText(15, imageInputText.y + 35, 75, leHealthIcon.getCharacter(), 8);
@@ -565,7 +570,7 @@ class CharacterEditorState extends MusicBeatState {
 		});
 
 		var addUpdateButton:FlxButton = new FlxButton(70, animationIndicesInputText.y + 30, "Add/Update", function() {
-			inline function updateAnimation(char:Character){
+			inline function updateAnimation(char:Character) {
 				var indicesInput = animationIndicesInputText.text.trim();
 				var indices:Array<Int> = indicesInput.length == 0 ? null : CharacterData.parseIndices(indicesInput.split(','));
 
@@ -624,7 +629,7 @@ class CharacterEditorState extends MusicBeatState {
 			}
 
 			updateAnimation(char);
-			if(ghostMirrorsCharacter){
+			if (ghostMirrorsCharacter) {
 				updateAnimation(ghostChar);
 				updateGhostAnimationsList();
 			}
@@ -635,7 +640,7 @@ class CharacterEditorState extends MusicBeatState {
 		});
 
 		var removeButton:FlxButton = new FlxButton(180, animationIndicesInputText.y + 30, "Remove", function() {
-			inline function removeAnim(char:Character){
+			inline function removeAnim(char:Character) {
 				for (anim in char.animationsArray) {
 					if (animationInputText.text == anim.anim) {
 						var resetAnim:Bool = (anim.anim == char.animation.name);
@@ -662,7 +667,7 @@ class CharacterEditorState extends MusicBeatState {
 				}
 			}
 			removeAnim(char);
-			if(ghostMirrorsCharacter){
+			if (ghostMirrorsCharacter) {
 				removeAnim(ghostChar);
 			}
 		});
@@ -712,7 +717,7 @@ class CharacterEditorState extends MusicBeatState {
 		ghostCharDropDown = new FlxUIDropDownMenu(15, 30, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			var idx:Int = Std.parseInt(pressed);
 			var charName = ghostList[idx];
-			if(ghostCharName == charName){
+			if (ghostCharName == charName) {
 				return;
 			}
 
@@ -817,7 +822,7 @@ class CharacterEditorState extends MusicBeatState {
 	var ghostCharName:String = "";
 
 	function reloadGhost(charName:String) {
-		if(ghostCharName == charName){
+		if (ghostCharName == charName) {
 			return;
 		}
 		ghostCharName = charName;
@@ -838,8 +843,8 @@ class CharacterEditorState extends MusicBeatState {
 		ghostMirrorsCharacter = (charName == "Current Character");
 	}
 
-	function updateGhostAnimationsList(){
-		if(ghostChar == null){
+	function updateGhostAnimationsList() {
+		if (ghostChar == null) {
 			return;
 		}
 		var animList:Array<String> = [
@@ -889,6 +894,16 @@ class CharacterEditorState extends MusicBeatState {
 			if (sender == scaleStepper) {
 				char.baseScale = sender.value;
 				char.scale.set(sender.value, sender.value);
+
+				if (ghostMirrorsCharacter) {
+					ghostChar.baseScale = sender.value;
+					ghostChar.scale.set(sender.value, sender.value);
+					if (ghostChar.animation.curAnim != null) {
+						ghostChar.playAnim(ghostChar.animation.curAnim.name, true);
+					} else {
+						ghostChar.updateHitbox();
+					}
+				}
 
 				updatePointerPos();
 

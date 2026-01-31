@@ -1,5 +1,6 @@
 package funkin.objects.hud;
 
+import funkin.states.editors.ChartingState;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.FlxGraphic;
 import flixel.FlxSprite;
@@ -102,10 +103,10 @@ class HealthIcon extends FlxSprite
 	public function swapOldIcon() 
 	{
 		if (!isOldIcon){
-			var oldIcon = Paths.image('icons/$char-old');
+			var oldIcon = Paths.image('icons/$char-old', null, !(FlxG.state is ChartingState));
 			
 			if(oldIcon == null)
-				oldIcon = Paths.image('icons/icon-$char-old'); // base game compat
+				oldIcon = Paths.image('icons/icon-$char-old', null, !(FlxG.state is ChartingState)); // base game compat
 
 			if (oldIcon != null){
 				changeIconGraphic(oldIcon);
@@ -119,13 +120,13 @@ class HealthIcon extends FlxSprite
 	}
 
 	public function changeIcon(char:String) {
-		var file:Null<FlxGraphic> = Paths.image('icons/$char'); 
+		var file:Null<FlxGraphic> = Paths.image('icons/$char', null, !(FlxG.state is ChartingState)); 
 
 		if(file == null)
-			file = Paths.image('icons/icon-$char'); // base game compat
+			file = Paths.image('icons/icon-$char', null, !(FlxG.state is ChartingState)); // base game compat
 		
 		if(file == null) 
-			file = Paths.image('icons/face'); // Prevents crash from missing icon
+			file = Paths.image('icons/face', null, !(FlxG.state is ChartingState)); // Prevents crash from missing icon
 
 		if (file != null){
 			//// TODO: sparrow atlas icons? would make the implementation of extra behaviour (ex: winning icons) way easier
