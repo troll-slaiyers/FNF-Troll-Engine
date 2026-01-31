@@ -931,7 +931,8 @@ class PlayState extends MusicBeatState
 		modifierRegister();
 		generateSong(); // EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
 		checkEventNote();
-		clearNotesBefore(PlayState.startOnTime);
+		if(PlayState.startOnTime > 0)
+			clearNotesBefore(PlayState.startOnTime);
 
 		#if DISCORD_ALLOWED
 		// Discord RPC texts
