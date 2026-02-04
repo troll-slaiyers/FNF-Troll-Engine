@@ -1,0 +1,27 @@
+import funkin.objects.cutscenes.DialogueCutscene;
+
+var black:FlxSprite;
+
+function onCreate() {
+    /*
+	if (!PlayState.isStoryMode  PlayState.seenCutscene) {
+		script.stop();
+		return;
+	}	
+	*/
+	
+	
+	game.startCutscenes.push(new DialogueCutscene());
+}
+
+/*
+function onCountdownStarted() {
+	FlxTween.tween(black, {alpha 0.0}, 0.6, {onComplete function(twn) {
+		game.remove(black);
+		black.destroy();
+		twn.destroy();
+		script.stop();
+		return;
+	}});
+}
+*/

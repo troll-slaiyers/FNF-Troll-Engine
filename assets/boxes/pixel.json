@@ -1,0 +1,8 @@
+{
+    "graphic": "pixelUI/dialogueBOX-pixel",
+	"antialiasing": false,
+	"graphicScale": 5.4,
+	"offsets":[-30, -10],
+    "dialoguePressed": "Text Box Appear instance"
+
+}

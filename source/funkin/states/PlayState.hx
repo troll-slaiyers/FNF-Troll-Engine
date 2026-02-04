@@ -4,6 +4,7 @@ import funkin.objects.cutscenes.Cutscene;
 #if VIDEOS_ALLOWED
 import funkin.objects.cutscenes.VideoCutscene;
 #end
+import funkin.objects.cutscenes.DialogueCutscene;
 import funkin.objects.playfields.PlayField.NoteCallback;
 import funkin.data.Cache;
 import funkin.data.Level;
