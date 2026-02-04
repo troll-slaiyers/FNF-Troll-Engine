@@ -8,6 +8,7 @@ typedef BoxData = {
 	var offsets:Array<Int>;
 	var dialogueIdle:String; //replace this
 	var dialoguePressed:String;
+	var dialogueFont:String;
 }
 class DialogueBox extends FlxSprite
 {

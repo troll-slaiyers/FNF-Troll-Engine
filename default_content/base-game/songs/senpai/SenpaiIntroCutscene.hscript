@@ -11,7 +11,7 @@ function onCreate() {
 	*/
 	
 	
-	game.startCutscenes.push(new DialogueCutscene());
+	game.startCutscenes.push(new DialogueCutscene('songs/senpai/dialogue.json'));
 }
 
 /*
