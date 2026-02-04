@@ -6,62 +6,81 @@
 
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Friday Night Funkin': Troll Engine" file="Trolled" packageName="com.sowy.trollengine"
+	<app title="Friday Night Funkin': Troll Engine" file="Trolled"
+		packageName="com.sowy.trollengine"
 		package="com.sowy.trollengine" main="Main" version="0.2.8" company="Sowy" />
 
-	<set if="switch" name="APP_ID" value="0x0100f6c013bbc000"/>
+	<set if="switch" name="APP_ID" value="0x0100f6c013bbc000" />
 
 	<!-- ____________________________ Window Settings ___________________________ -->
 
 	<window width="1280" height="720" fps="60" background="#000000" hardware="true" vsync="false" />
 	<window if="html5" resizable="true" />
 	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" vsync="false" />
-	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false" />
-	<window if="switch" orientation="landscape" fullscreen="true" width="0" height="0" resizable="true" />
+	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0"
+		resizable="false" />
+	<window if="switch" orientation="landscape" fullscreen="true" width="0" height="0"
+		resizable="true" />
 
 	<!-- _______________________ TROLL ENGINE CUSTOMIZATION ______________________ -->
 
 	<define name="USE_EPIC_JUDGEMENT" />
 	<define name="HSCRIPT_ALLOWED" />
 	<define name="VIDEOS_ALLOWED" if="cpp" />
-	<define name="FILESYSTEM_ALLOWED" if="native || desktop"/>
+	<define name="FILESYSTEM_ALLOWED" if="native || desktop" />
 	<define name="MODS_ALLOWED" if="desktop FILESYSTEM_ALLOWED" />
 	<define name="DISCORD_ALLOWED" if="desktop cpp" unless="display" />
-	<!--I don't recommend turning on MULTICORE_LOADING until we rewrite it to be less crashy -Neb-->
+	<!--I
+	don't recommend turning on MULTICORE_LOADING until we rewrite it to be less crashy -Neb-->
 	<!-- <define name="MULTICORE_LOADING" if="native" /> -->
 	<define name="CRASH_HANDLER" />
-	<define name="FUNNY_ALLOWED" /> <!--Allows funny shit like Ruin the Mod and Garlic Bread-->
+	<define name="FUNNY_ALLOWED" /> <!--Allows
+	funny shit like Ruin the Mod and Garlic Bread-->
 
-	<!--Remove if you dont want states to be modified with scripts. This only disables extension/overrides and not the HScriptedState class-->
+	<!--Remove
+	if you dont want states to be modified with scripts. This only disables extension/overrides and
+	not the HScriptedState class-->
 	<define name="SCRIPTABLE_STATES" if="HSCRIPT_ALLOWED" />
 
-	<!--Remove if you don't want to use FlxAnimate-->
+	<!--Remove
+	if you don't want to use FlxAnimate-->
 	<define name="USING_FLXANIMATE" />
 
-	<!--Remove if you don't want to use Moonchart, which allows usage of chart formats from other rhythm games and fnf engines-->
+	<!--Remove
+	if you don't want to use Moonchart, which allows usage of chart formats from other rhythm games
+	and fnf engines-->
 	<define name="USING_MOONCHART" if="native MODS_ALLOWED" />
 
-	<!--If you're using git, set this, because Haxe sucks fuck and cant detect if youre on git or 0.4.0 for some fucking reason welcome to haxe ladies and gentlemen-->
+	<!--If
+	you're using git, set this, because Haxe sucks fuck and cant detect if youre on git or 0.4.0 for
+	some fucking reason welcome to haxe ladies and gentlemen-->
 	<!-- <define name="USING_NEW_MOONCHART" /> -->
 
-	<!--Remove if you dont want the engine to autoupdate -->
+	<!--Remove
+	if you dont want the engine to autoupdate -->
 	<define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug" />
 
-	<!--Remove if you don't want to allow deprecated engine features.-->
-	<!--Anything marked as deprecated should be removed after a major or minor version but not after patches. (major.minor.patch)-->
-	<define name="ALLOW_DEPRECATION" unless="final"/>
+	<!--Remove
+	if you don't want to allow deprecated engine features.-->
+	<!--Anything
+	marked as deprecated should be removed after a major or minor version but not after patches.
+	(major.minor.patch)-->
+	<define name="ALLOW_DEPRECATION" unless="final" />
 
-	<!--Remove if you don't want options for the game to continue running after a crash (Windows) -->
+	<!--Remove
+	if you don't want options for the game to continue running after a crash (Windows) -->
 	<define name="WINDOWS_CRASH_HANDLER" if="windows cpp" />
-	
-	<!--Remove if you don't want options for the game to continue running after a crash (macOS & Linux) -->
+
+	<!--Remove
+	if you don't want options for the game to continue running after a crash (macOS & Linux) -->
 	<define name="UNIX_CRASH_HANDLER" if="desktop cpp" unless="windows" />
 
-	<!--Remove if you don't want crash logs to be saved-->
+	<!--Remove
+	if you don't want crash logs to be saved-->
 	<define name="SAVE_CRASH_LOGS" if="CRASH_HANDLER native" />
 
 	<!-- Custom shader error printing :D -->
-	<haxedef name="traceShaderLineNumbers"/>
+	<haxedef name="traceShaderLineNumbers" />
 
 	<!-- _____________________________ Path Settings ____________________________ -->
 
@@ -73,7 +92,8 @@
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
 
 	<assets path="assets" />
-	<assets path='default_content' rename='content' if='OFFICIAL_BUILD' embed='false' exclude="*.mp3" />
+	<assets path='default_content' rename='content' if='OFFICIAL_BUILD' embed='false'
+		exclude="*.mp3" />
 
 	<icon path="art/iconOG.png" />
 	<icon path="art/icon64.png" size='64' />
@@ -89,35 +109,36 @@
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
-	<haxelib name="flixel" version="5.6.2" /> <!--You can use up to Flixel 6.0.0 but some stuff might be a bit brokey-->
+	<haxelib name="flixel" version="5.6.2" /> <!--You
+	can use up to Flixel 6.0.0 but some stuff might be a bit brokey-->
 	<haxelib name="flixel-ui" version="2.6.1" />
 	<haxelib name="flixel-addons" version="3.2.3" />
-	<haxelib name="flixel-animate" if="USING_FLXANIMATE" version="1.3.1"/>
-	<haxelib name="funkin.vis"/>
-	<haxelib name="grig.audio"/>
+	<haxelib name="flixel-animate" if="USING_FLXANIMATE" version="1.3.1" />
+	<haxelib name="funkin.vis" />
+	<haxelib name="grig.audio" />
 
-	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
-	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/>
+	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED" />
+	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" />
 
 	<section if="USING_MOONCHART">
-		<haxelib name="moonchart" version="0.5.1" unless="USING_NEW_MOONCHART"/>
-		<haxelib name="moonchart" version="git" if="USING_NEW_MOONCHART"/>
+		<haxelib name="moonchart" version="0.5.1" unless="USING_NEW_MOONCHART" />
+		<haxelib name="moonchart" version="git" if="USING_NEW_MOONCHART" />
 	</section>
 
 	<section if="HSCRIPT_ALLOWED">
-		<haxelib name="hscript"/>
-		<haxedef name="hscriptPos"/>
+		<haxelib name="hscript" />
+		<haxedef name="hscriptPos" />
 
 		<haxeflag name="--macro" value="include('funkin')" />
 	</section>
 
 	<section if="MULTICORE_LOADING debug">
-		<haxedef name="traceLoading"/>
-		<haxedef name="loadBenchmark"/>
+		<haxedef name="traceLoading" />
+		<haxedef name="loadBenchmark" />
 	</section>
 
-	<haxelib name="faxe" if='switch'/>
-	<haxelib name="hxcpp-debug-server" if="debug" unless="telemetry"/>
+	<haxelib name="faxe" if='switch' />
+	<haxelib name="hxcpp-debug-server" if="debug" unless="telemetry" />
 
 	<!--
 		native file dialog library
@@ -125,7 +146,7 @@
 		especially on linux where it just freezes the entire app <3 -swordcube
 	-->
 	<haxelib name="linc_filedialogs" if="desktop cpp" />
-		
+
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
 	<section if="CRASH_HANDLER">
@@ -134,7 +155,11 @@
 		<haxedef name="HXCPP_STACK_LINE" />
 		<haxedef name="openfl-enable-handle-error" />
 	</section>
-		
+
+	<define name="HXCPP_TRACY" if="debug" />
+	<define name="HXCPP_TELEMETRY" if="debug" />
+	<define name="HXCPP_TRACY_ON_DEMAND" if="debug" />
+
 	<haxedef name="HXCPP_CPP11" if="desktop cpp" />
 	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />
 

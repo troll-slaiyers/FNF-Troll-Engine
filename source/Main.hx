@@ -9,12 +9,10 @@ import lime.app.Application.current as application;
 import lime.graphics.Image;
 import flixel.FlxG;
 import flixel.FlxState;
-
 import funkin.*;
 import funkin.api.Github;
 import funkin.macros.Sowy;
 import funkin.data.SemanticVersion;
-
 #if sys
 import sys.FileSystem;
 import sys.io.Process;
@@ -23,8 +21,7 @@ import haxe.io.BytesOutput;
 
 using StringTools;
 
-final class Version
-{
+final class Version {
 	public static final engineVersion:String = '1.0.0'; // Used for autoupdating n stuff
 	public static final betaVersion:String = 'rc.1'; // beta version, set it to 0 if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
 	public static final isBeta:Bool = betaVersion != '0';
@@ -36,8 +33,7 @@ final class Version
 	public static final displayedVersion:String = 'v$semanticVersion';
 }
 
-class Main extends Sprite
-{
+class Main extends Sprite {
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var adjustGameSize:Bool = true; // If true, the game size is adjusted to fit within the screen resolution
@@ -50,7 +46,6 @@ class Main extends Sprite
 	public static final UserAgent:String = 'TrollEngine/${Version.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
 
 	//// You can pretty much ignore everything from here on - your code should go in your states.
-
 	public static var showDebugTraces:Bool = #if (debug || SHOW_DEBUG_TRACES) true #else false #end;
 	public static var downloadBetas:Bool = Version.isBeta;
 	public static var outOfDate:Bool = false;
@@ -64,15 +59,16 @@ class Main extends Sprite
 
 	#if ALLOW_DEPRECATION
 	@:noCompletion @:deprecated("volumeChangedEvent is deprecated, use FlxG.sound.onVolumeChange, instead")
-	public static var volumeChangedEvent(get, never):flixel.util.FlxSignal.FlxTypedSignal<Float -> Void>;
-	@:noCompletion inline static function get_volumeChangedEvent() return FlxG.sound.onVolumeChange;
+	public static var volumeChangedEvent(get, never):flixel.util.FlxSignal.FlxTypedSignal<Float->Void>;
+
+	@:noCompletion inline static function get_volumeChangedEvent()
+		return FlxG.sound.onVolumeChange;
 	#end
 
 	////
-
 	#if desktop
 	// stolen from psych engine lol
-	static function __init__(){
+	static function __init__() {
 		var configPath:String = Path.directory(Path.withoutExtension(#if hl Sys.getCwd() #else Sys.programPath() #end));
 
 		#if windows
@@ -89,6 +85,11 @@ class Main extends Sprite
 
 	public function new() {
 		super();
+		#if HXCPP_TRACY
+		FlxG.stage.addEventListener(openfl.events.Event.EXIT_FRAME, (_:openfl.events.Event) -> cpp.vm.tracy.TracyProfiler.frameMark());
+		cpp.vm.tracy.TracyProfiler.messageAppInfo('Trolled');
+		cpp.vm.tracy.TracyProfiler.setThreadName('main');
+		#end
 		instance = this;
 
 		#if (windows && cpp)
@@ -109,7 +110,7 @@ class Main extends Sprite
 		var args = Sys.args();
 		trace(args);
 		for (arg in args) {
-			switch(arg) {
+			switch (arg) {
 				case "traceSowy":
 					trace("sowy");
 
@@ -155,7 +156,7 @@ class Main extends Sprite
 		if (scaleModifier > 1) {
 			var scaleModifier = Math.floor(scaleModifier);
 			resizeWindow(gameWidth * scaleModifier, gameHeight * scaleModifier);
-		}else
+		} else
 			scaleWindow(scaleModifier);
 
 		centerWindow();
@@ -184,8 +185,7 @@ class Main extends Sprite
 		return js.Browser.window.performance.now();
 		#elseif sys
 		return Sys.time() * 1000;
-		#elseif (lime_cffi && !macro)
-		@:privateAccess
+		#elseif (lime_cffi && !macro) @:privateAccess
 		return cast lime._internal.backend.native.NativeCFFI.lime_system_get_timer();
 		#elseif cpp
 		return untyped __global__.__time_stamp() * 1000;
@@ -198,17 +198,12 @@ class Main extends Sprite
 		application.window.resize(width, height);
 
 	public static function centerWindow() {
-		application.window.move(
-			Std.int((application.window.display.bounds.width - application.window.width) / 2),
-			Std.int((application.window.display.bounds.height - application.window.height) / 2)
-		);
+		application.window.move(Std.int((application.window.display.bounds.width - application.window.width) / 2),
+			Std.int((application.window.display.bounds.height - application.window.height) / 2));
 	}
 
 	public static function scaleWindow(scale:Float) {
-		application.window.resize(
-			Math.floor(application.window.display.bounds.width * scale),
-			Math.floor(application.window.display.bounds.height * scale)
-		);
+		application.window.resize(Math.floor(application.window.display.bounds.width * scale), Math.floor(application.window.display.bounds.height * scale));
 	}
 
 	public static function resetSpriteCache(sprite:Sprite):Void {
