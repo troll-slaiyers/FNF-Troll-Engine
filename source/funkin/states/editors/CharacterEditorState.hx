@@ -951,7 +951,13 @@ class CharacterEditorState extends MusicBeatState {
 
 		// var anims:Array<AnimArray> = char.animationsArray.copy();
 
-		Paths.removeBitmap(char.frames.parent.key); // is null SOMETIMES idk WHY
+		try {
+			Paths.removeBitmap(char.frames.parent.key); // is null SOMETIMES idk WHY
+		} catch (e) {
+			if (Main.showDebugTraces) {
+				trace(e.details());
+			}
+		}
 
 		if (Paths.fileExists('images/' + char.imageFile + '/Animation.json', TEXT)) {
 			char.frames = Paths.getTextureAtlas(char.imageFile);
