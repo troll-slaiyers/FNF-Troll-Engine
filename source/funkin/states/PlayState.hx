@@ -209,6 +209,7 @@ class PlayState extends MusicBeatState
 	public var healthDrain:Float = 0.0;
 	public var opponentHPDrain:Float = 0.0;
 	public var holdsGiveHP:Bool = false;
+	public var directionalCam:Bool = false;
 
 	public var songSpeed(default, set):Float = 1.0;
 	public var songSpeedType:String = "multiplicative";
@@ -237,14 +238,22 @@ class PlayState extends MusicBeatState
 	#end
 
 	////
-	public var worldCombos:Bool = false;
-	public var showRating:Bool = true;
-	public var showCombo:Bool = false;
-	public var showComboNum:Bool = true;
+	public var worldCombos(default, set):Bool = false;
 
-	var lastJudge:RatingSprite;
-	var lastCombos:Array<RatingSprite> = [];
+	public var lastJudge(get, never):RatingSprite;
+	public var lastCombo(get, never):Array<RatingSprite>;
 
+	private var defaultComboCameras:Array<FlxCamera> = [];
+
+	function set_worldCombos(v:Bool) {
+		defaultComboCameras[0] = v ? camGame : camHUD;
+		return worldCombos = v;
+	}
+
+	inline function get_lastJudge() return ratingGroup.lastJudge;
+	inline function get_lastCombo() return ratingGroup.lastCombo;
+
+	////
 	public var skipCountdown:Bool = false;
 	public var skipArrowStartTween:Bool = false;
 
@@ -485,15 +494,10 @@ class PlayState extends MusicBeatState
 	public var hudSkinScript:FunkinHScript; // this is the HUD skin used for countdown, judgements, etc
 
 	////
-	@:noCompletion function set_hudSkin(value:String){
-		var script = getHudSkinScript(value);
-
-		if (hudSkinScript != null)
-			hudSkinScript.call("onSkinUnload");
-
-		hudSkinScript = script;
-
-		if(script != null)script.call("onSkinLoad");
+	@:noCompletion function set_hudSkin(value:String){		
+		hudSkinScript?.call("onSkinUnload");
+		hudSkinScript = getHudSkinScript(value);
+		hudSkinScript?.call("onSkinLoad");
 		return hudSkin = value;
 	}
 
@@ -608,7 +612,8 @@ class PlayState extends MusicBeatState
 			disableModcharts = ClientPrefs.getGameplaySetting('disableModcharts', disableModcharts);
 			noDropPenalty = ClientPrefs.getGameplaySetting('noDropPenalty', noDropPenalty);
 			centerNotefield = ClientPrefs.centerNotefield;
-
+			directionalCam = ClientPrefs.directionalCam;
+			
 			#if tgt
 			playbackRate *= (ClientPrefs.ruin ? 0.8 : 1);
 			#end
@@ -911,13 +916,14 @@ class PlayState extends MusicBeatState
 		moveCameraSection(SONG.notes[0]);
 
 		////
+		worldCombos = worldCombos; // ClientPrefs.worldCombos;
+
 		ratingGroup = new RatingGroup();
-		ratingGroup.cameras = [worldCombos ? camGame : camHUD];
-		lastJudge = ratingGroup.lastJudge;
+		ratingGroup.cameras = defaultComboCameras;
 
 		timingTxt = new FlxText();
 		timingTxt.setFormat(Paths.font("vcr.ttf"), 28, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timingTxt.cameras = ratingGroup.cameras;
+		timingTxt.cameras = defaultComboCameras;
 		timingTxt.scrollFactor.set();
 		timingTxt.borderSize = 1.25;
 
@@ -1361,17 +1367,15 @@ class PlayState extends MusicBeatState
 	{
 		if(startedCountdown) {
 			callOnScripts('onStartCountdown');
-			callScript(hudSkinScript, "onStartCountdown");
+			hudSkinScript?.call("onStartCountdown");
 			return;
 		}
 
 		seenCutscene = true;
 		inCutscene = false;
 
-		if (hudSkinScript != null) {
-			if (callScript(hudSkinScript, "onStartCountdown") == Globals.Function_Stop)
-				return;
-		}
+		if (hudSkinScript?.call("onStartCountdown") == Globals.Function_Stop)
+			return;
 
 		if (callOnScripts('onStartCountdown') == Globals.Function_Stop)
 			return;
@@ -1388,8 +1392,7 @@ class PlayState extends MusicBeatState
 			(i==-1) ? this.add(curCountdown) : this.insert(i, curCountdown);
 
 			callOnScripts('onCountdownStarted');
-			if (hudSkinScript != null)
-				hudSkinScript.call("onCountdownStarted");
+			hudSkinScript?.call("onCountdownStarted");
 		}
 
 		startedCountdown = true;
@@ -1889,8 +1892,7 @@ class PlayState extends MusicBeatState
 	}
 
 	function firstNotePush(type:String) {
-		if (notetypeScripts.exists(type))
-			callScript(notetypeScripts.get(type), "onLoad", []);
+		notetypeScripts.get(type)?.call("onLoad", []);
 	}
 
 	inline function addKeyboardEvents() {
@@ -1919,8 +1921,7 @@ class PlayState extends MusicBeatState
 			comboColor = 0xFFFFFFFF;
 
 		if (!ClientPrefs.simpleJudge) {
-			for (prevCombo in lastCombos)
-				prevCombo.kill();
+			ratingGroup.killLastCombo();
 		}
 
 		hud.alpha = ClientPrefs.hudOpacity;
@@ -1967,8 +1968,7 @@ class PlayState extends MusicBeatState
 		signals.optionsChanged.dispatch(options);
 
 		callOnScripts('optionsChanged', [options]);
-		if (hudSkinScript != null)
-			callScript(hudSkinScript, "optionsChanged", [options]);
+		hudSkinScript?.call("optionsChanged", [options]);
 	}
 
 	override function draw(){
@@ -2107,12 +2107,8 @@ class PlayState extends MusicBeatState
 	function stepHold(note:Note, field:PlayField)
 	{
 		callOnScripts("onHoldStep", [note, field]);
-
-		if (note.noteScript != null)
-			callScript(note.noteScript, "onHoldStep", [note, field]);
-
-		if (note.genScript != null)
-			callScript(note.genScript, "onHoldStep", [note, field]);
+		note.noteScript?.call("onHoldStep", [note, field]);
+		note.genScript?.call("onHoldStep", [note, field]);
 
 		if(field.isPlayer){
 			if (holdsGiveHP && note.hitResult.judgment != UNJUDGED){
@@ -2126,12 +2122,8 @@ class PlayState extends MusicBeatState
 	function pressHold(note:Note, field:PlayField)
 	{
 		callOnScripts("onHoldPress", [note, field]);
-
-		if (note.noteScript != null)
-			callScript(note.noteScript, "onHoldPress", [note, field]);
-
-		if (note.genScript != null)
-			callScript(note.genScript, "onHoldPress", [note, field]);
+		note.noteScript?.call("onHoldPress", [note, field]);
+		note.genScript?.call("onHoldPress", [note, field]);
 
 		if (cpuControlled && note.isRoll && ClientPrefs.hitsoundBehav == 'Key Press')
 			playShithound();
@@ -2141,12 +2133,8 @@ class PlayState extends MusicBeatState
 	function releaseHold(note:Note, field:PlayField):Void
 	{
 		callOnScripts("onHoldRelease", [note, field]);
-
-		if (note.noteScript != null)
-			callScript(note.noteScript, "onHoldRelease", [note, field]);
-
-		if (note.genScript != null)
-			callScript(note.genScript, "onHoldRelease", [note, field]);
+		note.noteScript?.call("onHoldRelease", [note, field]);
+		note.genScript?.call("onHoldRelease", [note, field]);	
 	}
 
 	function field_noteSpawned(dunceNote:Note, field:PlayField) {
@@ -2156,8 +2144,7 @@ class PlayState extends MusicBeatState
 		unspawnNotes.remove(dunceNote);
 
 		callOnScripts('onSpawnNotePost', [dunceNote]);
-		if (dunceNote.noteScript != null)
-			callScript(dunceNote.noteScript, "postSpawnNote", [dunceNote]);
+		dunceNote.noteScript?.call("postSpawnNote", [dunceNote]);
 	}
 
 	function field_noteRemoved(note:Note, field:PlayField) {
@@ -2237,12 +2224,12 @@ class PlayState extends MusicBeatState
 	{
 		if (paused){
 			callOnScripts('onUpdate', [elapsed]);
-			if (hudSkinScript != null) hudSkinScript.call("onUpdate", [elapsed]);
+			hudSkinScript?.call("onUpdate", [elapsed]);
 
 			super.update(elapsed);
 
 			callOnScripts('onUpdatePost', [elapsed]);
-			if (hudSkinScript != null) hudSkinScript.call("onUpdatePost", [elapsed]);
+			hudSkinScript?.call("onUpdatePost", [elapsed]);
 
 			return;
 		}
@@ -2264,14 +2251,13 @@ class PlayState extends MusicBeatState
 		*/
 
 		callOnScripts('onUpdate', [elapsed]);
-		if (hudSkinScript != null)
-			hudSkinScript.call("onUpdate", [elapsed]);
+		hudSkinScript?.call("onUpdate", [elapsed]);
 
 		if (!disableCameraMovement) {
 			var xOff:Float = 0;
 			var yOff:Float = 0;
 
-			if (ClientPrefs.directionalCam && focusedChar != null){
+			if (directionalCam && focusedChar != null){
 				xOff = focusedChar.camOffX;
 				yOff = focusedChar.camOffY;
 			}
@@ -2429,8 +2415,7 @@ class PlayState extends MusicBeatState
 		}
 
 		callOnScripts('onUpdatePost', [elapsed]);
-		if (hudSkinScript != null)
-			hudSkinScript.call("onUpdatePost", [elapsed]);
+		hudSkinScript?.call("onUpdatePost", [elapsed]);
 	}
 
 	function openChartEditor()
@@ -2810,8 +2795,8 @@ class PlayState extends MusicBeatState
 	private function displayTiming(hitDiff:Float, judgeData:JudgmentData) {
 		FlxTween.cancelTweensOf(timingTxt);
 		FlxTween.cancelTweensOf(timingTxt.scale);
-
-		timingTxt.text = '${FlxMath.roundDecimal(hitDiff, 2)}ms';
+		
+		timingTxt.text = FlxMath.roundDecimal(hitDiff, 3) + 'ms';
 		timingTxt.screenCenter();
 		timingTxt.x += ClientPrefs.comboOffset[4];
 		timingTxt.y -= ClientPrefs.comboOffset[5];
@@ -2822,67 +2807,57 @@ class PlayState extends MusicBeatState
 		timingTxt.alpha = ClientPrefs.judgeOpacity;
 		timingTxt.y -= 8;
 		timingTxt.scale.set(1, 1);
+		
+		function onComplete(_) {
+			if (ClientPrefs.simpleJudge){
+				FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, Conductor.stepLength, {
+					ease: FlxEase.quadIn,
+					onComplete: (_) -> timingTxt.visible = false,
+					startDelay: 8 * Conductor.stepLength
+				});
+			}else{
+				FlxTween.tween(timingTxt, {alpha: 0}, Conductor.stepLength, {
+					// ease: FlxEase.circOut,
+					onComplete: (_) -> timingTxt.visible = false,
+					startDelay: 8 * Conductor.stepLength
+				});
+			}
+		}
 
-		var time = (Conductor.stepLength);
-		FlxTween.tween(timingTxt,
-			{y: timingTxt.y + 8},
-			0.1,
-			{onComplete: function(_){
-				if (ClientPrefs.simpleJudge){
-					FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, time, {
-						ease: FlxEase.quadIn,
-						onComplete: (_) -> timingTxt.visible = false,
-						startDelay: time * 8
-					});
-				}else{
-					FlxTween.tween(timingTxt, {alpha: 0}, time, {
-						// ease: FlxEase.circOut,
-						onComplete: (_) -> timingTxt.visible = false,
-						startDelay: time * 8
-					});
-				}
-			}}
-		);
+		FlxTween.tween(timingTxt, {y: timingTxt.y + 8}, 0.1, {onComplete: onComplete});
 	}
 
 	private function displayJudgment(image:String){
 		var r:Bool = false;
-		if(hudSkinScript!=null && callScript(hudSkinScript, "onDisplayJudgment", [image]) == Globals.Function_Stop)
+		if(hudSkinScript?.call("onDisplayJudgment", [image]) == Globals.Function_Stop)
 			r = true;
-		if(callOnScripts("onDisplayJudgment", [image]) == Globals.Function_Stop)
+		if(callOnScripts("onDisplayJudgment", [image]) == Globals.Function_Stop || r)
 			return;
-
-		if(r)return;
-
-		var spr:RatingSprite;
-
-		lastJudge = ratingGroup.lastJudge;
-		if (ClientPrefs.simpleJudge && lastJudge != null)
+		
+		if (ClientPrefs.simpleJudge)
 			lastJudge.kill();
 
-		if (worldCombos)
-			spr = ratingGroup.displayJudgment(image, -40, -60);
+		var spr:RatingSprite = if (worldCombos)
+			ratingGroup.displayJudgment(image, ratingGroup.judgeTemplate.x, ratingGroup.judgeTemplate.y);
 		else
-			spr = ratingGroup.displayJudgment(image, ClientPrefs.comboOffset[0], -ClientPrefs.comboOffset[1]);
+			ratingGroup.displayJudgment(image, ClientPrefs.comboOffset[0], -ClientPrefs.comboOffset[1]);
 
 		if (ClientPrefs.simpleJudge) {
 			spr.moves = false;
 
-			spr.scale.copyFrom(ratingGroup.judgeTemplate.scale);
-			spr.tween = FlxTween.tween(spr.scale, {x: spr.scale.x, y: spr.scale.y}, 0.1, {
-				ease: FlxEase.quadOut,
-				onComplete: function(tween:FlxTween) {
-					if (!spr.alive)
-						return;
+			function onComplete(_) {
+				if (!spr.alive)
+					return;
 
-					var stepDur = (Conductor.stepLength);
-					spr.tween = FlxTween.tween(spr.scale, {x: 0, y: 0}, stepDur, {
-						startDelay: stepDur * 8,
-						ease: FlxEase.quadIn,
-						onComplete: (tween:FlxTween) -> spr.kill()
-					});
-				}
-			});
+				spr.tween = FlxTween.tween(spr.scale, {x: 0, y: 0}, Conductor.stepLength, {
+					startDelay: 8 * Conductor.stepLength,
+					ease: FlxEase.quadIn,
+					onComplete: _ -> spr.kill()
+				});
+			}
+
+			spr.scale.copyFrom(ratingGroup.judgeTemplate.scale);
+			spr.tween = FlxTween.tween(spr.scale, {x: spr.scale.x, y: spr.scale.y}, 0.1, {ease: FlxEase.quadOut, onComplete: onComplete});
 
 			spr.alpha = 1.0;
 			spr.scale.scale(1.1, 1.1);
@@ -2893,46 +2868,38 @@ class PlayState extends MusicBeatState
 			spr.acceleration.y = 550;
 			spr.velocity.y = -FlxG.random.int(140, 175);
 
+			function onComplete(_) {
+				spr.tween = FlxTween.tween(spr, {alpha: 0.0}, 0.2, {
+					startDelay: Conductor.beatLength,
+					onComplete: _ -> spr.kill()
+				});
+			}
+
 			spr.scale.copyFrom(ratingGroup.judgeTemplate.scale);
-			spr.tween = FlxTween.tween(spr.scale, {x: spr.scale.x, y: spr.scale.y}, 0.1, {
-				ease: FlxEase.backOut,
-				onComplete: function(twn) {
-					spr.tween = FlxTween.tween(spr, {alpha: 0.0}, 0.2, {
-						startDelay: Conductor.beatLength,
-						onComplete: (_) -> spr.kill()
-					});
-				}
-			});
+			spr.tween = FlxTween.tween(spr.scale, {x: spr.scale.x, y: spr.scale.y}, 0.1, {ease: FlxEase.backOut, onComplete: onComplete});
 
 			spr.alpha = 1.0;
 			spr.scale.scale(0.96, 0.96);
 		}
 
 		spr.color = 0xFFFFFFFF;
-		spr.visible = showRating;
-		spr.alpha = ClientPrefs.judgeOpacity;
+		spr.alpha = ClientPrefs.judgeOpacity;	
 
-		if(hudSkinScript!=null)
-			callScript(hudSkinScript, "onDisplayJudgmentPost", [spr, image]);
+		hudSkinScript?.call("onDisplayJudgmentPost", [spr, image]);
 		callOnScripts("onDisplayJudgmentPost", [spr, image]);
 	}
 
 	var comboColor = 0xFFFFFFFF;
 	private function displayCombo(?combo:Int){
 		var r:Bool = false;
-		if (hudSkinScript!=null && callScript(hudSkinScript, "onDisplayCombo", [combo]) == Globals.Function_Stop)
+		if (hudSkinScript?.call("onDisplayCombo", [combo]) == Globals.Function_Stop)
 			r = true;
 
 		if (callOnScripts("onDisplayCombo", [combo]) == Globals.Function_Stop || r)
 			return;
 
-		if (combo == null)
-			combo = stats.combo;
-
 		if (ClientPrefs.simpleJudge) {
-			for (numSpr in lastCombos)
-				numSpr.kill();
-
+			ratingGroup.killLastCombo();
 			if (combo == 0)
 				return;
 		}else{
@@ -2940,39 +2907,35 @@ class PlayState extends MusicBeatState
 				return;
 		}
 
-		if (worldCombos)
-			lastCombos = ratingGroup.displayCombo(combo, -150, 80)
-		else
-			lastCombos = ratingGroup.displayCombo(combo, ClientPrefs.comboOffset[2], -ClientPrefs.comboOffset[3]);
-
 		var comboColor = (combo < 0) ? hud.judgeColours.get("miss") : comboColor;
 
-		for (numSpr in lastCombos)
+		if (worldCombos)
+			ratingGroup.displayCombo(combo, ratingGroup.comboTemplate.x, ratingGroup.comboTemplate.y);
+		else
+			ratingGroup.displayCombo(combo, ClientPrefs.comboOffset[2], -ClientPrefs.comboOffset[3]);		
+
+		for (numSpr in lastCombo)
 		{
 			numSpr.color = comboColor;
-			numSpr.visible = showComboNum;
-
 			numSpr.alpha = ClientPrefs.judgeOpacity;
 
 			if (ClientPrefs.simpleJudge)
 			{
 				numSpr.moves = false;
 
-				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
-				numSpr.tween = FlxTween.tween(numSpr.scale, {x: numSpr.scale.x, y: numSpr.scale.y}, 0.2, {
-					ease: FlxEase.circOut,
-					onComplete: function(tween:FlxTween) {
-						if (!numSpr.alive)
-							return;
+				function onComplete(_) {
+					if (!numSpr.alive)
+						return;
 
-						var stepDur = (Conductor.stepLength);
-						numSpr.tween = FlxTween.tween(numSpr, {alpha: 0.0}, stepDur, {
-							startDelay: Math.max((stepDur * 8) - 0.1, 0.0),
-							ease: FlxEase.quadIn,
-							onComplete: (tween:FlxTween) -> numSpr.kill()
-						});
-					}
-				});
+					numSpr.tween = FlxTween.tween(numSpr, {alpha: 0.0}, Conductor.stepLength, {
+						startDelay: Math.max(8 * Conductor.stepLength - 0.1, 0.0),
+						ease: FlxEase.quadIn,
+						onComplete: _ -> numSpr.kill()
+					});
+				}
+
+				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
+				numSpr.tween = FlxTween.tween(numSpr.scale, {x: numSpr.scale.x, y: numSpr.scale.y}, 0.2, {ease: FlxEase.circOut, onComplete: onComplete});
 
 				numSpr.scale.x *= 1.25;
 				numSpr.updateHitbox();
@@ -2994,7 +2957,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if(hudSkinScript!=null)callScript(hudSkinScript, "onDisplayComboPost", [combo]);
+		hudSkinScript?.call("onDisplayComboPost", [combo]);
 		callOnScripts("onDisplayComboPost", [combo]);
 	}
 
@@ -3044,7 +3007,7 @@ class PlayState extends MusicBeatState
 				comboColor = hud.judgeColours.get("epic");
 		}
 
-		if(hudSkinScript!=null)callScript(hudSkinScript, "onApplyJudgmentDataPost", [judgeData, diff, bot, show]);
+		hudSkinScript?.call("onApplyJudgmentDataPost", [judgeData, diff, bot, show]);
 		callOnScripts("onApplyJudgmentDataPost", [judgeData, diff, bot, show]);
 
 		if(show){
@@ -3066,7 +3029,7 @@ class PlayState extends MusicBeatState
 
 		var mutatedJudgeData:JudgmentData = Reflect.copy(judgeData);
 		if (note.noteScript != null){
-			var ret:Dynamic = callScript(note.noteScript, "mutateJudgeData", [note, mutatedJudgeData]);
+			var ret:Dynamic = note.noteScript.call("mutateJudgeData", [note, mutatedJudgeData]);
 			if (ret != null && ret != Globals.Function_Continue)
 				mutatedJudgeData = cast ret;
 		}
@@ -3251,8 +3214,7 @@ class PlayState extends MusicBeatState
 	}
 
 	function breakCombo() {
-		while (lastCombos.length > 0)
-			lastCombos.shift().kill();
+		ratingGroup.killLastCombo();
 
 		if (stats.combo > 10 && gf != null && gf.animOffsets.exists('sad')){
 			gf.playAnim('sad');
@@ -3290,7 +3252,7 @@ class PlayState extends MusicBeatState
 
 		if(callOnScripts("preNoteMiss", [daNote, field]) == Globals.Function_Stop)
 			return;
-		if (daNote.noteScript != null && callScript(daNote.noteScript, "preNoteMiss", [daNote, field]) == Globals.Function_Stop)
+		if (daNote.noteScript?.call("preNoteMiss", [daNote, field]) == Globals.Function_Stop)
 			return;
 
 		////
@@ -3345,10 +3307,8 @@ class PlayState extends MusicBeatState
 
 		////
 		callOnScripts("noteMiss", [daNote, field]);
-		if (daNote.noteScript != null)
-			callScript(daNote.noteScript, "noteMiss", [daNote, field]);
-		if (daNote.genScript != null)
-			callScript(daNote.genScript, "noteMiss", [daNote, field]);
+		daNote.noteScript?.call("noteMiss", [daNote, field]);
+		daNote.genScript?.call("noteMiss", [daNote, field]); 
 	}
 
 	function noteMissPress(direction:Int = 1, field:PlayField):Void //You pressed a key when there was no notes to press for this key
@@ -3394,7 +3354,7 @@ class PlayState extends MusicBeatState
 
 	function opponentNoteHit(note:Note, field:PlayField):Void
 	{
-		if (note.noteScript != null && callScript(note.noteScript, "preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
+		if (note.noteScript?.call("preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
 		if (callOnScripts("preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
@@ -3405,11 +3365,8 @@ class PlayState extends MusicBeatState
 
 		// Script shit
 		callOnScripts("opponentNoteHit", [note, field]);
-		if (note.noteScript != null)
-			callScript(note.noteScript, "opponentNoteHit", [note, field]);
-
-		if (note.genScript != null)
-			callScript(note.genScript, "noteHit", [note, field]);
+		note.noteScript?.call("opponentNoteHit", [note, field]);	
+		note.genScript?.call("noteHit", [note, field]);
 	}
 
 	function getNoteCharacters(note:Note, field:PlayField):Array<Character> {
@@ -3429,7 +3386,7 @@ class PlayState extends MusicBeatState
 	function commonNoteHit(note:Note, field:PlayField){ // things done by all note hit functions
 		camZooming = true;
 
-		if (note.noteScript != null && callScript(note.noteScript, "onCommonNoteHitPre", [note, field]) == Globals.Function_Stop)
+		if (note.noteScript?.call("onCommonNoteHitPre", [note, field]) == Globals.Function_Stop)
 			return;
 
 		if (callOnScripts("onCommonNoteHitPre", [note, field]) == Globals.Function_Stop)
@@ -3449,8 +3406,8 @@ class PlayState extends MusicBeatState
 
 		// Sing animations
 		var chars: Array<Character> = getNoteCharacters(note, field);
-		if (note.noteScript == null || callScript(note.noteScript, "playNoteAnim", [note, field, chars]) != Globals.Function_Stop)
-			for (char in chars)
+		if (note.noteScript?.call("playNoteAnim", [note, field, chars]) != Globals.Function_Stop)
+			for (char in chars) 
 				char.playNote(note, field);
 
 		// Strum animations
@@ -3461,9 +3418,7 @@ class PlayState extends MusicBeatState
 		}
 
 		////
-		if (note.noteScript != null)
-			callScript(note.noteScript, "onCommonNoteHit", [note, field]);
-
+		note.noteScript?.call("onCommonNoteHit", [note, field]);
 		callOnScripts("onCommonNoteHit", [note, field]);
 	}
 
@@ -3479,7 +3434,7 @@ class PlayState extends MusicBeatState
 		if (note.wasGoodHit || (field.autoPlayed && (note.ignoreNote || note.breaksCombo)))
 			return;
 
-		if (note.noteScript != null && callScript(note.noteScript, "preGoodNoteHit", [note, field]) == Globals.Function_Stop)
+		if (note.noteScript?.call("preGoodNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
 		if (callOnScripts("preGoodNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
@@ -3538,11 +3493,8 @@ class PlayState extends MusicBeatState
 		commonNoteHit(note, field);
 		// Script shit
 		callOnScripts("goodNoteHit", [note, field]);
-		if (note.noteScript != null)
-			callScript(note.noteScript, "goodNoteHit", [note, field]);
-
-		if (note.genScript != null)
-			callScript(note.genScript, "noteHit", [note, field]); // might be useful for some things i.e judge explosions
+		note.noteScript?.call("goodNoteHit", [note, field]);
+		note.genScript?.call("noteHit", [note, field]); // might be useful for some things i.e judge explosions
 	}
 
 	function getFieldFromNote(note:Note){
@@ -3770,7 +3722,8 @@ class PlayState extends MusicBeatState
 
 	public function openCutscenePauseMenu(scene: Cutscene)
 	{
-		if (callOnScripts('onPause') == Globals.Function_Stop)
+		if (!scene.canPause)return;
+		if (callOnScripts('onPause') == Globals.Function_Stop) 
 			return;
 
 		// 0 chance for Gitaroo Man easter egg

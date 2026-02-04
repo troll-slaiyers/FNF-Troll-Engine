@@ -66,29 +66,29 @@ class CutscenePauseSubstate extends MusicBeatSubstate {
 			},
 			{
 				id: "skip-cutscene",
+				filter: () -> associatedCutscene.canSkip,
 				onAccept: () -> {
-					close();
 					associatedCutscene.onEnd.dispatch(true);
+					close();
 				}
 			},
 			{
 				id: "restart-cutscene",
+				filter: () -> associatedCutscene.canRestart,
 				onAccept: () -> {
-					close();
 					associatedCutscene.restart();
+					close();
 				}
 			},
 			{
 				id: "exit-to-menu",
-				onAccept: () -> {
-					PlayState.instance != null ? PlayState.gotoMenus() : MusicBeatState.switchState(new funkin.states.MainMenuState());
-				}
+				onAccept: () -> PlayState.gotoMenus()
 			}
 		];
+
 		for (opt in options)
 			if (opt.filter == null || opt.filter())
 				opt.button = menu.addTextOption(Paths.getString("pauseoption_" + opt.id) ?? opt.id);
-
 	}
 
 	public function onSelectedOption(id:Int, obj:Alphabet) {

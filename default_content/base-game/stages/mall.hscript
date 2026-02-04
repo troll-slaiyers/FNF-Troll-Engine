@@ -2,7 +2,7 @@ var upperBoppers;
 var bottomBoppers;
 var santa;
 
-function onLoad()
+function buildStage()
 {
 	var bg:BGSprite = new BGSprite('stages/mall/bgWalls', -1000, -500, 0.2, 0.2);
 	bg.scale.set(0.8, 0.8);

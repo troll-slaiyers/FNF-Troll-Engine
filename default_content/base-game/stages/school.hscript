@@ -15,7 +15,7 @@ function roundTo(num, roundFactor){
 ////
 var bgGirls;
 
-function onLoad(){
+function buildStage(){
 	var bgSky:BGSprite = new BGSprite('stages/school/weebSky', 0, 0, 0.1, 0.1);
 	add(bgSky);
 	bgSky.antialiasing = false;

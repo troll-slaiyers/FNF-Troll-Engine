@@ -1,4 +1,4 @@
-function onLoad()
+function buildStage()
 {
 	var bg:BGSprite = new BGSprite('stages/mallEvil/evilBG', -400, -500, 0.2, 0.2);
 	bg.scale.set(0.8, 0.8);

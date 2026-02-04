@@ -1,7 +1,7 @@
 var titleScreen = !inPlaystate;
 
 var halloweenBG;
-function onLoad()
+function buildStage()
 {
 	if (ClientPrefs.lowQuality){
 		halloweenBG = new FlxSprite(-200, -100, Paths.image('stages/spooky/halloween_bg_low'));

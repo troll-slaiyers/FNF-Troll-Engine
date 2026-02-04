@@ -16,7 +16,7 @@ typedef VSliceStageProp = {
 	?alpha:Float,
 	?danceEvery:Float,
 	?scroll:Array<Float>,
-	?animations:Array<funkin.data.CharacterData.VSliceAnimData>,
+	?animations:Array<funkin.data.VSliceCharacterData.VSliceAnimData>,
 	?startingAnimation:String,
 	?animType: String,
 	?angle:Float,

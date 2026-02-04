@@ -8,7 +8,7 @@ var boyfrimate:FlxAnimate;
 var gfTurninDemon:FlxSprite;
 
 
-function onCutsceneEnd(){
+function onCutsceneEnd(wasSkipped: Bool){
 	game.remove(tankmanimate);
 	game.remove(speakimate);
 	game.remove(boyfrimate);

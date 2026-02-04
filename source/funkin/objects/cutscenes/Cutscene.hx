@@ -10,6 +10,13 @@ class Cutscene extends FlxTypedGroup<FlxBasic> {
 	public var sounds: Array<FlxSound> = [];
 	public var music:FlxSound;
 
+	// TODO: could use bit-shift bullshit and enums or sum shit lmao
+	// though thats overcomplicating it so 3 bools it is
+
+	public var canPause:Bool = true;
+	public var canSkip:Bool = true;
+	public var canRestart:Bool = true;
+
 	public function newSound(path:String, obeysBitch:Bool = true){
 		var newSound = new FlxSound().loadEmbedded(Paths.sound(path));
 		newSound.exists = true;

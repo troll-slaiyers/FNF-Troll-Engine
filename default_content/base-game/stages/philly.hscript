@@ -15,7 +15,7 @@ function cloneSpr(spr)
 	return clone;
 }
 
-function onLoad()
+function buildStage()
 {
 	var bg:FlxSprite = new FlxSprite(-100, 0, Paths.image('stages/philly/sky'));
 	bg.offset.set(-70, -16);
