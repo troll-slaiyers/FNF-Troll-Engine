@@ -1,3 +1,5 @@
+import funkin.objects.notes.NoteAnimation;
+
 ////
 var roundTo = CoolUtil.snap;
 var timerNumsGraphic = Paths.image("pixelUI/timer-nums");
@@ -156,25 +158,10 @@ function makeCountdownSprite(sprImage, swagCounter){
 }
 
 function setupNoteTexture(note:Note){
-	if(note.isSustainNote)
-		note.reloadNote('NOTE_assets', note.texSuffix + 'ENDS', 'pixelUI', 4, 2);
-	else
-		note.reloadNote('NOTE_assets', note.texSuffix, 'pixelUI', 4, 5);
+	note.reloadNote('NOTE_assets', note.texSuffix, 'pixelUI');
 
 	note.scale.set(noteScale * 6.0, noteScale * 6.0);
 	note.antialiasing = false;
-}
-
-function getStaticAnimationFrames(data:Int){
-	return NoteObject.getAnimsInd(data, StrumNote.currentStaticAnimNames, StrumNote.defaultStaticAnimNames[3]);
-}
-
-function getPressedAnimationFrames(data:Int){
-	return NoteObject.getAnimsInd(data, StrumNote.currentPressAnimNames,  StrumNote.defaultPressAnimNames[3]);
-}
-
-function getConfirmedAnimationFrames(data:Int){
-	return NoteObject.getAnimsInd(data, StrumNote.currentConfirmAnimNames, StrumNote.defaultConfirmAnimNames[3]);
 }
 
 function setupReceptorTexture(strum:StrumNote){
@@ -196,15 +183,14 @@ function setupReceptorTexture(strum:StrumNote){
 			strum.isQuant = true;
 		}
 	}
+
+	strum.frames = Paths.getSparrowAtlas("pixelUI/" + br);
+
+	strum.animation.addByPrefix('static', NoteAnimation.current.staticAnimations[strum.column % NoteAnimation.current.staticAnimations.length], 24, false);
+	strum.animation.addByPrefix('pressed', NoteAnimation.current.pressAnimations[strum.column % NoteAnimation.current.pressAnimations.length], 24, false);
+	strum.animation.addByPrefix('confirm', NoteAnimation.current.confirmAnimations[strum.column % NoteAnimation.current.confirmAnimations.length], 24, false);
 	
 	// TODO: add an easy way to do indices for strums
-
-	var graphic = Paths.image("pixelUI/" + br);
-	strum.loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
-	strum.animation.add('static', [getStaticAnimationFrames(strum.noteData)]);
-	strum.animation.add('pressed', [getPressedAnimationFrames(strum.noteData) + 4, getPressedAnimationFrames(strum.noteData) + 8], 12, false);
-	strum.animation.add('confirm', [getConfirmedAnimationFrames(strum.noteData) + 12, getConfirmedAnimationFrames(strum.noteData) + 16], 16, false);
-	strum.playAnim("static", true);
 	strum.antialiasing = false;
 
 	strum.scale.set(noteScale * 6.0, noteScale * 6.0);    
@@ -212,7 +198,7 @@ function setupReceptorTexture(strum:StrumNote){
 
 	strum.defScale.x = strum.scale.x;
 	strum.defScale.y = strum.scale.y;
-	
+
 	if(lastAnim != null)
 	{
 		strum.playAnim(lastAnim, true);
@@ -235,7 +221,7 @@ function preSetupNoteSplash(x, y, column, texture, hueColor, satColor, brtColor,
 
 function loadSplashAnims(texture){
 	this.frames = Paths.getSparrowAtlas('pixelUI/' + texture);
-	this.animation.addByPrefix("splash", "note splash " + suffixes[NoteObject.getAnimsInd(column, Note.currentNoteAnimNames, Note.defaultNoteAnimNames[3])] + " " + FlxG.random.int(1, 2), 24, false);
+	this.animation.addByPrefix('splash', 'note splash ' + StringTools.replace(NoteAnimation.current.noteAnimations[column %  NoteAnimation.current.noteAnimations.length], '0', '') + ' ' + FlxG.random.int(1, this.animationAmount), 24, false);
 	this.scale.set(noteScale * 5.0, noteScale * 5.0);
 	this.antialiasing = false;
 	this.updateHitbox();
