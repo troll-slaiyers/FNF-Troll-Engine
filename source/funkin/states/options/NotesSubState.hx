@@ -74,9 +74,9 @@ class NotesSubState extends MusicBeatSubstate
 		} else {
 			valuesArray = ClientPrefs.arrowHSV;
 			noteFrames = Paths.getSparrowAtlas('NOTE_assets');
-			noteAnimations = ['purple0', 'blue0', 'green0', 'red0'];
-			namesArray = ["Left", "Down", "Up", "Right"];
-			defaults = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+			noteAnimations = ['purple0', 'blue0', 'green0', 'red0', 'square0'];
+			namesArray = ["Left", "Down", "Up", "Right", "Center"];
+			defaults = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
 		}
 	}
 
@@ -120,7 +120,7 @@ class NotesSubState extends MusicBeatSubstate
 		
 		////
 		for (i in 0...valuesArray.length) {
-			var yPos:Float = (165 * i) + 35;
+			var yPos:Float = (165  * i) + 35;
 			for (j in 0...valueNames.length) {
 				var optionText:Alphabet = new Alphabet(0, yPos + 60, '', true);
 				optionText.fieldWidth = 225;
@@ -132,7 +132,7 @@ class NotesSubState extends MusicBeatSubstate
 
 			var note:FlxSprite = new FlxSprite(posX, yPos);
 			note.frames = noteFrames;
-			note.animation.addByPrefix('idle', noteAnimations[i % 4]);
+			note.animation.addByPrefix('idle', noteAnimations[i % noteAnimations.length]);
 			note.animation.play('idle');
 			grpNotes.add(note);
 

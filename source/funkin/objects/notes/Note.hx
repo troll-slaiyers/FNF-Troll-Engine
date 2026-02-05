@@ -40,6 +40,7 @@ private typedef NoteScriptState = {
 class Note extends NoteObject {
 	/** Whether holds should "glow" / increase in alpha when held */
 	public var holdGlow:Bool = true;
+
 	public var baseAlpha:Float = 1;
 
 	public static var spriteScales:Array<Float> = [0.9, 0.85, 0.8, 0.7, 0.66, 0.6, 0.55, 0.5, 0.46, 0.4];
@@ -47,19 +48,10 @@ class Note extends NoteObject {
 	public static var swagWidth(default, set):Float = 160 * spriteScale;
 	public static var halfWidth(default, null):Float = swagWidth * 0.5;
 
-	public static var quants:Array<Int> = [
-		4, // quarter note
+	public static var quants:Array<Int> = [4, // quarter note
 		8, // eight
 		12, // etc
-		16,
-		20,
-		24,
-		32,
-		48,
-		64,
-		96,
-		192
-	];
+		16, 20, 24, 32, 48, 64, 96, 192];
 
 	public static var defaultNotes = ['No Animation', 'GF Sing', ''];
 
@@ -314,7 +306,7 @@ class Note extends NoteObject {
 		if (column == -1)
 			return; // FUCKING PSYCH EVENT NOTES!!!
 
-		var hsb = isQuant ? ClientPrefs.quantHSV[quants.indexOf(quant)] : ClientPrefs.arrowHSV[column % 4];
+		var hsb = isQuant ? ClientPrefs.quantHSV[quants.indexOf(quant)] : getNoteColours(currentAnimations);
 		colorSwap.setHSBIntArray(hsb);
 
 		if (noteScript != null)

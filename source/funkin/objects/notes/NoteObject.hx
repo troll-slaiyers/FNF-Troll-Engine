@@ -6,6 +6,8 @@ import flixel.math.FlxPoint;
 import math.Vector3;
 import funkin.objects.shaders.NoteColorSwap;
 
+using StringTools;
+
 enum abstract ObjectType(#if cpp cpp.UInt8 #else Int #end) {
 	var UNKNOWN = -1;
 	var NOTE;
@@ -66,6 +68,22 @@ class NoteObject extends FlxSprite {
 	// gonna make this the thing you can call from all subclasses later
 	public static function getNoteAnimations(keyCount:Int) {
 		throw new NotImplementedException();
+	}
+
+	function getNoteColours(anims:NoteAnimation) { // i had to resist the urge to spell it without the u to keep it consistent
+		var anim:String = anims.noteAnimations[column % anims.noteAnimations.length];
+		if (anim.contains("purple")) {
+			return ClientPrefs.arrowHSV[0];
+		} else if (anim.contains("blue")) {
+			return ClientPrefs.arrowHSV[1];
+		} else if (anim.contains("green")) {
+			return ClientPrefs.arrowHSV[2];
+		} else if (anim.contains("red")) {
+			return ClientPrefs.arrowHSV[3];
+		} else if (anim.contains("square")) {
+			return ClientPrefs.arrowHSV[4];
+		}
+		return [0, 0, 0];
 	}
 
 	public static function getAnimsInd(data:Int, anims:Array<String>, ?targetArray:Array<String>):Int {

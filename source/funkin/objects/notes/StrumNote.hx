@@ -139,7 +139,7 @@ class StrumNote extends NoteObject {
 			// ok now the quants should b fine lol
 			colorSwap.copyFrom(note.colorSwap);
 		} else if (!isQuant) {
-			colorSwap.setHSBIntArray(ClientPrefs.arrowHSV[column % 4]);
+			colorSwap.setHSBIntArray(getNoteColours(currentAnimations));
 		} else {
 			colorSwap.setHSB();
 		}

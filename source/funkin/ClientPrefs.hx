@@ -756,7 +756,7 @@ class ClientPrefs {
 	];
 
 	//
-	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
 
 	/**
 	 * [0] and [1] for ratings.
