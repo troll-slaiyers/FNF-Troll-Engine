@@ -51,7 +51,7 @@ class DialogueCutscene extends Cutscene{
         box = new DialogueBox(dialogueFile.boxStyle);
         add(box);
 
-        dialogueText = new FlxTypeText(170, 420, Std.int(FlxG.width * 0.7), '', 32);
+        dialogueText = new FlxTypeText(170, 450, Std.int(FlxG.width * 0.75), '', 32);
         dialogueText.setFormat(Paths.font(box.font), 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
         dialogueText.antialiasing = box.antialiasing;
         dialogueText.borderSize = 1.4;
@@ -106,7 +106,6 @@ class DialogueCutscene extends Cutscene{
     function endDialogue()
     {
         onEnd.dispatch(false);
-        //destroy();
     }
 
     override public function restart(){

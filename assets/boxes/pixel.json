@@ -2,9 +2,21 @@
     "graphic": "pixelUI/dialogueBOX-pixel",
 	"antialiasing": false,
 	"graphicScale": 5.4,
-	"offsets":[-30, -10],
+	"offsets":[-30, 20],
     "dialoguePressed": "Text Box Appear instance",
 	"dialogueFont": "pixel.ttf",
 	"dialogueTalkSfx": "pixelText",
-	"dialoguePressedSfx": "clickText"
+	"dialoguePressedSfx": "clickText",
+	"animations": [
+		{
+			"offsets": [
+				-5,
+				0
+			],
+			"loop": false,
+			"fps": 24,
+			"animName": "pressed",
+			"animPrefix": "Text Box Appear instance"
+		}
+	]
 }

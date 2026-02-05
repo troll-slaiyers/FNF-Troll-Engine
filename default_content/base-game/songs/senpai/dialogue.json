@@ -24,5 +24,6 @@
 			"characterAnim": "demon",
 			"text": "Beep bo bop"
 		}
-	]
+	],
+	"boxStyle": "pixel"
 }
