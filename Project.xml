@@ -134,10 +134,6 @@
 		<haxedef name="HXCPP_STACK_LINE" />
 		<haxedef name="openfl-enable-handle-error" />
 	</section>
-
-	<define name="HXCPP_TRACY" if="debug" />
-	<define name="HXCPP_TELEMETRY" if="debug" />
-	<define name="HXCPP_TRACY_ON_DEMAND" if="debug" />
 		
 	<haxedef name="HXCPP_CPP11" if="desktop cpp" />
 	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />
