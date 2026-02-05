@@ -6,6 +6,7 @@ import flixel.text.FlxText.FlxTextBorderStyle;
 import sys.FileSystem;
 import haxe.Json;
 import sys.io.File;
+import flixel.util.FlxTimer;
 /*
 todo: add in portraits 
 add in null checking
@@ -31,6 +32,8 @@ class DialogueCutscene extends Cutscene{
     //none of the nulls work rn so fuck it
     public function new(dialoguePath:String){
 		super();
+        onEnd.addOnce(endDialogue);
+
         try
         {
 		    dialogueFile = Paths.json('$dialoguePath');
@@ -38,7 +41,8 @@ class DialogueCutscene extends Cutscene{
         catch(e)
         {
             trace('no dialogue!!!');
-            endDialogue();
+            onEnd.dispatch(false);
+
         }
 	}
     public override function createCutscene() {
@@ -46,7 +50,7 @@ class DialogueCutscene extends Cutscene{
         if(dialogueFile == null) 
         {
             trace('no dialogue!!!');
-            endDialogue();
+            onEnd.dispatch(false);
         }
         box = new DialogueBox(dialogueFile.boxStyle);
         add(box);
@@ -56,7 +60,6 @@ class DialogueCutscene extends Cutscene{
         dialogueText.antialiasing = box.antialiasing;
         dialogueText.borderSize = 1.4;
         add(dialogueText);
-        
 
         createNewLine();
 
@@ -85,16 +88,18 @@ class DialogueCutscene extends Cutscene{
      */
     public function createNewLine()
     {
+        if(curDialogueCount >= dialogueFile.dialogue.length)
+        {
+            onEnd.dispatch(false);
+
+            return;
+        }
+
         getTextSound();
         FlxG.sound.play(Paths.sound(box.dialoguePressedSound), 0.7);
         var curDialogueLine:DialogueLine = null;
 		curDialogueLine = dialogueFile.dialogue[curDialogueCount];
-        if(curDialogueCount == dialogueFile.dialogue.length)
-        {
-            endDialogue();
-            return;
-        }
-
+       
         box.animation.play('pressed');
         dialogueText.resetText(curDialogueLine.text);
         dialogueText.start(curDialogueLine.textSpeed);
@@ -103,9 +108,13 @@ class DialogueCutscene extends Cutscene{
     /**
      * Function thats called when Dialogue is ending.
      */
-    function endDialogue()
+    function endDialogue(wasSkipped:Bool)
     {
-        onEnd.dispatch(false);
+        box.onDialogueEnded();
+        new FlxTimer().start(1, function(tmr:FlxTimer)
+		{
+            destroy();
+		});
     }
 
     override public function restart(){

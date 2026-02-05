@@ -86,12 +86,17 @@ class DialogueBox extends FlxSprite
 		script = FunkinHScript.fromFile(file);
 		//variables
 				//script.set("add", add);
-				script.set("post", postLayer);
 
 	}
 	public function postLayer()
 	{
 		//used in scripts
+	}
+	public function onDialogueEnded()
+	{
+		trace('ended dialogue');
+		script.call("onDialogueEnded");
+
 	}
 	override function destroy()
 	{
