@@ -672,6 +672,9 @@ class ChartingState extends MusicBeatState {
 		addChartingUI();
 		addTracksUI();
 
+		reloadKeyAnimations(_song.keyCount);
+
+
 		////
 		updateStrumline();
 		adjustCamPos();
@@ -1934,6 +1937,14 @@ class ChartingState extends MusicBeatState {
 		}
 	}
 
+	function reloadKeyAnimations(count:Int) {
+		NoteAnimation.refreshKeyAnimations(_song.keyCount = Math.ceil(Math.max(1, count)));
+
+		reloadGridLayer();
+		updateStrumline();
+		adjustCamPos();
+	}
+
 	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>) {
 		var name:Null<String> = sender.name;
 
@@ -1972,13 +1983,7 @@ class ChartingState extends MusicBeatState {
 					updateNoteSteps();
 
 				case 'song_keyCount':
-					_song.keyCount = Math.ceil(Math.max(1, nums.value));
-					NoteAnimation.refreshKeyAnimations(_song.keyCount);
-
-					reloadGridLayer();
-					updateStrumline();
-					adjustCamPos();
-
+					reloadKeyAnimations(Std.int(nums.value));
 				case 'song_speed':
 					_song.speed = nums.value;
 
