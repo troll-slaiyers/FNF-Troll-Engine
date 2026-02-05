@@ -1,27 +1,37 @@
 import funkin.objects.cutscenes.DialogueCutscene;
 
-var black:FlxSprite;
+var bg:FlxSprite;
 
 function onCreate() {
     /*
-	if (!PlayState.isStoryMode  PlayState.seenCutscene) {
+	if (!PlayState.isStoryMode &&  PlayState.seenCutscene) {
 		script.stop();
 		return;
 	}	
 	*/
 	
-	
+	bg = CoolUtil.blankSprite(FlxG.width, FlxG.height, 0xFFB3DFd8);
+	bg.camera = game.camOther;
+	bg.alpha = 0;
+	game.add(bg);
+	//i should probably move the bgs out of this, ill need to look into it more
+	new FlxTimer().start(0.83, function(tmr:FlxTimer)
+	{
+		bg.alpha += (1 / 5) * 0.7;
+		if (bg.alpha > 0.7)
+			bg.alpha = 0.7;
+	}, 5);
+
+	FlxG.sound.playMusic(Paths.music('Lunchbox'), 0);
+	FlxG.sound.music.fadeIn(1, 0, 0.8);
+
 	game.startCutscenes.push(new DialogueCutscene('songs/senpai/dialogue.json'));
 }
 
-/*
+
 function onCountdownStarted() {
-	FlxTween.tween(black, {alpha 0.0}, 0.6, {onComplete function(twn) {
-		game.remove(black);
-		black.destroy();
-		twn.destroy();
-		script.stop();
-		return;
-	}});
+	new FlxTimer().start(0.2, function(tmr:FlxTimer)
+	{
+		bg.alpha -= 1 / 5 * 0.7;
+	}, 5);
 }
-*/
