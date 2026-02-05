@@ -1,20 +1,13 @@
-import funkin.objects.cutscenes.DialogueCutscene;
-
 var bg:FlxSprite;
 
-function onCreate() {
-    /*
-	if (!PlayState.isStoryMode &&  PlayState.seenCutscene) {
-		script.stop();
-		return;
-	}	
-	*/
-	
+function onCreate()
+{
+    trace('created script');
+    	
 	bg = CoolUtil.blankSprite(FlxG.width, FlxG.height, 0xFFB3DFd8);
 	bg.camera = game.camOther;
 	bg.alpha = 0;
 	game.add(bg);
-	//i should probably move the bgs out of this, ill need to look into it more
 	new FlxTimer().start(0.83, function(tmr:FlxTimer)
 	{
 		bg.alpha += (1 / 5) * 0.7;
@@ -22,12 +15,15 @@ function onCreate() {
 			bg.alpha = 0.7;
 	}, 5);
 
-	FlxG.sound.playMusic(Paths.music('Lunchbox'), 0);
-	FlxG.sound.music.fadeIn(1, 0, 0.8);
+    var handSelect:FlxSprite = new FlxSprite(1100, 600).loadGraphic(Paths.image('pixelUI/hand_textbox'));
+	handSelect.setGraphicSize(Std.int(handSelect.width *4));
+	handSelect.updateHitbox();
+    handSelect.antialiasing = false;
+    handSelect.cameras = [game.camOther];
+	game.add(handSelect);
+    trace(handSelect.active);
 
-	game.startCutscenes.push(new DialogueCutscene('songs/senpai/dialogue.json'));
 }
-
 
 function onCountdownStarted() {
 	FlxG.sound.music.fadeOut(1.5, 0, (_) -> FlxG.sound.music.stop());

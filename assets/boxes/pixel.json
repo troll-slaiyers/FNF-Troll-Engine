@@ -3,6 +3,7 @@
 	"antialiasing": false,
 	"graphicScale": 5.4,
 	"offsets":[-30, 20],
+	"looped": false,
     "dialoguePressed": "Text Box Appear instance",
 	"dialogueFont": "pixel.ttf",
 	"dialogueTalkSfx": "pixelText",

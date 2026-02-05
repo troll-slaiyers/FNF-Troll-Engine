@@ -1,6 +1,7 @@
 package funkin.objects.cutscenes;
 import lime.utils.Assets;
 import haxe.Json;
+import funkin.scripts.*;
 
 typedef BoxData = {
 	var graphic:String;
@@ -28,7 +29,8 @@ class DialogueBox extends FlxSprite
 	public var font:String = 'pixel.ttf';
 	public var dialogueTalkSound:String = 'dialogue';
 	public var dialoguePressedSound:String = 'dialogue';
-
+	public var script:FunkinHScript;
+	var currentBoxStyle:String;
     public function new(_boxtype:String)
     {
         super();
@@ -37,16 +39,17 @@ class DialogueBox extends FlxSprite
 		if(jsonFile == null)
 		{
 			trace('ERROR NO DIALOGUE OF TYPE: $_boxtype FOUND!!!\nreverting to pixel' );
-			jsonFile = Paths.getJson('pixel');
 		}
 
+		currentBoxStyle = _boxtype;
+		startScript();
         x = jsonFile.offsets[0];
         y = jsonFile.offsets[1];
 		
 	    frames = Paths.getSparrowAtlas(jsonFile.graphic);
 	    scrollFactor.set();
 		for (anim in jsonFile.animations) {
-				animation.addByPrefix(anim.animName, anim.animPrefix, anim.fps, anim.looped);
+				animation.addByPrefix(anim.animName, anim.animPrefix, anim.fps, false);
 		}
 		scale.set(jsonFile.graphicScale,jsonFile.graphicScale);
 
@@ -58,6 +61,47 @@ class DialogueBox extends FlxSprite
 		dialoguePressedSound = jsonFile.dialoguePressedSfx;
 
 	    updateHitbox();
+		postLayer();
     }
+	
+	
+	/**
+	 * ripped this from a stage script lol
+	 */
+	public function startScript()
+	{
+		if (script != null) {
+			trace("Script already started!");
+			return;
+		}   
+
+		var file = Paths.getHScriptPath('boxes/$currentBoxStyle');
+		if (file == null) {
+			script = null;
+			return;
+		}
+		
+		//script.set("post", postLayer);
+
+		script = FunkinHScript.fromFile(file);
+		//variables
+				//script.set("add", add);
+				script.set("post", postLayer);
+
+	}
+	public function postLayer()
+	{
+		//used in scripts
+	}
+	override function destroy()
+	{
+		if (script != null){
+			script.call("onDestroy");
+			script.stop();
+			script = null;
+		}
+		
+		super.destroy();
+	}
    
 }
