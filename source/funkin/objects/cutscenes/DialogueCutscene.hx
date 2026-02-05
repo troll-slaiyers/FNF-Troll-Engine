@@ -13,14 +13,14 @@ sorry if the code is a mess rn, alot is going on rn
 */
 typedef DialogueFile = {
 	var dialogue:Array<DialogueLine>;
-    var dialogueBox:String; //what box the file should use.
+    var boxStyle:String; //what box the file should use.
 }
 typedef DialogueLine = {
     var text:String;
 	var character:String;
 	var characterAnim:String;
 	var textSpeed:Float;
-	@:optional var soundByte:String; //what soundbyte should be played
+	var soundByte:String; //what soundbyte should be played
 }
 
 class DialogueCutscene extends Cutscene{
@@ -48,20 +48,21 @@ class DialogueCutscene extends Cutscene{
             trace('no dialogue!!!');
             endDialogue();
         }
-        box = new DialogueBox('pixel');
+        box = new DialogueBox(dialogueFile.boxStyle);
         add(box);
 
         dialogueText = new FlxTypeText(170, 420, Std.int(FlxG.width * 0.7), '', 32);
-        dialogueText.setFormat(Paths.font('pixel.otf'), 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-        dialogueText.antialiasing = false;
+        dialogueText.setFormat(Paths.font(box.font), 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+        dialogueText.antialiasing = box.antialiasing;
         dialogueText.borderSize = 1.4;
-        dialogueText.start(0.09);
         add(dialogueText);
+        
+
         createNewLine();
-        this.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]]; // this works right? :sob:
+
+        this.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
     } 
 
-        
     override function update(elapsed:Float)
     {
        	if (FlxG.keys.justPressed.SPACE)
@@ -69,13 +70,14 @@ class DialogueCutscene extends Cutscene{
             curDialogueCount++;
             createNewLine();
         }
-        
+        /*
+        maybe have a proper log book for dialogue.
         if (FlxG.keys.justPressed.BACKSPACE)
         {
             curDialogueCount--;
             createNewLine();
         }
-        
+        */
         super.update(elapsed);
     }
     /**
@@ -83,6 +85,8 @@ class DialogueCutscene extends Cutscene{
      */
     public function createNewLine()
     {
+        getTextSound();
+        FlxG.sound.play(Paths.sound(box.dialoguePressedSound), 0.7);
         var curDialogueLine:DialogueLine = null;
 		curDialogueLine = dialogueFile.dialogue[curDialogueCount];
         if(curDialogueCount == dialogueFile.dialogue.length)
@@ -104,17 +108,19 @@ class DialogueCutscene extends Cutscene{
         onEnd.dispatch(false);
         //destroy();
     }
-    
-	inline public static function parseDialogue(path:String):DialogueFile {
-		#if sys
-		return Json.parse(File.getContent(path));
-		#else
-		return Json.parse(Assets.getText(path));
-		#end
-	}
+
     override public function restart(){
         curDialogueCount = 0;
 		createNewLine();
 	}
+    /**
+     * Function thats called whenever
+     */
+    public function getTextSound()
+    {
+        var dialogueTalkSound:String = box.dialogueTalkSound;
+        if(box.dialogueTalkSound != null)
+        dialogueText.sounds = [FlxG.sound.load(Paths.sound(dialogueTalkSound), 0.6)];
+    }
 
 }

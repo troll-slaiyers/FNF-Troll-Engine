@@ -30,6 +30,8 @@ function onCreate() {
 
 
 function onCountdownStarted() {
+	FlxG.sound.music.fadeOut(1.5, 0, (_) -> FlxG.sound.music.stop());
+
 	new FlxTimer().start(0.2, function(tmr:FlxTimer)
 	{
 		bg.alpha -= 1 / 5 * 0.7;
