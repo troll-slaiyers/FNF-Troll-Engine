@@ -95,7 +95,7 @@ class DialogueBox extends FlxSprite
 	public function onDialogueEnded()
 	{
 		trace('ended dialogue');
-		script.call("onDialogueEnded");
+		script?.call("onDialogueEnded");
 
 	}
 	override function destroy()

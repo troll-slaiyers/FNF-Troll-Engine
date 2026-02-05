@@ -29,7 +29,7 @@ function onCreate()
 }
 
 function onDialogueEnded() {
-	alphaIn.cancel();
+	if(alphaIn!= null)alphaIn.cancel();
 	handSelect.visible = false;	
 	new FlxTimer().start(0.2, function(tmr:FlxTimer)
 	{
