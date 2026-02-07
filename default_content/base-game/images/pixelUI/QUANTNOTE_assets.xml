@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Created with Tex-Packer-EX v0.6.8 https://strawberrysage.github.io/tex-packer-ex
+-->
+<TextureAtlas imagePath="QUANTNOTE_assets.png" width="17" height="431">
+  <SubTexture name="arrowDOWN0000.png" x="0" y="0"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="arrowLEFT0000.png" x="0" y="17"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="arrowRIGHT0000.png" x="0" y="34"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="arrowSQUARE0000.png" x="0" y="51"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="arrowUP0000.png" x="0" y="68"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="blue hold end0000.png" x="0" y="425"  width="7" height="6" frameX="-0" frameY="-0" frameWidth="7" frameHeight="6"/>
+  <SubTexture name="blue hold piece0000.png" x="7" y="425"  width="7" height="6" frameX="-0" frameY="-0" frameWidth="7" frameHeight="6"/>
+  <SubTexture name="blue0000.png" x="0" y="85"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="down confirm0000.png" x="0" y="102"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="down confirm0001.png" x="0" y="102"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="down confirm0002.png" x="0" y="119"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="down press0000.png" x="0" y="136"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="green hold end0000.png" x="0" y="425"  width="7" height="6" frameX="-0" frameY="-0" frameWidth="7" frameHeight="6"/>
+  <SubTexture name="green hold piece0000.png" x="7" y="425"  width="7" height="6" frameX="-0" frameY="-0" frameWidth="7" frameHeight="6"/>
+  <SubTexture name="green0000.png" x="0" y="153"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="left confirm0000.png" x="0" y="170"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="left confirm0001.png" x="0" y="170"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="left confirm0002.png" x="0" y="187"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="left press0000.png" x="0" y="204"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="purple hold end0000.png" x="0" y="425"  width="7" height="6" frameX="-0" frameY="-0" frameWidth="7" frameHeight="6"/>
+  <SubTexture name="purple hold piece0000.png" x="7" y="425"  width="7" height="6" frameX="-0" frameY="-0" frameWidth="7" frameHeight="6"/>
+  <SubTexture name="purple0000.png" x="0" y="221"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="red hold end0000.png" x="0" y="425"  width="7" height="6" frameX="-0" frameY="-0" frameWidth="7" frameHeight="6"/>
+  <SubTexture name="red hold piece0000.png" x="7" y="425"  width="7" height="6" frameX="-0" frameY="-0" frameWidth="7" frameHeight="6"/>
+  <SubTexture name="red0000.png" x="0" y="238"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="right confirm0000.png" x="0" y="255"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="right confirm0001.png" x="0" y="255"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="right confirm0002.png" x="0" y="272"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="right press0000.png" x="0" y="289"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="square confirm0000.png" x="0" y="306"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="square confirm0001.png" x="0" y="306"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="square confirm0002.png" x="0" y="323"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="square hold end0000.png" x="0" y="425"  width="7" height="6" frameX="-0" frameY="-0" frameWidth="7" frameHeight="6"/>
+  <SubTexture name="square hold piece0000.png" x="7" y="425"  width="7" height="6" frameX="-0" frameY="-0" frameWidth="7" frameHeight="6"/>
+  <SubTexture name="square press0000.png" x="0" y="340"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="square0000.png" x="0" y="357"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="up confirm0000.png" x="0" y="374"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="up confirm0001.png" x="0" y="374"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="up confirm0002.png" x="0" y="391"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+  <SubTexture name="up press0000.png" x="0" y="408"  width="17" height="17" frameX="-0" frameY="-0" frameWidth="17" frameHeight="17"/>
+</TextureAtlas>

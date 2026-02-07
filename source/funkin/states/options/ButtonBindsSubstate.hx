@@ -1,9 +1,9 @@
 package funkin.states.options;
 
 // too lazy to finish merging this w the keyboard version rn
+import funkin.objects.notes.Note;
 import funkin.states.options.BindsBullshit.KeyboardNavHelper;
 import funkin.states.options.BindsBullshit.BindButton;
-import funkin.CoolUtil.overlapsMouse as overlaps;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.math.FlxMath;
 import flixel.addons.ui.FlxUI9SliceSprite;
@@ -12,6 +12,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.math.FlxPoint;
 import openfl.geom.Rectangle;
+import flixel.addons.ui.U as FlxU;
 
 using StringTools;
 
@@ -25,21 +26,7 @@ class ButtonBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxGam
 	// if an option is in this list, then atleast ONE key will have to be bound.
 	var forcedBind:Array<String> = ["ui_up", "ui_down", "ui_left", "ui_right", "accept", "back",];
 
-	var binds:Array<Array<String>> = [
-		[Paths.getString('controls_gameplay')],
-		[Paths.getString('control_note_left'), 'note_left'],
-		[Paths.getString('control_note_down'), 'note_down'],
-		[Paths.getString('control_note_up'), 'note_up'],
-		[Paths.getString('control_note_right'), 'note_right'],
-		/*
-		[Paths.getString('control_pause'), 'pause'],
-		[Paths.getString('control_reset'), 'reset'],
-
-		[Paths.getString('controls_ui')],
-		[Paths.getString('control_accept'), 'accept'],
-		[Paths.getString('control_back'), 'back'],
-		*/
-	];
+	var binds:Array<Array<String>> = [];
 
 	public var changedBind:(String, Int, FlxGamepadInputID) -> Void;
 
@@ -72,6 +59,46 @@ class ButtonBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxGam
 	var popupTitle:FlxText;
 	var popupText:FlxText;
 	var unbindText:FlxText;
+
+	override public function new() {
+		super();
+		var buttonBinds:Array<Array<String>> = [[Paths.getString('controls_gameplay')],];
+
+		var directions:Array<Array<String>> = [
+			['Center'],
+			['Left', 'Right'],
+			['Left', 'Center', 'Right'],
+			['Left', 'Down', 'Up', 'Right'],
+			['Left', 'Down', 'Center', 'Up', 'Right'],
+			['Left', 'Down', 'Right', 'Left 2', 'Up', 'Right 2'],
+			['Left', 'Down', 'Right', 'Center', 'Left 2', 'Up', 'Right 2'],
+			['Left', 'Down', 'Up', 'Right', 'Left 2', 'Down 2', 'Up 2', 'Right 2'],
+			['Left', 'Down', 'Up', 'Right', 'Center', 'Left 2', 'Down 2', 'Up 2', 'Right 2'],
+		];
+
+		for (i in Note.minKeyCount - 1...Note.maxKeyCount) {
+			buttonBinds.push(['${i + 1} Key']);
+			for (j in 0...i + 1) {
+				buttonBinds.push(['${directions[i][j]}', '${i + 1}_key_$j']);
+			}
+		}
+
+		FlxU.clearArray(directions);
+
+		var otherBinds:Array<Array<String>> = [
+			[Paths.getString('control_pause'), 'pause'],
+			[Paths.getString('control_reset'), 'reset'],
+
+			[Paths.getString('controls_ui')],
+			[Paths.getString('control_accept'), 'accept'],
+			[Paths.getString('control_back'), 'back'],
+		];
+
+		binds = buttonBinds.concat(otherBinds);
+
+		FlxU.clearArraySoft(buttonBinds);
+		FlxU.clearArraySoft(otherBinds);
+	}
 
 	override public function create() {
 		super.create();

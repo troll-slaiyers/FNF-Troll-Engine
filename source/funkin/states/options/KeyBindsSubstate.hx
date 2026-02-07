@@ -1,5 +1,6 @@
 package funkin.states.options;
 
+import funkin.objects.notes.Note;
 import funkin.states.options.BindsBullshit.KeyboardNavHelper;
 import funkin.states.options.BindsBullshit.BindButton;
 import funkin.CoolUtil.overlapsMouse as overlaps;
@@ -11,6 +12,8 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.math.FlxPoint;
 import openfl.geom.Rectangle;
+import flixel.addons.ui.U as FlxU;
+
 
 using StringTools;
 
@@ -24,38 +27,7 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 	// if an option is in this list, then atleast ONE key will have to be bound.
 	var forcedBind:Array<String> = ["ui_up", "ui_down", "ui_left", "ui_right", "accept", "back",];
 
-	var binds:Array<Array<String>> = [
-		[Paths.getString('controls_gameplay')],
-		[Paths.getString('control_note_left'), 'note_left'],
-		[Paths.getString('control_note_down'), 'note_down'],
-		[Paths.getString('control_note_up'), 'note_up'],
-		[Paths.getString('control_note_right'), 'note_right'],
-		[Paths.getString('control_pause'), 'pause'],
-		[Paths.getString('control_reset'), 'reset'],
-
-		[Paths.getString('controls_ui')],
-		[Paths.getString('control_ui_up'), 'ui_up'],
-		[Paths.getString('control_ui_down'), 'ui_down'],
-		[Paths.getString('control_ui_left'), 'ui_left'],
-		[Paths.getString('control_ui_right'), 'ui_right'],
-		[Paths.getString('control_accept'), 'accept'],
-		[Paths.getString('control_back'), 'back'],
-
-		[Paths.getString('controls_misc')],
-		[Paths.getString('control_volume_mute'), 'volume_mute'],
-		[Paths.getString('control_volume_up'), 'volume_up'],
-		[Paths.getString('control_volume_down'), 'volume_down'],
-		[Paths.getString('control_fullscreen'), 'fullscreen'],
-
-		[Paths.getString('controls_debug')],
-		// honestly might just replace this with one debug thing
-		// and make it so pressing it in playstate will open a debug menu w/ a bunch of stuff
-		// chart editor/character editor, botplay, skip to time, etc. move it from pause menu during charting mode lol
-		[Paths.getString('control_debug_1'), 'debug_1'],
-		[Paths.getString('control_debug_2'), 'debug_2'],
-		[Paths.getString('control_botplay'), 'botplay']
-	];
-
+	var binds:Array<Array<String>> = [];
 
 	public var changedBind:(String, Int, FlxKey) -> Void;
 
@@ -89,8 +61,65 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 	var popupText:FlxText;
 	var unbindText:FlxText;
 
-	override public function create()
-	{
+	override public function new() {
+		super();
+
+		var noteBinds:Array<Array<String>> = [[Paths.getString('controls_gameplay')],];
+
+		var directions:Array<Array<String>> = [
+			['Center'],
+			['Left', 'Right'],
+			['Left', 'Center', 'Right'],
+			['Left', 'Down', 'Up', 'Right'],
+			['Left', 'Down', 'Center', 'Up', 'Right'],
+			['Left', 'Down', 'Right', 'Left 2', 'Up', 'Right 2'],
+			['Left', 'Down', 'Right', 'Center', 'Left 2', 'Up', 'Right 2'],
+			['Left', 'Down', 'Up', 'Right', 'Left 2', 'Down 2', 'Up 2', 'Right 2'],
+			['Left', 'Down', 'Up', 'Right', 'Center', 'Left 2', 'Down 2', 'Up 2', 'Right 2']
+		];
+
+		for (i in Note.minKeyCount - 1...Note.maxKeyCount) {
+			noteBinds.push(['${i + 1} Key']);
+			for (j in 0...i + 1) {
+				noteBinds.push(['${directions[i][j]}', '${i + 1}_key_$j']);
+			}
+		}
+
+		FlxU.clearArray(directions);
+
+		var otherBinds:Array<Array<String>> = [
+			[Paths.getString('control_pause'), 'pause'],
+			[Paths.getString('control_reset'), 'reset'],
+			[Paths.getString('controls_ui')],
+			[Paths.getString('control_ui_up'), 'ui_up'],
+			[Paths.getString('control_ui_down'), 'ui_down'],
+			[Paths.getString('control_ui_left'), 'ui_left'],
+			[Paths.getString('control_ui_right'), 'ui_right'],
+			[Paths.getString('control_accept'), 'accept'],
+			[Paths.getString('control_back'), 'back'],
+
+			[Paths.getString('controls_misc')],
+			[Paths.getString('control_volume_mute'), 'volume_mute'],
+			[Paths.getString('control_volume_up'), 'volume_up'],
+			[Paths.getString('control_volume_down'), 'volume_down'],
+			[Paths.getString('control_fullscreen'), 'fullscreen'],
+
+			[Paths.getString('controls_debug')],
+			// honestly might just replace this with one debug thing
+			// and make it so pressing it in playstate will open a debug menu w/ a bunch of stuff
+			// chart editor/character editor, botplay, skip to time, etc. move it from pause menu during charting mode lol
+			[Paths.getString('control_debug_1'), 'debug_1'],
+			[Paths.getString('control_debug_2'), 'debug_2'],
+			[Paths.getString('control_botplay'), 'botplay']
+		];
+
+		binds = noteBinds.concat(otherBinds);
+
+		FlxU.clearArraySoft(noteBinds);
+		FlxU.clearArraySoft(otherBinds);
+	}
+
+	override public function create() {
 		super.create();
 
 		FlxG.cameras.add(cam, false);

@@ -437,8 +437,8 @@ class ModManager {
 					// before discarding we should be checking for submods and if THEY can execute
 					// if they can execute then we shouldnt be discarding this mod since the parent mod executes the logic for submods
 
-					for(submod_name => submod in mod.submods){
-						if (submod.shouldExecute(player, submod.getValue(player))){
+					for (submod in mod.submods) {
+						if (submod.shouldExecute(player, submod.getValue(player))) {
 							can_discard = false; // we CANNOT discard since a submod can execute still
 							break;
 						}
@@ -566,8 +566,13 @@ class ModManager {
 		var spaceWidth = FlxG.width / playerAmount;
 		var spaceX = spaceWidth * (playerAmount-1-player);
 
-		var baseX:Float = spaceX + (spaceWidth - Note.swagWidth * receptorAmount) * 0.5;
-		var x:Float = baseX + Note.swagWidth * direction;
+		// how much the note gap should scale by
+		// pushes notes closer together on higher keycounts to make them look less ugly
+		// does not go over 1 to prevent keycounts less than 4 from getting an increased gap, which they dont need.
+		var noteGapMult = Math.min(1, 1 - (1 / 30) * (receptorAmount - 4));
+
+		var baseX:Float = spaceX + (spaceWidth - Note.swagWidth * (receptorAmount * noteGapMult)) * 0.5 * noteGapMult;
+		var x:Float = baseX + Note.swagWidth * (direction * noteGapMult);
 
 		return x;
 	}
@@ -619,7 +624,7 @@ class ModManager {
 		diff += getValue("transformPath", player);
 		diff += getValue("movePath", player) * FlxMath.lerp(
 			Note.swagWidth,
-			Conductor.crotchet * 0.45 * speed,
+			Conductor.crotchet * Note.pixelsPerMS * speed, 
 			getValue("movePathType", player)
 		);
 		

@@ -451,13 +451,19 @@ class CharacterEditorState extends MusicBeatState {
 		});
 
 		var decideIconColor:FlxButton = new FlxButton(reloadImage.x, reloadImage.y + 30, "Get Icon Color", function() {
-			var coolColor = FlxColor.fromInt(CoolUtil.dominantColor(leHealthIcon));
-			healthColorStepperR.value = coolColor.red;
-			healthColorStepperG.value = coolColor.green;
-			healthColorStepperB.value = coolColor.blue;
-			getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperR, null);
-			getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperG, null);
-			getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperB, null);
+			try {
+				var coolColor = FlxColor.fromInt(CoolUtil.dominantColor(leHealthIcon));
+				healthColorStepperR.value = coolColor.red;
+				healthColorStepperG.value = coolColor.green;
+				healthColorStepperB.value = coolColor.blue;
+				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperR, null);
+				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperG, null);
+				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperB, null);
+			} catch (e) {
+				if (Main.showDebugTraces) {
+					trace(e.details());
+				}
+			}
 		});
 
 		healthIconInputText = new FlxUIInputText(15, imageInputText.y + 35, 75, leHealthIcon.getCharacter(), 8);
@@ -890,6 +896,16 @@ class CharacterEditorState extends MusicBeatState {
 				char.baseScale = sender.value;
 				char.scale.set(sender.value, sender.value);
 
+				if (ghostMirrorsCharacter) {
+					ghostChar.baseScale = sender.value;
+					ghostChar.scale.set(sender.value, sender.value);
+					if (ghostChar.animation.curAnim != null) {
+						ghostChar.playAnim(ghostChar.animation.curAnim.name, true);
+					} else {
+						ghostChar.updateHitbox();
+					}
+				}
+
 				updatePointerPos();
 
 				if (char.animation.curAnim != null) {
@@ -936,7 +952,13 @@ class CharacterEditorState extends MusicBeatState {
 
 		// var anims:Array<AnimArray> = char.animationsArray.copy();
 
-		Paths.removeBitmap(char.frames.parent.key); // is null SOMETIMES idk WHY
+		try {
+			Paths.removeBitmap(char.frames.parent.key); // is null SOMETIMES idk WHY
+		} catch (e) {
+			if (Main.showDebugTraces) {
+				trace(e.details());
+			}
+		}
 
 		if (Paths.fileExists('images/' + char.imageFile + '/Animation.json', TEXT)) {
 			char.frames = Paths.getTextureAtlas(char.imageFile);

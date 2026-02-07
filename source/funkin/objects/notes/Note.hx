@@ -1,7 +1,5 @@
 package funkin.objects.notes;
 
-import math.Vector3;
-import flixel.math.FlxMath;
 import funkin.scripts.*;
 import funkin.states.PlayState;
 import funkin.states.editors.ChartingState;
@@ -40,18 +38,15 @@ private typedef NoteScriptState = {
 }
 
 class Note extends NoteObject {
-	public var holdGlow:Bool = true; // Whether holds should "glow" / increase in alpha when held
+	/** Whether holds should "glow" / increase in alpha when held */
+	public var holdGlow:Bool = true;
+
 	public var baseAlpha:Float = 1;
 
-	public static var spriteScale:Float = 0.7;
+	public static var spriteScales:Array<Float> = [0.9, 0.85, 0.8, 0.7, 0.66, 0.6, 0.55, 0.5, 0.46, 0.4];
+	public static var spriteScale:Float = spriteScales[3];
 	public static var swagWidth(default, set):Float = 160 * spriteScale;
 	public static var halfWidth(default, null):Float = swagWidth * 0.5;
-
-	private static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
-
-	public static var defaultNoteAnimNames:Array<String> = ['purple0', 'blue0', 'green0', 'red0'];
-	public static var defaultHoldAnimNames:Array<String> = ['purple hold piece', 'blue hold piece', 'green hold piece', 'red hold piece'];
-	public static var defaultTailAnimNames:Array<String> = ['purple hold end', 'blue hold end', 'green hold end', 'red hold end'];
 
 	public static var quants:Array<Int> = [
 		4, // quarter note
@@ -73,7 +68,12 @@ class Note extends NoteObject {
 		''
 	];
 
+	public static inline final pixelsPerMS:Float = 0.45;
+
 	public static final quantShitCache = new Map<String, Null<String>>();
+
+	public static var minKeyCount:Int = 1;
+	public static var maxKeyCount:Int = 9;
 
 	public static function getQuantTexture(dir:String, fileName:String, textureKey:String):Null<String> {
 		if (quantShitCache.exists(textureKey))
@@ -141,7 +141,9 @@ class Note extends NoteObject {
 	// quant shit
 	public var row:Int = 0;
 	public var quant:Int = 4;
-	public var isQuant:Bool = false; // Whether the loaded texture is a quant texture.
+
+	/** Whether the loaded texture is a quant texture.*/
+	public var isQuant:Bool = false;
 
 	// note status
 	public var spawned:Bool = false;
@@ -297,7 +299,7 @@ class Note extends NoteObject {
 		if (colorSwap==null) return;
 		if (column == -1) return; // FUCKING PSYCH EVENT NOTES!!!
 		
-		var hsb = isQuant ? ClientPrefs.quantHSV[quants.indexOf(quant)] : ClientPrefs.arrowHSV[column % 4];
+		var hsb = isQuant ? ClientPrefs.quantHSV[quants.indexOf(quant)] : getNoteColours(currentAnimations);
 		colorSwap.setHSBIntArray(hsb);
 
 		if (noteScript != null)
@@ -307,6 +309,7 @@ class Note extends NoteObject {
 			genScript.executeFunc("onUpdateColours", [this], this);
 	}
 
+	@:noCompletion
 	private function set_noteMod(value:String):String {
 		if (value == null)
 			value = 'default';
@@ -344,6 +347,7 @@ class Note extends NoteObject {
 		return noteMod = value;
 	}
 
+	@:noCompletion
 	private function set_noteType(value:String):String {
 		noteSplashTexture = PlayState.splashSkin;
 
@@ -566,9 +570,15 @@ class Note extends NoteObject {
 	function _loadIndNoteAnims() {
 		final animName:String = 'default';
 		final animFrames:Array<Int> = switch (holdType) {
-			default: [column + 4];
-			case PART: [column];
-			case END: [column + 4];
+			default: [
+					NoteObject.getAnimsInd(column, NoteAnimations.fourKey.noteAnimations, NoteAnimations.fourKey.noteAnimations) + 4
+				];
+			case PART: [
+					NoteObject.getAnimsInd(column, NoteAnimations.fourKey.holdAnimations, NoteAnimations.fourKey.holdAnimations)
+				];
+			case END: [
+					NoteObject.getAnimsInd(column, NoteAnimations.fourKey.tailAnimations, NoteAnimations.fourKey.tailAnimations) + 4
+				];
 		}
 		animation.add(animName, animFrames);
 		animation.play(animName, true);
@@ -596,19 +606,37 @@ class Note extends NoteObject {
 	function _loadNoteAnims() {
 		final animName:String = 'default';
 		final animPrefix:String = switch (holdType) {
-			default: defaultNoteAnimNames[column];
-			case PART: defaultHoldAnimNames[column];
-			case END: defaultTailAnimNames[column];
+			default: '${currentAnimations.noteAnimations[column % currentAnimations.noteAnimations.length]}0';
+			case PART: currentAnimations.holdAnimations[column % currentAnimations.holdAnimations.length];
+			case END: currentAnimations.tailAnimations[column % currentAnimations.tailAnimations.length];
 		}
 
-		if (column == 0) animation.addByPrefix(animName, 'pruple end hold'); // ?????
+		// because phantomarcade cant spell
+		var hasThatStupidAssTypo:Bool = false;
+		if (holdType == END && animPrefix.contains("purple")) {
+			hasThatStupidAssTypo = attemptToAddAnimationByPrefix(animName, 'pruple end hold', 24, true); // ?????
+		}
 		// this is autistic wtf
 
-		animation.addByPrefix(animName, animPrefix);
+		if (!hasThatStupidAssTypo) {
+			animation.addByPrefix(animName, animPrefix);
+		}
 		animation.play(animName, true);
- 
-		scale.set(spriteScale, spriteScale); 
-	} 
+		scale.set(spriteScale, spriteScale);
+	}
+
+	// I stole this from psych lmao
+	// Modified to return if it was added or not.
+	function attemptToAddAnimationByPrefix(name:String, prefix:String, framerate:Float = 24, doLoop:Bool = true):Bool {
+		var animFrames = [];
+		@:privateAccess
+		animation.findByPrefix(animFrames, prefix); // adds valid frames to animFrames
+		if (animFrames.length < 1)
+			return false;
+
+		animation.addByPrefix(name, prefix, framerate, doLoop);
+		return true;
+	}
 
 	override function draw() {
 		colorSwap.daAlpha = alphaMod * alphaMod2;

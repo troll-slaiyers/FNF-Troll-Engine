@@ -9,10 +9,6 @@ import funkin.data.CharacterData;
 import funkin.objects.AttachedFlxText;
 import funkin.objects.hud.HealthIcon;
 import funkin.scripts.FunkinHScript;
-import funkin.scripts.FunkinScript;
-
-import funkin.Conductor.BPMChangeEvent;
-import funkin.data.ChartData.defaultNoteTypeList;
 import funkin.data.ChartData;
 import funkin.data.BaseSong;
 import funkin.data.Song;
@@ -24,8 +20,6 @@ import math.CoolMath.floorDecimal;
 
 import flixel.*;
 import flixel.group.FlxGroup;
-import flixel.group.FlxSpriteGroup;
-import flixel.input.keyboard.FlxKey;
 import flixel.util.FlxGradient;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.ui.*;
@@ -40,10 +34,6 @@ import flixel.ui.FlxButton;
 import haxe.Json;
 import haxe.io.Path;
 import haxe.io.Bytes;
-import haxe.format.JsonParser;
-import openfl.utils.ByteArray;
-import openfl.utils.Assets as OpenFlAssets;
-import openfl.media.Sound;
 import flixel.system.FlxAssets.FlxSoundAsset;
 import lime.media.AudioBuffer;
 import lime.ui.FileDialog;
@@ -55,7 +45,6 @@ import funkin.api.Discord.DiscordClient;
 #end
 
 #if sys
-import sys.io.File;
 import sys.FileSystem;
 import openfl.media.Sound;
 #end
@@ -724,6 +713,9 @@ class ChartingState extends MusicBeatState
 		addChartingUI();
 		addTracksUI();
 
+		reloadKeyAnimations(_song.keyCount);
+
+
 		////
 		updateStrumline();
 		adjustCamPos();
@@ -738,6 +730,7 @@ class ChartingState extends MusicBeatState
 	}
 
 	function updateStrumline() {
+		strumLineNotes.clear();
 		var fieldAmount:Int = 2;
 
 		strumLine.setGraphicSize(GRID_SIZE * (1 + _song.keyCount * fieldAmount), 4);
@@ -973,7 +966,7 @@ class ChartingState extends MusicBeatState
 		stepperBPM.name = 'song_bpm';
 		blockPressWhileTypingOnStepper.push(stepperBPM);
 
-		var stepperKeyCount = new CustomFlxUINumericStepper(10, stepperBPM.y + 35, 1, 4, 1, 10, 0);
+		var stepperKeyCount = new CustomFlxUINumericStepper(10, stepperBPM.y + 35, 1, 4, Note.minKeyCount, Note.maxKeyCount, 0);
 		stepperKeyCount.value = _song.keyCount;
 		stepperKeyCount.name = 'song_keyCount';
 		blockPressWhileTypingOnStepper.push(stepperKeyCount);
@@ -2041,11 +2034,21 @@ class ChartingState extends MusicBeatState
 			inst.volume = (tracks.length == 1) ? 1.0 : 0.6;
 		
 		for (id => track in soundTracksMap) {
-			if (_session.trackVolumes.exists(id))
+			if (track == null)
+				trace('Failed to load track: ' + id);
+			else if (_session.trackVolumes.exists(id))
 				track.volume = _session.trackVolumes[id];
 			else
 				_session.trackVolumes[id] = track.volume;
 		}
+	}
+
+	function reloadKeyAnimations(count:Int) {
+		NoteAnimation.refreshKeyAnimations(_song.keyCount = Math.ceil(Math.max(1, count)));
+
+		reloadGridLayer();
+		updateStrumline();
+		adjustCamPos();
 	}
 
 	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>)
@@ -2091,11 +2094,7 @@ class ChartingState extends MusicBeatState
 					updateNoteSteps();
 				
 				case 'song_keyCount':
-					_song.keyCount = Math.ceil(Math.max(1, nums.value));
-					reloadGridLayer();
-					updateStrumline();
-					adjustCamPos();
-				
+					reloadKeyAnimations(Std.int(nums.value));
 				case 'song_speed':
 					_song.speed = nums.value;
 				
@@ -3415,7 +3414,47 @@ class ChartingState extends MusicBeatState
 		return retStr;
 	}
 
-	var noteColors:Array<FlxColor> = [0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F];
+	var noteColors:Array<Array<FlxColor>> = [
+		[0xFF12FA05],
+		[0xFFC24B99, 0xFFF9393F],
+		[0xFFC24B99, 0xFF12FA05, 0xFFF9393F],
+		[0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F],
+		[0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFF12FA05, 0xFFF9393F],
+		[0xFFC24B99, 0xFF12FA05, 0xFFF9393F, 0xFFC24B99, 0xFF00FFFF, 0xFFF9393F],
+		[
+			0xFFC24B99,
+			0xFF12FA05,
+			0xFFF9393F,
+			0xFF12FA05,
+			0xFFC24B99,
+			0xFF00FFFF,
+			0xFFF9393F
+		],
+		[
+			0xFFC24B99,
+			0xFF00FFFF,
+			0xFF12FA05,
+			0xFFF9393F,
+			0xFFC24B99,
+			0xFF00FFFF,
+			0xFF12FA05,
+			0xFFF9393F
+		],
+		[
+			0xFFC24B99,
+			0xFF00FFFF,
+			0xFF12FA05,
+			0xFFF9393F,
+			0xFF12FA05,
+			0xFFC24B99,
+			0xFF00FFFF,
+			0xFF12FA05,
+			0xFFF9393F
+		],
+		[
+			0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F, 0xFF00FFFF, 0xFF12FA05, 0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F
+		],
+	];
 	var susWidth:Float = 8;
 	var showSusTail:Bool = true; // to visualise the head/cap/end of the tail
 	// because they looked WAY too short
@@ -3425,17 +3464,18 @@ class ChartingState extends MusicBeatState
 		final stepLength = (Conductor.getBPMFromSeconds(note.strumTime).stepCrochet);
 		final tailSteps:Float = note.sustainLength / stepLength;
 		var height:Float = tailSteps * GRID_SIZE * zoomList[curZoom];
-		if (!showSusTail) height -= GRID_HALF;
-		
-		if (height <= 0) return null;
-		
-		var spr:FlxSprite = new FlxSprite(
-			note.x + (GRID_SIZE - susWidth) * 0.5, 
-			note.y + GRID_HALF
-		);
-		var color:FlxColor = note.isQuant ? 0xFFFF0000 : noteColors[note.column % noteColors.length];
-		color.setHSB(
-			((color.hue + note.colorSwap.hue * 360) % 360 + 360) % 360,
+		if (!showSusTail)
+			height -= GRID_HALF;
+
+		if (height <= 0)
+			return null;
+
+		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE - susWidth) * 0.5, note.y + GRID_HALF);
+
+		var colors:Array<FlxColor> = noteColors[_song.keyCount - 1];
+
+		var color:FlxColor = note.isQuant ? 0xFFFF0000 : colors[note.column % colors.length];
+		color.setHSB(((color.hue + note.colorSwap.hue * 360) % 360 + 360) % 360,
 			CoolUtil.boundTo(color.saturation * 0.01 * (1.0 + note.colorSwap.saturation), 0.0, 1.0) * 100.0,
 			(color.brightness * 0.01 * (1.0 + note.colorSwap.brightness)) * 100.0,
 			color.alphaFloat

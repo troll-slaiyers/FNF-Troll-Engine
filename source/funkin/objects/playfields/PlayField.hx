@@ -9,11 +9,19 @@ import funkin.modchart.ModManager;
 import funkin.data.JudgmentManager;
 import funkin.objects.notes.*;
 import funkin.states.PlayState;
+import funkin.states.PlayState.instance as game;
+import funkin.Conductor.curDecBeat;
 
 using StringTools;
 
 /*
 The system is seperated into 3 classes:
+
+- PlayField
+	- This is the gameplay component.
+	- This keeps track of notes and updates them
+	- This is typically per-player, and can control multiple characters, can be locked up, etc.
+	- You can also swap which PlayField a player is actually controlling n all that
 
 - NoteField
 	- This is the rendering component.
@@ -25,12 +33,6 @@ The system is seperated into 3 classes:
 	- This cannot have its own modifiers, etc applied. All this does is render whatever's in the NoteField
 	- If you need to duplicate one PlayField a bunch, you should be using ProxyFields as they are far more optimized it only calls the mod manager for the initial notefield, and not any ProxyFields
 	- One use case is if you wanna include an infinite NoteField effect (i.e the end of The Government Knows by FMS_Cat, or get f**ked from UKSRT8)
-
-- PlayField
-	- This is the gameplay component.
-	- This keeps track of notes and updates them
-	- This is typically per-player, and can control multiple characters, can be locked up, etc.
-	- You can also swap which PlayField a player is actually controlling n all that
 */
 
 /*
@@ -45,153 +47,136 @@ typedef NoteCallback = (Note, PlayField) -> Void;
 
 class PlayField extends FlxTypedGroup<FlxBasic>
 {
-	override function set_camera(to){
-		for (strumLine in strumNotes)
-			strumLine.camera = to;
-		
-		noteField.camera = to;
+	/** tracks managed by this field **/
+	public var tracks:Array<FlxSound> = [];
+	/** used to calculate the base position of the strums **/
+	public var playerId(default, set):Int = 0;
 
-		return super.set_camera(to);
-	}
-
-	override function set_cameras(to){
-		for (strumLine in strumNotes)
-			strumLine.cameras = to;
-		
-		noteField.cameras = to;
-
-		return super.set_cameras(to);
-	}
-
-	function set_playerId(v) {
-		playerId = v;
-		setDefaultBaseXPositions();
-		return playerId;
-	}
-
-	public var tracks:Array<FlxSound> = []; // tracks managed by this field
-	public var playerId(default, set):Int = 0; // used to calculate the base position of the strums
-
-	public var spawnTime:Float = 1750; // spawn time for notes
-	public var spawnedNotes:Array<Note> = []; // spawned notes
+	/** spawn time for notes **/
+	public var spawnTime:Float = 1750;
+	/** spawned notes **/
+	public var spawnedNotes:Array<Note> = [];
 	
-	public var spawnedByData:Array<Array<Note>> = [[], [], [], []]; // spawned notes by data. Used for input
-	public var tapsByData:Array<Array<Note>> = [[], [], [], []]; // spawned tap notes (with requiresTap) by data. Used for input but can't change spawnedByData cus of holds n shit lol!
-	public var noTapsByData:Array<Array<Note>> = [[], [], [], []]; // spawned tap notes (without requiresTap) by data. Used for input but can't change spawnedByData cus of holds n shit lol!
-	public var noteQueue:Array<Array<Note>> = [[], [], [], []]; // unspawned notes
+	/** spawned notes by data. Used for input **/
+	public var spawnedByData:Array<Array<Note>> = [[], [], [], []];
+	/** spawned tap notes (with requiresTap) per column. Used for input but can't change spawnedByData cus of holds n shit lol! **/
+	public var tapsByData:Array<Array<Note>> = [[], [], [], []];
+	/** spawned tap notes (without requiresTap) per column. Used for input but can't change spawnedByData cus of holds n shit lol! **/
+	public var noTapsByData:Array<Array<Note>> = [[], [], [], []];
+	/** unspawned notes **/
+	public var noteQueue:Array<Array<Note>> = [[], [], [], []];
 	
-	public var strumNotes:Array<StrumNote> = []; // receptors
-	public var characters:Array<Character> = []; // characters that sing when field is hit
-	public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"]; // default character animations to play for each column
+	/** receptors **/
+	public var strumNotes:Array<StrumNote> = [];
+	/** characters that sing when field is hit **/
+	public var characters:Array<Character> = [];
+	/** default character animations to play for each column **/
+	public var singAnimations:Array<Array<String>> = [
+		["singUP"],
+		["singLEFT", "singRIGHT"],
+		["singLEFT", "singUP", "singRIGHT"],
+		["singLEFT", "singDOWN", "singUP", "singRIGHT"],
+		["singLEFT", "singDOWN", "singUP", "singUP", "singRIGHT"],
+		["singLEFT", "singUP", "singRIGHT", "singLEFT", "singDOWN", "singRIGHT"],
+		["singLEFT", "singUP", "singRIGHT", "singUP", "singLEFT", "singDOWN", "singRIGHT"],
+		[
+			"singLEFT",
+			"singDOWN",
+			"singUP",
+			"singRIGHT",
+			"singLEFT",
+			"singDOWN",
+			"singUP",
+			"singRIGHT"
+		],
+		[
+			"singLEFT",
+			"singDOWN",
+			"singUP",
+			"singRIGHT",
+			"singUP",
+			"singLEFT",
+			"singDOWN",
+			"singUP",
+			"singRIGHT"
+		],
+		[
+			"singLEFT",
+			"singDOWN",
+			"singUP",
+			"singRIGHT",
+			"singDOWN",
+			"singUP",
+			"singLEFT",
+			"singDOWN",
+			"singUP",
+			"singRIGHT"
+		]
+	];
 	
-	public var noteField:NoteField; // renderer
-	public var judgeManager(get, default):JudgmentManager; // for deriving judgements for input reasons
-	public var modManager:ModManager; // the mod manager. will be set automatically by playstate so dw bout this
-	public var modNumber:Int = 0; // used for the mod manager. can be set to a different number to give it a different set of modifiers. can be set to 0 to sync the modifiers w/ bf's, and 1 to sync w/ the opponent's
-	public var isPlayer:Bool = false; // if this playfield takes input from the player
-	public var inControl:Bool = true; // if this playfield will take input at all
-	public var keyCount(default, set):Int = 4; // How many lanes are in this field
-	public var autoPlayed(default, set):Bool = false; // if this playfield should be played automatically (botplay, opponent, etc)
+	/** note renderer **/
+	public var noteField:NoteField;
+	/** for deriving judgements for input reasons **/
+	public var judgeManager:JudgmentManager;
+	/** the mod manager. will be set automatically by playstate so dw bout this **/
+	public var modManager:ModManager;
+	/** used for the mod manager. can be set to a different number to give it a different set of modifiers. can be set to 0 to sync the modifiers w/ bf's, and 1 to sync w/ the opponent's **/
+	public var modNumber:Int = 0;
+	/** if this playfield takes input from the player **/
+	public var isPlayer:Bool = false;
+	/** if this playfield will take input at all **/
+	public var inControl:Bool = true;
+	/** How many lanes are in this field **/
+	public var keyCount(default, set):Int = 4;
+	/** if this playfield should be played automatically (botplay, opponent, etc) **/
+	public var autoPlayed(default, set):Bool = false;
 
 	public var x:Float = 0;
 	public var y:Float = 0;
-
-	function get_judgeManager() 
-		return judgeManager == null ? PlayState.instance.judgeManager : judgeManager;
 	
-	function set_keyCount(cnt:Int){
-		if (cnt < 0)
-			cnt=0;
-		if (spawnedByData.length < cnt){
-			for (_ in (spawnedByData.length)...cnt)
-				spawnedByData.push([]);
-		}else if(spawnedByData.length > cnt){
-			for (_ in cnt...spawnedByData.length)
-				spawnedByData.pop();
-		}
+	/** function that gets called when the note is hit. goodNoteHit and opponentNoteHit in playstate for eg **/
+	public var noteHitCallback:NoteCallback;
+	/** function that gets called when a hold is stepped on. Only really used for calling script events. Return 'false' to not do hold logic **/
+	public var holdPressCallback:NoteCallback;
+	/** function that gets called when a hold is released. Only really used for calling script events. **/
+	public var holdReleaseCallback:NoteCallback;
+	/** function that gets called for every 'step' that a hold is pressed for. **/
+	public var holdStepCallback:NoteCallback;
 
-		if (tapsByData.length < cnt) {
-			for (_ in (tapsByData.length)...cnt)
-				tapsByData.push([]);
-		} else if (tapsByData.length > cnt) {
-			for (_ in cnt...tapsByData.length)
-				tapsByData.pop();
-		} 
+	/** notesplashes **/
+	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
+	/** things that get "attached" to the receptors. custom splashes, etc. **/
+	public var strumAttachments:FlxTypedGroup<NoteObject>;
 
-		if (noTapsByData.length < cnt) {
-			for (_ in (noTapsByData.length)...cnt)
-				noTapsByData.push([]);
-		} else if (noTapsByData.length > cnt) {
-			for (_ in cnt...noTapsByData.length)
-				noTapsByData.pop();
-		} 
-
-		if (noteQueue.length < cnt)
-		{
-			for (_ in (noteQueue.length)...cnt)
-				noteQueue.push([]);
-		}
-		else if (noteQueue.length > cnt)
-		{
-			for (_ in cnt...noteQueue.length)
-				noteQueue.pop();
-		}
-		if (keysPressed.length < cnt)
-		{
-			for (_ in (keysPressed.length)...cnt)
-				keysPressed.push(false);
-		}
-
-		setDefaultBaseXPositions();
-
-		return keyCount = cnt;
-	}
-
-	function set_autoPlayed(aP:Bool){
-		if(aP == autoPlayed)return aP;
-		
-		for (idx in 0...keysPressed.length)
-			keysPressed[idx] = false;
-		
-		for(obj in strumNotes){
-			obj.playAnim("static");
-			obj.resetAnim = 0;
-		}
-		return autoPlayed = aP;
-	}
+ 	/** Event that gets called every time you miss a note. **/
+	public var noteMissed = new Event<NoteCallback>();
+	/** Event that gets called every time a note is removed. **/
+	public var noteRemoved = new Event<NoteCallback>(); 
+	/** Event that gets called every time a note is spawned. **/
+	public var noteSpawned = new Event<NoteCallback>();
+	/** Event that gets called every time a hold is dropped **/
+	public var holdDropped = new Event<NoteCallback>();
+	/** Event that gets called every time a hold is finished **/
+	public var holdFinished = new Event<NoteCallback>();
+	/** Event that gets called every time a hold is updated **/
+	public var holdUpdated = new Event<(Note, PlayField, Float) -> Void>();
 	
-	public var noteHitCallback:NoteCallback; // function that gets called when the note is hit. goodNoteHit and opponentNoteHit in playstate for eg
-	public var holdPressCallback:NoteCallback; // function that gets called when a hold is stepped on. Only really used for calling script events. Return 'false' to not do hold logic
-	public var holdReleaseCallback:NoteCallback; // function that gets called when a hold is released. Only really used for calling script events.
-	public var holdStepCallback:NoteCallback; // function that gets called for every 'step' that a hold is pressed for.
-
-	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>; // notesplashes
-	public var strumAttachments:FlxTypedGroup<NoteObject>; // things that get "attached" to the receptors. custom splashes, etc.
-
-	public var noteMissed:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time you miss a note.
-	public var noteRemoved:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time a note is removed.
-	public var noteSpawned:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time a note is spawned.
-	public var holdDropped:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time a hold is dropped
-	public var holdFinished:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time a hold is finished
-	public var holdUpdated:Event<(Note, PlayField, Float) -> Void> = new Event<(Note, PlayField, Float) -> Void>(); // event that gets called every time a hold is updated
-	
-	public var keysPressed:Array<Bool> = [false,false,false,false]; // what keys are pressed rn
+	/** what keys are pressed rn **/
+	public var keysPressed:Array<Bool> = [false,false,false,false];
 	public var isHolding:Array<Bool> = [false,false,false,false];
 
 	public var baseXPositions:Array<Float> = [];
-	public function setDefaultBaseXPositions() {
-		for (i in 0...this.keyCount)
-			this.baseXPositions[i] = modManager.getBaseX(i, this.playerId, keyCount);
-	}
-	public inline function getBaseX(direction:Int)
-		return baseXPositions[direction];
-	
-	public function new(modMgr:ModManager, ?keyCount:Int){
+
+	private var garbage:Array<Note> = [];
+
+	public function new(?keyCount:Int){
 		super();
-		this.modManager = modMgr;
-		this.keyCount = keyCount == null ? PlayState.keyCount : keyCount;
+		this.modManager = game?.modManager;
+		this.judgeManager = game?.judgeManager;
+		this.keyCount = keyCount ?? PlayState.keyCount;
 
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
+		grpNoteSplashes.visible = false; // so they dont get drawn
 		add(grpNoteSplashes);
 
 		strumAttachments = new FlxTypedGroup<NoteObject>();
@@ -200,15 +185,14 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 		var splash:NoteSplash = new NoteSplash(100, 100, 0);
 		splash.handleRendering = false;
-		grpNoteSplashes.add(splash);
-		grpNoteSplashes.visible = false; // so they dont get drawn
 		splash.alpha = 0.0;
+		grpNoteSplashes.add(splash);
 
 		////
-		noteField = new NoteField(this, modMgr);
+		noteField = new NoteField(this);
 	}
 
-	// queues a note to be spawned
+	/** queues a note to be spawned **/
 	public function queue(note:Note){
 		if (noteQueue[note.column] == null)
 			noteQueue[note.column] = [note];
@@ -218,16 +202,16 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
-	// unqueues a note
+	/** unqueues a note **/
 	public function unqueue(note:Note)
 	{
-		if (noteQueue[note.column] == null)
-			noteQueue[note.column] = [];
-		noteQueue[note.column].remove(note);
-		noteQueue[note.column].sort(sortNotesAscend);
+		if (noteQueue[note.column] != null) {
+			noteQueue[note.column].remove(note);
+			noteQueue[note.column].sort(sortNotesAscend);
+		}
 	}
 
-	// destroys a note
+	/** destroys a note **/
 	public function removeNote(daNote:Note){
 		daNote.active = false;
 		daNote.visible = false;
@@ -266,7 +250,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		daNote.destroy();
 	}
 
-	// spawns a note
+	/** spawns a note **/
 	public function spawnNote(note:Note){
 		if(note.spawned)
 			return;
@@ -301,37 +285,35 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		insert(0, note);
 	}
 
-	// gets all notes in the playfield, spawned or otherwise.
-
-	public function getAllNotes(?dir:Int){
+	/** gets all notes in the playfield, spawned or otherwise. **/
+	public function getAllNotes(?column:Int){
 		var arr:Array<Note> = [];
-		if(dir==null){
-			for(queue in noteQueue){
-				for(note in queue)
+		if (column == null) {
+			for (queue in noteQueue) {
+				for (note in queue)
 					arr.push(note);
-				
 			}
-		}else{
-			for (note in noteQueue[dir])
+		}else {
+			for (note in noteQueue[column])
 				arr.push(note);
 		}
-		for(note in spawnedNotes)
+		for (note in spawnedNotes)
 			arr.push(note);
 		return arr;
 	}
 	
-	// returns true if the playfield has the note, false otherwise.
+	/** Returns true if this PlayField has the note, false otherwise. **/
 	public function hasNote(note:Note)
 		return spawnedNotes.contains(note) || noteQueue[note.column]!=null && noteQueue[note.column].contains(note);
 	
-	// sends an input to the playfield
-	public function input(data:Int, ?hitTime:Float):Null<Note> {
-		if (data < 0 || data > keyCount) 
+	/** Sends an input to the PlayField **/
+	public function input(column:Int, ?hitTime:Float):Null<Note> {
+		if (column < 0 || column > keyCount) 
 			return null;
 
 		hitTime ??= Conductor.getAccPosition();
 
-		var noteList = getTapNotes(data, (note:Note) -> !note.tooLate);
+		var noteList = getTapNotes(column, (note:Note) -> !note.tooLate);
 		noteList.sort(sortNotesDescend); // so lowPriority actually works (even though i hate it lol!)
 
 		var recentHold:Null<Note> = null;
@@ -358,55 +340,46 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return recentHold;
 	}
 
-	// generates the receptors
+	/** generates the receptors **/
 	public function generateStrums(){
 		for(i in 0...keyCount){
-			var babyArrow:StrumNote = new StrumNote(0, 0, i, this, (FlxG.state == PlayState.instance) ? PlayState.instance.hudSkin : 'default');
-			babyArrow.downScroll = ClientPrefs.downScroll;
-			babyArrow.alpha = 0;
-			insert(0, babyArrow);
-			babyArrow.x = getBaseX(i);
-			babyArrow.y = 50;
-			babyArrow.handleRendering = false; // NoteField handles rendering
-			babyArrow.cameras = cameras;
-			strumNotes.push(babyArrow);
-			babyArrow.postAddedToGroup();
+			var strum:StrumNote = new StrumNote(0, 0, i, this, (FlxG.state == game) ? game.hudSkin : 'default');
+			strum.downScroll = ClientPrefs.downScroll;
+			strum.alpha = 0;
+			insert(0, strum);
+			strum.x = getBaseX(i);
+			strum.y = 50;
+			strum.handleRendering = false; // NoteField handles rendering
+			strum.cameras = cameras;
+			strumNotes.push(strum);
+			strum.postAddedToGroup();
 		}
 	}
 
-	// does the introduction thing for the receptors. story mode usually sets skip to true. OYT uses this when mario comes in
+	/** 
+		Does the fade & slide animation for the receptors.  
+		OYT uses this when mario comes in.
+		@param skip If true, the receptors will immediately appear without any animation.
+	**/
 	public function fadeIn(skip:Bool = false)
 	{
-		for (data in 0...strumNotes.length)
-		{
-			var babyArrow:StrumNote = strumNotes[data];
-			if (skip)
-				babyArrow.alpha = 1;
-			else
-			{
-				babyArrow.alpha = 0;
-				var daY = babyArrow.downScroll ? -10 : 10;
-				babyArrow.offsetY -= daY;
-				FlxTween.tween(babyArrow, {offsetY: babyArrow.offsetY + daY, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + Conductor.beatLength * data});
+		if (skip) {
+			for (column => strum in strumNotes)
+				strum.alpha = 1;
+		}else {	
+			for (column => strum in strumNotes) {
+				FlxTween.tween(strum, {offsetY: strum.offsetY, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: ((0.5 * 4) / keyCount) + Conductor.beatLength * ((column * 4) / keyCount)});
+				strum.offsetY -= strum.downScroll ? -10 : 10;
+				strum.alpha = 0;
 			}
 		}
 	}
 
-	// just sorts by z indexes, not used anymore tho
-	function sortByOrderNote(Obj1:Note, Obj2:Note):Int
-	{
-		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
-	}
-
-	private static function sortNotesAscend(a:Note, b:Note):Int
-		return Std.int(a.strumTime - b.strumTime);
-
-	private static function sortNotesDescend(a:Note, b:Note):Int
-		return Std.int(b.strumTime - a.strumTime);
-
-	// spawns a notesplash w/ specified skin. optional note to derive the skin and colours from.
-
-	public function spawnSplash(note:Note, splashSkin:String){
+	/** 
+		Spawns a notesplash w/ specified skin. 
+		@param note Optional note to derive the skin and colours from. 
+	**/
+	public function spawnSplash(note:Null<Note>, splashSkin:String){
 		var skin:String;
 		var hue:Float;
 		var sat:Float;
@@ -434,29 +407,32 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return splash;
 	}
 
-	// spawns notes, deals w/ hold inputs, etc.
+	/** Spawns notes, deals w/ hold inputs, etc. **/
 	override public function update(elapsed:Float){
+		noteField.modManager = modManager;
 		noteField.modNumber = modNumber;
 		noteField.cameras = cameras;
 
 		for (char in characters)
 			char.controlled = isPlayer;
 		
-		var curDecStep = Conductor.curDecStep;
-		var curDecBeat = Conductor.curDecBeat;
+		// note spawning
+		for (column => queue in noteQueue) {
+			if (queue[0] == null)
+				continue;
 
-		for (data => column in noteQueue)
-		{
-			if (column[0] != null)
-			{
-				var dataSpawnTime = modManager.get("noteSpawnTime" + data); 
-				var noteSpawnTime = (dataSpawnTime != null && dataSpawnTime.getValue(modNumber)>0)?dataSpawnTime:modManager.get("noteSpawnTime");
-				var time:Float = noteSpawnTime == null ? spawnTime : noteSpawnTime.getValue(modNumber); // no longer averages the spawn times
-				if (time <= 0)time = spawnTime;
-				
-				while (column.length > 0 && column[0].strumTime - Conductor.songPosition < time)
-					spawnNote(column[0]);
-			}
+			var modifier = modManager.get("noteSpawnTime" + column); 
+			if (modifier == null || modifier.getValue(modNumber) <= 0) 
+				modifier = modManager.get("noteSpawnTime");
+			
+			var spawnTime:Float;
+			if (modifier == null || (spawnTime = modifier.getValue(modNumber)) <= 0)
+				spawnTime = this.spawnTime;
+			else
+				spawnTime = modifier.getValue(modNumber);
+			
+			while (queue.length > 0 && queue[0].strumTime - Conductor.songPosition < spawnTime)
+				spawnNote(queue[0]);
 		}
 
 		super.update(elapsed);
@@ -464,9 +440,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		for(obj in strumNotes)
 			modManager.updateObject(curDecBeat, obj, modNumber);
 
-		//spawnedNotes.sort(sortByOrderNote);
-
-		var garbage:Array<Note> = [];
 		for (daNote in spawnedNotes)
 		{
 			if(!daNote.alive){
@@ -477,7 +450,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 			// check for hold inputs
 			if(!daNote.isSustainNote){
-				if(daNote.column > keyCount-1){
+				if(daNote.column >= keyCount){
 					garbage.push(daNote);
 					continue;
 				}
@@ -509,7 +482,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 						if(isHeld && !daNote.isRoll){
 							if(daNote.unhitTail.length > 0)
-								if (receptor.animation.finished || receptor.animation.curAnim.name != "confirm") 
+								if (receptor.animation.finished || receptor.animation.name != "confirm") 
 									receptor.playAnim("confirm", true, daNote);
 							
 							daNote.tripProgress = 1.0;
@@ -582,8 +555,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			}
 		}
 
-		for(note in garbage)removeNote(note);
-		
+		while (garbage.length > 0) 
+			removeNote(garbage.pop());
 
 		if (inControl && autoPlayed)
 		{
@@ -599,9 +572,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				}
 			}
 		}else{
-			for(data in 0...keyCount){
-				if (keysPressed[data]){
-					var noteList = getTapNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote, false);
+			for(column in 0...keyCount){
+				if (keysPressed[column]){
+					var noteList = getTapNotesWithEnd(column, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote, false);
 					
 					noteList.sort(sortNotesDescend);
 					
@@ -622,18 +595,16 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 	}
 	
-
-	// gets all living notes w/ optional filter
-
-	public function getNotes(dir:Int, ?filter:Note->Bool):Array<Note>
+	/** Gets all living notes w/ optional filter **/
+	public function getNotes(column:Int, ?filter:Note->Bool):Array<Note>
 	{
-		if (spawnedByData[dir]==null)
+		if (spawnedByData[column]==null)
 			return [];
 
 		var collected:Array<Note> = [];
-		for (note in spawnedByData[dir])
+		for (note in spawnedByData[column])
 		{
-			if (note.alive && note.column == dir)
+			if (note.alive && note.column == column)
 			{
 				if (filter == null || filter(note))
 					collected.push(note);
@@ -642,16 +613,16 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return collected;
 	}
  
-	// get all living TAP notes
-	public function getTapNotes(dir:Int, ?filter:Note->Bool, requiresTap:Bool = true):Array<Note> {
-		var array = requiresTap ? tapsByData[dir] : noTapsByData[dir];
+	/** get all living TAP notes **/
+	public function getTapNotes(column:Int, ?filter:Note->Bool, requiresTap:Bool = true):Array<Note> {
+		var array = requiresTap ? tapsByData[column] : noTapsByData[column];
 
 		if (array == null)
 			return [];
 
 		var collected:Array<Note> = [];
 		for (note in array) {
-			if (note.alive && note.column == dir) {
+			if (note.alive && note.column == column) {
 				if (filter == null || filter(note))
 					collected.push(note);
 			}
@@ -659,9 +630,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return collected;
 	}
 
-	// gets all living TAP notes before a certain time w/ optional filter
-	public function getTapNotesWithEnd(dir:Int, end:Float, ?filter:Note->Bool, requiresTap:Bool = true):Array<Note> {
-		var array = requiresTap ? tapsByData[dir] : noTapsByData[dir];
+	/** gets all living TAP notes before a certain time w/ optional filter **/
+	public function getTapNotesWithEnd(column:Int, end:Float, ?filter:Note->Bool, requiresTap:Bool = true):Array<Note> {
+		var array = requiresTap ? tapsByData[column] : noTapsByData[column];
 
 		if (array == null)
 			return [];
@@ -670,7 +641,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		for (note in array) {
 			if (note.strumTime > end)
 				break;
-			if (note.alive && note.column == dir && !note.wasGoodHit && !note.tooLate) {
+			if (note.alive && note.column == column && !note.wasGoodHit && !note.tooLate) {
 				if (filter == null || filter(note))
 					collected.push(note);
 			}
@@ -678,16 +649,16 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return collected;
 	}
 
-	// gets all living notes before a certain time w/ optional filter
-	public function getNotesWithEnd(dir:Int, end:Float, ?filter:Note->Bool):Array<Note>
+	/** gets all living notes before a certain time w/ optional filter **/
+	public function getNotesWithEnd(column:Int, end:Float, ?filter:Note->Bool):Array<Note>
 	{
-		if (spawnedByData[dir] == null)
+		if (spawnedByData[column] == null)
 			return [];
 		var collected:Array<Note> = [];
-		for (note in spawnedByData[dir])
+		for (note in spawnedByData[column])
 		{
 			if (note.strumTime>end)break;
-			if (note.alive && note.column == dir && !note.wasGoodHit && !note.tooLate)
+			if (note.alive && note.column == column && !note.wasGoodHit && !note.tooLate)
 			{
 				if (filter == null || filter(note))
 					collected.push(note);
@@ -696,12 +667,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return collected;
 	}
 
-	function sortByShit(Obj1:Note, Obj2:Note):Int
-	{
-		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
-	}
-
-	// go through every queued note and call a func on it
+	/** go through every queued note and call a func on it **/
 	public function forEachQueuedNote(callback:Note->Void)
 	{
 		for(column in noteQueue){
@@ -718,7 +684,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
-	// kills all notes which are stacked
+	/** kills all notes which are stacked **/
 	public function clearStackedNotes(){
 
 		var goobaeg:Array<Note> = [];
@@ -753,26 +719,40 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			removeNote(note);
 	}
 
-	// as is in the name, removes all dead notes
+	/** as is in the name, removes all dead notes **/
 	public function clearDeadNotes(){
 		var dead:Array<Note> = [];
 		for(note in spawnedNotes){
 			if(!note.alive)
 				dead.push(note);
-			
 		}
 		for(column in noteQueue){
 			for(note in column){
 				if(!note.alive)
 					dead.push(note);
 			}
-			
 		}
 
 		for(note in dead)
 			removeNote(note);
 	}
 
+	public function setDefaultBaseXPositions() {
+		for (i in 0...keyCount)
+			baseXPositions[i] = getDefaultBaseX(i);
+	}
+
+	public inline function getBaseX(direction:Int)
+		return baseXPositions[direction];
+
+	public inline function getDefaultBaseX(direction:Int)
+		return modManager.getBaseX(direction, this.playerId, keyCount);
+
+	private static inline function sortNotesAscend(a:Note, b:Note):Int
+		return Std.int(a.strumTime - b.strumTime);
+
+	private static inline function sortNotesDescend(a:Note, b:Note):Int
+		return Std.int(b.strumTime - a.strumTime);
 
 	override function destroy(){
 		noteSpawned.removeAll();
@@ -784,4 +764,91 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 		return super.destroy();
 	}
+
+	#if true
+	function set_playerId(v) {
+		playerId = v;
+		setDefaultBaseXPositions();
+		return playerId;
+	}
+
+	function set_keyCount(cnt:Int){
+		if (cnt < 0)
+			cnt=0;
+
+		if (spawnedByData.length < cnt) {
+			for (_ in (spawnedByData.length)...cnt)
+				spawnedByData.push([]);
+		} else if(spawnedByData.length > cnt){
+			spawnedByData.resize(cnt);
+		}
+
+		if (tapsByData.length < cnt) {
+			for (_ in (tapsByData.length)...cnt)
+				tapsByData.push([]);
+		} else if (tapsByData.length > cnt) {
+			tapsByData.resize(cnt);
+		} 
+
+		if (noTapsByData.length < cnt) {
+			for (_ in (noTapsByData.length)...cnt)
+				noTapsByData.push([]);
+		} else if (noTapsByData.length > cnt) {
+			noTapsByData.resize(cnt);
+		} 
+
+		if (noteQueue.length < cnt) {
+			for (_ in (noteQueue.length)...cnt)
+				noteQueue.push([]);
+		} else if (noteQueue.length > cnt) {
+			noteQueue.resize(cnt);
+		}
+
+		if (keysPressed.length < cnt) {
+			for (_ in (keysPressed.length)...cnt)
+				keysPressed.push(false);
+		}
+
+		if (baseXPositions.length < cnt) {
+			for (_ in (baseXPositions.length)...cnt)
+				baseXPositions.push(getDefaultBaseX(baseXPositions.length));
+		} else if (baseXPositions.length > cnt) {
+			baseXPositions.resize(cnt);
+		}
+
+		return keyCount = cnt;
+	}
+
+	function set_autoPlayed(aP:Bool){
+		if(aP == autoPlayed)return aP;
+		
+		for (idx in 0...keysPressed.length)
+			keysPressed[idx] = false;
+		
+		for(obj in strumNotes){
+			obj.playAnim("static");
+			obj.resetAnim = 0;
+		}
+		return autoPlayed = aP;
+	}
+
+	override function set_camera(to){
+		for (strumLine in strumNotes)
+			strumLine.camera = to;
+		
+		noteField.camera = to;
+
+		return super.set_camera(to);
+	}
+
+	override function set_cameras(to){
+		for (strumLine in strumNotes)
+			strumLine.cameras = to;
+		
+		noteField.cameras = to;
+
+		return super.set_cameras(to);
+	}
+
+	#end
 }
