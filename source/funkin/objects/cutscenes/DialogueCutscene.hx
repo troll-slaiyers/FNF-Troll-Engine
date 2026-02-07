@@ -73,21 +73,21 @@ class DialogueCutscene extends Cutscene{
 
         this.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
     } 
-    function loadCharacters()
+
+    function loadCharacters()        //alot of this function is kind of ripped from psych
     {
-        //alot of this function is kind of ripped from psych
-        var charsMap:Map<String, Bool> = new Map<String>();
+        var charsMap:Map<String, Bool> = new Map<String, Bool>();
         //Does a loop through the entire dialogue file and checks for characters
 		for (i in 0...dialogueFile.dialogue.length) {
 			if(dialogueFile.dialogue[i] != null && dialogueFile.dialogue[i].character != null) {
 				var newChar:String = dialogueFile.dialogue[i].character;
                 if(!charsMap.exists(newChar) || !charsMap.get(newChar)) 
-					charsMap.set(newChar);//adds to the map only if the new character doesnt already exist
+					charsMap.set(newChar, true);//adds to the map only if the new character doesnt already exist
 			}
 		}
 
         for (curCharacter in charsMap.keys()) {
-		    var char:DialogueCharacter = new DialogueCharacter(curCharacter); //new character thats invisible and barely drawn.
+		    var char:DialogueCharacter = new DialogueCharacter(curCharacter);
 			char.updateHitbox();
 			char.scrollFactor.set();
 			char.alpha = 0.00001;
@@ -114,12 +114,14 @@ class DialogueCutscene extends Cutscene{
     {
         FlxG.sound.play(Paths.sound(box.dialoguePressedSound), 0.7);
         box.newLine();
+        
         if(curLine >= dialogueFile.dialogue.length)
         {
             onEnd.dispatch(false);
             return;
         }
-        var curDialogueLine:DialogueLine = null;
+
+        var curDialogueLine:DialogueLine;
 		curDialogueLine = dialogueFile.dialogue[curLine];
         var curCharcter:Int = 0;
         for (i in 0...characters.length) {
@@ -143,7 +145,7 @@ class DialogueCutscene extends Cutscene{
         dialogueText.start(curDialogueLine.text_speed);
     }
     /**
-     * Function that's only called when the current dialogue is ending.
+     * Function that's only called when dialogue is ending.
      * @param wasSkipped 
      */
     function endDialogue(wasSkipped:Bool)
@@ -169,7 +171,8 @@ class DialogueCutscene extends Cutscene{
 		createNewLine();
 	}
     /**
-     * Function thats called whenever
+     * Function thats called to retrieve text sound.
+     * TODO: add character text sounds.
      */
     public function getTextSound()
     {

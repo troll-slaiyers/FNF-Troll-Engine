@@ -11,33 +11,15 @@
 			"sound": "",
 			"text_speed": 0.06,
 			"character": "senpai",
-			"characterAnim": "normal",
+			"characterAnim": "talk",
 			"text": "A serenade between gentlemen shall decide where her beautiful heart shall reside."
 		},
 		{
 			"sound": "",
-			"text_speed": 0.5,
+			"text_speed": 0.2,
 			"portrait": "bf",
-			"boxState": "normal",
-			"characterAnim": "demon",
+			"characterAnim": "normal",
 			"text": "Beep bo bop"
-		},
-		{
-			"sound": "",
-			"text_size": 47,
-			"text_speed": 0.02,
-			"portrait": "senpai",
-			"characterAnim": "normal",
-			"text": "man shut ur fucking mouth"
-		}
-		,
-		{
-			"sound": "",
-			"text_size": 23,
-			"text_speed": 0.02,
-			"portrait": "bf",
-			"characterAnim": "normal",
-			"text": "ok"
 		}
 	],
 	"box_style": "pixel"
