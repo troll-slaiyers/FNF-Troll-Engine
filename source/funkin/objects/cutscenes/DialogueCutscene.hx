@@ -49,7 +49,7 @@ class DialogueCutscene extends Cutscene{
     public override function createCutscene() {
         trace('created dialogue');
 
-        box = new DialogueBox(dialogueFile.boxStyle);
+        box = new DialogueBox(dialogueFile.box_style);
         box.visible = false;
         add(box);
         trace('box');
