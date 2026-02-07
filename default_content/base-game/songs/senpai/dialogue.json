@@ -2,29 +2,43 @@
 	"dialogue": [
 		{
 			"sound": "",
-			"textSpeed": 0.05,
+			"text_speed": 0.06,
 			"character": "senpai",
-			"boxState": "normal",
 			"characterAnim": "normal",
 			"text": "Ah, a new fair maiden has come in search of true love!"
 		},
 		{
 			"sound": "",
-			"textSpeed": 0.05,
+			"text_speed": 0.06,
 			"character": "senpai",
-			"boxState": "normal",
 			"characterAnim": "normal",
 			"text": "A serenade between gentlemen shall decide where her beautiful heart shall reside."
 		},
 		{
 			"sound": "",
-			"character": 0.05,
+			"text_speed": 0.5,
 			"portrait": "bf",
 			"boxState": "normal",
 			"characterAnim": "demon",
-			"text_size": 45,
 			"text": "Beep bo bop"
+		},
+		{
+			"sound": "",
+			"text_size": 47,
+			"text_speed": 0.02,
+			"portrait": "senpai",
+			"characterAnim": "normal",
+			"text": "man shut ur fucking mouth"
+		}
+		,
+		{
+			"sound": "",
+			"text_size": 23,
+			"text_speed": 0.02,
+			"portrait": "bf",
+			"characterAnim": "normal",
+			"text": "ok"
 		}
 	],
-	"boxStyle": "pixel"
+	"box_style": "pixel"
 }

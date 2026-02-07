@@ -1,23 +1,29 @@
 {
     "graphic": "pixelUI/dialogueBOX-pixel",
 	"antialiasing": false,
-	"graphicScale": 5.4,
+	"scale": 5.4,
 	"offsets":[-30, 20],
-	"looped": false,
-    "dialoguePressed": "Text Box Appear instance",
-	"dialogueFont": "pixel.ttf",
-	"dialogueTalkSfx": "pixelText",
-	"dialoguePressedSfx": "clickText",
+	"dialogue_talk_sfx": "pixelText",
+	"dialogue_pressed_sfx": "clickText",
 	"animations": [
 		{
 			"offsets": [
 				-5,
 				0
 			],
-			"loop": false,
+			"looped": false,
 			"fps": 24,
 			"animName": "pressed",
 			"animPrefix": "Text Box Appear instance"
 		}
-	]
+	],
+	"text": {
+		"font":"Pixel Arial 11 Bold",
+		"size": 35,
+		"offsets": [180,470],
+		"color": "#3F2021",
+		"shadow_color": "#D89494",
+    	"shadow_width": 2,
+		"width": 900
+	}
 }

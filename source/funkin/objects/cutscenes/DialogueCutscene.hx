@@ -14,15 +14,15 @@ sorry if the code is a mess rn, alot is going on rn
 */
 typedef DialogueFile = {
 	var dialogue:Array<DialogueLine>;
-    var boxStyle:String; //what box the file should use.
+    var box_style:String; //what box the file should use.
 }
 typedef DialogueLine = {
     var text:String;
 	var character:String;
 	var characterAnim:String;
-	var textSpeed:Float;
+	var text_speed:Float;
     var text_size:Int;//custom font size
-	var soundByte:String; //what soundbyte should be played //should have this based on character i think
+	var sound_byte:String; //what soundbyte should be played //should have this based on character i think
 }
 
 class DialogueCutscene extends Cutscene{
@@ -33,12 +33,12 @@ class DialogueCutscene extends Cutscene{
     /**
      * How long it should take until the dialogue first starts
      * Set to 0 for instant start time.
-     */
+    */
     public var introDelay:Float = 2;
     /**
      * Whether the player is able to progress the dialogue.
      * Starts of at 0.
-     */
+    */
     public var canProgressDialogue:Bool = false;
     public function new(dialoguePath:String){
 		super();
@@ -52,13 +52,18 @@ class DialogueCutscene extends Cutscene{
         box = new DialogueBox(dialogueFile.boxStyle);
         box.visible = false;
         add(box);
+        trace('box');
+		box.script?.call("onCreatePost");
 
-        dialogueText = new FlxTypeText(170, 450, Std.int(FlxG.width * 0.75), '', 12);
-        dialogueText.setFormat(Paths.font(box.font), 12, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+        dialogueText = new FlxTypeText(box.textOffsets[0], box.textOffsets[1], box.textWidth, '', 32);
+        dialogueText.setFormat(Paths.font(box.font), 32, FlxColor.fromString(box.textColor), LEFT, SHADOW, FlxColor.fromString(box.shadowTextColor), false);
         dialogueText.antialiasing = box.antialiasing;
-        dialogueText.borderSize = 1.4;
+        dialogueText.borderSize = box.shadowWidth;
         add(dialogueText);
-       
+        dialogueText.completeCallback = function()
+        {
+            box.finishLine();
+        }
         new FlxTimer().start(introDelay, function(tmr:FlxTimer)
 		{
             canProgressDialogue = true;
@@ -91,6 +96,8 @@ class DialogueCutscene extends Cutscene{
      */
     public function createNewLine()
     {
+        FlxG.sound.play(Paths.sound(box.dialoguePressedSound), 0.7);
+        box.newLine();
         if(curLine >= dialogueFile.dialogue.length)
         {
             onEnd.dispatch(false);
@@ -100,12 +107,9 @@ class DialogueCutscene extends Cutscene{
 		curDialogueLine = dialogueFile.dialogue[curLine];
         getTextSound();
         dialogueText.size = getTextSize(curDialogueLine.text_size);
-        FlxG.sound.play(Paths.sound(box.dialoguePressedSound), 0.7);
-      
-       
-        box.animation.play('pressed');
+               
         dialogueText.resetText(curDialogueLine.text);
-        dialogueText.start(curDialogueLine.textSpeed);
+        dialogueText.start(curDialogueLine.text_speed);
 
     }
     /**

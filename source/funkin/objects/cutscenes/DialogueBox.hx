@@ -1,18 +1,30 @@
 package funkin.objects.cutscenes;
+import flixel.util.FlxColor;
 import lime.utils.Assets;
 import haxe.Json;
 import funkin.scripts.*;
-
 typedef BoxData = {
 	var graphic:String;
 	var antialiasing:Bool;
-	var graphicScale:Float;
+	var scale:Float;
 	var offsets:Array<Int>;
-	var dialogueFont:String;
-	var dialogueTalkSfx:String;
-	var dialoguePressedSfx:String;
-	var text_size:Int;
+	var dialogue_talk_sfx:String;
+	var dialogue_pressed_sfx:String;
 	var animations:Array<AnimsArray>;
+	var text:TextData;
+}
+
+/**
+ * Typedef used for the actual text stuff.
+ */
+typedef TextData = {
+	var size:Int;
+	var font:String;
+	var offsets:Array<Int>;
+	var width:Int;
+	var color:String;
+	var shadow_color:String;
+    var shadow_width:Float;
 }
 
 typedef AnimsArray = {
@@ -29,10 +41,15 @@ class DialogueBox extends FlxSprite
 
 	public var font:String = 'pixel.ttf';
 	public var textSize:Int = 42;
+	public var textColor:String;
+	public var shadowTextColor:String;
 	public var dialogueTalkSound:String = 'dialogue';
 	public var dialoguePressedSound:String = 'dialogue';
 	public var script:FunkinHScript;
 	var currentBoxStyle:String;
+	public var shadowWidth:Float;
+	public var textOffsets:Array<Int>= [170, 450];
+	public var textWidth:Int = 700;
     public function new(_boxtype:String)
     {
         super();
@@ -44,32 +61,38 @@ class DialogueBox extends FlxSprite
 		}
 
 		currentBoxStyle = _boxtype;
-		startScript();
+
+
         x = jsonFile.offsets[0];
         y = jsonFile.offsets[1];
 		
 	    frames = Paths.getSparrowAtlas(jsonFile.graphic);
 	    scrollFactor.set();
 		for (anim in jsonFile.animations) {
-				animation.addByPrefix(anim.animName, anim.animPrefix, anim.fps, false);
+				animation.addByPrefix(anim.animName, anim.animPrefix, anim.fps, anim.looped);
 		}
-		scale.set(jsonFile.graphicScale,jsonFile.graphicScale);
+		scale.set(jsonFile.scale,jsonFile.scale);
 
 		antialiasing = jsonFile.antialiasing;
 
-		font = jsonFile.dialogueFont;
-		textSize = jsonFile.text_size;
-		dialogueTalkSound = jsonFile.dialogueTalkSfx;
-		dialoguePressedSound = jsonFile.dialoguePressedSfx;
+		font = jsonFile.text.font;
+		textSize = jsonFile.text.size;
+		textColor = jsonFile.text.color;
+		shadowTextColor = jsonFile.text.shadow_color;
+		shadowWidth = jsonFile.text.shadow_width;
+		textOffsets = jsonFile.text.offsets;
+		textWidth = jsonFile.text.width;
+		dialogueTalkSound = jsonFile.dialogue_talk_sfx;
+		dialoguePressedSound = jsonFile.dialogue_pressed_sfx;
 
 	    updateHitbox();
-		createPost();
+
+		startScript();
+
     }
 	
 	
-	/**
-	 * ripped this from a stage script lol
-	 */
+	// ripped this from a stage script lol
 	public function startScript()
 	{
 		if (script != null) {
@@ -82,17 +105,27 @@ class DialogueBox extends FlxSprite
 			script = null;
 			return;
 		}
-		
+
 		//script.set("post", postLayer);
 
 		script = FunkinHScript.fromFile(file);
 		//variables
-				//script.set("add", add);
+		script.set("this", this);
 
 	}
 	public function createPost()
 	{
-		script?.call("onCreatePost");
+		script.call("onCreatePost");
+	}
+
+	public function newLine()
+	{
+		script.call("onNewLine");
+
+	}
+	public function finishLine()
+	{
+		script.call("onFinishLineDialogue");
 
 	}
 	public function onDialogueEnded()

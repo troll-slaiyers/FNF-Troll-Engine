@@ -5,6 +5,10 @@ function onCreate()
 {
     trace('created script');
     	
+	game.camFollowPos.x = 650;
+	game.camFollowPos.y =  500;
+	game.camFollow.x = game.camFollowPos.x;
+	game.camFollow.y = game.camFollowPos.y;
 	bg = CoolUtil.blankSprite(FlxG.width, FlxG.height, 0xFFB3DFd8);
 	bg.camera = game.camOther;
 	bg.alpha = 0;
@@ -16,15 +20,7 @@ function onCreate()
 		if (bg.alpha > 0.7)
 			bg.alpha = 0.7;
 	}, 5);
-
-    handSelect = new FlxSprite(1100, 600).loadGraphic(Paths.image('pixelUI/hand_textbox'));
-	handSelect.setGraphicSize(Std.int(handSelect.width *4));
-	handSelect.updateHitbox();
-    handSelect.antialiasing = false;
-    handSelect.cameras = [game.camOther];
-	game.add(handSelect);
-	
-    trace(handSelect.active);
+	trace(this);
 
 }
 
@@ -35,4 +31,25 @@ function onDialogueEnded() {
 	{
 		bg.alpha -= 1 / 5 * 0.7;
 	}, 5);
+}
+
+function onCreatePost()
+{
+	trace('ceare post');
+	handSelect = new FlxSprite(1100, 600).loadGraphic(Paths.image('pixelUI/hand_textbox'));
+	handSelect.setGraphicSize(Std.int(handSelect.width * 4));
+	handSelect.updateHitbox();
+    handSelect.antialiasing = false;
+    handSelect.cameras = [game.camOther];
+	handSelect.visible = false;
+	add(handSelect);
+}
+
+function onNewLine()
+{
+	this.animation.play('pressed');
+}
+function onFinishLineDialogue()
+{
+	handSelect.visible = true;
 }
