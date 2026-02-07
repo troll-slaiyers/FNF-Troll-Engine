@@ -18,6 +18,7 @@ import funkin.modchart.ModManager;
 import funkin.modchart.Modifier.RenderInfo;
 import funkin.objects.shaders.NoteColorSwap;
 import funkin.states.PlayState;
+import funkin.states.PlayState.instance as game;
 import haxe.ds.Vector as FastVector;
 import funkin.objects.playfields.FieldBase;
 
@@ -42,11 +43,10 @@ class NoteField extends FieldBase
 	public var optimizeHolds = false; //ClientPrefs.optimizeHolds;
 	public var defaultShader:FlxShader = new FlxShader();
 
-	public function new(field:PlayField, modManager:ModManager)
+	public function new(field:PlayField)
 	{
 		super(0, 0);
 		this.field = field;
-		this.modManager = modManager;
 		this.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs);
 	}
 	override public function getNotefield() {return this;}
@@ -269,7 +269,7 @@ class NoteField extends FieldBase
 		}
 
 		if ((FlxG.state is PlayState))
-			PlayState.instance.callOnScripts("notefieldPreDraw", [this],
+			game.callOnScripts("notefieldPreDraw", [this],
 				["drawQueue" => drawQueue, "lookupMap" => lookupMap]); // lets you do custom rendering in scripts, if needed
 		// one example would be reimplementing Die Batsards' original bullet mechanic
 		// if you need an example on how this all works just look at the tap note drawing portion
@@ -390,7 +390,7 @@ class NoteField extends FieldBase
 		
 		var strumDiff = (Conductor.songPosition - hold.strumTime);
 		var visualDiff = (Conductor.visualPosition - hold.visualTime); // TODO: get the start and end visualDiff and interpolate so that changing speeds mid-hold will look better
-		var sv = PlayState.instance.getSV(hold.strumTime).speed;
+		var sv = game.getSV(hold.strumTime).speed;
 
 
 /* 		var basePos = simpleDraw ? hold.vec3Cache : modManager.getPos(visualDiff, strumDiff, curDecBeat, hold.column, modNumber, hold, this,

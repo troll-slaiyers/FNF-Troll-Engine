@@ -47,30 +47,6 @@ typedef NoteCallback = (Note, PlayField) -> Void;
 
 class PlayField extends FlxTypedGroup<FlxBasic>
 {
-	override function set_camera(to){
-		for (strumLine in strumNotes)
-			strumLine.camera = to;
-		
-		noteField.camera = to;
-
-		return super.set_camera(to);
-	}
-
-	override function set_cameras(to){
-		for (strumLine in strumNotes)
-			strumLine.cameras = to;
-		
-		noteField.cameras = to;
-
-		return super.set_cameras(to);
-	}
-
-	function set_playerId(v) {
-		playerId = v;
-		setDefaultBaseXPositions();
-		return playerId;
-	}
-
 	/** tracks managed by this field **/
 	public var tracks:Array<FlxSound> = [];
 	/** used to calculate the base position of the strums **/
@@ -158,66 +134,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var x:Float = 0;
 	public var y:Float = 0;
 	
-	function set_keyCount(cnt:Int){
-		if (cnt < 0)
-			cnt=0;
-
-		if (spawnedByData.length < cnt) {
-			for (_ in (spawnedByData.length)...cnt)
-				spawnedByData.push([]);
-		} else if(spawnedByData.length > cnt){
-			spawnedByData.resize(cnt);
-		}
-
-		if (tapsByData.length < cnt) {
-			for (_ in (tapsByData.length)...cnt)
-				tapsByData.push([]);
-		} else if (tapsByData.length > cnt) {
-			tapsByData.resize(cnt);
-		} 
-
-		if (noTapsByData.length < cnt) {
-			for (_ in (noTapsByData.length)...cnt)
-				noTapsByData.push([]);
-		} else if (noTapsByData.length > cnt) {
-			noTapsByData.resize(cnt);
-		} 
-
-		if (noteQueue.length < cnt) {
-			for (_ in (noteQueue.length)...cnt)
-				noteQueue.push([]);
-		} else if (noteQueue.length > cnt) {
-			noteQueue.resize(cnt);
-		}
-
-		if (keysPressed.length < cnt) {
-			for (_ in (keysPressed.length)...cnt)
-				keysPressed.push(false);
-		}
-
-		if (baseXPositions.length < cnt) {
-			for (_ in (baseXPositions.length)...cnt)
-				baseXPositions.push(getDefaultBaseX(baseXPositions.length));
-		} else if (baseXPositions.length > cnt) {
-			baseXPositions.resize(cnt);
-		}
-
-		return keyCount = cnt;
-	}
-
-	function set_autoPlayed(aP:Bool){
-		if(aP == autoPlayed)return aP;
-		
-		for (idx in 0...keysPressed.length)
-			keysPressed[idx] = false;
-		
-		for(obj in strumNotes){
-			obj.playAnim("static");
-			obj.resetAnim = 0;
-		}
-		return autoPlayed = aP;
-	}
-	
 	/** function that gets called when the note is hit. goodNoteHit and opponentNoteHit in playstate for eg **/
 	public var noteHitCallback:NoteCallback;
 	/** function that gets called when a hold is stepped on. Only really used for calling script events. Return 'false' to not do hold logic **/
@@ -250,21 +166,12 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var isHolding:Array<Bool> = [false,false,false,false];
 
 	public var baseXPositions:Array<Float> = [];
-	
-	public function setDefaultBaseXPositions() {
-		for (i in 0...keyCount)
-			baseXPositions[i] = getDefaultBaseX(i);
-	}
 
-	public inline function getBaseX(direction:Int)
-		return baseXPositions[direction];
+	private var garbage:Array<Note> = [];
 
-	public inline function getDefaultBaseX(direction:Int)
-		return modManager.getBaseX(direction, this.playerId, keyCount);
-
-	public function new(modMgr:ModManager, ?keyCount:Int){
+	public function new(?keyCount:Int){
 		super();
-		this.modManager = modMgr;
+		this.modManager = game?.modManager;
 		this.judgeManager = game?.judgeManager;
 		this.keyCount = keyCount ?? PlayState.keyCount;
 
@@ -282,10 +189,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		grpNoteSplashes.add(splash);
 
 		////
-		noteField = new NoteField(this, modMgr);
+		noteField = new NoteField(this);
 	}
 
-	// queues a note to be spawned
+	/** queues a note to be spawned **/
 	public function queue(note:Note){
 		if (noteQueue[note.column] == null)
 			noteQueue[note.column] = [note];
@@ -295,16 +202,16 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
-	// unqueues a note
+	/** unqueues a note **/
 	public function unqueue(note:Note)
 	{
-		if (noteQueue[note.column] == null)
-			noteQueue[note.column] = [];
-		noteQueue[note.column].remove(note);
-		noteQueue[note.column].sort(sortNotesAscend);
+		if (noteQueue[note.column] != null) {
+			noteQueue[note.column].remove(note);
+			noteQueue[note.column].sort(sortNotesAscend);
+		}
 	}
 
-	// destroys a note
+	/** destroys a note **/
 	public function removeNote(daNote:Note){
 		daNote.active = false;
 		daNote.visible = false;
@@ -343,7 +250,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		daNote.destroy();
 	}
 
-	// spawns a note
+	/** spawns a note **/
 	public function spawnNote(note:Note){
 		if(note.spawned)
 			return;
@@ -378,29 +285,28 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		insert(0, note);
 	}
 
-	// gets all notes in the playfield, spawned or otherwise.
-	public function getAllNotes(?dir:Int){
+	/** gets all notes in the playfield, spawned or otherwise. **/
+	public function getAllNotes(?column:Int){
 		var arr:Array<Note> = [];
-		if(dir==null){
-			for(queue in noteQueue){
-				for(note in queue)
+		if (column == null) {
+			for (queue in noteQueue) {
+				for (note in queue)
 					arr.push(note);
-				
 			}
-		}else{
-			for (note in noteQueue[dir])
+		}else {
+			for (note in noteQueue[column])
 				arr.push(note);
 		}
-		for(note in spawnedNotes)
+		for (note in spawnedNotes)
 			arr.push(note);
 		return arr;
 	}
 	
-	// returns true if the playfield has the note, false otherwise.
+	/** Returns true if this PlayField has the note, false otherwise. **/
 	public function hasNote(note:Note)
 		return spawnedNotes.contains(note) || noteQueue[note.column]!=null && noteQueue[note.column].contains(note);
 	
-	// sends an input to the playfield
+	/** Sends an input to the PlayField **/
 	public function input(column:Int, ?hitTime:Float):Null<Note> {
 		if (column < 0 || column > keyCount) 
 			return null;
@@ -434,7 +340,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return recentHold;
 	}
 
-	// generates the receptors
+	/** generates the receptors **/
 	public function generateStrums(){
 		for(i in 0...keyCount){
 			var strum:StrumNote = new StrumNote(0, 0, i, this, (FlxG.state == game) ? game.hudSkin : 'default');
@@ -450,7 +356,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
-	// does the introduction thing for the receptors. story mode usually sets skip to true. OYT uses this when mario comes in
+	/** 
+		Does the fade & slide animation for the receptors.  
+		OYT uses this when mario comes in.
+		@param skip If true, the receptors will immediately appear without any animation.
+	**/
 	public function fadeIn(skip:Bool = false)
 	{
 		if (skip) {
@@ -465,21 +375,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
-	// just sorts by z indexes, not used anymore tho
-	function sortByOrderNote(Obj1:Note, Obj2:Note):Int
-	{
-		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
-	}
-
-	private static function sortNotesAscend(a:Note, b:Note):Int
-		return Std.int(a.strumTime - b.strumTime);
-
-	private static function sortNotesDescend(a:Note, b:Note):Int
-		return Std.int(b.strumTime - a.strumTime);
-
-	// spawns a notesplash w/ specified skin. optional note to derive the skin and colours from.
-
-	public function spawnSplash(note:Note, splashSkin:String){
+	/** 
+		Spawns a notesplash w/ specified skin. 
+		@param note Optional note to derive the skin and colours from. 
+	**/
+	public function spawnSplash(note:Null<Note>, splashSkin:String){
 		var skin:String;
 		var hue:Float;
 		var sat:Float;
@@ -507,26 +407,32 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return splash;
 	}
 
-	// spawns notes, deals w/ hold inputs, etc.
+	/** Spawns notes, deals w/ hold inputs, etc. **/
 	override public function update(elapsed:Float){
+		noteField.modManager = modManager;
 		noteField.modNumber = modNumber;
 		noteField.cameras = cameras;
 
 		for (char in characters)
 			char.controlled = isPlayer;
 		
-		for (column => column in noteQueue) {
-			if (column[0] != null) {
-				var noteSpawnTime = modManager.get("noteSpawnTime" + column); 
-				if (noteSpawnTime == null || noteSpawnTime.getValue(modNumber) <= 0) 
-					noteSpawnTime = modManager.get("noteSpawnTime");
-				
-				var time:Float = noteSpawnTime == null ? spawnTime : noteSpawnTime.getValue(modNumber); // no longer averages the spawn times
-				if (time <= 0) time = spawnTime;
-				
-				while (column.length > 0 && column[0].strumTime - Conductor.songPosition < time)
-					spawnNote(column[0]);
-			}
+		// note spawning
+		for (column => queue in noteQueue) {
+			if (queue[0] == null)
+				continue;
+
+			var modifier = modManager.get("noteSpawnTime" + column); 
+			if (modifier == null || modifier.getValue(modNumber) <= 0) 
+				modifier = modManager.get("noteSpawnTime");
+			
+			var spawnTime:Float;
+			if (modifier == null || (spawnTime = modifier.getValue(modNumber)) <= 0)
+				spawnTime = this.spawnTime;
+			else
+				spawnTime = modifier.getValue(modNumber);
+			
+			while (queue.length > 0 && queue[0].strumTime - Conductor.songPosition < spawnTime)
+				spawnNote(queue[0]);
 		}
 
 		super.update(elapsed);
@@ -534,9 +440,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		for(obj in strumNotes)
 			modManager.updateObject(curDecBeat, obj, modNumber);
 
-		//spawnedNotes.sort(sortByOrderNote);
-
-		var garbage:Array<Note> = [];
 		for (daNote in spawnedNotes)
 		{
 			if(!daNote.alive){
@@ -547,7 +450,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 			// check for hold inputs
 			if(!daNote.isSustainNote){
-				if(daNote.column > keyCount-1){
+				if(daNote.column >= keyCount){
 					garbage.push(daNote);
 					continue;
 				}
@@ -579,7 +482,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 						if(isHeld && !daNote.isRoll){
 							if(daNote.unhitTail.length > 0)
-								if (receptor.animation.finished || receptor.animation.curAnim.name != "confirm") 
+								if (receptor.animation.finished || receptor.animation.name != "confirm") 
 									receptor.playAnim("confirm", true, daNote);
 							
 							daNote.tripProgress = 1.0;
@@ -652,8 +555,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			}
 		}
 
-		for(note in garbage)removeNote(note);
-		
+		while (garbage.length > 0) 
+			removeNote(garbage.pop());
 
 		if (inControl && autoPlayed)
 		{
@@ -692,18 +595,16 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 	}
 	
-
-	// gets all living notes w/ optional filter
-
-	public function getNotes(dir:Int, ?filter:Note->Bool):Array<Note>
+	/** Gets all living notes w/ optional filter **/
+	public function getNotes(column:Int, ?filter:Note->Bool):Array<Note>
 	{
-		if (spawnedByData[dir]==null)
+		if (spawnedByData[column]==null)
 			return [];
 
 		var collected:Array<Note> = [];
-		for (note in spawnedByData[dir])
+		for (note in spawnedByData[column])
 		{
-			if (note.alive && note.column == dir)
+			if (note.alive && note.column == column)
 			{
 				if (filter == null || filter(note))
 					collected.push(note);
@@ -712,16 +613,16 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return collected;
 	}
  
-	// get all living TAP notes
-	public function getTapNotes(dir:Int, ?filter:Note->Bool, requiresTap:Bool = true):Array<Note> {
-		var array = requiresTap ? tapsByData[dir] : noTapsByData[dir];
+	/** get all living TAP notes **/
+	public function getTapNotes(column:Int, ?filter:Note->Bool, requiresTap:Bool = true):Array<Note> {
+		var array = requiresTap ? tapsByData[column] : noTapsByData[column];
 
 		if (array == null)
 			return [];
 
 		var collected:Array<Note> = [];
 		for (note in array) {
-			if (note.alive && note.column == dir) {
+			if (note.alive && note.column == column) {
 				if (filter == null || filter(note))
 					collected.push(note);
 			}
@@ -729,9 +630,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return collected;
 	}
 
-	// gets all living TAP notes before a certain time w/ optional filter
-	public function getTapNotesWithEnd(dir:Int, end:Float, ?filter:Note->Bool, requiresTap:Bool = true):Array<Note> {
-		var array = requiresTap ? tapsByData[dir] : noTapsByData[dir];
+	/** gets all living TAP notes before a certain time w/ optional filter **/
+	public function getTapNotesWithEnd(column:Int, end:Float, ?filter:Note->Bool, requiresTap:Bool = true):Array<Note> {
+		var array = requiresTap ? tapsByData[column] : noTapsByData[column];
 
 		if (array == null)
 			return [];
@@ -740,7 +641,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		for (note in array) {
 			if (note.strumTime > end)
 				break;
-			if (note.alive && note.column == dir && !note.wasGoodHit && !note.tooLate) {
+			if (note.alive && note.column == column && !note.wasGoodHit && !note.tooLate) {
 				if (filter == null || filter(note))
 					collected.push(note);
 			}
@@ -748,16 +649,16 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return collected;
 	}
 
-	// gets all living notes before a certain time w/ optional filter
-	public function getNotesWithEnd(dir:Int, end:Float, ?filter:Note->Bool):Array<Note>
+	/** gets all living notes before a certain time w/ optional filter **/
+	public function getNotesWithEnd(column:Int, end:Float, ?filter:Note->Bool):Array<Note>
 	{
-		if (spawnedByData[dir] == null)
+		if (spawnedByData[column] == null)
 			return [];
 		var collected:Array<Note> = [];
-		for (note in spawnedByData[dir])
+		for (note in spawnedByData[column])
 		{
 			if (note.strumTime>end)break;
-			if (note.alive && note.column == dir && !note.wasGoodHit && !note.tooLate)
+			if (note.alive && note.column == column && !note.wasGoodHit && !note.tooLate)
 			{
 				if (filter == null || filter(note))
 					collected.push(note);
@@ -766,12 +667,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return collected;
 	}
 
-	function sortByShit(Obj1:Note, Obj2:Note):Int
-	{
-		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
-	}
-
-	// go through every queued note and call a func on it
+	/** go through every queued note and call a func on it **/
 	public function forEachQueuedNote(callback:Note->Void)
 	{
 		for(column in noteQueue){
@@ -788,7 +684,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
-	// kills all notes which are stacked
+	/** kills all notes which are stacked **/
 	public function clearStackedNotes(){
 
 		var goobaeg:Array<Note> = [];
@@ -823,26 +719,40 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			removeNote(note);
 	}
 
-	// as is in the name, removes all dead notes
+	/** as is in the name, removes all dead notes **/
 	public function clearDeadNotes(){
 		var dead:Array<Note> = [];
 		for(note in spawnedNotes){
 			if(!note.alive)
 				dead.push(note);
-			
 		}
 		for(column in noteQueue){
 			for(note in column){
 				if(!note.alive)
 					dead.push(note);
 			}
-			
 		}
 
 		for(note in dead)
 			removeNote(note);
 	}
 
+	public function setDefaultBaseXPositions() {
+		for (i in 0...keyCount)
+			baseXPositions[i] = getDefaultBaseX(i);
+	}
+
+	public inline function getBaseX(direction:Int)
+		return baseXPositions[direction];
+
+	public inline function getDefaultBaseX(direction:Int)
+		return modManager.getBaseX(direction, this.playerId, keyCount);
+
+	private static inline function sortNotesAscend(a:Note, b:Note):Int
+		return Std.int(a.strumTime - b.strumTime);
+
+	private static inline function sortNotesDescend(a:Note, b:Note):Int
+		return Std.int(b.strumTime - a.strumTime);
 
 	override function destroy(){
 		noteSpawned.removeAll();
@@ -854,4 +764,91 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 		return super.destroy();
 	}
+
+	#if true
+	function set_playerId(v) {
+		playerId = v;
+		setDefaultBaseXPositions();
+		return playerId;
+	}
+
+	function set_keyCount(cnt:Int){
+		if (cnt < 0)
+			cnt=0;
+
+		if (spawnedByData.length < cnt) {
+			for (_ in (spawnedByData.length)...cnt)
+				spawnedByData.push([]);
+		} else if(spawnedByData.length > cnt){
+			spawnedByData.resize(cnt);
+		}
+
+		if (tapsByData.length < cnt) {
+			for (_ in (tapsByData.length)...cnt)
+				tapsByData.push([]);
+		} else if (tapsByData.length > cnt) {
+			tapsByData.resize(cnt);
+		} 
+
+		if (noTapsByData.length < cnt) {
+			for (_ in (noTapsByData.length)...cnt)
+				noTapsByData.push([]);
+		} else if (noTapsByData.length > cnt) {
+			noTapsByData.resize(cnt);
+		} 
+
+		if (noteQueue.length < cnt) {
+			for (_ in (noteQueue.length)...cnt)
+				noteQueue.push([]);
+		} else if (noteQueue.length > cnt) {
+			noteQueue.resize(cnt);
+		}
+
+		if (keysPressed.length < cnt) {
+			for (_ in (keysPressed.length)...cnt)
+				keysPressed.push(false);
+		}
+
+		if (baseXPositions.length < cnt) {
+			for (_ in (baseXPositions.length)...cnt)
+				baseXPositions.push(getDefaultBaseX(baseXPositions.length));
+		} else if (baseXPositions.length > cnt) {
+			baseXPositions.resize(cnt);
+		}
+
+		return keyCount = cnt;
+	}
+
+	function set_autoPlayed(aP:Bool){
+		if(aP == autoPlayed)return aP;
+		
+		for (idx in 0...keysPressed.length)
+			keysPressed[idx] = false;
+		
+		for(obj in strumNotes){
+			obj.playAnim("static");
+			obj.resetAnim = 0;
+		}
+		return autoPlayed = aP;
+	}
+
+	override function set_camera(to){
+		for (strumLine in strumNotes)
+			strumLine.camera = to;
+		
+		noteField.camera = to;
+
+		return super.set_camera(to);
+	}
+
+	override function set_cameras(to){
+		for (strumLine in strumNotes)
+			strumLine.cameras = to;
+		
+		noteField.cameras = to;
+
+		return super.set_cameras(to);
+	}
+
+	#end
 }
