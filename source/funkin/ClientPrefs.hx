@@ -876,6 +876,10 @@ class ClientPrefs {
 		defaultOptionDefinitions.get("framerate").value = FlxG.stage.application.window.displayMode.refreshRate;
 		#end
 
+		while(arrowHSV.length < 5){
+			arrowHSV.push([0, 0, 0]);
+		}
+
 		// locale = openfl.system.Capabilities.language;
 
 		optionSave.bind("options_v2");
