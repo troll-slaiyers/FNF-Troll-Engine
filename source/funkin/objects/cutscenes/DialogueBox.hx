@@ -50,27 +50,29 @@ class DialogueBox extends FlxSprite
 	public var shadowWidth:Float;
 	public var textOffsets:Array<Int>= [170, 450];
 	public var textWidth:Int = 700;
+	
     public function new(_boxtype:String)
     {
         super();
 		var path:String = ('assets/boxes/$_boxtype.json');
 		jsonFile = Paths.getJson(path);
-		if(jsonFile == null)
+		if(jsonFile != null)
 		{
-			trace('ERROR NO DIALOGUE BOX OF TYPE: $_boxtype FOUND!!!');
+			currentBoxStyle = _boxtype;
+			loadJSON();
 		}
+			
+		else trace('Couldnt load $_boxtype dialogue box!');
+    }
 
-		currentBoxStyle = _boxtype;
-
-
-        x = jsonFile.offsets[0];
-        y = jsonFile.offsets[1];
-		
+	function loadJSON()
+	{	
 	    frames = Paths.getSparrowAtlas(jsonFile.graphic);
-	    scrollFactor.set();
-		for (anim in jsonFile.animations) {
-				animation.addByPrefix(anim.animName, anim.animPrefix, anim.fps, anim.looped);
-		}
+
+		for (anim in jsonFile.animations) 
+			animation.addByPrefix(anim.animName, anim.animPrefix, anim.fps, anim.looped);
+		x = jsonFile.offsets[0];
+        y = jsonFile.offsets[1];
 		scale.set(jsonFile.scale,jsonFile.scale);
 
 		antialiasing = jsonFile.antialiasing;
@@ -84,15 +86,13 @@ class DialogueBox extends FlxSprite
 		textWidth = jsonFile.text.width;
 		dialogueTalkSound = jsonFile.dialogue_talk_sfx;
 		dialoguePressedSound = jsonFile.dialogue_pressed_sfx;
+		
+	    scrollFactor.set();
 
 	    updateHitbox();
 
 		startScript();
-
-    }
-	
-	
-	// ripped this from a stage script lol
+	}
 	public function startScript()
 	{
 		if (script != null) {
@@ -105,8 +105,6 @@ class DialogueBox extends FlxSprite
 			script = null;
 			return;
 		}
-
-		//script.set("post", postLayer);
 
 		script = FunkinHScript.fromFile(file);
 		//variables
@@ -126,7 +124,6 @@ class DialogueBox extends FlxSprite
 	public function finishLine()
 	{
 		script.call("onFinishLineDialogue");
-
 	}
 	public function onDialogueEnded()
 	{

@@ -3,15 +3,9 @@ import flixel.addons.text.FlxTypeText;
 import flixel.util.FlxColor;
 import funkin.input.Controls;
 import flixel.text.FlxText.FlxTextBorderStyle;
-import sys.FileSystem;
 import haxe.Json;
-import sys.io.File;
 import flixel.util.FlxTimer;
-/*
-todo: add in portraits 
-add in null checking
-sorry if the code is a mess rn, alot is going on rn
-*/
+
 typedef DialogueFile = {
 	var dialogue:Array<DialogueLine>;
     var box_style:String; //what box the file should use.
@@ -19,10 +13,10 @@ typedef DialogueFile = {
 typedef DialogueLine = {
     var text:String;
 	var character:String;
-	var characterAnim:String;
+	var character_anim:String;
 	var text_speed:Float;
     var text_size:Int;//custom font size
-	var sound_byte:String; //what soundbyte should be played //should have this based on character i think
+	var sound_byte:String; 
 }
 
 class DialogueCutscene extends Cutscene{
@@ -40,26 +34,32 @@ class DialogueCutscene extends Cutscene{
      * Starts of at 0.
     */
     public var canProgressDialogue:Bool = false;
-    public function new(dialoguePath:String){
+    var characters:Array<DialogueCharacter> = [];
+    public var keepAllCharactersOnScreen:Bool = false;
+    
+    public function new(dialoguePath:String)
+    {
 		super();
         onEnd.addOnce(endDialogue);
 		dialogueFile = Paths.json('$dialoguePath');
-
 	}
-    public override function createCutscene() {
-        trace('created dialogue');
+
+    public override function createCutscene() 
+    {
+        loadCharacters();
 
         box = new DialogueBox(dialogueFile.box_style);
         box.visible = false;
         add(box);
-        trace('box');
-		box.script?.call("onCreatePost");
 
+		box.script?.call("onCreatePost");
+        
         dialogueText = new FlxTypeText(box.textOffsets[0], box.textOffsets[1], box.textWidth, '', 32);
         dialogueText.setFormat(Paths.font(box.font), 32, FlxColor.fromString(box.textColor), LEFT, SHADOW, FlxColor.fromString(box.shadowTextColor), false);
         dialogueText.antialiasing = box.antialiasing;
         dialogueText.borderSize = box.shadowWidth;
         add(dialogueText);
+
         dialogueText.completeCallback = function()
         {
             box.finishLine();
@@ -73,7 +73,29 @@ class DialogueCutscene extends Cutscene{
 
         this.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
     } 
+    function loadCharacters()
+    {
+        //alot of this function is kind of ripped from psych
+        var charsMap:Map<String, Bool> = new Map<String>();
+        //Does a loop through the entire dialogue file and checks for characters
+		for (i in 0...dialogueFile.dialogue.length) {
+			if(dialogueFile.dialogue[i] != null && dialogueFile.dialogue[i].character != null) {
+				var newChar:String = dialogueFile.dialogue[i].character;
+                if(!charsMap.exists(newChar) || !charsMap.get(newChar)) 
+					charsMap.set(newChar);//adds to the map only if the new character doesnt already exist
+			}
+		}
 
+        for (curCharacter in charsMap.keys()) {
+		    var char:DialogueCharacter = new DialogueCharacter(curCharacter); //new character thats invisible and barely drawn.
+			char.updateHitbox();
+			char.scrollFactor.set();
+			char.alpha = 0.00001;
+			add(char);
+			characters.push(char);
+		}
+
+    }
     override function update(elapsed:Float)
     {
        	if (FlxG.keys.justPressed.SPACE && canProgressDialogue)
@@ -81,14 +103,8 @@ class DialogueCutscene extends Cutscene{
             curLine++;
             createNewLine();
         }
-        /*
-        maybe have a proper log book for dialogue.
-        if (FlxG.keys.justPressed.BACKSPACE)
-        {
-            curLine--;
-            createNewLine();
-        }
-        */
+        //maybe have a proper log book for dialogue.
+        
         super.update(elapsed);
     }
     /**
@@ -105,12 +121,26 @@ class DialogueCutscene extends Cutscene{
         }
         var curDialogueLine:DialogueLine = null;
 		curDialogueLine = dialogueFile.dialogue[curLine];
+        var curCharcter:Int = 0;
+        for (i in 0...characters.length) {
+			if(characters[i].curChar == curDialogueLine.character) {
+				curCharcter = i;
+				break;
+			}
+		}
+        if(!keepAllCharactersOnScreen)
+        for (i in 0...characters.length) {
+            characters[i].alpha = 0;
+		    if(characters[i] ==  characters[curCharcter]) {
+				characters[curCharcter].alpha = 1;
+			}
+		}
+        characters[curCharcter].animation.play(curDialogueLine.character_anim);
         getTextSound();
         dialogueText.size = getTextSize(curDialogueLine.text_size);
                
         dialogueText.resetText(curDialogueLine.text);
         dialogueText.start(curDialogueLine.text_speed);
-
     }
     /**
      * Function that's only called when the current dialogue is ending.

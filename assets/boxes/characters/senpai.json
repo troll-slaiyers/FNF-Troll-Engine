@@ -1,0 +1,15 @@
+{
+    "graphic": "pixelUI/portrait-senpai",
+    "scale": 5.4,
+    "offsets": [191, 112],
+    "antialiasing": false,
+    "animations": [
+    {
+      "name": "normal",
+      "prefix": "portraitEnter",
+      "frameRate": 12,
+      "looped": false
+
+    }
+]
+}
