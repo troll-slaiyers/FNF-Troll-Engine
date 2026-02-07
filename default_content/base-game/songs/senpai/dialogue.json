@@ -14,7 +14,7 @@
 			"character": "senpai",
 			"boxState": "normal",
 			"characterAnim": "normal",
-			"text": "A serenade between gentleman shall decide where her beautiful heart shall reside."
+			"text": "A serenade between gentlemen shall decide where her beautiful heart shall reside."
 		},
 		{
 			"sound": "",
@@ -22,6 +22,7 @@
 			"portrait": "bf",
 			"boxState": "normal",
 			"characterAnim": "demon",
+			"text_size": 45,
 			"text": "Beep bo bop"
 		}
 	],

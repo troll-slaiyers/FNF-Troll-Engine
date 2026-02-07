@@ -21,63 +21,66 @@ typedef DialogueLine = {
 	var character:String;
 	var characterAnim:String;
 	var textSpeed:Float;
-	var soundByte:String; //what soundbyte should be played
+    var text_size:Int;//custom font size
+	var soundByte:String; //what soundbyte should be played //should have this based on character i think
 }
 
 class DialogueCutscene extends Cutscene{
     var dialogueText:FlxTypeText;
-    public var curDialogueCount:Int = 0;
+    public var curLine:Int = 0;
     var box:DialogueBox;
     var dialogueFile:DialogueFile;
-    //none of the nulls work rn so fuck it
+    /**
+     * How long it should take until the dialogue first starts
+     * Set to 0 for instant start time.
+     */
+    public var introDelay:Float = 2;
+    /**
+     * Whether the player is able to progress the dialogue.
+     * Starts of at 0.
+     */
+    public var canProgressDialogue:Bool = false;
     public function new(dialoguePath:String){
 		super();
         onEnd.addOnce(endDialogue);
+		dialogueFile = Paths.json('$dialoguePath');
 
-        try
-        {
-		    dialogueFile = Paths.json('$dialoguePath');
-        }
-        catch(e)
-        {
-            trace('no dialogue!!!');
-            onEnd.dispatch(false);
-
-        }
 	}
     public override function createCutscene() {
         trace('created dialogue');
-        if(dialogueFile == null) 
-        {
-            trace('no dialogue!!!');
-            onEnd.dispatch(false);
-        }
+
         box = new DialogueBox(dialogueFile.boxStyle);
+        box.visible = false;
         add(box);
 
-        dialogueText = new FlxTypeText(170, 450, Std.int(FlxG.width * 0.75), '', 32);
-        dialogueText.setFormat(Paths.font(box.font), 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+        dialogueText = new FlxTypeText(170, 450, Std.int(FlxG.width * 0.75), '', 12);
+        dialogueText.setFormat(Paths.font(box.font), 12, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
         dialogueText.antialiasing = box.antialiasing;
         dialogueText.borderSize = 1.4;
         add(dialogueText);
-
-        createNewLine();
+       
+        new FlxTimer().start(introDelay, function(tmr:FlxTimer)
+		{
+            canProgressDialogue = true;
+            box.visible = true;
+            createNewLine();
+		});
 
         this.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
     } 
 
     override function update(elapsed:Float)
     {
-       	if (FlxG.keys.justPressed.SPACE)
+       	if (FlxG.keys.justPressed.SPACE && canProgressDialogue)
         {
-            curDialogueCount++;
+            curLine++;
             createNewLine();
         }
         /*
         maybe have a proper log book for dialogue.
         if (FlxG.keys.justPressed.BACKSPACE)
         {
-            curDialogueCount--;
+            curLine--;
             createNewLine();
         }
         */
@@ -88,17 +91,17 @@ class DialogueCutscene extends Cutscene{
      */
     public function createNewLine()
     {
-        if(curDialogueCount >= dialogueFile.dialogue.length)
+        if(curLine >= dialogueFile.dialogue.length)
         {
             onEnd.dispatch(false);
-
             return;
         }
-
-        getTextSound();
-        FlxG.sound.play(Paths.sound(box.dialoguePressedSound), 0.7);
         var curDialogueLine:DialogueLine = null;
-		curDialogueLine = dialogueFile.dialogue[curDialogueCount];
+		curDialogueLine = dialogueFile.dialogue[curLine];
+        getTextSound();
+        dialogueText.size = getTextSize(curDialogueLine.text_size);
+        FlxG.sound.play(Paths.sound(box.dialoguePressedSound), 0.7);
+      
        
         box.animation.play('pressed');
         dialogueText.resetText(curDialogueLine.text);
@@ -106,7 +109,8 @@ class DialogueCutscene extends Cutscene{
 
     }
     /**
-     * Function thats called when Dialogue is ending.
+     * Function that's only called when the current dialogue is ending.
+     * @param wasSkipped 
      */
     function endDialogue(wasSkipped:Bool)
     {
@@ -116,9 +120,18 @@ class DialogueCutscene extends Cutscene{
             destroy();
 		});
     }
+    /**
+     * Returns Text Size for the current line.
+     * This is done so we can use custom text sizes for each line.
+     * @param _lineTextSize 
+     * @return Int
+     */
+    inline function getTextSize(_lineTextSize:Int):Int 
+        return _lineTextSize > 0 ? _lineTextSize : box.textSize;
+    
 
     override public function restart(){
-        curDialogueCount = 0;
+        curLine = 0;
 		createNewLine();
 	}
     /**

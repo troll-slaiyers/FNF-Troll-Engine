@@ -11,6 +11,7 @@ typedef BoxData = {
 	var dialogueFont:String;
 	var dialogueTalkSfx:String;
 	var dialoguePressedSfx:String;
+	var text_size:Int;
 	var animations:Array<AnimsArray>;
 }
 
@@ -27,6 +28,7 @@ class DialogueBox extends FlxSprite
 	var jsonFile:BoxData;
 
 	public var font:String = 'pixel.ttf';
+	public var textSize:Int = 42;
 	public var dialogueTalkSound:String = 'dialogue';
 	public var dialoguePressedSound:String = 'dialogue';
 	public var script:FunkinHScript;
@@ -38,7 +40,7 @@ class DialogueBox extends FlxSprite
 		jsonFile = Paths.getJson(path);
 		if(jsonFile == null)
 		{
-			trace('ERROR NO DIALOGUE OF TYPE: $_boxtype FOUND!!!\nreverting to pixel' );
+			trace('ERROR NO DIALOGUE BOX OF TYPE: $_boxtype FOUND!!!');
 		}
 
 		currentBoxStyle = _boxtype;
@@ -56,12 +58,12 @@ class DialogueBox extends FlxSprite
 		antialiasing = jsonFile.antialiasing;
 
 		font = jsonFile.dialogueFont;
-
+		textSize = jsonFile.text_size;
 		dialogueTalkSound = jsonFile.dialogueTalkSfx;
 		dialoguePressedSound = jsonFile.dialoguePressedSfx;
 
 	    updateHitbox();
-		postLayer();
+		createPost();
     }
 	
 	
@@ -88,9 +90,10 @@ class DialogueBox extends FlxSprite
 				//script.set("add", add);
 
 	}
-	public function postLayer()
+	public function createPost()
 	{
-		//used in scripts
+		script?.call("onCreatePost");
+
 	}
 	public function onDialogueEnded()
 	{
