@@ -327,7 +327,7 @@ class NotesSubState extends MusicBeatSubstate
 	}
 
 	function changeSelection(change:Int = 0) {
-		curSelected += FlxMath.wrap(curSelected + change, 0, FlxMath.minInt(valuesArray.length, namesArray.length) - 1);
+		curSelected += FlxMath.wrap(curSelected + change, 0, namesArray.length - 1);
 		curValue = valuesArray[curSelected][typeSelected];
 		updateValue();
 
