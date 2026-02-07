@@ -25,7 +25,7 @@ import openfl.net.FileFilter;
 using StringTools;
 
 /**
-	Class for various util functions.
+	Class for various util functions.  
 	Math function shall go to `CoolMath`
 **/
 class CoolUtil {
@@ -72,7 +72,7 @@ class CoolUtil {
 		idx = newDiffIds.indexOf("hard");
 		if (idx != -1)
 			return idx;
-
+		
 		return curDiffIdx < 0 ? 0 : curDiffIdx;
 	}
 
@@ -112,7 +112,7 @@ class CoolUtil {
 		b = b.toLowerCase();
 		if (a < b) return -1;
 		if (a > b) return 1;
-		return 0;
+		return 0;	
 	}
 
 	public static function stringSort(ordering:Array<String>, a:String, b:String):Int {
@@ -153,15 +153,15 @@ class CoolUtil {
 		spr.color = color;
 		return spr;
 	}
-
+	
 	public static function makeOutlinedGraphic(Width:Int, Height:Int, Color:Int, LineThickness:Int, OutlineColor:Int)
 	{
 		var rectangle = flixel.graphics.FlxGraphic.fromRectangle(Width, Height, OutlineColor, true);
 		rectangle.bitmap.fillRect(
 			new openfl.geom.Rectangle(
-				LineThickness,
-				LineThickness,
-				Width-LineThickness*2,
+				LineThickness, 
+				LineThickness, 
+				Width-LineThickness*2, 
 				Height-LineThickness*2
 			),
 			Color
@@ -172,7 +172,7 @@ class CoolUtil {
 
 	/**
 	 * @param spr The sprite on which to clone the animation
-	 * @param ogName Name of the animation to be cloned.
+	 * @param ogName Name of the animation to be cloned. 
 	 * @param cloneName Name of the resulting clone.
 	 * @param force Whether to override the resulting animation, if it exists.
 	 */
@@ -213,7 +213,7 @@ class CoolUtil {
 		var daList:Array<String> = string.split('\n');
 		for (i in 0...daList.length)
 			daList[i] = daList[i].trim();
-
+		
 		return daList;
 	}
 	public static function coolTextFile(path:String):Array<String>
@@ -233,7 +233,7 @@ class CoolUtil {
 			for (row in 0...sprite.frameHeight) {
 				var pixelColor:FlxColor = sprite.pixels.getPixel32(col, row);
 				if (pixelColor.alpha >= alphaTolerance) {
-					pixelColor.alpha = 255;
+					pixelColor.alpha = 255;	
 					colorCount[pixelColor] = colorCount.exists(pixelColor) ? colorCount[pixelColor] + 1 : 1;
 				}
 			}
@@ -353,7 +353,7 @@ class CoolUtil {
 	private static inline function _filefilters(?filters:Array<String>) {
 		#if linc_filedialogs
 		return filters ?? [];
-		#else
+		#else		
 		final goodFilters:Array<String> = [];
 		if (filters != null) {
 			for (f in filters) {
@@ -369,7 +369,7 @@ class CoolUtil {
 		Normalize a path to be used by the the file system.
 
 		On Windows, slashes `/` are replaced by backslashes `\`
-
+		
 		If `path` is `null`, or if the resulting path doesn't exist, the current working directory is returned.
 
 		@param path File path, can be relative or absolute.
@@ -381,7 +381,7 @@ class CoolUtil {
 			return Sys.getCwd();
 		if (!Path.isAbsolute(path))
 			path = Path.normalize(Path.addTrailingSlash(Sys.getCwd()) + path);
-
+		
 		if (!FileSystem.exists(Path.directory(path)))
 			path = Sys.getCwd();
 		#if windows else
@@ -412,7 +412,7 @@ class CoolUtil {
 		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
 		#end
 	}
-
+	
 	public static function showOpenDialog(title:String = "Open File", ?defaultPath:String, ?filters:Array<String>, ?onOpen:(bytes:Bytes)->Void, ?onSelect:(path:String)->Void, ?onCancel:Void->Void):Void {
 		final filters = _filefilters(filters);
 		final defaultPath = getSystemPath(defaultPath);

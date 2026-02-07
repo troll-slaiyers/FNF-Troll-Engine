@@ -48,12 +48,25 @@ class Note extends NoteObject {
 	public static var swagWidth(default, set):Float = 160 * spriteScale;
 	public static var halfWidth(default, null):Float = swagWidth * 0.5;
 
-	public static var quants:Array<Int> = [4, // quarter note
+	public static var quants:Array<Int> = [
+		4, // quarter note
 		8, // eight
 		12, // etc
-		16, 20, 24, 32, 48, 64, 96, 192];
+		16,
+		20,
+		24,
+		32,
+		48,
+		64,
+		96,
+		192
+	];
 
-	public static var defaultNotes = ['No Animation', 'GF Sing', ''];
+	public static var defaultNotes = [
+		'No Animation',
+		'GF Sing',
+		''
+	];
 
 	public static inline final pixelsPerMS:Float = 0.45;
 
@@ -87,8 +100,7 @@ class Note extends NoteObject {
 		return quants[quants.length - 1]; // invalid
 	}
 
-	@:noCompletion
-	private inline static function set_swagWidth(val:Float) {
+	@:noCompletion private static function set_swagWidth(val:Float) {
 		halfWidth = val * 0.5;
 		return swagWidth = val;
 	}
@@ -152,9 +164,9 @@ class Note extends NoteObject {
 	public var texture(default, set):String; // texture for the note
 	public var canQuant:Bool = true; // whether a quant texture should be searched for or not
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
-
 	// This automatically gets set if a notetype changes the ColorSwap values
-	//// note
+
+	//// note 
 	public var defaultJudgement:Judgment;
 	public var breaksCombo:Bool = false; // hitting this will cause a combo break
 	public var blockHit:Bool = false; // whether you can hit this note or not
@@ -252,37 +264,22 @@ class Note extends NoteObject {
 
 	// Angle is controlled by verts in the modchart system
 	@:noCompletion public var copyAngle(get, set):Bool;
-
-	@:noCompletion inline function get_copyAngle()
-		return copyVerts;
-
-	@:noCompletion inline function set_copyAngle(val:Bool)
-		return copyVerts = val;
-
+	@:noCompletion inline function get_copyAngle() return copyVerts;
+	@:noCompletion inline function set_copyAngle(val:Bool) return copyVerts = val;
+	
 	@:noCompletion public var multAlpha(get, set):Float;
-
-	@:noCompletion inline function get_multAlpha()
-		return alphaMod;
-
-	@:noCompletion inline function set_multAlpha(v:Float)
-		return alphaMod = v;
-
+	@:noCompletion inline function get_multAlpha()return alphaMod;
+	@:noCompletion inline function set_multAlpha(v:Float)return alphaMod = v;
+	
 	//// backwards compat
-	@:noCompletion public var realNoteData(get, set):Int;
-
-	@:noCompletion inline function get_realNoteData()
-		return realColumn;
-
-	@:noCompletion inline function set_realNoteData(v:Int)
-		return realColumn = v;
+	@:noCompletion public var realNoteData(get, set):Int; 
+	@:noCompletion inline function get_realNoteData() return realColumn;
+	@:noCompletion inline function set_realNoteData(v:Int) return realColumn = v;
 	#end
 
-	@:noCompletion function get_canBeHit()
-		return UNJUDGED != PlayState.instance.judgeManager.judgeNote(this, Conductor.songPosition);
+	@:noCompletion function get_canBeHit() return UNJUDGED != PlayState.instance.judgeManager.judgeNote(this, Conductor.songPosition);
 
-	@:noCompletion inline function get_noteSplashDisabled()
-		return noteSplashBehaviour == DISABLED;
-
+	@:noCompletion inline function get_noteSplashDisabled() return noteSplashBehaviour == DISABLED;
 	@:noCompletion inline function set_noteSplashDisabled(val:Bool) {
 		noteSplashBehaviour = val ? DISABLED : DEFAULT;
 		return val;
@@ -290,22 +287,18 @@ class Note extends NoteObject {
 
 	////
 	private function set_texture(value:String):String {
-		if (tex != value)
-			reloadNote(value, texSuffix);
+		if (tex != value) reloadNote(value, texSuffix);
 		return tex;
 	}
 
 	/**
 		@param force If `true`, forces the colours to update even if `usesDefaultColours` is `false`
 	**/
-	public function updateColours(force:Bool = false) {
-		if (!force && !usesDefaultColours)
-			return;
-		if (colorSwap == null)
-			return;
-		if (column == -1)
-			return; // FUCKING PSYCH EVENT NOTES!!!
-
+	public function updateColours(force:Bool = false){
+		if (!force && !usesDefaultColours) return;
+		if (colorSwap==null) return;
+		if (column == -1) return; // FUCKING PSYCH EVENT NOTES!!!
+		
 		var hsb = isQuant ? ClientPrefs.quantHSV[quants.indexOf(quant)] : getNoteColours(currentAnimations);
 		colorSwap.setHSBIntArray(hsb);
 
@@ -382,9 +375,10 @@ class Note extends NoteObject {
 
 					case 'Hey!':
 						characterHitAnimName = 'hey';
-					// TODO
+						// TODO
 
-					// case 'Hurt Note':
+					//case 'Hurt Note':
+							
 
 					case 'GF Sing':
 						gfNote = true;
@@ -437,8 +431,8 @@ class Note extends NoteObject {
 		return '(column: $column | noteType: $noteType | strumTime: $strumTime | visible: $visible)';
 	}
 
-	public function new(strumTime:Float, column:Int, ?prevNote:Note, fieldIndex:Int = -1, susPart:SustainPart = TAP, ?inEditor:Bool = false,
-			?noteMod:String = 'default') {
+	public function new(strumTime:Float, column:Int, ?prevNote:Note, fieldIndex:Int = -1, susPart:SustainPart = TAP, ?inEditor:Bool = false, ?noteMod:String = 'default')
+	{
 		super(NOTE);
 
 		this.strumTime = this.visualTime = strumTime;
@@ -491,11 +485,11 @@ class Note extends NoteObject {
 		////
 
 		/** Should join and check for shit in the following order:
-		 *
-		 * `folder + "/" + "QUANT" + name + suffix` (If quants are enabled)
-		 * `folder + "/" + name + suffix`
-		 * `"QUANT" + name + suffix` (If quants are enabled)
-		 * `name + suffix`
+		 * 
+		 * `folder + "/" + "QUANT" + name + suffix` (If quants are enabled)  
+		 * `folder + "/" + name + suffix`  
+		 * `"QUANT" + name + suffix` (If quants are enabled)  
+		 * `name + suffix`  
 		 *
 		 * Sets `isQuant` to `true` if a quant texture is to be returned
 		 */
@@ -611,7 +605,6 @@ class Note extends NoteObject {
 
 	function _loadNoteAnims() {
 		final animName:String = 'default';
-
 		final animPrefix:String = switch (holdType) {
 			default: '${currentAnimations.noteAnimations[column % currentAnimations.noteAnimations.length]}0';
 			case PART: currentAnimations.holdAnimations[column % currentAnimations.holdAnimations.length];
