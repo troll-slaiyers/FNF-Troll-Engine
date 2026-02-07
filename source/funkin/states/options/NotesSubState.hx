@@ -119,7 +119,7 @@ class NotesSubState extends MusicBeatSubstate
 		add(grpNumbers);
 		
 		////
-		for (i in 0...valuesArray.length) {
+		for (i in 0...namesArray.length) {
 			var yPos:Float = (165  * i) + 35;
 			for (j in 0...valueNames.length) {
 				var optionText:Alphabet = new Alphabet(0, yPos + 60, '', true);
