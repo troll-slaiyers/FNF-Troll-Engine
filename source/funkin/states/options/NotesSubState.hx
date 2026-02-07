@@ -81,7 +81,7 @@ class NotesSubState extends MusicBeatSubstate
 		}
 	}
 
-	function onOpenValuesFile(bytes:haxe.io.Bytes) {
+	inline function onOpenValuesFile(bytes:haxe.io.Bytes) {
 		loadFromString(bytes.toString());
 	}
 
