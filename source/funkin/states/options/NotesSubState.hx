@@ -1,5 +1,6 @@
 package funkin.states.options;
 
+import flixel.math.FlxMath;
 import flixel.group.FlxSpriteGroup;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -326,12 +327,7 @@ class NotesSubState extends MusicBeatSubstate
 	}
 
 	function changeSelection(change:Int = 0) {
-		curSelected += change;
-		if (curSelected < 0)
-			curSelected = valuesArray.length-1;
-		if (curSelected > valuesArray.length-1)
-			curSelected = 0;
-
+		curSelected += FlxMath.wrap(curSelected + change, 0, FlxMath.minInt(valuesArray.length, namesArray.length) - 1);
 		curValue = valuesArray[curSelected][typeSelected];
 		updateValue();
 
