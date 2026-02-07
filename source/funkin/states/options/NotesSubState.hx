@@ -27,7 +27,7 @@ class NotesSubState extends MusicBeatSubstate
 	
 	var selectionOverlay:FlxSpriteGroup;
 
-	var posX = 230;
+	inline static final posX:Int = 230;
 	var daCam:FlxCamera;
 
 	////
