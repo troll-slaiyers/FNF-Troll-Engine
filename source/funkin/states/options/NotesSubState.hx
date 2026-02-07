@@ -389,7 +389,7 @@ class NotesSubState extends MusicBeatSubstate
 	}
 
 	function updateValue(change:Float = 0) {
-		curValue = change;
+		curValue += change;
 		
 		var max:Float = switch(typeSelected) {
 			case 0: 180;
