@@ -41,9 +41,9 @@ class StrumNote extends NoteObject {
 
 	override function toString()
 		return '(column: $column | texture $texture | visible: $visible)';
-
+	
 	private function set_texture(value:String):String {
-		if (texture != value) {
+		if(texture != value) {
 			texture = value;
 			reloadNote();
 		}
@@ -55,9 +55,11 @@ class StrumNote extends NoteObject {
 
 		if (genScript == null) {
 			texture = PlayState.arrowSkin;
-		} else if (genScript.exists("setupReceptorTexture")) {
+
+		}else if (genScript.exists("setupReceptorTexture")) {
 			genScript.executeFunc("setupReceptorTexture", [this]);
-		} else {
+		
+		}else {
 			var newTex:String = PlayState.arrowSkin;
 
 			if (genScript.exists("texture"))
@@ -72,7 +74,8 @@ class StrumNote extends NoteObject {
 		return noteMod = value;
 	}
 
-	public function reloadNote() {
+	public function reloadNote()
+	{
 		// TODO: add indices support n shit
 
 		var textureKey:String;
@@ -83,16 +86,14 @@ class StrumNote extends NoteObject {
 			var folderPath = split.join('/') + '/';
 
 			textureKey = Note.getQuantTexture(folderPath, fileName, texture);
-			if (textureKey != null)
-				isQuant = true;
-			else
-				textureKey = texture;
-		} else
+			if (textureKey != null) isQuant = true;
+			else textureKey = texture;
+
+		}else
 			textureKey = texture;
 
 		var lastAnim:String = animation.name;
-		if (lastAnim == null)
-			lastAnim = 'static';
+		if (lastAnim == null) lastAnim = 'static';
 
 		frames = Paths.getSparrowAtlas(textureKey);
 
@@ -107,7 +108,8 @@ class StrumNote extends NoteObject {
 		updateHitbox();
 	}
 
-	public function postAddedToGroup() {
+	public function postAddedToGroup()
+	{
 		playAnim('static');
 		ID = column;
 	}
@@ -120,7 +122,7 @@ class StrumNote extends NoteObject {
 				resetAnim = 0;
 				playAnim('static');
 			}
-		} else if (resetAnim < 0 && animation.finished) {
+		}else if (resetAnim < 0 && animation.finished) {
 			resetAnim = 0;
 			playAnim('static');
 		}
@@ -135,12 +137,15 @@ class StrumNote extends NoteObject {
 
 		if (animation.name == 'static') {
 			colorSwap.setHSB();
-		} else if (note != null) {
+		} 
+		else if (note != null) {
 			// ok now the quants should b fine lol
 			colorSwap.copyFrom(note.colorSwap);
-		} else if (!isQuant) {
-			colorSwap.setHSBIntArray(getNoteColours(currentAnimations));
-		} else {
+		}
+		else if(!isQuant) {
+			colorSwap.setHSBIntArray(ClientPrefs.arrowHSV[column % 4]);
+		}
+		else {
 			colorSwap.setHSB();
 		}
 	}

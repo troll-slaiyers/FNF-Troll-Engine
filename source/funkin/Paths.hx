@@ -610,6 +610,8 @@ class Paths
 				globalContent.push(mod);
 		}
 
+		trace('global content: $globalContent');
+
 		return globalContent;
 	}
 
@@ -716,16 +718,12 @@ class Paths
 			Reflect.setField(data, "freeplaySongs", []);
 
 		////
-		if (Reflect.field(data, "weeks") != null)
-			return data; // valid ig
-
 		if (Reflect.hasField(data, "chapters")) { // TGT
 			Reflect.setField(data, "weeks", Reflect.field(data, "chapters"));
 			Reflect.deleteField(data, "chapters");
-			return data;
-		}else {
-			return {};
 		}
+
+		return data;
 	}
 
 	static public function getModDirectories():Array<String> 

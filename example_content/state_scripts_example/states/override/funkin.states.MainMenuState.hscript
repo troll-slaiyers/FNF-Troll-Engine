@@ -1,0 +1,72 @@
+import funkin.CoolUtil;
+
+var options = [
+	"story mode",
+	"freeplay",
+	"options",
+	"funny",
+];
+var optionSprites = [];
+var curSelected = 0;
+
+function create() {
+	statecreate();
+	
+	var bg = new funkin.objects.CoolMenuBG(Paths.image('menuDesat', null, false), 0xFFFF0000);
+	this.add(bg);
+	
+	var spr = new FlxSprite(0,0,"trollface");
+	spr.screenCenter();
+	this.add(spr);
+	
+	var txt = new FlxText(0,0,0, "Hello Bro");
+	txt.screenCenter();
+	txt.y = spr.y - txt.height - 30;
+	txt.scale.set(2, 2);
+	this.add(txt);
+	
+	for (i => name in options) {
+		var opt = new FlxText(0,0,0, name);
+		opt.x = (FlxG.width / options.length) * (i + 0.5);
+		opt.y = FlxG.height - spr.height - 30;
+		opt.scale.set(2, 2);
+		opt.updateHitbox();
+		opt.x -= opt.width / 2;
+		this.add(opt);
+		optionSprites[i] = opt;
+	}
+	
+	changeSelection(0);
+}
+
+function changeSelection(v) {
+	optionSprites[curSelected].color = 0xFFFFFFFF;
+	curSelected = CoolUtil.updateIndex(curSelected, v, options.length);
+	optionSprites[curSelected].color = 0xFFFFFF00;
+}
+
+function acceptSelection() {
+	switch (options[curSelected]) {
+		case "story mode":
+			MusicBeatState.switchState(new funkin.states.StoryModeState());
+		case "freeplay":
+			MusicBeatState.switchState(new funkin.states.FreeplayState());
+		case "options":
+			MusicBeatState.switchState(new funkin.states.options.OptionsState());
+		case "funny":
+			MusicBeatState.switchState(HScriptedState.fromFile("funny.CustomState"));
+	}
+}
+
+function update(elapsed) {
+	if (controls.UI_LEFT_P) {
+		changeSelection(-1);
+	}
+	if (controls.UI_RIGHT_P) {
+		changeSelection(1);
+	}
+	if (controls.ACCEPT) {
+		acceptSelection();
+	}
+	stateupdate(elapsed);
+}

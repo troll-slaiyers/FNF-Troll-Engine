@@ -1,0 +1,41 @@
+var fishGrp;
+
+function create() {
+	statecreate();
+	
+	var bg = new funkin.objects.CoolMenuBG(Paths.image('menuDesat', null, false), 0xFF0094FF);
+	this.add(bg);
+
+	fishGrp = new FlxGroup();
+	this.add(fishGrp);
+	
+	var txt = new FlxText(0,0,0, "Aquarium\n\nPress Z to add a fish\n\nPress BACKSPACE to return to the main menu");
+	txt.alpha = 0.5;
+	txt.screenCenter();
+	txt.scale.set(2,2);
+	this.add(txt);
+}
+
+function addFish() {
+	var fish = new funkin.objects.Fish();
+	var scale = FlxG.random.float(0.21, 0.367);
+	fish.scale.set(scale, scale);
+	fish.updateHitbox();
+	fish.x = FlxG.random.int(0, FlxG.width-fish.width);
+	fish.y = FlxG.random.int(0, FlxG.height-fish.height);
+	fish.velocity.x *= FlxG.random.float(0.9, 1.2) * (FlxG.random.bool() ? -1 : 1);
+	fish.velocity.y *= FlxG.random.float(0.9, 1.2) * (FlxG.random.bool() ? -1 : 1);
+	fishGrp.add(fish);
+}
+
+function update(elapsed) {
+	if (FlxG.keys.justPressed.Z) {
+		addFish();
+	}
+	if (FlxG.keys.justPressed.BACKSPACE) {
+		MusicBeatState.switchState(new funkin.states.MainMenuState());
+	}
+
+	stateupdate(elapsed);
+	
+}
