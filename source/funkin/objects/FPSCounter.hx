@@ -99,7 +99,7 @@ class FPSCounter extends TextField {
 		return this.showDebug = debug;
 	}
 
-    @:noCompletion
+	@:noCompletion
 	private function set_align(val) {
 		return align = defaultTextFormat.align = switch (val) {
 			default:
