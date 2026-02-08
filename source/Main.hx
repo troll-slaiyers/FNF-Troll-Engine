@@ -4,7 +4,6 @@ import haxe.io.Path;
 import haxe.CallStack;
 import openfl.display.Bitmap;
 import openfl.display.Sprite;
-import openfl.display.FPS;
 import lime.app.Application.current as application;
 import lime.graphics.Image;
 import flixel.FlxG;
@@ -14,6 +13,7 @@ import funkin.*;
 import funkin.api.Github;
 import funkin.macros.Sowy;
 import funkin.data.SemanticVersion;
+import funkin.objects.FPSCounter;
 
 #if sys
 import sys.FileSystem;
@@ -59,7 +59,7 @@ class Main extends Sprite
 	////
 	public static var instance:Main;
 	public static var game:FNFGame;
-	public static var fpsVar:FPS;
+	public static var fpsVar:FPSCounter;
 	public static var bread:Bitmap;
 
 	#if ALLOW_DEPRECATION
@@ -166,7 +166,7 @@ class Main extends Sprite
 		game = new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
 		addChild(game);
 
-		fpsVar = new FPS(10, 3, 0xFFFFFF);
+		fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
 		fpsVar.visible = false;
 		addChild(fpsVar);
 

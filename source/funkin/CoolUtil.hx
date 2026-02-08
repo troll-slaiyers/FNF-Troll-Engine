@@ -3,14 +3,11 @@ package funkin;
 import funkin.data.BaseSong;
 import haxe.io.Bytes;
 import haxe.io.Path;
-
 import math.CoolMath;
-
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxEase;
 import flixel.util.typeLimit.OneOfTwo;
-
 #if sys
 import sys.io.File;
 import sys.FileSystem;
@@ -40,11 +37,12 @@ class CoolUtil {
 	// TODO: reuse song instances n get rid of this
 	public static function indexOfSong(songList:Array<BaseSong>, song:BaseSong):Int {
 		// return songList.indexOf(song);
-		if (song != null) for (i => s in songList) {
-			if (song.songId == s.songId && song.folder == s.folder) {
-				return i;
+		if (song != null)
+			for (i => s in songList) {
+				if (song.songId == s.songId && song.folder == s.folder) {
+					return i;
+				}
 			}
-		}
 		return -1;
 	}
 
@@ -72,7 +70,7 @@ class CoolUtil {
 		idx = newDiffIds.indexOf("hard");
 		if (idx != -1)
 			return idx;
-		
+
 		return curDiffIdx < 0 ? 0 : curDiffIdx;
 	}
 
@@ -90,9 +88,11 @@ class CoolUtil {
 
 		buf.add(str.charAt(0));
 		while (i < str.length) {
-			if (h % 3 == 0) buf.add(',');
+			if (h % 3 == 0)
+				buf.add(',');
 			buf.add(str.charAt(i));
-			h--; i++;
+			h--;
+			i++;
 		}
 
 		return buf.toString();
@@ -100,7 +100,7 @@ class CoolUtil {
 
 	public static function structureToMap(st:Dynamic):Map<String, Dynamic> {
 		return [
-			for (k in Reflect.fields(st)){
+			for (k in Reflect.fields(st)) {
 				k => Reflect.field(st, k);
 			}
 		];
@@ -110,62 +110,57 @@ class CoolUtil {
 		// https://haxe.motion-twin.narkive.com/BxeZgKeh/sort-an-array-string-alphabetically
 		a = a.toLowerCase();
 		b = b.toLowerCase();
-		if (a < b) return -1;
-		if (a > b) return 1;
-		return 0;	
+		if (a < b)
+			return -1;
+		if (a > b)
+			return 1;
+		return 0;
 	}
 
 	public static function stringSort(ordering:Array<String>, a:String, b:String):Int {
-		if(a==b) return 0;
+		if (a == b)
+			return 0;
 
 		var aHasDefault = ordering.contains(a);
 		var bHasDefault = ordering.contains(b);
 		if (aHasDefault && bHasDefault)
 			return ordering.indexOf(a) - ordering.indexOf(b);
-		else if(aHasDefault)
+		else if (aHasDefault)
 			return 1;
-		else if(bHasDefault)
+		else if (bHasDefault)
 			return -1;
 		else
 			return alphabeticalSort(a, b);
 	}
 
 	public static function customSort<T>(ordering:Array<T>, a:T, b:T):Int {
-		if(a==b) return 0;
+		if (a == b)
+			return 0;
 
 		var aHasDefault = ordering.contains(a);
 		var bHasDefault = ordering.contains(b);
 		if (aHasDefault && bHasDefault)
 			return ordering.indexOf(a) - ordering.indexOf(b);
-		else if(aHasDefault)
+		else if (aHasDefault)
 			return 1;
-		else if(bHasDefault)
+		else if (bHasDefault)
 			return -1;
 		else
 			return 0;
 	}
 
 	////
-	inline public static function blankSprite(width, height, color=0xFFFFFFFF) {
+	inline public static function blankSprite(width, height, color = 0xFFFFFFFF) {
 		var spr = new FlxSprite().makeGraphic(1, 1);
 		spr.scale.set(width, height);
 		spr.updateHitbox();
 		spr.color = color;
 		return spr;
 	}
-	
-	public static function makeOutlinedGraphic(Width:Int, Height:Int, Color:Int, LineThickness:Int, OutlineColor:Int)
-	{
+
+	public static function makeOutlinedGraphic(Width:Int, Height:Int, Color:Int, LineThickness:Int, OutlineColor:Int) {
 		var rectangle = flixel.graphics.FlxGraphic.fromRectangle(Width, Height, OutlineColor, true);
-		rectangle.bitmap.fillRect(
-			new openfl.geom.Rectangle(
-				LineThickness, 
-				LineThickness, 
-				Width-LineThickness*2, 
-				Height-LineThickness*2
-			),
-			Color
-		);
+		rectangle.bitmap.fillRect(new openfl.geom.Rectangle(LineThickness, LineThickness, Width - LineThickness * 2, Height - LineThickness * 2), Color);
 
 		return rectangle;
 	};
@@ -176,16 +171,15 @@ class CoolUtil {
 	 * @param cloneName Name of the resulting clone.
 	 * @param force Whether to override the resulting animation, if it exists.
 	 */
-	public static function cloneSpriteAnimation(spr:FlxSprite, ogName:String, cloneName:String, force:Bool=false)
-	{
+	public static function cloneSpriteAnimation(spr:FlxSprite, ogName:String, cloneName:String, force:Bool = false) {
 		var daAnim = spr.animation.getByName(ogName);
-		if (daAnim!=null && (force==true || !spr.animation.exists(cloneName)))
+		if (daAnim != null && (force == true || !spr.animation.exists(cloneName)))
 			spr.animation.add(cloneName, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
 	}
 
 	@:noCompletion static var _point:FlxPoint = new FlxPoint();
-	public static function overlapsMouse(object:FlxObject, ?camera:FlxCamera):Bool
-	{
+
+	public static function overlapsMouse(object:FlxObject, ?camera:FlxCamera):Bool {
 		camera ??= FlxG.camera;
 
 		FlxG.mouse.getPositionInCameraView(camera, _point);
@@ -204,8 +198,7 @@ class CoolUtil {
 	}
 
 	////
-	public static function listFromString(string:String):Array<String>
-	{
+	public static function listFromString(string:String):Array<String> {
 		string = string.trim();
 		if (string.length == 0)
 			return [];
@@ -213,11 +206,11 @@ class CoolUtil {
 		var daList:Array<String> = string.split('\n');
 		for (i in 0...daList.length)
 			daList[i] = daList[i].trim();
-		
+
 		return daList;
 	}
-	public static function coolTextFile(path:String):Array<String>
-	{
+
+	public static function coolTextFile(path:String):Array<String> {
 		var rawList = Paths.getContent(path);
 		if (rawList == null)
 			return [];
@@ -233,7 +226,7 @@ class CoolUtil {
 			for (row in 0...sprite.frameHeight) {
 				var pixelColor:FlxColor = sprite.pixels.getPixel32(col, row);
 				if (pixelColor.alpha >= alphaTolerance) {
-					pixelColor.alpha = 255;	
+					pixelColor.alpha = 255;
 					colorCount[pixelColor] = colorCount.exists(pixelColor) ? colorCount[pixelColor] + 1 : 1;
 				}
 			}
@@ -254,70 +247,66 @@ class CoolUtil {
 	}
 
 	////
-	public static function colorFromString(color:String):FlxColor
-	{
-		return FlxColor.fromRGB(
-			Std.parseInt("0x"+color.substr(-6, 2)),
-			Std.parseInt("0x"+color.substr(-4, 2)),
-			Std.parseInt("0x"+color.substr(-2, 2)),
-			Std.parseInt("0x"+color.substr(-8, 2))
-		);
+	public static function colorFromString(color:String):FlxColor {
+		return FlxColor.fromRGB(Std.parseInt("0x" + color.substr(-6, 2)), Std.parseInt("0x" + color.substr(-4, 2)), Std.parseInt("0x" + color.substr(-2, 2)),
+			Std.parseInt("0x" + color.substr(-8, 2)));
 	}
 
 	// could probably use a macro
-	public static function getEaseFromString(?name:String):EaseFunction
-	{
-		return switch(name)
-		{
- 			case "backIn": FlxEase.backIn;
- 			case "backInOut": FlxEase.backInOut;
- 			case "backOut": FlxEase.backOut;
- 			case "bounceIn": FlxEase.bounceIn;
- 			case "bounceInOut": FlxEase.bounceInOut;
- 			case "bounceOut": FlxEase.bounceOut;
- 			case "circIn": FlxEase.circIn;
- 			case "circInOut": FlxEase.circInOut;
- 			case "circOut": FlxEase.circOut;
- 			case "cubeIn": FlxEase.cubeIn;
- 			case "cubeInOut": FlxEase.cubeInOut;
- 			case "cubeOut": FlxEase.cubeOut;
- 			case "elasticIn": FlxEase.elasticIn;
- 			case "elasticInOut": FlxEase.elasticInOut;
- 			case "elasticOut": FlxEase.elasticOut;
- 			case "expoIn": FlxEase.expoIn;
- 			case "expoInOut": FlxEase.expoInOut;
- 			case "expoOut": FlxEase.expoOut;
- 			case "quadIn": FlxEase.quadIn;
- 			case "quadInOut": FlxEase.quadInOut;
- 			case "quadOut": FlxEase.quadOut;
- 			case "quartIn": FlxEase.quartIn;
- 			case "quartInOut": FlxEase.quartInOut;
- 			case "quartOut": FlxEase.quartOut;
- 			case "quintIn": FlxEase.quintIn;
- 			case "quintInOut": FlxEase.quintInOut;
- 			case "quintOut": FlxEase.quintOut;
- 			case "sineIn": FlxEase.sineIn;
- 			case "sineInOut": FlxEase.sineInOut;
- 			case "sineOut": FlxEase.sineOut;
- 			case "smoothStepIn": FlxEase.smoothStepIn;
- 			case "smoothStepInOut": FlxEase.smoothStepInOut;
- 			case "smoothStepOut": FlxEase.smoothStepOut;
- 			case "smootherStepIn": FlxEase.smootherStepIn;
- 			case "smootherStepInOut": FlxEase.smootherStepInOut;
- 			case "smootherStepOut": FlxEase.smootherStepOut;
+	public static function getEaseFromString(?name:String):EaseFunction {
+		return switch (name) {
+			case "backIn": FlxEase.backIn;
+			case "backInOut": FlxEase.backInOut;
+			case "backOut": FlxEase.backOut;
+			case "bounceIn": FlxEase.bounceIn;
+			case "bounceInOut": FlxEase.bounceInOut;
+			case "bounceOut": FlxEase.bounceOut;
+			case "circIn": FlxEase.circIn;
+			case "circInOut": FlxEase.circInOut;
+			case "circOut": FlxEase.circOut;
+			case "cubeIn": FlxEase.cubeIn;
+			case "cubeInOut": FlxEase.cubeInOut;
+			case "cubeOut": FlxEase.cubeOut;
+			case "elasticIn": FlxEase.elasticIn;
+			case "elasticInOut": FlxEase.elasticInOut;
+			case "elasticOut": FlxEase.elasticOut;
+			case "expoIn": FlxEase.expoIn;
+			case "expoInOut": FlxEase.expoInOut;
+			case "expoOut": FlxEase.expoOut;
+			case "quadIn": FlxEase.quadIn;
+			case "quadInOut": FlxEase.quadInOut;
+			case "quadOut": FlxEase.quadOut;
+			case "quartIn": FlxEase.quartIn;
+			case "quartInOut": FlxEase.quartInOut;
+			case "quartOut": FlxEase.quartOut;
+			case "quintIn": FlxEase.quintIn;
+			case "quintInOut": FlxEase.quintInOut;
+			case "quintOut": FlxEase.quintOut;
+			case "sineIn": FlxEase.sineIn;
+			case "sineInOut": FlxEase.sineInOut;
+			case "sineOut": FlxEase.sineOut;
+			case "smoothStepIn": FlxEase.smoothStepIn;
+			case "smoothStepInOut": FlxEase.smoothStepInOut;
+			case "smoothStepOut": FlxEase.smoothStepOut;
+			case "smootherStepIn": FlxEase.smootherStepIn;
+			case "smootherStepInOut": FlxEase.smootherStepInOut;
+			case "smootherStepOut": FlxEase.smootherStepOut;
 
- 			case "instant": (t:Float) -> return 1.0;
+			case "instant": (t:Float) -> return 1.0;
 			default: FlxEase.linear;
 		}
 	}
 
-	inline public static function numberArray(max:Int, ?min = 0):Array<Int>
-	{
+	inline public static function numberArray(max:Int, ?min = 0):Array<Int> {
 		// max+1 because in haxe for loops stop before reaching the max number
-		return [for (n in min...max+1){n;}];
+		return [
+			for (n in min...max + 1) {
+				n;
+			}
+		];
 	}
 
-	//uhhhh does this even work at all? i'm starting to doubt
+	// uhhhh does this even work at all? i'm starting to doubt
 	public static function precacheSound(sound:String, ?library:String = null):Void {
 		Paths.sound(sound, library);
 	}
@@ -339,8 +328,7 @@ class CoolUtil {
 			else
 				File.saveContent(path, content);
 			return true;
-		}
-		catch(e) {
+		} catch (e) {
 			final errMsg:String = 'Error while trying to save the file: ${Std.string(e).replace('\n', ' ')}';
 			trace(errMsg);
 		}
@@ -353,7 +341,7 @@ class CoolUtil {
 	private static inline function _filefilters(?filters:Array<String>) {
 		#if linc_filedialogs
 		return filters ?? [];
-		#else		
+		#else
 		final goodFilters:Array<String> = [];
 		if (filters != null) {
 			for (f in filters) {
@@ -369,7 +357,7 @@ class CoolUtil {
 		Normalize a path to be used by the the file system.
 
 		On Windows, slashes `/` are replaced by backslashes `\`
-		
+
 		If `path` is `null`, or if the resulting path doesn't exist, the current working directory is returned.
 
 		@param path File path, can be relative or absolute.
@@ -381,10 +369,11 @@ class CoolUtil {
 			return Sys.getCwd();
 		if (!Path.isAbsolute(path))
 			path = Path.normalize(Path.addTrailingSlash(Sys.getCwd()) + path);
-		
+
 		if (!FileSystem.exists(Path.directory(path)))
 			path = Sys.getCwd();
-		#if windows else
+		#if windows
+		else
 			path = path.replace('/', '\\');
 		#end
 
@@ -394,62 +383,79 @@ class CoolUtil {
 		#end
 	}
 
-	public static function showOpenMultipleDialog(title:String = "Open Files", ?defaultPath:String, ?filters:Array<String>, ?onSelect:(paths:Array<String>)->Void, ?onCancel:Void->Void):Void {
+	public static function showOpenMultipleDialog(title:String = "Open Files", ?defaultPath:String, ?filters:Array<String>,
+			?onSelect:(paths:Array<String>) -> Void, ?onCancel:Void->Void):Void {
 		final filters = _filefilters(filters);
 		final defaultPath = getSystemPath(defaultPath);
 		#if linc_filedialogs
 		final files:Array<String> = FileDialogs.open_file(title, cast defaultPath, cast filters, Option.Multiselect);
 		if (files.length == 0) {
-			if (onCancel != null) onCancel();
-		}else {
-			if (onSelect != null) onSelect(files);
+			if (onCancel != null)
+				onCancel();
+		} else {
+			if (onSelect != null)
+				onSelect(files);
 		}
 		#else
 		final dialog:FileDialog = new FileDialog();
-		if (onCancel != null) dialog.onCancel.add(onCancel);
-		if (onSelect != null) dialog.onSelectMultiple.add(onSelect);
+		if (onCancel != null)
+			dialog.onCancel.add(onCancel);
+		if (onSelect != null)
+			dialog.onSelectMultiple.add(onSelect);
 		dialog.browse(OPEN_MULTIPLE, filters, defaultPath, title);
 		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
 		#end
 	}
-	
-	public static function showOpenDialog(title:String = "Open File", ?defaultPath:String, ?filters:Array<String>, ?onOpen:(bytes:Bytes)->Void, ?onSelect:(path:String)->Void, ?onCancel:Void->Void):Void {
+
+	public static function showOpenDialog(title:String = "Open File", ?defaultPath:String, ?filters:Array<String>, ?onOpen:(bytes:Bytes) -> Void,
+			?onSelect:(path:String) -> Void, ?onCancel:Void->Void):Void {
 		final filters = _filefilters(filters);
 		final defaultPath = getSystemPath(defaultPath);
 		#if linc_filedialogs
 		final files:Array<String> = FileDialogs.open_file(title, cast defaultPath, cast filters, Option.None);
-		if (onSelect != null) onSelect(files[0]);
+		if (onSelect != null)
+			onSelect(files[0]);
 		if (files.length == 0) {
-			if (onCancel != null) onCancel();
-		}else {
-			if (onOpen != null) onOpen(File.getBytes(files[0]));
+			if (onCancel != null)
+				onCancel();
+		} else {
+			if (onOpen != null)
+				onOpen(File.getBytes(files[0]));
 		}
 		#else
 		final dialog:FileDialog = new FileDialog();
-		if (onOpen != null) dialog.onOpen.add(onOpen);
-		if (onCancel != null) dialog.onCancel.add(onCancel);
-		if (onSelect != null) dialog.onSelect.add(onSelect);
+		if (onOpen != null)
+			dialog.onOpen.add(onOpen);
+		if (onCancel != null)
+			dialog.onCancel.add(onCancel);
+		if (onSelect != null)
+			dialog.onSelect.add(onSelect);
 		dialog.browse(OPEN, filters, defaultPath, title);
 		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
 		#end
 	}
 
-	public static function showSaveDialog(content:OneOfTwo<String, Bytes>, title:String = "Save File", ?defaultPath:String, ?filters:Array<String>, ?onSave:(path:String)->Void, ?onCancel:Void->Void):Void {
+	public static function showSaveDialog(content:OneOfTwo<String, Bytes>, title:String = "Save File", ?defaultPath:String, ?filters:Array<String>,
+			?onSave:(path:String) -> Void, ?onCancel:Void->Void):Void {
 		final filters = _filefilters(filters);
 		final defaultPath = getSystemPath(defaultPath);
 		#if linc_filedialogs
 		final savePath:String = FileDialogs.save_file(title, cast defaultPath, cast filters);
 		if (savePath.length == 0) {
-			if (onCancel != null) onCancel();
-		}else {
+			if (onCancel != null)
+				onCancel();
+		} else {
 			var success:Bool = safeSaveFile(savePath, content);
-			if (success && onSave != null) onSave(savePath);
+			if (success && onSave != null)
+				onSave(savePath);
 		}
 		#else
 		final dialog:FileDialog = new FileDialog();
 		dialog.onSelect.add((f) -> safeSaveFile(f, content));
-		if (onCancel != null) dialog.onCancel.add(onCancel);
-		if (onSave != null) dialog.onSelect.add(onSave);
+		if (onCancel != null)
+			dialog.onCancel.add(onCancel);
+		if (onSave != null)
+			dialog.onSelect.add(onSave);
 		dialog.browse(SAVE, filters, defaultPath, title);
 		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
 		#end
@@ -457,25 +463,38 @@ class CoolUtil {
 
 	// https://community.haxe.org/t/clone-a-class-instance/3747/5
 	// shoutout random guy on haxe fourm
-    public static function copyClass<T>(c:T):T {
-        var cls:Class<T> = Type.getClass(c);
-        var inst:T = Type.createEmptyInstance(cls);
-        var fields = Type.getInstanceFields(cls);
+	public static function copyClass<T>(c:T):T {
+		var cls:Class<T> = Type.getClass(c);
+		var inst:T = Type.createEmptyInstance(cls);
+		var fields = Type.getInstanceFields(cls);
 
-        for (field in fields) {
-            var val:Dynamic = Reflect.field(c,field);
-            if (!Reflect.isFunction(val)) {
-                if (val is Array) {
-                    Reflect.setField(inst,field,val.copy()); // WHAT THE FUCK HAXE??
-                }
-                else{
-                    Reflect.setField(inst,field,val);
-                }
-            }
-        }
-        return inst;
-    }
+		for (field in fields) {
+			var val:Dynamic = Reflect.field(c, field);
+			if (!Reflect.isFunction(val)) {
+				if (val is Array) {
+					Reflect.setField(inst, field, val.copy()); // WHAT THE FUCK HAXE??
+				} else {
+					Reflect.setField(inst, field, val);
+				}
+			}
+		}
+		return inst;
+	}
 
+	public static function formatMemory(Bytes:Float):String {
+		var units:Int = 0;
+		while (Bytes >= 1024) {
+			Bytes /= 1024;
+			units++;
+		}
+
+		return Math.round(Bytes * 100) / 100 + switch (units) {
+			case 0: "Bytes";
+			case 1: "kB";
+			case 2: "MB";
+			default: "GB";
+		};
+	}
 
 	////
 	@:noCompletion inline public static function coolLerp(current:Float, target:Float, elapsed:Float):Float
