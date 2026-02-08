@@ -113,17 +113,17 @@ class DialogueBox extends FlxSprite
 	}
 	public function createPost()
 	{
-		script.call("onCreatePost");
+		script?.call("onCreatePost");
 	}
 
 	public function newLine()
 	{
-		script.call("onNewLine");
+		script?.call("onNewLine");
 
 	}
 	public function finishLine()
 	{
-		script.call("onFinishLineDialogue");
+		script?.call("onFinishLineDialogue");
 	}
 	public function onDialogueEnded()
 	{
