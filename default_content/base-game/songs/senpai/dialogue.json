@@ -17,7 +17,7 @@
 		{
 			"sound": "",
 			"text_speed": 0.2,
-			"portrait": "bf",
+			"character": "bf-pixel",
 			"character_anim": "normal",
 			"text": "Beep bo bop"
 		}

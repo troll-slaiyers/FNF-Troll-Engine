@@ -1,14 +1,12 @@
 package funkin.objects.cutscenes;
 import flixel.addons.text.FlxTypeText;
 import flixel.util.FlxColor;
-import funkin.input.Controls;
-import flixel.text.FlxText.FlxTextBorderStyle;
 import haxe.Json;
 import flixel.util.FlxTimer;
 
 typedef DialogueFile = {
 	var dialogue:Array<DialogueLine>;
-    var box_style:String; //what box the file should use.
+    var box_style:String;
 }
 typedef DialogueLine = {
     var text:String;
@@ -31,7 +29,6 @@ class DialogueCutscene extends Cutscene{
     public var introDelay:Float = 2;
     /**
      * Whether the player is able to progress the dialogue.
-     * Starts of at 0.
     */
     public var canProgressDialogue:Bool = false;
     var characters:Array<DialogueCharacter> = [];
@@ -74,7 +71,7 @@ class DialogueCutscene extends Cutscene{
         this.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
     } 
 
-    function loadCharacters()        //alot of this function is kind of ripped from psych
+    function loadCharacters()        
     {
         var charsMap:Map<String, Bool> = new Map<String, Bool>();
         //Does a loop through the entire dialogue file and checks for characters
@@ -82,7 +79,7 @@ class DialogueCutscene extends Cutscene{
 			if(dialogueFile.dialogue[i] != null && dialogueFile.dialogue[i].character != null) {
 				var newChar:String = dialogueFile.dialogue[i].character;
                 if(!charsMap.exists(newChar) || !charsMap.get(newChar)) 
-					charsMap.set(newChar, true);//adds to the map only if the new character doesnt already exist
+					charsMap.set(newChar, true);//adds to the map only if the character doesnt already exist
 			}
 		}
 
