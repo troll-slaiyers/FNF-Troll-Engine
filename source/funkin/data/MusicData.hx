@@ -32,16 +32,18 @@ class MusicData
 		@param snd Optional `FlxSound` instance to load and play music data onto.
 		@returns An `FlxSound` instance playing this song.
 	**/
-	public function play(?snd:FlxSound, volume:Float = 1.0):FlxSound {
-		if (snd == null) {
-			snd = new FlxSound();
-			snd.context = MUSIC;
-			FlxG.sound.defaultMusicGroup.add(snd);
-		};
+	public function play(?sound:FlxSound, volume:Float = 1.0):FlxSound {
+		var snd = sound ?? FlxG.sound.list.recycle(FlxSound);
 		snd.loadEmbedded(Paths.returnSound(path), looped, false);
 		snd.volume = volume;
 		snd.play(false, startTime, endTime);
 		snd.loopTime = loopTime;
+
+		if (sound == null) {
+			snd.context = MUSIC;
+			FlxG.sound.defaultMusicGroup.add(snd);
+		}
+
 		return snd;
 	}
 

@@ -244,7 +244,8 @@ class PauseSubState extends MusicBeatSubstate
 
 	private function playMusic(){
 		if (songName == null) {
-			pauseMusic = null;
+			if (pauseMusic != null && pauseMusic.active)
+				pauseMusic.stop();
 			return;
 		}
 
@@ -270,7 +271,7 @@ class PauseSubState extends MusicBeatSubstate
 		}
 
 		if (md != null) {
-			pauseMusic = md.play(null, 0.0);
+			pauseMusic = md.play(pauseMusic, 0.0);
 			pauseMusic.time = FlxG.random.float(pauseMusic.time, (pauseMusic.endTime ?? pauseMusic.length) * 0.5);
 			pauseMusic.fadeIn(5, 0, 0.75);
 		}else {

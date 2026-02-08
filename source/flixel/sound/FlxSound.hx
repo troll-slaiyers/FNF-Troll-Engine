@@ -649,11 +649,11 @@ class FlxSound extends FlxBasic
 	{
 		if (_transform != null)
 		{
-			var mod:Float = 1;
-			if(context == SFX)
-				mod = ClientPrefs.sfxVolume;
-			else if(context == MUSIC)
-				mod = ClientPrefs.songVolume;
+			var mod:Float = switch(context) {
+				case SFX: ClientPrefs.sfxVolume;
+				case MUSIC: ClientPrefs.songVolume;
+				default: 1.0;
+			}
 
 			_transform.volume = #if FLX_SOUND_SYSTEM (FlxG.sound.muted ? 0 : 1) * FlxG.sound.volume * #end
 				(group != null ? group.volume : 1) * _volume * _volumeAdjust * mod;
