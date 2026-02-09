@@ -9,7 +9,7 @@ import haxe.Int64;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 
-class CoolMath /*Games*/ {
+class CoolMath/*Games*/{
 	inline public static function coolLerp(current:Float, target:Float, elapsed:Float):Float
 		return FlxMath.lerp(target, current, Math.exp(-elapsed));
 
@@ -26,14 +26,16 @@ class CoolMath /*Games*/ {
 		var fAngle:Float = angle % (Math.PI * 2.0);
 		if (fAngle < 0.0)
 			fAngle += Math.PI * 2.0;
-
+		
 		var result:Float = fAngle / Math.PI;
-
+		
 		if (result < 0.5) {
 			return 2.0 * result;
-		} else if (result < 1.5) {
+		}
+		else if (result < 1.5) {
 			return -2.0 * result + 2.0;
-		} else {
+		}
+		else {
 			return 2.0 * result - 4.0;
 		}
 	}
@@ -42,7 +44,7 @@ class CoolMath /*Games*/ {
 		return (value - clow) * (nhigh - nlow) / (chigh - clow) + nlow;
 
 	inline public static function quantizeAlpha(f:Float, interval:Float):Float
-		return Std.int((f + interval / 2) / interval) * interval;
+		return Std.int((f+interval/2)/interval) * interval;
 
 	inline public static function quantize(f:Float, snap:Float):Float
 		return Math.fround(f * snap) / snap;
@@ -63,7 +65,7 @@ class CoolMath /*Games*/ {
 		var tempMult:Float = 1.0;
 		for (_ in 0...decimals)
 			tempMult *= 10.0;
-
+		
 		return Math.ffloor(value * tempMult) / tempMult;
 	}
 
