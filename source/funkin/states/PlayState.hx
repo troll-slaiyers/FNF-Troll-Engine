@@ -613,8 +613,6 @@ class PlayState extends MusicBeatState
 			cpuControlled = ClientPrefs.getGameplaySetting('botplay', cpuControlled);
 			disableModcharts = ClientPrefs.getGameplaySetting('disableModcharts', disableModcharts);
 			noDropPenalty = ClientPrefs.getGameplaySetting('noDropPenalty', noDropPenalty);
-			centerNotefield = ClientPrefs.centerNotefield;
-			directionalCam = ClientPrefs.directionalCam;
 			
 			#if tgt
 			playbackRate *= (ClientPrefs.ruin ? 0.8 : 1);
@@ -623,7 +621,8 @@ class PlayState extends MusicBeatState
 			healthDrain = 0.0;
 			opponentHPDrain = 0.0;
 		}
-
+		centerNotefield = ClientPrefs.centerNotefield;
+		directionalCam = ClientPrefs.directionalCam;
 		if (perfectMode){
 			practiceMode = false;
 			instakillOnMiss = true;
