@@ -1,10 +1,7 @@
 var bg:FlxSprite;
-var handSelect:FlxSprite;
 var alphaIn:FlxTimer;
 function onCreate()
-{
-    trace('created script');
-    	
+{    	
 	game.camFollowPos.x = 650;
 	game.camFollowPos.y =  500;
 	game.camFollow.x = game.camFollowPos.x;
@@ -20,36 +17,18 @@ function onCreate()
 		if (bg.alpha > 0.7)
 			bg.alpha = 0.7;
 	}, 5);
-	trace(this);
-
 }
 
 function onDialogueEnded() {
 	if(alphaIn!= null)alphaIn.cancel();
-	handSelect.visible = false;	
 	new FlxTimer().start(0.2, function(tmr:FlxTimer)
 	{
 		bg.alpha -= 1 / 5 * 0.7;
 	}, 5);
 }
 
-function onCreatePost()
-{
-	trace('ceare post');
-	handSelect = new FlxSprite(1100, 600).loadGraphic(Paths.image('pixelUI/hand_textbox'));
-	handSelect.setGraphicSize(Std.int(handSelect.width * 4));
-	handSelect.updateHitbox();
-    handSelect.antialiasing = false;
-    handSelect.cameras = [game.camOther];
-	handSelect.visible = false;
-	add(handSelect);
-}
 
 function onNewLine()
 {
 	this.animation.play('pressed');
-}
-function onFinishLineDialogue()
-{
-	handSelect.visible = true;
 }
