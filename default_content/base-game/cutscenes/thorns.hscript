@@ -1,0 +1,54 @@
+import funkin.objects.cutscenes.DialogueCutscene;
+var senpaiEvil:FlxSprite;
+var redBG:FlxSprite;
+function onCreateCutscene()
+{
+    redBG = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFff1b31);
+	redBG.scrollFactor.set();
+	redBG.antialiasing = false;
+	game.add(redBG);
+
+    senpaiEvil = new FlxSprite();
+	senpaiEvil.frames = Paths.getSparrowAtlas('weeb/senpaiCrazy');
+	senpaiEvil.animation.addByPrefix('idle', 'Senpai Pre Explosion', 24, false);
+	senpaiEvil.setGraphicSize(Std.int(senpaiEvil.width * 6));
+	senpaiEvil.scrollFactor.set();
+	senpaiEvil.updateHitbox();
+	senpaiEvil.screenCenter();
+	senpaiEvil.antialiasing = false;
+	senpaiEvil.x += 300;
+    game.add(senpaiEvil);
+
+ 	whiteFlash = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFFFFFFF);
+	whiteFlash.scrollFactor.set();
+	whiteFlash.antialiasing = false;
+	whiteFlash.alpha = 0;
+	game.add(whiteFlash);
+
+	game.camHUD.visible = false;
+
+	timeline.playAnimation(30, senpaiEvil, "idle");
+	this.sound(30, "Senpai_Dies", false);
+	timeline.easeProperties(110, 150, whiteFlash, {alpha: 1}, FlxEase.linear);
+	timeline.once(170, ()-> {
+		timeline.easeProperties(170, 210, whiteFlash, {alpha: 0}, FlxEase.linear);
+		senpaiEvil.visible = false;
+		redBG.visible = false;
+	
+	});
+		timeline.finish(210);
+
+
+}
+function onCutsceneEnd(wasSkipped: Bool){
+	
+	if(wasSkipped)
+	{
+		senpaiEvil.visible = false;
+		redBG.visible = false;
+		whiteFlash.visible = false;
+	}
+	game.camHUD.visible = true;
+	game.startCutscenes.push(new DialogueCutscene('songs/thorns/dialogue.json'));
+
+}

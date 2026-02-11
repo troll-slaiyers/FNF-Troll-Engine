@@ -1,0 +1,21 @@
+{
+    "graphic": "pixelUI/spiritFaceForward",
+    "scale": 6,
+    "offsets": [191, -40],
+    "antialiasing": false,
+    "animations": [
+    {
+      "name": "talk",
+      "prefix": "portraitTalk",
+      "frameRate": 12,
+      "looped": false
+
+    },
+    {
+      "name": "enter",
+      "prefix": "portraitEnter",
+      "frameRate": 12,
+      "looped": false
+    }
+]
+}

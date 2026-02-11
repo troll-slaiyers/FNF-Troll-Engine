@@ -1,0 +1,42 @@
+{
+	"dialogue": [
+		{
+			"sound": "",
+			"text_speed": 0.06,
+			"character": "spirit",
+			"character_anim": "enter",
+			"text": "Direct contact with real humans, after being trapped in here for so long..."
+		},
+		{
+			"sound": "",
+			"text_speed": 0.1,
+			"text_size": 65,
+			"character": "spirit",
+			"character_anim": "talk",
+			"text": "and HER of all people."
+		},
+		{
+			"sound": "",
+			"text_speed": 0.06,
+			"character": "spirit",
+			"character_anim": "talk",
+			"text": "I'll make her father pay for what he's done to me and all the others,,,,"
+		},
+		{
+			"sound": "",
+			"text_speed": 0.06,
+			"character": "spirit",
+			"character_anim": "talk",
+			"text": "I'll beat you and make you take my place."
+		}
+		,
+		{
+			"sound": "",
+			"text_speed": 0.06,
+			"character": "spirit",
+			"character_anim": "talk",
+			"text": "You don't mind your bodies being borrowed right? It's only fair..."
+		}
+	],
+	"box_style": "thorns"
+}
