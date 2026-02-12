@@ -5,8 +5,7 @@ function onCreate() {
 	if (!PlayState.isStoryMode &&  PlayState.seenCutscene) {
 		script.stop();
 		return;
-	}	
-	
+	}
 
 	FlxG.sound.playMusic(Paths.music('Lunchbox'), 0);
 	FlxG.sound.music.fadeIn(1, 0, 0.8);
