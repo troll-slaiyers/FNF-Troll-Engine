@@ -36,7 +36,8 @@ function onCreateCutscene()
 		redBG.visible = false;
 	
 	});
-		timeline.finish(210);
+		
+	timeline.finish(210);
 
 
 }
@@ -50,5 +51,9 @@ function onCutsceneEnd(wasSkipped: Bool){
 	}
 	game.camHUD.visible = true;
 	game.startCutscenes.push(new DialogueCutscene('songs/thorns/dialogue.json'));
+	
+	FlxG.sound.playMusic(Paths.music('LunchboxScary'), 0);
+	FlxG.sound.music.fadeIn(1, 0, 0.8);
 
 }
+
