@@ -1,4 +1,6 @@
 function onCreateCutscene() {
+	this.canSkip = false;
+	
 	game.camHUD.visible = false;
 	
 	game.camFollowPos.x = 450;

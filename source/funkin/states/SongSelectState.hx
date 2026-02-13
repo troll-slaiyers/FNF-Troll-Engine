@@ -78,8 +78,8 @@ class SongSelectState extends MusicBeatSubstate
 
 		////
 		if (_parentState == null) {
-			if (FlxG.sound.music == null){
-				MusicBeatState.playMenuMusic(1);
+			if (!MusicBeatState.isPlayingMusic()){
+				MusicBeatState.playMenuMusic(true);
 			}else{
 				FlxG.sound.music.fadeIn(1.0, FlxG.sound.music.volume);
 			}

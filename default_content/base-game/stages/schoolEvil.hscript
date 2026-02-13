@@ -16,7 +16,7 @@ function roundTo(num, roundFactor){
 ////
 var bgGhouls;
 
-function onLoad(){
+function buildStage(){
 	var posX = 400;
 	var posY = 200;
 	

@@ -2,7 +2,9 @@ var camFollow = game.camFollow;
 var camFollowPos = game.camFollowPos;
 var tankmanimate:FlxAnimate;
 
-function onCutsceneEnd(){
+function onCutsceneEnd(wasSkipped: Bool){
+	game.boyfriend.voicelining = false;
+	game.boyfriend.dance();
 	game.remove(tankmanimate);
 	tankmanimate.destroy();
 

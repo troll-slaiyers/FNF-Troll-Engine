@@ -5,7 +5,7 @@ var boppers = [];
 tankmenGroup = null;
 tankmenArray = [];
 
-function onLoad()
+function buildStage()
 {
 	var sky:BGSprite = new BGSprite('stages/tank/tankSky', -400, -400, 0, 0);
 	add(sky);

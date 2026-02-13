@@ -1,5 +1,11 @@
 package math;
 
+#if cpp
+import cpp.Stdlib;
+import cpp.Native;
+import cpp.RawPointer;
+import haxe.Int64;
+#end
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 
@@ -76,7 +82,27 @@ class CoolMath/*Games*/{
 		var p = point ?? FlxPoint.weak();
 		p.set((x * c) - (y * s), (x * s) + (y * c));
 
-
 		return p;
+	}
+
+	public static function Q_rsqrt(number:Float):Float {
+		#if cpp
+		var i:Int64 = 0;
+		var x2:Single;
+		var y:Single;
+		final threehalfs:Single = 1.5;
+
+		x2 = number * 0.5;
+		y = number;
+		Stdlib.nativeMemcpy(cast RawPointer.addressOf(i), cast RawPointer.addressOf(y), Native.sizeof(Int));   // evil floating point bit level hacking
+		i = 0x5f3759df - (i >> 1);                                                                           // what the fuck?
+		Stdlib.nativeMemcpy(cast RawPointer.addressOf(y), cast RawPointer.addressOf(i), Native.sizeof(Float));
+
+		y = y * (threehalfs - (x2 * y * y));                                                                   // 1st iteration
+	//	y  = y * ( threehalfs - ( x2 * y * y ) );                                                              // 2nd iteration, this can be removed
+		return y;
+		#else
+		return 1 / Math.sqrt(number);
+		#end
 	}
 }

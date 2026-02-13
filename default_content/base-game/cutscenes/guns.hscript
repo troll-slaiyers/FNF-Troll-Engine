@@ -3,7 +3,7 @@ var tankmanimate: FlxAnimate;
 var camFollow = game.camFollow;
 var camFollowPos = game.camFollowPos;
 
-function onCutsceneEnd(){
+function onCutsceneEnd(wasSkipped: Bool){
 	game.remove(tankmanimate);
 	tankmanimate.destroy();
 

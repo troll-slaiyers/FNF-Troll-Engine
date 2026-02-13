@@ -1,9 +1,10 @@
 package funkin.states.options;
 
 // too lazy to finish merging this w the keyboard version rn
+import funkin.objects.notes.NoteAnimations;
+import funkin.objects.notes.Note;
 import funkin.states.options.BindsBullshit.KeyboardNavHelper;
 import funkin.states.options.BindsBullshit.BindButton;
-import funkin.CoolUtil.overlapsMouse as overlaps;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.math.FlxMath;
 import flixel.addons.ui.FlxUI9SliceSprite;
@@ -12,6 +13,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.math.FlxPoint;
 import openfl.geom.Rectangle;
+import flixel.addons.ui.U as FlxU;
 
 using StringTools;
 
@@ -25,23 +27,12 @@ class ButtonBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxGam
 	// if an option is in this list, then atleast ONE key will have to be bound.
 	var forcedBind:Array<String> = ["ui_up", "ui_down", "ui_left", "ui_right", "accept", "back",];
 
-	var binds:Array<Array<String>> = [
-		[Paths.getString('controls_gameplay')],
-		[Paths.getString('control_note_left'), 'note_left'],
-		[Paths.getString('control_note_down'), 'note_down'],
-		[Paths.getString('control_note_up'), 'note_up'],
-		[Paths.getString('control_note_right'), 'note_right'],
-		/*
-		[Paths.getString('control_pause'), 'pause'],
-		[Paths.getString('control_reset'), 'reset'],
-
-		[Paths.getString('controls_ui')],
-		[Paths.getString('control_accept'), 'accept'],
-		[Paths.getString('control_back'), 'back'],
-		*/
-	];
+	var binds:Array<Array<String>> = [];
 
 	public var changedBind:(String, Int, FlxGamepadInputID) -> Void;
+
+	/** Which key counts to display **/
+	public var displayedKeyCounts:Array<Int> = null;
 
 	// anything beyond this point prob shouldnt be touched too much
 	final clientBinded:Map<String, Array<FlxGamepadInputID>> = ClientPrefs.buttonBinds;
@@ -72,6 +63,49 @@ class ButtonBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxGam
 	var popupTitle:FlxText;
 	var popupText:FlxText;
 	var unbindText:FlxText;
+
+	override public function new() {
+		super();
+
+		if (displayedKeyCounts == null) {
+			if (PlayState.instance != null)
+				displayedKeyCounts = [PlayState.keyCount];
+			else #if USE_EXTRA_KEYS
+				displayedKeyCounts = [for (kc in Note.minKeyCount...Note.maxKeyCount + 1) kc];
+			#else
+				displayedKeyCounts = [4];
+			#end
+		}
+		
+		var noteBinds:Array<Array<String>> = [[Paths.getString('controls_gameplay')],];
+
+		var baseDirections = ['Left', 'Down', 'Up', 'Right', 'Center'];
+		for (kc in displayedKeyCounts) {
+			var directions = NoteAnimations.remap4KArray(kc, baseDirections);
+
+			noteBinds.push(['$kc Key']);
+			for (n in 0...kc)
+				noteBinds.push(['${n + 1}. ${directions[n]}', '${kc}_key_${n}']);
+		}
+
+		if (displayedKeyCounts.length <= 1)
+			noteBinds.remove(noteBinds[1]);
+
+		var otherBinds:Array<Array<String>> = [
+			null, // still gameplay but separate them a lil from the note binds
+			[Paths.getString('control_pause'), 'pause'],
+			[Paths.getString('control_reset'), 'reset'],
+
+			[Paths.getString('controls_ui')],
+			[Paths.getString('control_accept'), 'accept'],
+			[Paths.getString('control_back'), 'back'],
+		];
+
+		binds = noteBinds.concat(otherBinds);
+
+		FlxU.clearArraySoft(noteBinds);
+		FlxU.clearArraySoft(otherBinds);
+	}
 
 	override public function create() {
 		super.create();
@@ -111,25 +145,24 @@ class ButtonBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxGam
 		var daY:Float = 0;
 		var idx:Int = 0;
 		for (data in binds) {
-			if (data.length == 0)
-				continue;
-
-			var label = data[0];
-
-			if (data.length == 1) {
+			if (data == null || data.length == 0) {
+				daY += 32;
+			}
+			else if (data.length == 1) {
 				// its just a label
-				var text = new FlxText(8, daY, 0, label, 16);
+				var text = new FlxText(8, daY, 0, data[0], 16);
 				text.cameras = [scrollableCam];
 				text.setFormat(Paths.font("quanticob.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
 				group.add(text);
 				daY += text.height;
-			} else {
+			}
+			else {
 				// its a bind
 				var buttArray:Array<BindButtonC> = [];
 				var internal:String = data[1];
 				internals.push(data[1]);
 
-				var text = new FlxText(16, daY, 0, label, 16);
+				var text = new FlxText(16, daY, 0, data[0], 16);
 				text.setFormat(Paths.font("quantico.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
 				text.cameras = [scrollableCam];
 				text.updateHitbox();

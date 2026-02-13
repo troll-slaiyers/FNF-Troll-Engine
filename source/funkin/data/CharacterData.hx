@@ -2,6 +2,8 @@ package funkin.data;
 
 import funkin.objects.Character;
 import flixel.util.FlxColor;
+import funkin.data.VSliceCharacterData;
+import funkin.data.AndromedaCharacterData;
 using StringTools;
 
 typedef CharacterFile = {
@@ -32,7 +34,7 @@ typedef AnimArray = {
 	var fps:Int;
 	var loop:Bool;
 	var indices:Array<Int>;
-	var offsets:Array<Int>;
+	var offsets:Array<Float>;
 	@:optional var image:String;
 	@:optional var cameraOffset:Array<Float>;
 }
@@ -47,13 +49,11 @@ class CharacterData {
 			return null;
 		}
 
-		switch (Reflect.field(json, "format")){
-			case "andromeda": return fileFromAndromeda(json);
-			// case "troll.1": // base game better hurry the fuck up on fixing their shit or im making my own format
-		}
+		if (AndromedaCharacterData.isAndromedaFormat(json))
+			return AndromedaCharacterData.toPsychData(json);
 
-		if(Reflect.field(json, "version") != null)
-			return fileFromVSlice(json);
+		if (VSliceCharacterData.isVSliceFormat(json))
+			return VSliceCharacterData.toPsychData(json);
 
 		var json:CharacterFile = json;
 		
@@ -160,71 +160,6 @@ class CharacterData {
 		else
 			[0.0, 0.0];
 	}
-	
-	private static function fileFromVSlice(data:Dynamic): CharacterFile {
-		var data: VSliceCharJson = data;
-		// TODO: render type shit
-		return {
-			script_name: "vslice",
-			animations: [for(anim in data.animations)vsliceToPsychAnim(anim)],
-			image: data.assetPath,
-			scale: (data?.scale ?? 1) * ((data?.isPixel ?? false) ? 6 : 1),
-			sing_duration: data?.singTime ?? 4,
-			
-			position: data?.offsets ?? [0, 0],
-			camera_position: data?.cameraOffsets ?? [0, 0],
-
-			flip_x: data?.flipX ?? false,
-			no_antialiasing: data?.isPixel ?? false,
-
-			healthicon: data?.healthIcon?.id ?? 'bf',
-			healthbar_colors: [255, 0, 0]
-		}
-	}
-
-	private static function vsliceToPsychAnim(anim: VSliceAnimData): AnimArray {
-		var offsets:Array<Float> = anim?.offsets ?? [0, 0];
-		return {
-			anim: anim.name,
-			name: anim.prefix,
-			fps: anim?.frameRate ?? 24,
-			indices: anim.frameIndices,
-			loop: anim?.looped ?? false,
-			offsets: [Std.int(offsets[0]), Std.int(offsets[1])]
-		}
-	}
-
-	private static function fileFromAndromeda(data:Dynamic):CharacterFile {
-		var data:AndromedaCharJson = data;
-		var conv:CharacterFile = {
-			animations: [for (anim in data.anims) andromedaToPsychAnim(anim)],
-			image: 'characters/'+data.spritesheet,
-			scale: data.scale,
-			sing_duration: data.singDur,
-			
-			position: data.charOffset,
-			camera_position: data.camOffset,
-	
-			flip_x: data.flipX,
-			no_antialiasing: data.antialiasing==false,
-	
-			healthicon: data.iconName,
-			healthbar_colors: funkin.scripts.Wrappers.SowyColor.toRGBArray(CoolUtil.colorFromString(data.healthColor))
-		};
-	
-		return conv;
-	}
-
-	private static function andromedaToPsychAnim(anim:AndromedaAnimShit):AnimArray {
-		return {
-			anim: anim.name,
-			name: anim.prefix,
-			fps: anim.fps,
-			indices: anim.indices,
-			loop: anim.looped,
-			offsets: [Std.int(anim.offsets[0]), Std.int(anim.offsets[1])]
-		}
-	}
 
 	public static function charToPsychData(char:Character){
 		return {
@@ -240,47 +175,6 @@ class CharacterData {
 			"flip_x": char.originalFlipX,
 			"no_antialiasing": char.noAntialiasing,
 			"healthbar_colors": char.healthColorArray
-		};
-	}
-	
-	public static function psychToFunkinAnim(anim:AnimArray) return {
-		"name": anim.anim,
-		"prefix": anim.name,
-		"offsets": anim.offsets,
-		"looped": anim.loop,
-		"frameRate": 24,
-		"flipX": false,
-		"flipY": false
-	}
-
-	public static function charToFunkinData(char:Character){
-		return {
-			"generatedBy": "TROLL ENGINE",
-			"version": "1.0.0",
-
-			"name": char.characterId,
-			"assetPath": char.imageFile,
-			"renderType": CharacterData.getImageFileType(char.imageFile),
-			"flipX": char.originalFlipX,
-			"scale": char.baseScale,
-			"isPixel": char.noAntialiasing == true, // i think // isPixel also assumes its scaled up by 6 so
-
-			"offsets": char.positionArray,
-			"cameraOffsets": char.cameraPosition,
-
-			"singTime": char.singDuration, 
-			"danceEvery": char.danceEveryNumBeats,
-			"startingAnimation": char.danceIdle ? "danceLeft" : "idle",
-
-			"healthIcon": {
-				"id": char.healthIcon,
-				"offsets": [0, 0],
-				"isPixel": StringTools.endsWith(char.healthIcon, "-pixel"),
-				"flipX": false,
-				"scale": 1
-			},
-
-			"animations": [for (anim in char.animationsArray) psychToFunkinAnim(anim)],
 		};
 	}
 
@@ -319,74 +213,4 @@ class CharacterData {
 
 		return characters;
 	}
-}
-
-////
-typedef VSliceDeathData = {
-	?cameraOffsets:Array<Float>,
-	?cameraZoom:Float,
-	?preTransitionDelay:Float
-}
-typedef VSliceHealthIconData = {
-	id: Null<String>,
-	scale: Null<Float>,
-	flipX: Null<Bool>,
-	isPixel: Null<Bool>,
-	offsets: Null<Array<Float>>
-}
-typedef VSliceAnimData = {
-	name:String,
-	?prefix:String,
-	?assetPath:String,
-	?offsets:Array<Float>,
-	?looped:Bool,
-	?flipX:Bool,
-	?flipY:Bool,
-	?frameRate:Int,
-	?frameIndices:Array<Int>
-};	
-
-typedef VSliceCharJson = {
-	var version: String;
-	var name: String;
-	var renderType: String;
-	var assetPath: String;
-	var scale: Null<Float>;
-	var healthIcon: Null<VSliceHealthIconData>;
-	var death: Null<VSliceDeathData>;
-	var offsets: Null<Array<Float>>;
-	var cameraOffsets: Array<Float>;
-	var isPixel: Null<Bool>;
-	var danceEvery: Null<Float>;
-	var singTime: Null<Float>;
-	var animations: Array<VSliceAnimData>;
-	var startingAnimation: Null<String>; // ???? WHAT IS THE POINT OF THIS
-	var flipX: Null<Bool>;
-}
-
-////
-typedef AndromedaAnimShit = {
-	var prefix:String;
-	var name:String;
-	var fps:Int;
-	var looped:Bool;
-	var offsets:Array<Float>;
-	@:optional var indices:Array<Int>;
-}
-
-typedef AndromedaCharJson = {
-	var anims:Array<AndromedaAnimShit>;
-	var spritesheet:String;
-	var singDur:Float; // dadVar
-	var iconName:String;
-	var healthColor:String;
-	var charOffset:Array<Float>;
-	var beatDancer:Bool; // dances every beat like gf and spooky kids
-	var flipX:Bool;
-
-	@:optional var format:String;
-	@:optional var camMovement:Float;
-	@:optional var camOffset:Array<Float>;
-	@:optional var scale:Float;
-	@:optional var antialiasing:Bool;
 }

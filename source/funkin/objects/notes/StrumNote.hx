@@ -12,13 +12,7 @@ using StringTools;
 // honestly we should make it so you can attach a hscript to receptors and type-less notes
 // maybe notetypes/default.hx and notetypes/receptor.hx
 // idk lol i'll explore it more once i get around to making skins/assetpacks (resource packs but troll engine)
-
-class StrumNote extends NoteObject
-{
-	public static var defaultStaticAnimNames:Array<String> = ['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT'];
-	public static var defaultPressAnimNames:Array<String> = ["left press", "down press", "up press", "right press"];
-	public static var defaultConfirmAnimNames:Array<String> = ["left confirm", "down confirm", "up confirm", "right confirm"];
-
+class StrumNote extends NoteObject {
 	////
 	public var texture(default, set):String = null;
 	public var downScroll:Bool = false;
@@ -103,9 +97,9 @@ class StrumNote extends NoteObject
 
 		frames = Paths.getSparrowAtlas(textureKey);
 
-		animation.addByPrefix('static', defaultStaticAnimNames[column], 24, false);
-		animation.addByPrefix('pressed', defaultPressAnimNames[column], 24, false);
-		animation.addByPrefix('confirm', defaultConfirmAnimNames[column], 24, false);
+		animation.addByPrefix('static', currentAnimations.staticAnimations[column % currentAnimations.staticAnimations.length], 24, false);
+		animation.addByPrefix('pressed', currentAnimations.pressAnimations[column % currentAnimations.pressAnimations.length], 24, false);
+		animation.addByPrefix('confirm', currentAnimations.confirmAnimations[column % currentAnimations.confirmAnimations.length], 24, false);
 
 		playAnim(lastAnim, true);
 

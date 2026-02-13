@@ -369,10 +369,9 @@ class OptionsSubstate extends MusicBeatSubstate
 			#end
 			#if DISCORD_ALLOWED
 			case 'discordRPC':
-				val ? DiscordClient.start(true) : DiscordClient.shutdown(true);
+				DiscordClient.setActive(val, true);
 			case 'discordRPC_hideDetails':
 				DiscordClient.hideDetails = val;
-				if (val) DiscordClient.changePresence(null);
 			#end
 			case 'autoPause':
 				FlxG.autoPause = val;
@@ -412,7 +411,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					currentBinds.set(key, bindsMap[key].copy());
 					
 				substate.changedBind = (action:String, index:Int, newBind:Int) -> {
-					var daId = '${action}${index}-bind';
+					var daId = 'bind-$action-$index';
 					
 					trace(daId, currentBinds.get(action)[index], newBind, currentBinds.get(action)[index] == newBind);
 					

@@ -1,5 +1,6 @@
 package funkin.states.options;
 
+import flixel.math.FlxMath;
 import flixel.group.FlxSpriteGroup;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -26,7 +27,7 @@ class NotesSubState extends MusicBeatSubstate
 	
 	var selectionOverlay:FlxSpriteGroup;
 
-	var posX = 230;
+	inline static final posX:Int = 230;
 	var daCam:FlxCamera;
 
 	////
@@ -74,13 +75,13 @@ class NotesSubState extends MusicBeatSubstate
 		} else {
 			valuesArray = ClientPrefs.arrowHSV;
 			noteFrames = Paths.getSparrowAtlas('NOTE_assets');
-			noteAnimations = ['purple0', 'blue0', 'green0', 'red0'];
-			namesArray = ["Left", "Down", "Up", "Right"];
-			defaults = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+			noteAnimations = ['purple0', 'blue0', 'green0', 'red0', 'square0'];
+			namesArray = ["Left", "Down", "Up", "Right", "Center"];
+			defaults = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
 		}
 	}
 
-	function onOpenValuesFile(bytes:haxe.io.Bytes) {
+	inline function onOpenValuesFile(bytes:haxe.io.Bytes) {
 		loadFromString(bytes.toString());
 	}
 
@@ -119,8 +120,8 @@ class NotesSubState extends MusicBeatSubstate
 		add(grpNumbers);
 		
 		////
-		for (i in 0...valuesArray.length) {
-			var yPos:Float = (165 * i) + 35;
+		for (i in 0...namesArray.length) {
+			var yPos:Float = (165  * i) + 35;
 			for (j in 0...valueNames.length) {
 				var optionText:Alphabet = new Alphabet(0, yPos + 60, '', true);
 				optionText.fieldWidth = 225;
@@ -132,7 +133,7 @@ class NotesSubState extends MusicBeatSubstate
 
 			var note:FlxSprite = new FlxSprite(posX, yPos);
 			note.frames = noteFrames;
-			note.animation.addByPrefix('idle', noteAnimations[i % 4]);
+			note.animation.addByPrefix('idle', noteAnimations[i % noteAnimations.length]);
 			note.animation.play('idle');
 			grpNotes.add(note);
 
@@ -326,12 +327,7 @@ class NotesSubState extends MusicBeatSubstate
 	}
 
 	function changeSelection(change:Int = 0) {
-		curSelected += change;
-		if (curSelected < 0)
-			curSelected = valuesArray.length-1;
-		if (curSelected > valuesArray.length-1)
-			curSelected = 0;
-
+		curSelected = FlxMath.wrap(curSelected + change, 0, namesArray.length - 1);
 		curValue = valuesArray[curSelected][typeSelected];
 		updateValue();
 

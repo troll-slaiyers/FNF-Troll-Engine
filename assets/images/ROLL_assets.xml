@@ -1,13 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-16"?>
 <TextureAtlas imagePath="ROLL_assets.png">
-	<!-- Created with Adobe Animate version 20.0.3.25487 -->
-	<!-- http://www.adobe.com/products/animate.html -->
-	<SubTexture name="blue roll end0000" x="8" y="8" width="50" height="30"/>
-	<SubTexture name="blue roll piece0000" x="66" y="8" width="50" height="50"/>
-	<SubTexture name="green roll end0000" x="124" y="8" width="50" height="30"/>
-	<SubTexture name="green roll piece0000" x="182" y="8" width="50" height="50"/>
-	<SubTexture name="purple roll end0000" x="8" y="66" width="50" height="30"/>
-	<SubTexture name="purple roll piece0000" x="66" y="66" width="50" height="50"/>
-	<SubTexture name="red roll end0000" x="124" y="66" width="50" height="30"/>
-	<SubTexture name="red roll piece0000" x="182" y="66" width="50" height="50"/>
+	<!-- Created with Adobe Flash CS6 version 12.0.0.481 -->
+	<!-- http://www.adobe.com/products/flash.html -->
+	<SubTexture name="blue roll end0000" x="1" y="1" width="50" height="30"/>
+	<SubTexture name="blue roll piece0000" x="52" y="1" width="50" height="50"/>
+	<SubTexture name="green roll end0000" x="1" y="52" width="50" height="30"/>
+	<SubTexture name="green roll piece0000" x="52" y="52" width="50" height="50"/>
+	<SubTexture name="purple roll end0000" x="1" y="103" width="50" height="30"/>
+	<SubTexture name="purple roll piece0000" x="52" y="103" width="50" height="50"/>
+	<SubTexture name="red roll end0000" x="1" y="154" width="50" height="30"/>
+	<SubTexture name="red roll piece0000" x="52" y="154" width="50" height="50"/>
+	<SubTexture name="square roll end0000" x="1" y="205" width="50" height="30"/>
+	<SubTexture name="square roll piece0000" x="52" y="205" width="50" height="50"/>
 </TextureAtlas>

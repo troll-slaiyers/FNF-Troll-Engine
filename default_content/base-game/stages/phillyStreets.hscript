@@ -5,7 +5,7 @@ var scrollingSky:FlxTiledSprite;
 
 var rainShaderStartIntensity:Float = 0.2;
 var rainShaderEndIntensity:Float = 0.4;
-var rainShader = newShader("rain", "rain");
+var rainShader = Paths.getShader("rain", "rain");
 
 
 var lightsStop:Bool = false; // state of the traffic lights
@@ -16,8 +16,51 @@ var carWaiting:Bool = false; // if the car is waiting at the lights and is ready
 var carInterruptable:Bool = true; // if the car can be reset
 var car2Interruptable:Bool = true;
 
-function getNamedProp(n)return this.props.get(n);
+function getNamedProp(n)
+	return this.props.get(n);
 
+function buildStage(){
+	super();
+	game.gf.scrollFactor.set(1, 1);
+
+	scrollingSky = new FlxTiledSprite(Paths.image('stages/phillyStreets/phillySkybox'), 2922, 718, true, false);
+	scrollingSky.setPosition(-650, -375);
+	scrollingSky.scrollFactor.set(0.1, 0.1);
+	scrollingSky.scale.set(0.65, 0.65);
+	insert(0, scrollingSky);
+
+	for (id in this.props.keys()) {
+		if (StringTools.endsWith(id, "_lightmap")) {
+			this.props.get(id).blend = 0; // ADD
+		}
+	}
+
+	switch(game.songId){
+		case 'darnell':
+			rainShaderStartIntensity = 0;
+			rainShaderEndIntensity = 0.1;
+		case 'lit-up':
+			rainShaderStartIntensity = 0.1;
+			rainShaderEndIntensity = 0.2;
+		case '2hot':
+			rainShaderStartIntensity = 0.2;
+			rainShaderEndIntensity = 0.4;
+	}
+	
+	rainShader.data.uScale.value = [FlxG.height / 200.0];
+	rainShader.data.uIntensity.value = [rainShaderStartIntensity];
+	rainShader.data.uTime.value = [0];
+    rainShader.data.uScreenResolution.value = [FlxG.width, FlxG.height];
+    rainShader.data.uCameraBounds.value = [0, 0, FlxG.width, FlxG.height];
+    rainShader.data.uFrameBounds.value = [0, 0, FlxG.width, FlxG.height];
+	var color = 0xFF6680cc;
+	rainShader.setFloatArray("uRainColor", [FlxColor.get_redFloat(color), FlxColor.get_greenFloat(color), FlxColor.get_blueFloat(color)]);
+
+	game.camGame.filters ??= [];
+	game.camGame.filters.push(new ShaderFilter(rainShader));
+	
+	resetCar(true, true);
+}
 
 function changeLights(beat:Int):Void{
 
@@ -62,47 +105,6 @@ function resetCar(left:Bool, right:Bool){
 	}
 }
 
-function onLoad(s, fg){
-	game.gf.scrollFactor.set(1, 1);
-
-	scrollingSky = new FlxTiledSprite(Paths.image('stages/phillyStreets/phillySkybox'), 2922, 718, true, false);
-	scrollingSky.setPosition(-650, -375);
-	scrollingSky.scrollFactor.set(0.1, 0.1);
-	scrollingSky.scale.set(0.65, 0.65);
-	s.insert(0, scrollingSky);
-
-	for (id in this.props.keys()) {
-		if (StringTools.endsWith(id, "_lightmap")) {
-			this.props.get(id).blend = 0; // ADD
-		}
-	}
-
-	switch(game.songId){
-		case 'darnell':
-			rainShaderStartIntensity = 0;
-			rainShaderEndIntensity = 0.1;
-		case 'lit-up':
-			rainShaderStartIntensity = 0.1;
-			rainShaderEndIntensity = 0.2;
-		case '2hot':
-			rainShaderStartIntensity = 0.2;
-			rainShaderEndIntensity = 0.4;
-	}
-	
-	rainShader.data.uScale.value = [FlxG.height / 200.0];
-	rainShader.data.uIntensity.value = [rainShaderStartIntensity];
-	rainShader.data.uTime.value = [0];
-    rainShader.data.uScreenResolution.value = [FlxG.width, FlxG.height];
-    rainShader.data.uCameraBounds.value = [0, 0, FlxG.width, FlxG.height];
-    rainShader.data.uFrameBounds.value = [0, 0, FlxG.width, FlxG.height];
-	var color = FlxColor.fromString("#FF6680cc");
-	rainShader.setFloatArray("uRainColor", [color.red / 255, color.green / 255, color.blue / 255]);
-
-	game.camGame.setFilters([new ShaderFilter(rainShader)]);
-
-	resetCar(true, true);
-}
-
 function finishCarLights(sprite:FlxSprite):Void{
 	carWaiting = false;
 	var duration:Float = FlxG.random.float(1.8, 3);
@@ -117,14 +119,13 @@ function finishCarLights(sprite:FlxSprite):Void{
 	];
 
 	FlxTween.angle(sprite, rotations[0], rotations[1], duration, {ease: FlxEase.sineIn, startDelay: startdelay} );
-	FlxTween.quadPath(sprite, path, duration, true,
-{
-  ease: FlxEase.sineIn,
+	FlxTween.quadPath(sprite, path, duration, true, {
+		ease: FlxEase.sineIn,
 		startDelay: startdelay,
 		onComplete: function(_) {
-		carInterruptable = true;
-  }
-});
+			carInterruptable = true;
+		}
+	});
 }
 
 /**
@@ -161,20 +162,16 @@ function driveCarLights(sprite:FlxSprite):Void{
 		FlxPoint.get(1770 - offset[0] - 80, 994 - offset[1] + 10),
 		FlxPoint.get(1950 - offset[0] - 80, 980 - offset[1] + 15)
 	];
-	// debug shit!!! keeping it here just in case
-	// for(point in path){
-	// 	var debug:FlxSprite = new FlxSprite(point.x - 5, point.y - 5).makeGraphic(10, 10, 0xFFFF0000);
-// 	add(debug);
-	// }
+	visualizePath(path);
+
 	FlxTween.angle(sprite, rotations[0], rotations[1], duration, {ease: FlxEase.cubeOut} );
-	FlxTween.quadPath(sprite, path, duration, true,
-{
-  ease: FlxEase.cubeOut,
+	FlxTween.quadPath(sprite, path, duration, true, {
+		ease: FlxEase.cubeOut,
 		onComplete: function(_) {
-		carWaiting = true;
-					if(lightsStop == false) finishCarLights(getNamedProp('phillyCars'));
-  }
-});
+			carWaiting = true;
+			if (lightsStop == false) finishCarLights(getNamedProp('phillyCars'));
+		}
+	});
 }
 
 /**
@@ -216,15 +213,15 @@ function driveCar(sprite:FlxSprite):Void{
 			FlxPoint.get(2400 - offset[0], 980 - offset[1] - 50),
 			FlxPoint.get(3102 - offset[0], 1127 - offset[1] + 40)
 	];
+	visualizePath(path);
 
 	FlxTween.angle(sprite, rotations[0], rotations[1], duration, null );
-	FlxTween.quadPath(sprite, path, duration, true,
-  {
-	ease: null,
-			onComplete: function(_) {
-		carInterruptable = true;
-	  }
-});
+	FlxTween.quadPath(sprite, path, duration, true, {
+		ease: null,
+		onComplete: function(_) {
+			carInterruptable = true;
+		}
+	});
 }
 
 function driveCarBack(sprite:FlxSprite):Void{
@@ -258,20 +255,19 @@ function driveCarBack(sprite:FlxSprite):Void{
 	var rotations:Array<Int> = [18, -8];
 	// the path to move the car on
 	var path:Array<FlxPoint> = [
-			FlxPoint.get(3102 - offset[0], 1127 - offset[1] + 60),
-			FlxPoint.get(2400 - offset[0], 980 - offset[1] - 30),
-			FlxPoint.get(1570 - offset[0], 1049 - offset[1] - 10)
-
+		FlxPoint.get(3102 - offset[0], 1127 - offset[1] + 60),
+		FlxPoint.get(2400 - offset[0], 980 - offset[1] - 30),
+		FlxPoint.get(1570 - offset[0], 1049 - offset[1] - 10)
 	];
+	visualizePath(path);
 
 	FlxTween.angle(sprite, rotations[0], rotations[1], duration, null );
-	FlxTween.quadPath(sprite, path, duration, true,
-  {
-	ease: null,
-			onComplete: function(_) {
-		car2Interruptable = true;
-	  }
-});
+	FlxTween.quadPath(sprite, path, duration, true, {
+		ease: null,
+		onComplete: function(_) {
+			car2Interruptable = true;
+		}
+	});
 }
 
 function onUpdate(e){
@@ -287,20 +283,31 @@ function onUpdate(e){
 
 function onBeatHit(){
 	if (FlxG.random.bool(10) && game.curBeat != (lastChange + changeInterval) && carInterruptable == true)
-		{
-			if(lightsStop == false){
-				driveCar(getNamedProp('phillyCars'));
-			}else{
-				driveCarLights(getNamedProp('phillyCars'));
-			}
+	{
+		if(lightsStop == false){
+			driveCar(getNamedProp('phillyCars'));
+		}else{
+			driveCarLights(getNamedProp('phillyCars'));
 		}
+	}
 
-		// try driving one on the right too. in this case theres no red light logic, it just can only spawn on green lights
-		if(FlxG.random.bool(10) && game.curBeat != (lastChange + changeInterval) && car2Interruptable == true && lightsStop == false) driveCarBack(getNamedProp('phillyCars2'));
+	// try driving one on the right too. in this case theres no red light logic, it just can only spawn on green lights
+	if (FlxG.random.bool(10) && game.curBeat != (lastChange + changeInterval) && car2Interruptable == true && lightsStop == false) 
+		driveCarBack(getNamedProp('phillyCars2'));
 
-		// After the interval has been hit, change the light state.
-		if (game.curBeat == (lastChange + changeInterval)) changeLights(game.curBeat);
+	// After the interval has been hit, change the light state.
+	if (game.curBeat == (lastChange + changeInterval)) 
+		changeLights(game.curBeat);
 }
+
+// debug shit!!! keeping it here just in case
+function visualizePath(path) {
+	for(point in path){
+		var debug:FlxSprite = new FlxSprite(point.x - 5, point.y - 5).makeGraphic(10, 10, 0xFFFF0000);
+		add(debug);
+	}
+}
+
 function pauseTween(tween:FlxTween):Void
 	{
 	  if (tween != null)

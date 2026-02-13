@@ -326,12 +326,8 @@ class CoolUtil {
 		Paths.music(sound, library);
 	}
 
-	public static function browserLoad(site:String) {
-		#if linux
-		Sys.command('/usr/bin/xdg-open', [site]);
-		#else
+	public static inline function browserLoad(site:String) {
 		flixel.FlxG.openURL(site);
-		#end
 	}
 
 	public static function safeSaveFile(path:String, content:OneOfTwo<String, Bytes>):Bool {
@@ -458,6 +454,28 @@ class CoolUtil {
 		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
 		#end
 	}
+
+	// https://community.haxe.org/t/clone-a-class-instance/3747/5
+	// shoutout random guy on haxe fourm
+    public static function copyClass<T>(c:T):T {
+        var cls:Class<T> = Type.getClass(c);
+        var inst:T = Type.createEmptyInstance(cls);
+        var fields = Type.getInstanceFields(cls);
+
+        for (field in fields) {
+            var val:Dynamic = Reflect.field(c,field);
+            if (!Reflect.isFunction(val)) {
+                if (val is Array) {
+                    Reflect.setField(inst,field,val.copy()); // WHAT THE FUCK HAXE??
+                }
+                else{
+                    Reflect.setField(inst,field,val);
+                }
+            }
+        }
+        return inst;
+    }
+
 
 	////
 	@:noCompletion inline public static function coolLerp(current:Float, target:Float, elapsed:Float):Float

@@ -53,11 +53,12 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 	var judgeSprs:Array<RatingSprite> = [];
 
 	public var lastJudge:RatingSprite = null;
-	public var lastCombo:Array<RatingSprite> = null;
+	public var lastCombo:Array<RatingSprite> = [];
 
 	var comboTemplate:RatingSprite = {
 		var graphic = Paths.image("comboNums");
 		var spr = new RatingSprite();
+		spr.setPosition(-150, 80);
 
 		if (graphic != null) {
 			spr.loadGraphic(graphic, true, Math.floor(graphic.width / 12), graphic.height);
@@ -74,6 +75,7 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 
 	var judgeTemplate:RatingSprite = {
 		var spr = new RatingSprite();		
+		spr.setPosition(-40, -60);
 		spr.scale.set(.7, .7);
 		spr.updateHitbox();
 		spr;
@@ -140,10 +142,7 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 	public function displayJudgment(name:String, offsetX:Float=0.0, offsetY:Float=0.0):RatingSprite  {
 		var spr:RatingSprite = getJudgeSpr(name);
 		addOnTop(spr);
-
-		spr.active = true;
-		spr.alive = true;
-		spr.exists = true;
+		spr.revive();
 
 		spr.x = this.x + offsetX;
 		spr.y = this.y + offsetY;
@@ -166,23 +165,23 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 			x -= comboTemplate.width * (str.length-1) * 0.5;
 		}
 
-		var numbs = new Array<RatingSprite>();
 		for (i in 0...str.length){
 			var spr:RatingSprite = getComboSpr(str.charAt(i));
 			addOnTop(spr);
-			
-			spr.active = true;
-			spr.alive = true;
-			spr.exists = true;
+			spr.revive();
 
 			spr.x = x + i *	comboTemplate.width;
 			spr.y = y;
 
-			numbs[i] = spr;
+			lastCombo[i] = spr;
 		}
+		lastCombo.resize(str.length);
+		return lastCombo;
+	}
 
-		lastCombo = numbs;
-		return numbs;
+	public inline function killLastCombo() {
+		for (spr in lastCombo)
+			spr.kill();
 	}
 
 	public function regenerateCaches()

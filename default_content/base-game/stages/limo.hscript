@@ -17,7 +17,7 @@ function onAddSpriteGroups(){
 	return Function_Stop;
 }
 
-function onLoad()
+function buildStage()
 {
 	//if (game.gf.curCharacter == 'gf') game.changeCharacter("gf-car", 2);
 

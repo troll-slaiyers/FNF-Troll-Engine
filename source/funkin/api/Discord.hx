@@ -29,19 +29,117 @@ private final defaultRPCInfo:DiscordRPCInfo = {
 // this is kinda fucked up i think
 class DiscordClient
 {
-	public static var hideDetails:Bool = true;
-	
+	public static var initialized:Bool = false;
+
+	public static var active(get, set):Bool;
+	public static var hideDetails(default, set):Bool = true;
+
+	@:isVar private static var currentInfo(null, null):DiscordRPCInfo;
 	private static var lastPresence:DiscordRichPresence;
 
-	private static final mutex = new Mutex();
-	private static final waitMutex = new Mutex();
-	private static final thread:Thread = Thread.create(threadLoop);
-	private static function threadLoop() {
+	private static var mutex:Mutex = null;
+	private static var waitMutex:Mutex = null;
+	private static var thread:Thread = null;
+
+	public static function init()
+	{
+		if (initialized)
+			return;
+		
+		mutex = new Mutex();
+		waitMutex = new Mutex();
+		thread = Thread.create(threadLoop);
+
+		FlxG.stage.application.onExit.add(onApplicationExit);
+	}
+
+	public static inline function setActive(value:Bool, wait:Bool = false):Bool
+	{
+		value ? start(wait) : shutdown(wait);
+		return value;
+	}
+
+	public static function start(wait:Bool = false)
+	{
+		if (!initialized) init();
+		if (!active) {
+			currentInfo ??= defaultRPCInfo;
+			thread.sendMessage(currentInfo.applicationId);
+			if (wait) wait_until_it_started();
+		}
+	}
+
+	public static function setRPCInfo(info:DiscordRPCInfo, wait:Bool = false)
+	{
+		currentInfo = info ?? defaultRPCInfo;
+
+		if (active) {
+			thread.sendMessage(currentInfo.applicationId);
+			if (wait) wait_until_it_started();
+		}
+		
+		return currentInfo; 
+	}
+
+	public static function shutdown(wait:Bool = false)
+	{
+		if (active) {
+			thread.sendMessage(false);
+			if (wait) wait_until_it_shatdown();
+		}
+	}
+
+	public static function changePresence(data:DiscordClientPresenceParams, mergeDefault:Bool = true)
+	{
+		if (!active)
+			return;
+
+		if (hideDetails) {
+			data = currentInfo.defaultPresence;
+		}else if (mergeDefault) {
+			data = merge(data, currentInfo.defaultPresence);
+		}
+
+		////
+		var details = data.details;
+		var state = data.state;
+		var largeImageKey = data.largeImageKey;
+		var largeImageText = data.largeImageText;
+		var smallImageKey = data.smallImageKey;
+		// does discord even use these anymore i havent seen them working in a huge while
+		//var startTimestamp = data.startTimestamp;
+		//var endTimestamp = data.endTimestamp;
+
+		if (!currentInfo.allowedImageKeys.contains(largeImageKey))
+			largeImageKey = currentInfo.defaultPresence.largeImageKey;
+
+		////
+		mutex.acquire();
+
+		lastPresence = #if (hxdiscord_rpc >=  "1.3.0") new DiscordRichPresence() #else DiscordRichPresence.create() #end;
+		lastPresence.details = details;
+		lastPresence.state = state;
+		lastPresence.largeImageKey = largeImageKey;
+		lastPresence.largeImageText = largeImageText;
+		lastPresence.smallImageKey = smallImageKey;
+		/*
+		lastPresence.startTimestamp = startTimestamp;
+		lastPresence.endTimestamp = endTimestamp;
+		*/
+
+		DiscordRpc.UpdatePresence(cpp.RawConstPointer.addressOf(lastPresence));
+
+		mutex.release();
+	}
+
+	////
+	private static function threadLoop()
+	{
 		var curId:String = "";
 		var isActive:Bool = false;
 
 		while (true) {
-			var msg:Dynamic = Thread.readMessage(isActive==false);
+			var msg:Dynamic = Thread.readMessage(isActive==false); // if not active, sleep until a message arrives
 
 			mutex.acquire();
 
@@ -85,114 +183,8 @@ class DiscordClient
 		}
 	}
 
-	private static function onReady(request:cpp.RawConstPointer<DiscordUser>)
+	private static function merge(data:Dynamic, defaultData:Dynamic)
 	{
-		changePresence(null);
-	}
-
-	private static function onError(_code:Int, _message:cpp.ConstCharStar)
-	{
-		trace('Error! $_code : $_message');
-	}
-
-	private static function onDisconnected(_code:Int, _message:cpp.ConstCharStar)
-	{
-		trace('Disconnected! $_code : $_message');
-	}
-
-	private static inline function wait_until_it_started() {
-		while (waitMutex.tryAcquire())
-			waitMutex.release();
-	}
-	private static inline function wait_until_it_shatdown() {
-		waitMutex.acquire();
-		waitMutex.release();
-	}
-
-	public static function isActive():Bool {
-		if (waitMutex.tryAcquire()) {
-			waitMutex.release();
-			return false;
-		}
-		return true;
-	}
-
-	////
-	@:isVar private static var currentInfo(null, null):DiscordRPCInfo;
-	
-	public static function start(wait:Bool = false)
-	{
-		if (!isActive()) {
-			currentInfo ??= defaultRPCInfo;
-			thread.sendMessage(currentInfo.applicationId);
-			if (wait) wait_until_it_started();
-		}
-	}
-
-	public static function setRPCInfo(info:DiscordRPCInfo, wait:Bool = false) {
-		currentInfo = info ?? defaultRPCInfo;
-
-		if (isActive()) {
-			thread.sendMessage(currentInfo.applicationId);
-			if (wait) wait_until_it_started();
-		}
-		
-		return currentInfo; 
-	}
-
-	public static function shutdown(wait:Bool = false)
-	{
-		if (isActive()) {
-			thread.sendMessage(false);
-			if (wait) wait_until_it_shatdown();
-		}
-	}
-
-	////
-	public static function changePresence(data:DiscordClientPresenceParams, mergeDefault:Bool = true)
-	{
-		if (!isActive())
-			return;
-
-		if (hideDetails) {
-			data = currentInfo.defaultPresence;
-		}else if (mergeDefault) {
-			data = merge(data, currentInfo.defaultPresence);
-		}
-
-		////
-		var details = data.details;
-		var state = data.state;
-		var largeImageKey = data.largeImageKey;
-		var largeImageText = data.largeImageText;
-		var smallImageKey = data.smallImageKey;
-		// does discord even use these anymore i havent seen them working in a huge while
-		//var startTimestamp = data.startTimestamp;
-		//var endTimestamp = data.endTimestamp;
-
-		if (!currentInfo.allowedImageKeys.contains(largeImageKey))
-			largeImageKey = currentInfo.defaultPresence.largeImageKey;
-
-		////
-		mutex.acquire();
-
-		lastPresence = #if (hxdiscord_rpc >=  "1.3.0") new DiscordRichPresence() #else DiscordRichPresence.create() #end;
-		lastPresence.details = details;
-		lastPresence.state = state;
-		lastPresence.largeImageKey = largeImageKey;
-		lastPresence.largeImageText = largeImageText;
-		lastPresence.smallImageKey = smallImageKey;
-		/*
-		lastPresence.startTimestamp = startTimestamp;
-		lastPresence.endTimestamp = endTimestamp;
-		*/
-
-		DiscordRpc.UpdatePresence(cpp.RawConstPointer.addressOf(lastPresence));
-
-		mutex.release();
-	}
-
-	private static function merge(data:Dynamic, defaultData:Dynamic) {
 		if (data == null)
 			return defaultData;
 
@@ -208,6 +200,60 @@ class DiscordClient
 		}
 
 		return data;
+	}
+
+	////
+	private static function onReady(request:cpp.RawConstPointer<DiscordUser>)
+	{
+		changePresence(null);
+	}
+
+	private static function onError(_code:Int, _message:cpp.ConstCharStar)
+	{
+		trace('Error! $_code : $_message');
+	}
+
+	private static function onDisconnected(_code:Int, _message:cpp.ConstCharStar)
+	{
+		trace('Disconnected! $_code : $_message');
+	}
+
+	private static function onApplicationExit(exitCode:Int) {
+		shutdown(true);
+	}
+
+	////
+	private static inline function wait_until_it_started() {
+		while (waitMutex.tryAcquire())
+			waitMutex.release();
+	}
+	private static inline function wait_until_it_shatdown() {
+		waitMutex.acquire();
+		waitMutex.release();
+	}
+
+	////
+	static function get_active():Bool
+	{
+		if (!initialized)
+			return false;
+
+		if (waitMutex.tryAcquire()) {
+			waitMutex.release();
+			return false;
+		}
+
+		return true;
+	}
+	inline static function set_active(v:Bool):Bool
+	{
+		return setActive(v, true);
+	}
+	
+	inline static function set_hideDetails(v:Bool):Bool
+	{
+		if (v && hideDetails != v) DiscordClient.changePresence(null);
+		return hideDetails = v;
 	}
 }
 

@@ -1,5 +1,7 @@
 package funkin.states.options;
 
+import funkin.objects.notes.NoteAnimations;
+import funkin.objects.notes.Note;
 import funkin.states.options.BindsBullshit.KeyboardNavHelper;
 import funkin.states.options.BindsBullshit.BindButton;
 import funkin.CoolUtil.overlapsMouse as overlaps;
@@ -11,6 +13,8 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.math.FlxPoint;
 import openfl.geom.Rectangle;
+import flixel.addons.ui.U as FlxU;
+
 
 using StringTools;
 
@@ -24,40 +28,12 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 	// if an option is in this list, then atleast ONE key will have to be bound.
 	var forcedBind:Array<String> = ["ui_up", "ui_down", "ui_left", "ui_right", "accept", "back",];
 
-	var binds:Array<Array<String>> = [
-		[Paths.getString('controls_gameplay')],
-		[Paths.getString('control_note_left'), 'note_left'],
-		[Paths.getString('control_note_down'), 'note_down'],
-		[Paths.getString('control_note_up'), 'note_up'],
-		[Paths.getString('control_note_right'), 'note_right'],
-		[Paths.getString('control_pause'), 'pause'],
-		[Paths.getString('control_reset'), 'reset'],
-
-		[Paths.getString('controls_ui')],
-		[Paths.getString('control_ui_up'), 'ui_up'],
-		[Paths.getString('control_ui_down'), 'ui_down'],
-		[Paths.getString('control_ui_left'), 'ui_left'],
-		[Paths.getString('control_ui_right'), 'ui_right'],
-		[Paths.getString('control_accept'), 'accept'],
-		[Paths.getString('control_back'), 'back'],
-
-		[Paths.getString('controls_misc')],
-		[Paths.getString('control_volume_mute'), 'volume_mute'],
-		[Paths.getString('control_volume_up'), 'volume_up'],
-		[Paths.getString('control_volume_down'), 'volume_down'],
-		[Paths.getString('control_fullscreen'), 'fullscreen'],
-
-		[Paths.getString('controls_debug')],
-		// honestly might just replace this with one debug thing
-		// and make it so pressing it in playstate will open a debug menu w/ a bunch of stuff
-		// chart editor/character editor, botplay, skip to time, etc. move it from pause menu during charting mode lol
-		[Paths.getString('control_debug_1'), 'debug_1'],
-		[Paths.getString('control_debug_2'), 'debug_2'],
-		[Paths.getString('control_botplay'), 'botplay']
-	];
-
+	var binds:Array<Array<String>> = [];
 
 	public var changedBind:(String, Int, FlxKey) -> Void;
+
+	/** Which key counts to display **/
+	public var displayedKeyCounts:Array<Int> = null;
 
 	// anything beyond this point prob shouldnt be touched too much
 	final clientBinded:Map<String, Array<FlxKey>> = ClientPrefs.keyBinds;
@@ -89,8 +65,67 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 	var popupText:FlxText;
 	var unbindText:FlxText;
 
-	override public function create()
-	{
+	override public function new() {
+		super();
+
+		if (displayedKeyCounts == null) {
+			if (PlayState.instance != null)
+				displayedKeyCounts = [PlayState.keyCount];
+			else #if USE_EXTRA_KEYS
+				displayedKeyCounts = [for (kc in Note.minKeyCount...Note.maxKeyCount + 1) kc];
+			#else
+				displayedKeyCounts = [4];
+			#end
+		}
+		
+		var noteBinds:Array<Array<String>> = [[Paths.getString('controls_gameplay')],];
+
+		var baseDirections = ['Left', 'Down', 'Up', 'Right', 'Center'];
+		for (kc in displayedKeyCounts) {
+			var directions = NoteAnimations.remap4KArray(kc, baseDirections);
+
+			noteBinds.push(['$kc Key']);
+			for (n in 0...kc)
+				noteBinds.push(['${n + 1}. ${directions[n]}', '${kc}_key_${n}']);
+		}
+
+		if (displayedKeyCounts.length <= 1)
+			noteBinds.remove(noteBinds[1]);
+
+		var otherBinds:Array<Array<String>> = [
+			null, // still gameplay but separate them a lil from the note binds
+			[Paths.getString('control_pause'), 'pause'],
+			[Paths.getString('control_reset'), 'reset'],
+			[Paths.getString('controls_ui')],
+			[Paths.getString('control_ui_up'), 'ui_up'],
+			[Paths.getString('control_ui_down'), 'ui_down'],
+			[Paths.getString('control_ui_left'), 'ui_left'],
+			[Paths.getString('control_ui_right'), 'ui_right'],
+			[Paths.getString('control_accept'), 'accept'],
+			[Paths.getString('control_back'), 'back'],
+
+			[Paths.getString('controls_misc')],
+			[Paths.getString('control_volume_mute'), 'volume_mute'],
+			[Paths.getString('control_volume_up'), 'volume_up'],
+			[Paths.getString('control_volume_down'), 'volume_down'],
+			[Paths.getString('control_fullscreen'), 'fullscreen'],
+
+			[Paths.getString('controls_debug')],
+			// honestly might just replace this with one debug thing
+			// and make it so pressing it in playstate will open a debug menu w/ a bunch of stuff
+			// chart editor/character editor, botplay, skip to time, etc. move it from pause menu during charting mode lol
+			[Paths.getString('control_debug_1'), 'debug_1'],
+			[Paths.getString('control_debug_2'), 'debug_2'],
+			[Paths.getString('control_botplay'), 'botplay']
+		];
+
+		binds = noteBinds.concat(otherBinds);
+
+		FlxU.clearArraySoft(noteBinds);
+		FlxU.clearArraySoft(otherBinds);
+	}
+
+	override public function create() {
 		super.create();
 
 		FlxG.cameras.add(cam, false);
@@ -124,15 +159,24 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 		var daY:Float = 0;
 		var idx:Int = 0;
 		for (data in binds) {
-			var label = data[0];
-
-			if (data.length > 1) {
+			if (data == null || data.length == 0) {
+				daY += 32;
+			}
+			else if (data.length == 1) {
+				// its just a label
+				var text = new FlxText(8, daY, 0, data[0], 16);
+				text.cameras = [scrollableCam];
+				text.setFormat(Paths.font("quanticob.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
+				group.add(text);
+				daY += text.height;
+			}
+			else {
 				// its a bind
 				var buttArray:Array<BindButtonK> = [];
 				var internal:String = data[1];
 				internals.push(data[1]);
 
-				var text = new FlxText(16, daY, 0, label, 16);
+				var text = new FlxText(16, daY, 0, data[0], 16);
 				text.cameras = [scrollableCam];
 				text.setFormat(Paths.font("quantico.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
 				text.updateHitbox();
@@ -169,13 +213,6 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 				keyboardNavigation.push(new KeyboardNavHelper(text, drop, buttArray));
 
 				bindButtons.push(buttArray);
-			} else {
-				// its just a label
-				var text = new FlxText(8, daY, 0, label, 16);
-				text.cameras = [scrollableCam];
-				text.setFormat(Paths.font("quanticob.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
-				group.add(text);
-				daY += text.height;
 			}
 			idx++;
 		}

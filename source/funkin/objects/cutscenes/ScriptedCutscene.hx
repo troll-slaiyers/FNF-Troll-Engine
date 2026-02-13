@@ -45,8 +45,8 @@ class ScriptedCutscene extends Cutscene
 			if(scriptPath != null)
 				script = FunkinHScript.fromFile(scriptPath, id, ["this" => this, "add" => this.add, "remove" => this.remove, "insert" => this.insert]);
 		}
-		onEnd.addOnce((_:Bool) -> {
-			callScript("onCutsceneEnd");
+		onEnd.addOnce((wasSkipped:Bool) -> {
+			callScript("onCutsceneEnd", [wasSkipped]);
 		});
 	}
 	

@@ -27,15 +27,17 @@ Expect bugs, breaking changes and little documentation!!! (You can look at the `
 
 ## Engine Credits / Special Thanks
 - [Nebula the Zorua](https://x.com/Nebula_Zorua) - Most engine stuff
-- [crowplexus](https://github.com/crowplexus) - Countdown class + [hxdiscord_rpc](https://github.com/MAJigsaw77/hxdiscord_rpc/) implementation
 - [4mbr0s3_2](https://www.youtube.com/@4mbr0s3-2) - Modifier system inspiration
 - [SrtHero278](https://github.com/SrtHero278) - Notefield optimizations
-- [moxie-coder](https://github.com/moxie-coder) - Mac building and workflow help
-- [Vortex](https://github.com/Vortex2Oblivion) - Bunch of Linux and other little improvements
-- [Lat](https://x.com/latzephr/status/1771139155881234576) - Original Week 6 Health bar and timer assets
+- [Vortex](https://github.com/Vortex2Oblivion) - Extra keys implementation and a bunch of other improvements
+- [Shadz](https://github.com/ShadzXD) - Flixel-animate implementation
+- [MaybeMaru](https://github.com/MaybeMaru) - Creator of [Flixel-animate](https://github.com/MaybeMaru/flixel-animate) and [Moonchart](https://github.com/MaybeMaru/moonchart)
 - [swordcube](https://bsky.app/profile/swordcube.bsky.social) - Pixel note splashes + [linc_filedialogs](https://github.com/swordcube/linc_filedialogs) implementation
-- [Shadz](https://github.com/ShadzXD) - [Flixel-animate](https://github.com/MaybeMaru/flixel-animate) implementation
-- [Gab](https://github.com/michisock) - We like him
+- [crowplexus](https://github.com/crowplexus) - Countdown class + [hxdiscord_rpc](https://github.com/MAJigsaw77/hxdiscord_rpc/) implementation
+- [moxie-coder](https://github.com/moxie-coder) - Mac building and workflow help
+- [Unholywanderer](https://github.com/unholywanderer) - what the nuts
+- [Gab](https://github.com/michisock) - We like him!!!
+- [Lat](https://x.com/latzephr) - [Original Week 6 health bar and timer concept](https://x.com/latzephr/status/1771139155881234576)
 - [AllyTS](https://x.com/NewTioSans) - Mine Note texture
 - [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) - Dad Engine
 
