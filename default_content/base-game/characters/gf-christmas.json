@@ -1,22 +1,10 @@
 {
-	"script_name": "gf",
 	"animations": [
 		{
 			"loop": false,
 			"offsets": [
-				1,
-				0
-			],
-			"anim": "cheer",
-			"fps": 24,
-			"name": "GF Cheer",
-			"indices": []
-		},
-		{
-			"loop": false,
-			"offsets": [
 				0,
-				-19
+				-9
 			],
 			"anim": "singLEFT",
 			"fps": 24,
@@ -27,7 +15,7 @@
 			"loop": false,
 			"offsets": [
 				0,
-				-20
+				-39
 			],
 			"anim": "singDOWN",
 			"fps": 24,
@@ -38,7 +26,7 @@
 			"loop": false,
 			"offsets": [
 				0,
-				4
+				-16
 			],
 			"anim": "singUP",
 			"fps": 24,
@@ -49,7 +37,7 @@
 			"loop": false,
 			"offsets": [
 				0,
-				-20
+				-10
 			],
 			"anim": "singRIGHT",
 			"fps": 24,
@@ -59,8 +47,19 @@
 		{
 			"loop": false,
 			"offsets": [
-				-2,
-				-21
+				1,
+				-22
+			],
+			"anim": "cheer",
+			"fps": 24,
+			"name": "GF Cheer",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				0,
+				-25
 			],
 			"anim": "sad",
 			"fps": 24,
@@ -85,7 +84,7 @@
 			"loop": false,
 			"offsets": [
 				0,
-				-9
+				-8
 			],
 			"anim": "danceLeft",
 			"fps": 24,
@@ -164,7 +163,7 @@
 			"loop": true,
 			"offsets": [
 				-2,
-				-17
+				-7
 			],
 			"anim": "scared",
 			"fps": 24,
@@ -175,8 +174,8 @@
 	"no_antialiasing": false,
 	"image": "characters/gfChristmas",
 	"position": [
-		0,
-		0
+		-150,
+		-20
 	],
 	"healthicon": "gf",
 	"flip_x": false,

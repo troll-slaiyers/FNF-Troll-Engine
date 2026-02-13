@@ -1,3 +1,3 @@
 #if !macro
-import funkin.objects.notes.NoteAnimation.current as currentAnimations;
+import funkin.objects.notes.NoteAnimations.current as currentAnimations;
 #end

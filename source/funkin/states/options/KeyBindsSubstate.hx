@@ -1,5 +1,6 @@
 package funkin.states.options;
 
+import funkin.objects.notes.NoteAnimations;
 import funkin.objects.notes.Note;
 import funkin.states.options.BindsBullshit.KeyboardNavHelper;
 import funkin.states.options.BindsBullshit.BindButton;
@@ -30,6 +31,9 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 	var binds:Array<Array<String>> = [];
 
 	public var changedBind:(String, Int, FlxKey) -> Void;
+
+	/** Which key counts to display **/
+	public var displayedKeyCounts:Array<Int> = null;
 
 	// anything beyond this point prob shouldnt be touched too much
 	final clientBinded:Map<String, Array<FlxKey>> = ClientPrefs.keyBinds;
@@ -64,30 +68,32 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 	override public function new() {
 		super();
 
+		if (displayedKeyCounts == null) {
+			if (PlayState.instance != null)
+				displayedKeyCounts = [PlayState.keyCount];
+			else #if USE_EXTRA_KEYS
+				displayedKeyCounts = [for (kc in Note.minKeyCount...Note.maxKeyCount + 1) kc];
+			#else
+				displayedKeyCounts = [4];
+			#end
+		}
+		
 		var noteBinds:Array<Array<String>> = [[Paths.getString('controls_gameplay')],];
 
-		var directions:Array<Array<String>> = [
-			['Center'],
-			['Left', 'Right'],
-			['Left', 'Center', 'Right'],
-			['Left', 'Down', 'Up', 'Right'],
-			['Left', 'Down', 'Center', 'Up', 'Right'],
-			['Left', 'Down', 'Right', 'Left 2', 'Up', 'Right 2'],
-			['Left', 'Down', 'Right', 'Center', 'Left 2', 'Up', 'Right 2'],
-			['Left', 'Down', 'Up', 'Right', 'Left 2', 'Down 2', 'Up 2', 'Right 2'],
-			['Left', 'Down', 'Up', 'Right', 'Center', 'Left 2', 'Down 2', 'Up 2', 'Right 2']
-		];
+		var baseDirections = ['Left', 'Down', 'Up', 'Right', 'Center'];
+		for (kc in displayedKeyCounts) {
+			var directions = NoteAnimations.remap4KArray(kc, baseDirections);
 
-		for (i in Note.minKeyCount - 1...Note.maxKeyCount) {
-			noteBinds.push(['${i + 1} Key']);
-			for (j in 0...i + 1) {
-				noteBinds.push(['${directions[i][j]}', '${i + 1}_key_$j']);
-			}
+			noteBinds.push(['$kc Key']);
+			for (n in 0...kc)
+				noteBinds.push(['${n + 1}. ${directions[n]}', '${kc}_key_${n}']);
 		}
 
-		FlxU.clearArray(directions);
+		if (displayedKeyCounts.length <= 1)
+			noteBinds.remove(noteBinds[1]);
 
 		var otherBinds:Array<Array<String>> = [
+			null, // still gameplay but separate them a lil from the note binds
 			[Paths.getString('control_pause'), 'pause'],
 			[Paths.getString('control_reset'), 'reset'],
 			[Paths.getString('controls_ui')],
@@ -153,15 +159,24 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 		var daY:Float = 0;
 		var idx:Int = 0;
 		for (data in binds) {
-			var label = data[0];
-
-			if (data.length > 1) {
+			if (data == null || data.length == 0) {
+				daY += 32;
+			}
+			else if (data.length == 1) {
+				// its just a label
+				var text = new FlxText(8, daY, 0, data[0], 16);
+				text.cameras = [scrollableCam];
+				text.setFormat(Paths.font("quanticob.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
+				group.add(text);
+				daY += text.height;
+			}
+			else {
 				// its a bind
 				var buttArray:Array<BindButtonK> = [];
 				var internal:String = data[1];
 				internals.push(data[1]);
 
-				var text = new FlxText(16, daY, 0, label, 16);
+				var text = new FlxText(16, daY, 0, data[0], 16);
 				text.cameras = [scrollableCam];
 				text.setFormat(Paths.font("quantico.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
 				text.updateHitbox();
@@ -198,13 +213,6 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 				keyboardNavigation.push(new KeyboardNavHelper(text, drop, buttArray));
 
 				bindButtons.push(buttArray);
-			} else {
-				// its just a label
-				var text = new FlxText(8, daY, 0, label, 16);
-				text.cameras = [scrollableCam];
-				text.setFormat(Paths.font("quanticob.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
-				group.add(text);
-				daY += text.height;
 			}
 			idx++;
 		}

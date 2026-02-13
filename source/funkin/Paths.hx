@@ -349,9 +349,9 @@ class Paths
 	inline static public function getSparrowAtlas(key:String, ?library:String):FlxAtlasFrames
 	{
 		var rawXml = Paths.getContent(getPath('images/$key.xml'));
-		return FlxAtlasFrames.fromSparrow(
+		return rawXml == null ? null : FlxAtlasFrames.fromSparrow(
 			image(key, library),
-			rawXml != null ? Xml.parse(rawXml) : null
+			Xml.parse(rawXml)
 		);
 	}
 

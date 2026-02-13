@@ -57,13 +57,17 @@
 		},
 		{
 			"loop": false,
-			"offsets": [
+			"cameraOffset": [
 				0,
-				-27
+				0
+			],
+			"offsets": [
+				-5,
+				-31
 			],
 			"anim": "sad",
 			"fps": 24,
-			"name": "GF Crying at Gunpoint",
+			"name": "GF Crying at Gunpoint ",
 			"indices": [
 				0,
 				1,
@@ -84,8 +88,8 @@
 	"no_antialiasing": false,
 	"image": "characters/gfTankmen",
 	"position": [
-		-110,
-		0
+		-140,
+		-10
 	],
 	"healthicon": "gf",
 	"flip_x": false,

@@ -71,48 +71,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	/** characters that sing when field is hit **/
 	public var characters:Array<Character> = [];
 	/** default character animations to play for each column **/
-	public var singAnimations:Array<Array<String>> = [
-		["singUP"],
-		["singLEFT", "singRIGHT"],
-		["singLEFT", "singUP", "singRIGHT"],
-		["singLEFT", "singDOWN", "singUP", "singRIGHT"],
-		["singLEFT", "singDOWN", "singUP", "singUP", "singRIGHT"],
-		["singLEFT", "singUP", "singRIGHT", "singLEFT", "singDOWN", "singRIGHT"],
-		["singLEFT", "singUP", "singRIGHT", "singUP", "singLEFT", "singDOWN", "singRIGHT"],
-		[
-			"singLEFT",
-			"singDOWN",
-			"singUP",
-			"singRIGHT",
-			"singLEFT",
-			"singDOWN",
-			"singUP",
-			"singRIGHT"
-		],
-		[
-			"singLEFT",
-			"singDOWN",
-			"singUP",
-			"singRIGHT",
-			"singUP",
-			"singLEFT",
-			"singDOWN",
-			"singUP",
-			"singRIGHT"
-		],
-		[
-			"singLEFT",
-			"singDOWN",
-			"singUP",
-			"singRIGHT",
-			"singDOWN",
-			"singUP",
-			"singLEFT",
-			"singDOWN",
-			"singUP",
-			"singRIGHT"
-		]
-	];
+	public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
 	
 	/** note renderer **/
 	public var noteField:NoteField;
@@ -167,6 +126,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 	public var baseXPositions:Array<Float> = [];
 
+	private var defaultSingAnimations = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
 	private var garbage:Array<Note> = [];
 
 	public function new(?keyCount:Int){
@@ -815,6 +775,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		} else if (baseXPositions.length > cnt) {
 			baseXPositions.resize(cnt);
 		}
+
+		NoteAnimations.remap4KArray(cnt, defaultSingAnimations, singAnimations); 
 
 		return keyCount = cnt;
 	}

@@ -2045,7 +2045,9 @@ class ChartingState extends MusicBeatState
 	}
 
 	function reloadKeyAnimations(count:Int) {
-		NoteAnimation.refreshKeyAnimations(_song.keyCount = Math.ceil(Math.max(1, count)));
+		_song.keyCount = Math.ceil(Math.max(1, count));
+		NoteAnimations.refreshKeyAnimations(_song.keyCount);
+		NoteAnimations.remap4KArray(_song.keyCount, defaultNoteColours, noteColours);
 
 		reloadGridLayer();
 		updateStrumline();
@@ -3430,47 +3432,8 @@ class ChartingState extends MusicBeatState
 		return retStr;
 	}
 
-	var noteColors:Array<Array<FlxColor>> = [
-		[0xFF12FA05],
-		[0xFFC24B99, 0xFFF9393F],
-		[0xFFC24B99, 0xFF12FA05, 0xFFF9393F],
-		[0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F],
-		[0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFF12FA05, 0xFFF9393F],
-		[0xFFC24B99, 0xFF12FA05, 0xFFF9393F, 0xFFC24B99, 0xFF00FFFF, 0xFFF9393F],
-		[
-			0xFFC24B99,
-			0xFF12FA05,
-			0xFFF9393F,
-			0xFF12FA05,
-			0xFFC24B99,
-			0xFF00FFFF,
-			0xFFF9393F
-		],
-		[
-			0xFFC24B99,
-			0xFF00FFFF,
-			0xFF12FA05,
-			0xFFF9393F,
-			0xFFC24B99,
-			0xFF00FFFF,
-			0xFF12FA05,
-			0xFFF9393F
-		],
-		[
-			0xFFC24B99,
-			0xFF00FFFF,
-			0xFF12FA05,
-			0xFFF9393F,
-			0xFF12FA05,
-			0xFFC24B99,
-			0xFF00FFFF,
-			0xFF12FA05,
-			0xFFF9393F
-		],
-		[
-			0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F, 0xFF00FFFF, 0xFF12FA05, 0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F
-		],
-	];
+	var defaultNoteColours:Array<FlxColor> = [0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F, 0xFF69608F];
+	var noteColours:Array<FlxColor> = [];
 	var susWidth:Float = 8;
 	var showSusTail:Bool = true; // to visualise the head/cap/end of the tail
 	// because they looked WAY too short
@@ -3488,9 +3451,7 @@ class ChartingState extends MusicBeatState
 
 		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE - susWidth) * 0.5, note.y + GRID_HALF);
 
-		var colors:Array<FlxColor> = noteColors[_song.keyCount - 1];
-
-		var color:FlxColor = note.isQuant ? 0xFFFF0000 : colors[note.column % colors.length];
+		var color:FlxColor = note.isQuant ? 0xFFFF0000 : noteColours[note.column % noteColours.length];
 		color.setHSB(((color.hue + note.colorSwap.hue * 360) % 360 + 360) % 360,
 			CoolUtil.boundTo(color.saturation * 0.01 * (1.0 + note.colorSwap.saturation), 0.0, 1.0) * 100.0,
 			(color.brightness * 0.01 * (1.0 + note.colorSwap.brightness)) * 100.0,

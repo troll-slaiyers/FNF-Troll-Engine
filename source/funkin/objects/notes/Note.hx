@@ -62,12 +62,6 @@ class Note extends NoteObject {
 		192
 	];
 
-	public static var defaultNotes = [
-		'No Animation',
-		'GF Sing',
-		''
-	];
-
 	public static inline final pixelsPerMS:Float = 0.45;
 
 	public static final quantShitCache = new Map<String, Null<String>>();
@@ -240,8 +234,8 @@ class Note extends NoteObject {
 	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
 	public var alphaMod:Float = 1;
 	public var alphaMod2:Float = 1; // TODO: unhardcode this shit lmao
-
 	// What is this even used for anymore??
+
 	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
 	public var typeOffsetY:Float = 0;
 	public var typeOffsetAngle:Float = 0;
@@ -302,11 +296,8 @@ class Note extends NoteObject {
 		var hsb = isQuant ? ClientPrefs.quantHSV[quants.indexOf(quant)] : getNoteColours(currentAnimations);
 		colorSwap.setHSBIntArray(hsb);
 
-		if (noteScript != null)
-			noteScript.executeFunc("onUpdateColours", [this], this);
-
-		if (genScript != null)
-			genScript.executeFunc("onUpdateColours", [this], this);
+		noteScript?.executeFunc("onUpdateColours", [this]);
+		genScript?.executeFunc("onUpdateColours", [this]);
 	}
 
 	@:noCompletion
@@ -361,38 +352,18 @@ class Note extends NoteObject {
 		var sat = colorSwap.saturation;
 		var brt = colorSwap.brightness;
 
-		if (column > -1 && noteType != value) {
-			var instance:NoteScriptState = inEditor ? ChartingState.instance : PlayState.instance;
-			noteScript = (instance == null) ? null : instance.notetypeScripts.get(value);
-
-			if (noteScript != null) {
-				noteScript.executeFunc("setupNote", [this], this);
-			} else { // default notes. these values won't get set if you make a script for them!
-				switch (value) {
-					case 'Alt Animation':
-						characterHitAnimSuffix = "-alt";
-						characterMissAnimSuffix = "-altmiss";
-
-					case 'Hey!':
-						characterHitAnimName = 'hey';
-						// TODO
-
-					//case 'Hurt Note':
-							
-
-					case 'GF Sing':
-						gfNote = true;
-
-					case 'No Animation':
-						noAnimation = true;
-						noMissAnimation = true;
-				}
-			}
-
+		if (noteType != value) {
 			noteType = value;
+			
+			var instance:NoteScriptState = inEditor ? ChartingState.instance : PlayState.instance;
+			noteScript = instance?.notetypeScripts.get(value);
+			
+			if (noteScript != null)
+				noteScript.executeFunc("setupNote", [this], null, ["super" => _setupNoteType]);
+			else
+				_setupNoteType();
 
-			if (genScript != null)
-				genScript.executeFunc("setupNoteType", [this], this, ["this" => this]);
+			genScript?.executeFunc("setupNoteType", [this]);
 		}
 
 		if (usesDefaultColours) {
@@ -409,22 +380,42 @@ class Note extends NoteObject {
 
 		////
 
-		if (noteScript != null)
-			noteScript.executeFunc("postSetupNote", [this], this);
-
-		if (genScript != null)
-			genScript.executeFunc("postSetupNoteType", [this], this);
+		noteScript?.executeFunc("postSetupNote", [this]);
+		genScript?.executeFunc("postSetupNoteType", [this]);
 
 		////
 		if (isQuant && Paths.imageExists('QUANT' + noteSplashTexture))
 			noteSplashTexture = 'QUANT' + noteSplashTexture;
 
-		if (!isQuant || (isQuant && noteSplashTexture.startsWith("QUANT"))) {
+		if (!isQuant || noteSplashTexture.startsWith("QUANT")) {
 			noteSplashHue = colorSwap.hue;
 			noteSplashSat = colorSwap.saturation;
 			noteSplashBrt = colorSwap.brightness;
 		}
 		return value;
+	}
+
+	function _setupNoteType() {
+		// default notes. these values won't get set if you make a script for them!
+		switch (noteType) {
+			case 'Alt Animation':
+				characterHitAnimSuffix = "-alt";
+				characterMissAnimSuffix = "-altmiss";
+
+			case 'Hey!':
+				characterHitAnimName = 'hey';
+				// TODO
+
+			//case 'Hurt Note':
+					
+
+			case 'GF Sing':
+				gfNote = true;
+
+			case 'No Animation':
+				noAnimation = true;
+				noMissAnimation = true;
+		}
 	}
 
 	override function toString() {
@@ -473,13 +464,10 @@ class Note extends NoteObject {
 		tex = texture;
 		texSuffix = suffix;
 
-		if (genScript != null)
-			genScript.executeFunc("onReloadNote", [this, texture, suffix], this);
+		genScript?.executeFunc("onReloadNote", [this, texture, suffix]);
+		noteScript?.executeFunc("onReloadNote", [this, texture, suffix]);
 
-		if (noteScript != null)
-			noteScript.executeFunc("onReloadNote", [this, texture, suffix], this);
-
-		if (genScript != null && genScript.executeFunc("preReloadNote", [this, texture, suffix], this) == Globals.Function_Stop)
+		if (genScript?.executeFunc("preReloadNote", [this, texture, suffix]) == Globals.Function_Stop)
 			return;
 
 		////
@@ -494,11 +482,16 @@ class Note extends NoteObject {
 		 * Sets `isQuant` to `true` if a quant texture is to be returned
 		 */
 		inline function getTextureKey() { // made it a function just cause i think it's easier to read it like this
-			var skin:String = (texture.length > 0) ? texture : PlayState.arrowSkin;
-			var split:Array<String> = skin.split('/');
+			var folderPath:String = (folder.length == 0) ? folder : '$folder/';
+			var fileName:String = (texture.length > 0) ? texture : PlayState.arrowSkin;
 
-			var fileName:String = split.pop() + suffix;
-			var folderPath:String = (folder == '' ? '' : folder + '/') + split.join('/');
+			var split:Int = fileName.lastIndexOf('/');
+			if (split != -1) {
+				var fap:String = fileName.substr(split + 1);
+				if (fap.length > 0) folderPath += '$fap/';
+				fileName = fileName.substr(0, split) + suffix;
+			} else
+				fileName = fileName + suffix;
 
 			var key:Null<String> = null;
 			this.isQuant = false;
@@ -510,8 +503,8 @@ class Note extends NoteObject {
 				key = (!this.isQuant && Paths.imageExists(normalKey)) ? normalKey : quantKey;
 			}
 
-			if (folderPath != '')
-				checkFolder(folderPath + '/');
+			if (folderPath.length != 0)
+				checkFolder(folderPath);
 
 			if (key == null)
 				checkFolder('');
@@ -526,15 +519,8 @@ class Note extends NoteObject {
 		if (wasQuant != isQuant)
 			updateColours();
 
-		if (vInd > 0 && hInd > 0) {
-			var graphic = Paths.image(textureKey);
-			setSize(graphic.width / hInd, graphic.height / vInd);
-			loadGraphic(graphic, true, Math.floor(width), Math.floor(height));
-			loadIndNoteAnims();
-		} else {
-			frames = Paths.getSparrowAtlas(textureKey);
-			loadNoteAnims();
-		}
+		frames = Paths.getSparrowAtlas(textureKey);
+		frames != null ? loadNoteAnims() : loadGraphic(Paths.image(textureKey));
 
 		if (inEditor)
 			setGraphicSize(ChartingState.GRID_SIZE, ChartingState.GRID_SIZE);
@@ -543,59 +529,20 @@ class Note extends NoteObject {
 		updateHitbox();
 
 		////
-		if (genScript != null)
-			genScript.executeFunc("postReloadNote", [this, texture, suffix], this);
-
-		if (noteScript != null)
-			noteScript.executeFunc("postReloadNote", [this, texture, suffix], this);
-	}
-
-	public function loadIndNoteAnims() {
-		var changed = false;
-
-		if (noteScript != null && noteScript.exists("loadIndNoteAnims")) {
-			noteScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims]);
-			changed = true;
-		}
-
-		if (genScript != null && genScript.exists("loadIndNoteAnims")) {
-			genScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims, "noteTypeLoaded" => changed]);
-			changed = true;
-		}
-
-		if (!changed)
-			_loadIndNoteAnims();
-	}
-
-	function _loadIndNoteAnims() {
-		final animName:String = 'default';
-		final animFrames:Array<Int> = switch (holdType) {
-			default: [
-					NoteObject.getAnimsInd(column, NoteAnimations.fourKey.noteAnimations, NoteAnimations.fourKey.noteAnimations) + 4
-				];
-			case PART: [
-					NoteObject.getAnimsInd(column, NoteAnimations.fourKey.holdAnimations, NoteAnimations.fourKey.holdAnimations)
-				];
-			case END: [
-					NoteObject.getAnimsInd(column, NoteAnimations.fourKey.tailAnimations, NoteAnimations.fourKey.tailAnimations) + 4
-				];
-		}
-		animation.add(animName, animFrames);
-		animation.play(animName, true);
-
-		// scale.set(6, 6); // causd mines to be huge lol
+		genScript?.executeFunc("postReloadNote", [this, texture, suffix]);
+		noteScript?.executeFunc("postReloadNote", [this, texture, suffix]);
 	}
 
 	public function loadNoteAnims() {
 		var changed = false;
 
 		if (noteScript != null && noteScript.exists("loadNoteAnims")) {
-			noteScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims]);
+			noteScript.executeFunc("loadNoteAnims", [this], null, ["super" => _loadNoteAnims]);
 			changed = true;
 		}
 
 		if (genScript != null && genScript.exists("loadNoteAnims")) {
-			genScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims, "noteTypeLoaded" => changed]);
+			genScript.executeFunc("loadNoteAnims", [this], null, ["super" => _loadNoteAnims, "noteTypeLoaded" => changed]);
 			changed = true;
 		}
 
@@ -655,13 +602,8 @@ class Note extends NoteObject {
 		if (inEditor)
 			return;
 
-		if (noteScript != null) {
-			noteScript.executeFunc("noteUpdate", [elapsed], this);
-		}
-
-		if (genScript != null) {
-			genScript.executeFunc("noteUpdate", [elapsed], this);
-		}
+		noteScript?.executeFunc("noteUpdate", [elapsed]);
+		genScript?.executeFunc("noteUpdate", [elapsed]);
 
 		if (hitByOpponent)
 			wasGoodHit = true;

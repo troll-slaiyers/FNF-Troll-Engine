@@ -824,7 +824,7 @@ class ClientPrefs {
 		[SPACE],
 		[F, J],
 		[F, SPACE, J],
-		[A, S, W, D],
+		[D, F, J, K],
 		[D, F, SPACE, J, K],
 		[S, D, F, J, K, L],
 		[S, D, F, SPACE, J, K, L],

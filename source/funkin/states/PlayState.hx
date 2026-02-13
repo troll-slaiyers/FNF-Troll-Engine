@@ -1,6 +1,6 @@
 package funkin.states;
 
-import funkin.objects.notes.NoteAnimation;
+import funkin.objects.notes.NoteAnimations;
 import funkin.objects.cutscenes.Cutscene;
 #if VIDEOS_ALLOWED
 import funkin.objects.cutscenes.VideoCutscene;
@@ -688,7 +688,7 @@ class PlayState extends MusicBeatState
 		songTrackNames = getChartTrackNames();
 
 		PlayState.keyCount = SONG.keyCount;
-		NoteAnimation.refreshKeyAnimations(keyCount);
+		NoteAnimations.refreshKeyAnimations(keyCount);
 
 		updateKeybinds();
 
@@ -1341,12 +1341,9 @@ class PlayState extends MusicBeatState
 				var opp:Int = playOpponent ? 0 : 1;
 
 				var halfKeys:Int = Math.floor(keyCount / 2);
-				if (keyCount % 2 != 0) // middle receptor dissappears, if there is one
-					modManager.setValue('alpha${halfKeys + 1}', 1.0, opp);
-
 				for (i in 0...halfKeys)
 					modManager.setValue('transform${i}X', -off, opp);
-				for (i in keyCount-halfKeys...keyCount)
+				for (i in keyCount-halfKeys-1...keyCount)
 					modManager.setValue('transform${i}X', off, opp);
 
 				modManager.setValue("alpha", 0.6, opp);
@@ -1942,13 +1939,14 @@ class PlayState extends MusicBeatState
 
 		var reBind:Bool = false;
 		for (opt in options) {
-			if (opt.startsWith("bind")) {
+			if (opt.startsWith('bind-')) {
 				reBind = true;
 				break;
 			}
 		}
 
 		if (reBind) {
+			trace("Updating key binds");
 			updateKeybinds();
 
 			// unpress everything

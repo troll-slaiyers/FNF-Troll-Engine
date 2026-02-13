@@ -70,7 +70,7 @@ class NoteObject extends FlxSprite {
 		throw new NotImplementedException();
 	}
 
-	function getNoteColours(anims:NoteAnimation) { // i had to resist the urge to spell it without the u to keep it consistent
+	function getNoteColours(anims:NoteAnimations) { // i had to resist the urge to spell it without the u to keep it consistent
 		var anim:String = anims.noteAnimations[column % anims.noteAnimations.length];
 		if (anim.contains("purple")) {
 			return ClientPrefs.arrowHSV[0];

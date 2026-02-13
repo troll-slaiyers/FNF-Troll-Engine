@@ -411,7 +411,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					currentBinds.set(key, bindsMap[key].copy());
 					
 				substate.changedBind = (action:String, index:Int, newBind:Int) -> {
-					var daId = '${action}${index}-bind';
+					var daId = 'bind-$action-$index';
 					
 					trace(daId, currentBinds.get(action)[index], newBind, currentBinds.get(action)[index] == newBind);
 					
