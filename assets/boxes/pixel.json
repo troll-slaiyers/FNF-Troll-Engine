@@ -3,7 +3,7 @@
 	"antialiasing": false,
 	"scale": 5.4,
 	"offsets":[-30, 20],
-	"dialogue_talk_sfx": "pixelText",
+	"dialogue_talk_sfx": ["pixelText"],
 	"dialogue_pressed_sfx": "clickText",
 	"animations": [
 		{

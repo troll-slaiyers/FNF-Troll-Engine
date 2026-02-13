@@ -12,6 +12,7 @@ typedef DialogueCharacterFile = {
 	var offsets:Array<Int>;
 	var antialiasing:Bool;
 	var scale:Float;
+	var talk_sound:Array<String>;
 
 	var animations:Array<DialogueAnimArray>;
 }
@@ -37,6 +38,7 @@ class DialogueCharacter extends FlxSprite
 	 *  Defaults to bf-pixel
 	 */
     public var curChar:String = 'bf-pixel';
+	public var talkSound:Array<String> = null;
 	public function new( _character:String)
     {
         super();
@@ -74,7 +76,7 @@ class DialogueCharacter extends FlxSprite
 
         antialiasing = jsonFile.antialiasing;
         scale.set(jsonFile.scale, jsonFile.scale);
-	
+		talkSound  = jsonFile.talk_sound;
         for (curAnim in jsonFile.animations)
 		{
 			#if USING_FLXANIMATE

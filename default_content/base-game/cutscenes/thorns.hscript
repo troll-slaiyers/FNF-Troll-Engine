@@ -47,8 +47,9 @@ function onCreateCutscene()
 
 	timeline.finish(240);
 }
-function onCutsceneEnd(wasSkipped:Bool)
-{
+function onCutsceneEnd(wasSkipped: Bool){
+	
+	
 	senpaiEvil.visible = false;
 	redBG.visible = false;
 	whiteFlash.visible = false;
@@ -58,5 +59,6 @@ function onCutsceneEnd(wasSkipped:Bool)
 	
 	FlxG.sound.playMusic(Paths.music('LunchboxScary'), 0);
 	FlxG.sound.music.fadeIn(1, 0, 0.8);
+
 }
 

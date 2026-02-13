@@ -8,7 +8,7 @@ typedef BoxData = {
 	var antialiasing:Bool;
 	var scale:Float;
 	var offsets:Array<Int>;
-	var dialogue_talk_sfx:String;
+	var dialogue_talk_sfx:Array<String>;
 	var dialogue_pressed_sfx:String;
 	var animations:Array<AnimsArray>;
 	var text:TextData;
@@ -43,7 +43,7 @@ class DialogueBox extends FlxSprite
 	public var textSize:Int = 42;
 	public var textColor:String;
 	public var shadowTextColor:String;
-	public var dialogueTalkSound:String = 'dialogue';
+	public var dialogueTalkSound:Array<String> = null;
 	public var dialoguePressedSound:String = 'dialogue';
 	public var script:FunkinHScript;
 	var currentBoxStyle:String;
@@ -86,7 +86,7 @@ class DialogueBox extends FlxSprite
 		textWidth = jsonFile.text.width;
 		dialogueTalkSound = jsonFile.dialogue_talk_sfx;
 		dialoguePressedSound = jsonFile.dialogue_pressed_sfx;
-		
+
 	    scrollFactor.set();
 
 	    updateHitbox();

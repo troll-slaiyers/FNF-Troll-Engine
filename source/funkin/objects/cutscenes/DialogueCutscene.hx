@@ -14,7 +14,7 @@ typedef DialogueLine = {
 	var character_anim:String;
 	var text_speed:Float;
     var text_size:Int;//custom font size
-	var sound_byte:String; 
+	var line_sound:Array<String>; 
 }
 
 class DialogueCutscene extends Cutscene{
@@ -31,9 +31,16 @@ class DialogueCutscene extends Cutscene{
      * Whether the player is able to progress the dialogue.
     */
     public var canProgressDialogue:Bool = false;
+    /**
+     * Array that will be filled with all the dialogue characters.
+     */
     var characters:Array<DialogueCharacter> = [];
+    /**
+     * Variable that allows you to keep all characters on screen if you want too.
+     */
     public var keepAllCharactersOnScreen:Bool = false;
-    
+    var finishedLine:Bool = false;
+    var curCharacter:DialogueCharacter;
     public function new(dialoguePath:String)
     {
 		super();
@@ -56,11 +63,11 @@ class DialogueCutscene extends Cutscene{
         dialogueText.antialiasing = box.antialiasing;
         dialogueText.borderSize = box.shadowWidth;
         add(dialogueText);
-
         dialogueText.completeCallback = function()
         {
-            box.finishLine();
+            finishLine();
         }
+
         new FlxTimer().start(introDelay, function(tmr:FlxTimer)
 		{
             canProgressDialogue = true;
@@ -70,20 +77,25 @@ class DialogueCutscene extends Cutscene{
 
         this.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
     } 
-
+    public function finishLine()
+    {
+        finishedLine = true;
+        box.animation.finish();
+        box.finishLine();
+    }
     function loadCharacters()        
     {
-        var charsMap:Map<String, Bool> = new Map<String, Bool>();
+        var characterMap:Map<String, Bool> = new Map<String, Bool>();
         //Does a loop through the entire dialogue file and checks for characters
 		for (i in 0...dialogueFile.dialogue.length) {
 			if(dialogueFile.dialogue[i] != null && dialogueFile.dialogue[i].character != null) {
-				var newChar:String = dialogueFile.dialogue[i].character;
-                if(!charsMap.exists(newChar) || !charsMap.get(newChar)) 
-					charsMap.set(newChar, true);//adds to the map only if the character doesnt already exist
+				var newCharacter:String = dialogueFile.dialogue[i].character;
+                if(!characterMap.exists(newCharacter) || !characterMap.get(newCharacter)) 
+					characterMap.set(newCharacter, true);//adds to the map only if the character doesnt already exist
 			}
 		}
 
-        for (curCharacter in charsMap.keys()) {
+        for (curCharacter in characterMap.keys()) {
 		    var char:DialogueCharacter = new DialogueCharacter(curCharacter);
 			char.updateHitbox();
 			char.scrollFactor.set();
@@ -97,10 +109,18 @@ class DialogueCutscene extends Cutscene{
     {
        	if (FlxG.keys.justPressed.SPACE && canProgressDialogue)
         {
-            curLine++;
-            createNewLine();
+            if(finishedLine)
+            {
+                curLine++;
+                createNewLine();
+            }
+            else
+            {
+                dialogueText.skip();
+            }
+
         }
-        //maybe have a proper log book for dialogue.
+        //todo: maybe have a proper log book for dialogue.
         
         super.update(elapsed);
     }
@@ -117,8 +137,9 @@ class DialogueCutscene extends Cutscene{
             onEnd.dispatch(false);
             return;
         }
-
+        finishedLine = false;
         var curDialogueLine:DialogueLine;
+
 		curDialogueLine = dialogueFile.dialogue[curLine];
         var curCharcter:Int = 0;
         for (i in 0...characters.length) {
@@ -134,7 +155,8 @@ class DialogueCutscene extends Cutscene{
 				characters[curCharcter].alpha = 1;
 			}
 		}
-        characters[curCharcter].animation.play(curDialogueLine.character_anim);
+        curCharacter = characters[curCharcter];
+        curCharacter.animation.play(curDialogueLine.character_anim);
         getTextSound();
         dialogueText.size = getTextSize(curDialogueLine.text_size);
                
@@ -169,13 +191,20 @@ class DialogueCutscene extends Cutscene{
 	}
     /**
      * Function thats called to retrieve text sound.
-     * TODO: add character text sounds.
      */
     public function getTextSound()
     {
-        var dialogueTalkSound:String = box.dialogueTalkSound;
-        if(box.dialogueTalkSound != null)
-        dialogueText.sounds = [FlxG.sound.load(Paths.sound(dialogueTalkSound), 0.6)];
+        var dialogueTalkSound:Array<String> = null;
+        if(dialogueFile.dialogue[curLine].line_sound != null)
+            dialogueTalkSound = dialogueFile.dialogue[curLine].line_sound;
+        else if(curCharacter.talkSound != null)
+            dialogueTalkSound = curCharacter.talkSound;
+        else if(box.dialogueTalkSound != null)
+            dialogueTalkSound = box.dialogueTalkSound;
+
+        if(dialogueTalkSound != null)
+        dialogueText.sounds = [for (dialogueSound in dialogueTalkSound) FlxG.sound.load(Paths.sound(dialogueSound), 0.6)];
+        
     }
 
 }
