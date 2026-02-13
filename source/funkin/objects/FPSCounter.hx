@@ -10,6 +10,9 @@ import openfl.text.TextFormat;
 import openfl.text.TextFormatAlign;
 
 class FPSCounter extends TextField {
+	/** Allows the FPS counter to lie about your framerate because Lime sucks and framerates goes above whats desired **/
+	public var canLie:Bool = true;
+
 	/** The current frame rate, expressed using frames-per-second **/
 	public var currentFPS(default, null):Int = 0;
 
@@ -65,7 +68,7 @@ class FPSCounter extends TextField {
 
 		_previousTime = Main.getTime();
 		if (_updateClock >= 1000) {
-			currentFPS = (FlxG.drawFramerate > 0) ? FlxMath.minInt(_framesPassed, FlxG.drawFramerate) : _framesPassed;
+			currentFPS = (canLie && FlxG.drawFramerate > 0) ? FlxMath.minInt(_framesPassed, FlxG.drawFramerate) : _framesPassed;
 			var text:String = 'FPS: $currentFPS';
 
 			if (showDebug)
