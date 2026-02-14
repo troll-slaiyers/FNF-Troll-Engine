@@ -1,5 +1,6 @@
 package funkin.states;
 
+import math.CoolMath;
 import funkin.data.Highscore;
 import funkin.data.Song;
 import funkin.data.Level;
@@ -352,7 +353,7 @@ class StoryModeState extends MusicBeatState {
 		var radius:Float = 60 + (levels.length * 15);
 		var lerpVal:Float = 1.0 - Math.exp(-elapsed * 16.0);
 
-		lerpHighscore = CoolUtil.coolLerp(lerpHighscore, targetHighscore, elapsed * 12);
+		lerpHighscore = CoolMath.coolLerp(lerpHighscore, targetHighscore, elapsed * 12);
 		scoreText.text = 'HIGH SCORE: ${Math.round(lerpHighscore)}';
 		
 		for(idx in 0...levelTitles.members.length){

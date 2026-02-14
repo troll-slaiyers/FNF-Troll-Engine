@@ -203,8 +203,11 @@ class MainMenuState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		var lerpVal:Float = CoolUtil.boundTo(elapsed * 7.5, 0, 1);
-		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
+		var lerpVal:Float = Math.exp(-elapsed * 7.5);
+		camFollowPos.setPosition(
+			FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal),
+			FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal)
+		);
 
 		if (!selectedSomethin)
 		{

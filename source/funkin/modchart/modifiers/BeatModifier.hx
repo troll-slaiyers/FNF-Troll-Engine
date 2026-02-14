@@ -39,12 +39,12 @@ class BeatModifier extends NoteModifier {
 		var amount:Float = 0;
 		if (beat < accelTime)
 		{
-			amount = CoolUtil.scale(beat, 0, accelTime, 0, 1);
+			amount = CoolMath.scale(beat, 0, accelTime, 0, 1);
 			amount *= amount;
 		}
 		else
 		{
-			amount = CoolUtil.scale(beat, accelTime, totalTime, 1, 0);
+			amount = CoolMath.scale(beat, accelTime, totalTime, 1, 0);
 			amount = 1 - (1 - amount) * (1 - amount);
 		}
 

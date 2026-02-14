@@ -15,19 +15,19 @@ class AlphaModifier extends NoteModifier
 	}
 
 	public function getHiddenEnd(player:Int = -1, column:Int){
-		return (FlxG.height* 0.5) + fadeDistY * CoolUtil.scale(getHiddenSudden(player, column),0, 1, -1, -1.25) + (FlxG.height* 0.5) * getWithColumnVariant("hiddenOffset", player, column);
+		return (FlxG.height* 0.5) + fadeDistY * CoolMath.scale(getHiddenSudden(player, column),0, 1, -1, -1.25) + (FlxG.height* 0.5) * getWithColumnVariant("hiddenOffset", player, column);
 	}
 
 	public function getHiddenStart(player:Int = -1, column:Int){
-		return (FlxG.height* 0.5) + fadeDistY * CoolUtil.scale(getHiddenSudden(player, column), 0, 1, 0, -0.25) + (FlxG.height* 0.5) * getWithColumnVariant("hiddenOffset", player, column);
+		return (FlxG.height* 0.5) + fadeDistY * CoolMath.scale(getHiddenSudden(player, column), 0, 1, 0, -0.25) + (FlxG.height* 0.5) * getWithColumnVariant("hiddenOffset", player, column);
 	}
 
 	public function getSuddenEnd(player:Int = -1, column:Int){
-		return (FlxG.height* 0.5) + fadeDistY * CoolUtil.scale(getHiddenSudden(player, column),0, 1, 1, 1.25) + (FlxG.height* 0.5) * getWithColumnVariant("suddenOffset", player, column);
+		return (FlxG.height* 0.5) + fadeDistY * CoolMath.scale(getHiddenSudden(player, column),0, 1, 1, 1.25) + (FlxG.height* 0.5) * getWithColumnVariant("suddenOffset", player, column);
 	}
 
 	public function getSuddenStart(player:Int = -1, column:Int){
-		return (FlxG.height* 0.5) + fadeDistY * CoolUtil.scale(getHiddenSudden(player, column),0, 1, 0, 0.25) + (FlxG.height* 0.5) * getWithColumnVariant("suddenOffset", player, column);
+		return (FlxG.height* 0.5) + fadeDistY * CoolMath.scale(getHiddenSudden(player, column),0, 1, 0, 0.25) + (FlxG.height* 0.5) * getWithColumnVariant("suddenOffset", player, column);
 	}
 
 	inline function getWithColumnVariant(mod:String, player:Int, column:Int){
@@ -46,13 +46,13 @@ class AlphaModifier extends NoteModifier
 
 		var hiddenValue = getWithColumnVariant("hidden", player, column);
 		if(hiddenValue != 0){
-			var hiddenAdjust = CoolUtil.clamp(CoolUtil.scale(yPos, getHiddenStart(player, column), getHiddenEnd(player, column), 0, -1), -1, 0);
+			var hiddenAdjust = CoolMath.clamp(CoolMath.scale(yPos, getHiddenStart(player, column), getHiddenEnd(player, column), 0, -1), -1, 0);
 			alpha += hiddenValue * hiddenAdjust;
 		}
 
 		var suddenValue = getWithColumnVariant("sudden", player, column);
 		if (suddenValue != 0){
-			var suddenAdjust = CoolUtil.clamp(CoolUtil.scale(yPos, getSuddenStart(player, column), getSuddenEnd(player, column), 0, -1), -1, 0);
+			var suddenAdjust = CoolMath.clamp(CoolMath.scale(yPos, getSuddenStart(player, column), getSuddenEnd(player, column), 0, -1), -1, 0);
 			alpha += suddenValue * suddenAdjust;
 		}
 
@@ -63,26 +63,26 @@ class AlphaModifier extends NoteModifier
 			alpha -= getSubmodValue('stealth$column', player);
 
 		if(getSubmodValue("blink",player)!=0){
-			var f = CoolUtil.quantizeAlpha(FlxMath.fastSin(time*10),0.3333);
-			alpha += CoolUtil.scale(f,0,1,-1,0);
+			var f = CoolMath.quantizeAlpha(FlxMath.fastSin(time*10),0.3333);
+			alpha += CoolMath.scale(f,0,1,-1,0);
 		}
 
 		if(getSubmodValue("vanish",player)!=0){
 			var realFadeDist:Float = 120;
-			alpha += CoolUtil.scale(Math.abs(distFromCenter),realFadeDist,2*realFadeDist,-1,0)*getSubmodValue("vanish",player);
+			alpha += CoolMath.scale(Math.abs(distFromCenter),realFadeDist,2*realFadeDist,-1,0)*getSubmodValue("vanish",player);
 		}
 
-		return CoolUtil.clamp(alpha+1,0,1);
+		return CoolMath.clamp(alpha+1,0,1);
 	}
 
 	function getGlow(visible:Float){
-		var glow = CoolUtil.scale(visible, 1, 0.5, 0, 1.3);
-		return CoolUtil.clamp(glow,0,1);
+		var glow = CoolMath.scale(visible, 1, 0.5, 0, 1.3);
+		return CoolMath.clamp(glow,0,1);
 	}
 
 	function getRealAlpha(visible:Float){
-		var alpha = CoolUtil.scale(visible, 0.5, 0, 1, 0);
-		return CoolUtil.clamp(alpha,0,1);
+		var alpha = CoolMath.scale(visible, 0.5, 0, 1, 0);
+		return CoolMath.clamp(alpha,0,1);
 	}
 
 	override function shouldExecute(player:Int, val:Float)return true;

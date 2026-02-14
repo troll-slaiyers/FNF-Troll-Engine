@@ -797,7 +797,6 @@ class ClientPrefs {
 		'volume_mute' => [ZERO, NONE],
 		'volume_up' => [NUMPADPLUS, PLUS],
 		'volume_down' => [NUMPADMINUS, MINUS],
-		'fullscreen' => [F11, NONE],
 		'debug_1' => [SEVEN, NONE],
 		'debug_2' => [EIGHT, NONE],
 		'botplay' => [F8, NONE]
@@ -989,7 +988,6 @@ class ClientPrefs {
 		FNFGame.muteKeys = copyKey(keyBinds.get('volume_mute'));
 		FNFGame.volumeDownKeys = copyKey(keyBinds.get('volume_down'));
 		FNFGame.volumeUpKeys = copyKey(keyBinds.get('volume_up'));
-		FNFGame.fullscreenKeys = copyKey(keyBinds.get("fullscreen"));
 	}
 
 	public static function copyKey(arrayToCopy:Array<Int>):Array<Int> {

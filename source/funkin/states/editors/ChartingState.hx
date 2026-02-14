@@ -17,6 +17,7 @@ import funkin.data.Song;
 import funkin.objects.notes.*;
 import funkin.objects.ui.CustomFlxUI;
 
+import math.CoolMath;
 import math.CoolMath.floorDecimal;
 
 import flixel.*;
@@ -2208,7 +2209,7 @@ class ChartingState extends MusicBeatState
 	function getSnappedTime(snap:Float) {
 		var time = Conductor.songPosition;
 		var bmpEventTime = Conductor.getBPMFromSeconds(time).songTime;
-		return CoolUtil.snap(time - bmpEventTime, snap) + bmpEventTime;
+		return CoolMath.snap(time - bmpEventTime, snap) + bmpEventTime;
 	}
 
 	function updateQuantization(){
@@ -2392,7 +2393,7 @@ class ChartingState extends MusicBeatState
 					var clickTime:Float = sectionStartTime() + curDummyY * gridTime;
 					
 					var len:Float = Math.max(0, clickTime - note.strumTime);
-					note.sustainLength = FlxG.keys.pressed.SHIFT ? len : CoolUtil.snap(len, gridTime);
+					note.sustainLength = FlxG.keys.pressed.SHIFT ? len : CoolMath.snap(len, gridTime);
 					doUpdate = true;
 				}
 
@@ -2648,7 +2649,7 @@ class ChartingState extends MusicBeatState
 					if (holdArray[i]){
 						var note = heldNotesVortex[i];
 						if (note != null){
-							note.sustainLength = CoolUtil.snap(Conductor.songPosition - note.strumTime, Conductor.stepCrochet);
+							note.sustainLength = CoolMath.snap(Conductor.songPosition - note.strumTime, Conductor.stepCrochet);
 							doUpdate = true;
 						}
 					}else {
@@ -3200,7 +3201,7 @@ class ChartingState extends MusicBeatState
 	}
 	
 	inline function fuckFloatingPoints(n:Float):Float // haha decimals
-		return CoolUtil.snap(n, Conductor.jackLimit);
+		return CoolMath.snap(n, Conductor.jackLimit);
 
 	inline function wipeGroup(group:FlxTypedGroup<Dynamic>)
 	{
@@ -3452,9 +3453,10 @@ class ChartingState extends MusicBeatState
 		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE - susWidth) * 0.5, note.y + GRID_HALF);
 
 		var color:FlxColor = note.isQuant ? 0xFFFF0000 : noteColours[note.column % noteColours.length];
-		color.setHSB(((color.hue + note.colorSwap.hue * 360) % 360 + 360) % 360,
-			CoolUtil.boundTo(color.saturation * 0.01 * (1.0 + note.colorSwap.saturation), 0.0, 1.0) * 100.0,
-			(color.brightness * 0.01 * (1.0 + note.colorSwap.brightness)) * 100.0,
+		color.setHSB((
+			(color.hue + note.colorSwap.hue * 360) % 360 + 360) % 360,
+			color.saturation * (1.0 + note.colorSwap.saturation),
+			color.brightness * (1.0 + note.colorSwap.brightness),
 			color.alphaFloat
 		);
 		spr.makeGraphic(1, 1, color);

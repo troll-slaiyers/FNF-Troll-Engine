@@ -1,6 +1,7 @@
 package funkin.states.options;
 
 // too lazy to finish merging this w the keyboard version rn
+import math.CoolMath;
 import funkin.objects.notes.NoteAnimations;
 import funkin.objects.notes.Note;
 import funkin.states.options.BindsBullshit.KeyboardNavHelper;
@@ -431,7 +432,7 @@ class ButtonBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxGam
 	}
 
 	function updateBindingSubmenu(elapsed:Float) {
-		overCam.alpha = CoolUtil.coolLerp(overCam.alpha, 1.0, elapsed * 12.0);
+		overCam.alpha = CoolMath.coolLerp(overCam.alpha, 1.0, elapsed * 12.0);
 
 		var pressedKey = getJustPressed();
 		if (pressedKey != -1) {

@@ -311,21 +311,6 @@ class CoolUtil {
 		}
 	}
 
-	inline public static function numberArray(max:Int, ?min = 0):Array<Int>
-	{
-		// max+1 because in haxe for loops stop before reaching the max number
-		return [for (n in min...max+1){n;}];
-	}
-
-	//uhhhh does this even work at all? i'm starting to doubt
-	public static function precacheSound(sound:String, ?library:String = null):Void {
-		Paths.sound(sound, library);
-	}
-
-	public static function precacheMusic(sound:String, ?library:String = null):Void {
-		Paths.music(sound, library);
-	}
-
 	public static inline function browserLoad(site:String) {
 		flixel.FlxG.openURL(site);
 	}
@@ -476,32 +461,48 @@ class CoolUtil {
         return inst;
     }
 
+	public static function formatMemory(Bytes:Float):String {
+		var units:Int = 0;
+		while (Bytes >= 1024) {
+			Bytes /= 1024;
+			units++;
+		}
+
+		return Math.round(Bytes * 100) / 100 + switch (units) {
+			case 0: "Bytes";
+			case 1: "kB";
+			case 2: "MB";
+			default: "GB";
+		};
+	}
 
 	////
-	@:noCompletion inline public static function coolLerp(current:Float, target:Float, elapsed:Float):Float
+	#if ALLOW_DEPRECATION
+	@:deprecated @:noCompletion inline public static function coolLerp(current:Float, target:Float, elapsed:Float):Float
 		return CoolMath.coolLerp(current, target, elapsed);
 
-	@:noCompletion inline public static function scale(x:Float, lower1:Float, higher1:Float, lower2:Float, higher2:Float):Float
+	@:deprecated @:noCompletion inline public static function scale(x:Float, lower1:Float, higher1:Float, lower2:Float, higher2:Float):Float
 		return CoolMath.scale(x, lower1, higher1, lower2, higher2);
 
-	@:noCompletion inline public static function quantizeAlpha(f:Float, interval:Float):Float
+	@:deprecated @:noCompletion inline public static function quantizeAlpha(f:Float, interval:Float):Float
 		return CoolMath.quantizeAlpha(f, interval);
 
-	@:noCompletion inline public static function quantize(f:Float, snap:Float):Float
+	@:deprecated @:noCompletion inline public static function quantize(f:Float, snap:Float):Float
 		return CoolMath.quantize(f, snap);
 
-	@:noCompletion inline public static function snap(f:Float, snap:Float):Float
+	@:deprecated @:noCompletion inline public static function snap(f:Float, snap:Float):Float
 		return CoolMath.snap(f, snap);
 
-	@:noCompletion inline public static function boundTo(value:Float, min:Float, max:Float):Float
+	@:deprecated @:noCompletion inline public static function boundTo(value:Float, min:Float, max:Float):Float
 		return CoolMath.boundTo(value, min, max);
 
-	@:noCompletion inline public static function clamp(n:Float, lower:Float, higher:Float):Float
+	@:deprecated @:noCompletion inline public static function clamp(n:Float, lower:Float, higher:Float):Float
 		return CoolMath.clamp(n, lower, higher);
 
-	@:noCompletion inline public static function floorDecimal(value:Float, decimals:Int):Float
+	@:deprecated @:noCompletion inline public static function floorDecimal(value:Float, decimals:Int):Float
 		return CoolMath.floorDecimal(value, decimals);
 
-	@:noCompletion inline public static function rotate(x:Float, y:Float, rads:Float, ?point:FlxPoint):FlxPoint
+	@:deprecated @:noCompletion inline public static function rotate(x:Float, y:Float, rads:Float, ?point:FlxPoint):FlxPoint
 		return CoolMath.rotate(x, y, rads, point);
+	#end
 }

@@ -5,6 +5,7 @@ import funkin.modchart.Modifier;
 
 import math.Vector3;
 import math.VectorHelpers;
+import math.CoolMath;
 
 import flixel.FlxSprite;
 import flixel.math.FlxAngle;

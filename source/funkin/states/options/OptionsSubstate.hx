@@ -3,7 +3,7 @@ package funkin.states.options;
 import funkin.states.options.IBindsMenu;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.input.keyboard.FlxKey;
-import haxe.extern.EitherType;
+import math.CoolMath;
 import funkin.CoolUtil.overlapsMouse as overlaps;
 import funkin.states.options.*;
 import funkin.ClientPrefs;
@@ -294,8 +294,8 @@ class OptionsSubstate extends MusicBeatSubstate
 			var isPreset:Bool = true;
 
 			for (idx in 0...compareWindow.length){
-				var preset = CoolUtil.snap(windows[idx], 0.1);
-				var custom = CoolUtil.snap(compareWindow[idx], 0.1);
+				var preset = CoolMath.snap(windows[idx], 0.1);
+				var custom = CoolMath.snap(compareWindow[idx], 0.1);
 				
 				if (preset != custom){
 					isPreset = false;
@@ -434,7 +434,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		previewSound.context = MISC;
 	}
 
-	private var lastFlixelVolume:Float = CoolUtil.snap(FlxG.sound.volume, 0.1);
+	private var lastFlixelVolume:Float = CoolMath.snap(FlxG.sound.volume, 0.1);
 	function onNumberChanged(option:String, oldVal:Float, newVal:Float)
 	{
 		switch (option)
@@ -450,7 +450,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 				var prevVol = FlxG.sound.volume;
 				var newVol = newVal * 0.01;
-				var snappedVol = CoolUtil.snap(newVol, 0.1);
+				var snappedVol = CoolMath.snap(newVol, 0.1);
 
 				ignoreVolumeChange = true;
 				FlxG.sound.volume = newVol;
@@ -1093,7 +1093,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		else if (newVal < minVal)
 			newVal = minVal;
 
-		var snappedVal:Float = CoolUtil.snap(newVal, valSnap);
+		var snappedVal:Float = CoolMath.snap(newVal, valSnap);
 		option.value = snappedVal;
 		
 		if (oldVal != snappedVal)

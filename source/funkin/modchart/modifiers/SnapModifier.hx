@@ -7,9 +7,9 @@ class SnapModifier extends NoteModifier
 
 	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
-		pos.x = FlxMath.lerp(pos.x, CoolUtil.snap(pos.x, getSubmodValue("snapXInterval", player)), getValue(player));
-		pos.y = FlxMath.lerp(pos.y, CoolUtil.snap(pos.y, getSubmodValue("snapYInterval", player)), getSubmodValue("snapY", player));
-		pos.z = FlxMath.lerp(pos.z, CoolUtil.snap(pos.z, getSubmodValue("snapZInterval", player)), getSubmodValue("snapZ", player));
+		pos.x = FlxMath.lerp(pos.x, CoolMath.snap(pos.x, getSubmodValue("snapXInterval", player)), getValue(player));
+		pos.y = FlxMath.lerp(pos.y, CoolMath.snap(pos.y, getSubmodValue("snapYInterval", player)), getSubmodValue("snapY", player));
+		pos.z = FlxMath.lerp(pos.z, CoolMath.snap(pos.z, getSubmodValue("snapZInterval", player)), getSubmodValue("snapZ", player));
 		return pos;
 	}
 	

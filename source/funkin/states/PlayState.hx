@@ -1343,7 +1343,7 @@ class PlayState extends MusicBeatState
 				var halfKeys:Int = Math.floor(keyCount / 2);
 				for (i in 0...halfKeys)
 					modManager.setValue('transform${i}X', -off, opp);
-				for (i in keyCount-halfKeys-1...keyCount)
+				for (i in halfKeys...keyCount)
 					modManager.setValue('transform${i}X', off, opp);
 
 				modManager.setValue("alpha", 0.6, opp);

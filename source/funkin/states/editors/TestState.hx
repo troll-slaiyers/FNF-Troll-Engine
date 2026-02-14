@@ -90,8 +90,11 @@ class TestState extends MusicBeatState{
 			lastGroup = curGroup;
 		}
 
-		var lerpVal:Float = CoolUtil.boundTo(elapsed * 2.4, 0, 1);
-		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
+		var lerpVal:Float = Math.exp(-elapsed * 2.4);
+		camFollowPos.setPosition(
+			FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal),
+			FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal)
+		);
 		
 		super.update(elapsed);
 	}

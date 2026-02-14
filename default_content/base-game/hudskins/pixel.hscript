@@ -1,4 +1,4 @@
-import funkin.objects.notes.NoteAnimation;
+import funkin.objects.notes.NoteAnimations;
 
 ////
 var roundTo = CoolUtil.snap;
@@ -186,9 +186,9 @@ function setupReceptorTexture(strum:StrumNote){
 
 	strum.frames = Paths.getSparrowAtlas("pixelUI/" + br);
 
-	strum.animation.addByPrefix('static', NoteAnimation.current.staticAnimations[strum.column % NoteAnimation.current.staticAnimations.length], 24, false);
-	strum.animation.addByPrefix('pressed', NoteAnimation.current.pressAnimations[strum.column % NoteAnimation.current.pressAnimations.length], 24, false);
-	strum.animation.addByPrefix('confirm', NoteAnimation.current.confirmAnimations[strum.column % NoteAnimation.current.confirmAnimations.length], 24, false);
+	strum.animation.addByPrefix('static', NoteAnimations.current.staticAnimations[strum.column % NoteAnimations.current.staticAnimations.length], 24, false);
+	strum.animation.addByPrefix('pressed', NoteAnimations.current.pressAnimations[strum.column % NoteAnimations.current.pressAnimations.length], 24, false);
+	strum.animation.addByPrefix('confirm', NoteAnimations.current.confirmAnimations[strum.column % NoteAnimations.current.confirmAnimations.length], 24, false);
 	
 	// TODO: add an easy way to do indices for strums
 	strum.antialiasing = false;
@@ -221,7 +221,7 @@ function preSetupNoteSplash(x, y, column, texture, hueColor, satColor, brtColor,
 
 function loadSplashAnims(texture){
 	this.frames = Paths.getSparrowAtlas('pixelUI/' + texture);
-	this.animation.addByPrefix('splash', 'note splash ' + StringTools.replace(NoteAnimation.current.noteAnimations[column %  NoteAnimation.current.noteAnimations.length], '0', '') + ' ' + FlxG.random.int(1, this.animationAmount), 24, false);
+	this.animation.addByPrefix('splash', 'note splash ' + StringTools.replace(NoteAnimations.current.noteAnimations[column %  NoteAnimations.current.noteAnimations.length], '0', '') + ' ' + FlxG.random.int(1, this.animationAmount), 24, false);
 	this.scale.set(noteScale * 5.0, noteScale * 5.0);
 	this.antialiasing = false;
 	this.updateHitbox();

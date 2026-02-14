@@ -108,7 +108,6 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 			[Paths.getString('control_volume_mute'), 'volume_mute'],
 			[Paths.getString('control_volume_up'), 'volume_up'],
 			[Paths.getString('control_volume_down'), 'volume_down'],
-			[Paths.getString('control_fullscreen'), 'fullscreen'],
 
 			[Paths.getString('controls_debug')],
 			// honestly might just replace this with one debug thing

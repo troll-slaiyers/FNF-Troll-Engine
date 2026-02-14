@@ -1,5 +1,6 @@
 package funkin.states;
 
+import math.CoolMath;
 import funkin.input.InputFormatter;
 import flixel.util.FlxColor;
 import funkin.objects.hud.HealthIcon;
@@ -453,8 +454,8 @@ class FreeplayState extends MusicBeatState
 
 	override function draw()
 	{
-		lerpHighscore = CoolUtil.coolLerp(lerpHighscore, targetHighscore, FlxG.elapsed * 12);
-		lerpRating = CoolUtil.coolLerp(lerpRating, targetRating, FlxG.elapsed * 8);
+		lerpHighscore = CoolMath.coolLerp(lerpHighscore, targetHighscore, FlxG.elapsed * 12);
+		lerpRating = CoolMath.coolLerp(lerpRating, targetRating, FlxG.elapsed * 8);
 
 		final score = Math.round(lerpHighscore);
 		final rating = formatRating(Math.fround(lerpRating * 100.0) / 100.0);
