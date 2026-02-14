@@ -61,7 +61,7 @@ class DialogueCharacter extends FlxSprite
 		var fileType:String = CharacterData.getImageFileType(jsonFile.graphic);
 		var isAnimateAtlas:Bool = false;
 
-		//todo: add multisprite support?
+		//todo: add multisprite support
 		switch (fileType)
 		{
 			case "texture":	

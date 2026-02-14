@@ -111,26 +111,7 @@ class DialogueBox extends FlxSprite
 		script.set("this", this);
 
 	}
-	public function createPost()
-	{
-		script?.call("onCreatePost");
-	}
 
-	public function newLine()
-	{
-		script?.call("onNewLine");
-
-	}
-	public function finishLine()
-	{
-		script?.call("onFinishLineDialogue");
-	}
-	public function onDialogueEnded()
-	{
-		trace('ended dialogue');
-		script?.call("onDialogueEnded");
-
-	}
 	override function destroy()
 	{
 		if (script != null){
@@ -138,7 +119,6 @@ class DialogueBox extends FlxSprite
 			script.stop();
 			script = null;
 		}
-		
 		super.destroy();
 	}
    

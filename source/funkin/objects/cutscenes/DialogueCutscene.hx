@@ -80,8 +80,8 @@ class DialogueCutscene extends Cutscene{
     public function finishLine()
     {
         finishedLine = true;
-        box.animation.finish();
-        box.finishLine();
+        box.script?.call("onFinishLineDialogue");
+
     }
     function loadCharacters()        
     {
@@ -130,7 +130,7 @@ class DialogueCutscene extends Cutscene{
     public function createNewLine()
     {
         FlxG.sound.play(Paths.sound(box.dialoguePressedSound), 0.7);
-        box.newLine();
+		box?.script?.call("onNewLine");
         
         if(curLine >= dialogueFile.dialogue.length)
         {
@@ -169,7 +169,8 @@ class DialogueCutscene extends Cutscene{
      */
     function endDialogue(wasSkipped:Bool)
     {
-        box.onDialogueEnded();
+        box?.script?.call("onDialogueEnded");
+
         new FlxTimer().start(1, function(tmr:FlxTimer)
 		{
             destroy();
@@ -183,7 +184,6 @@ class DialogueCutscene extends Cutscene{
      */
     inline function getTextSize(_lineTextSize:Int):Int 
         return _lineTextSize > 0 ? _lineTextSize : box.textSize;
-    
 
     override public function restart(){
         curLine = 0;
