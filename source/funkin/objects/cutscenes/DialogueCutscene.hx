@@ -116,13 +116,22 @@ class DialogueCutscene extends Cutscene{
             }
             else
             {
-                dialogueText.skip();
+                skipCurLine();
             }
 
         }
         //todo: maybe have a proper log book for dialogue.
         
         super.update(elapsed);
+    }
+
+    /**
+     * Function thats called when a line of dialogue is skipped mid sentence.
+     */
+    private function skipCurLine()
+    {
+        box?.script?.call("onSkipLine");
+        dialogueText.skip();
     }
     /**
      * Creates a new line of dialogue.
