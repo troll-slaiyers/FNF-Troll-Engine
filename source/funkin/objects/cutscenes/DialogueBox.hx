@@ -71,12 +71,13 @@ class DialogueBox extends FlxSprite
 
 		for (anim in jsonFile.animations) 
 			animation.addByPrefix(anim.animName, anim.animPrefix, anim.fps, anim.looped);
+
 		x = jsonFile.offsets[0];
         y = jsonFile.offsets[1];
 		scale.set(jsonFile.scale,jsonFile.scale);
 
+		//this can probably be fixed, i dont think we need all ts
 		antialiasing = jsonFile.antialiasing;
-
 		font = jsonFile.text.font;
 		textSize = jsonFile.text.size;
 		textColor = jsonFile.text.color;

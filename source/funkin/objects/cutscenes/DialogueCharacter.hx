@@ -6,9 +6,11 @@ import animate.FlxAnimateController;
 #end
 import flixel.FlxSprite;
 import funkin.data.CharacterData;
+import flixel.graphics.frames.FlxAtlasFrames;
 
 typedef DialogueCharacterFile = {
 	var graphic:String;
+	var extra_graphics:Array<String>;
 	var offsets:Array<Int>;
 	var antialiasing:Bool;
 	var scale:Float;
@@ -60,15 +62,32 @@ class DialogueCharacter extends FlxSprite
 	{
 		var fileType:String = CharacterData.getImageFileType(jsonFile.graphic);
 		var isAnimateAtlas:Bool = false;
+		var atlases:Array<String> = [jsonFile.graphic];
 
-		//todo: add multisprite support
 		switch (fileType)
 		{
 			case "texture":	
 				frames = Paths.getTextureAtlas(jsonFile.graphic);
 				isAnimateAtlas = true;
-			case "packer":	frames = Paths.getPackerAtlas(jsonFile.graphic);
-			case "sparrow":	frames = Paths.getSparrowAtlas(jsonFile.graphic);
+			case "packer":	
+				frames = Paths.getPackerAtlas(jsonFile.graphic);
+			case "sparrow":	
+				//this probably be something in a diff file tbh
+				var frames:FlxAtlasFrames = Paths.getSparrowAtlas(jsonFile.graphic);
+				if(jsonFile.extra_graphics != null && jsonFile.extra_graphics.length > 0){
+					for(i in jsonFile.extra_graphics){
+						if (!atlases.contains(i)) {
+							atlases.push(i);
+							var subAtlas:FlxAtlasFrames = Paths.getSparrowAtlas(i);
+							if (subAtlas==null)continue;
+							@:privateAccess
+							if (!frames.usedGraphics.contains(subAtlas.parent))
+								frames.addAtlas(subAtlas, true);
+						}
+					}
+				}
+				this.frames = frames;
+
 
 		}
         x = jsonFile.offsets[0];
