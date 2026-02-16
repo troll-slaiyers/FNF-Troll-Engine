@@ -94,6 +94,7 @@ class DialogueBox extends FlxSprite
 
 		startScript();
 	}
+
 	public function startScript()
 	{
 		if (script != null) {
@@ -110,7 +111,6 @@ class DialogueBox extends FlxSprite
 		script = FunkinHScript.fromFile(file);
 		//variables
 		script.set("this", this);
-
 	}
 
 	override function destroy()

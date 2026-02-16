@@ -15,6 +15,7 @@ typedef DialogueLine = {
 	var text_speed:Float;
     var text_size:Int;//custom font size
 	var line_sound:Array<String>; 
+    var box_animation:String;
 }
 
 class DialogueCutscene extends Cutscene{
@@ -148,8 +149,10 @@ class DialogueCutscene extends Cutscene{
         }
         finishedLine = false;
         var curDialogueLine:DialogueLine;
-
 		curDialogueLine = dialogueFile.dialogue[curLine];
+
+        playBoxAnimation(curDialogueLine.box_animation);
+
         var curCharcter:Int = 0;
         for (i in 0...characters.length) {
 			if(characters[i].curChar == curDialogueLine.character) {
@@ -200,8 +203,9 @@ class DialogueCutscene extends Cutscene{
 	}
     /**
      * Function thats called to retrieve text sound.
+     * Leaving all fields empty, will not play a sound.
      */
-    public function getTextSound()
+    private function getTextSound()
     {
         var dialogueTalkSound:Array<String> = null;
         if(dialogueFile.dialogue[curLine].line_sound != null)
@@ -213,7 +217,15 @@ class DialogueCutscene extends Cutscene{
 
         if(dialogueTalkSound != null)
         dialogueText.sounds = [for (dialogueSound in dialogueTalkSound) FlxG.sound.load(Paths.sound(dialogueSound), 0.6)];
-        
+    }
+    /**
+     * Play dialogue box animation
+     * @param _anim 
+     */
+    function playBoxAnimation(_anim:String)
+    {
+        if(_anim == null) return;
+        box?.animation.play(_anim);
     }
 
 }
