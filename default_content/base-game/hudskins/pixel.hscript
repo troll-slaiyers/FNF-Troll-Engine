@@ -159,59 +159,19 @@ function makeCountdownSprite(sprImage, swagCounter){
 
 function setupNoteTexture(note:Note){
 	note.reloadNote('NOTE_assets', note.texSuffix, 'pixelUI');
-
 	note.scale.set(noteScale * 6.0, noteScale * 6.0);
 	note.antialiasing = false;
 }
 
 function setupReceptorTexture(strum:StrumNote){
-	strum.isQuant = false;
-	
-	var lastAnim:String = null;
-	if (strum.animation.curAnim != null) 
-		lastAnim = strum.animation.curAnim.name;
-	
-	var br:String = 'NOTE_assets';
-	
-	var arrowSkin = PlayState.SONG.arrowSkin;
-	if (Paths.imageExists("pixelUI/" + arrowSkin))
-		br = arrowSkin;
-	
-	if (ClientPrefs.noteSkin == 'Quants') {
-		if (Paths.imageExists("pixelUI/QUANT"+br)) {
-			br = "QUANT" + br;
-			strum.isQuant = true;
-		}
-	}
-
-	strum.frames = Paths.getSparrowAtlas("pixelUI/" + br);
-
-	strum.animation.addByPrefix('static', NoteAnimations.current.staticAnimations[strum.column % NoteAnimations.current.staticAnimations.length], 24, false);
-	strum.animation.addByPrefix('pressed', NoteAnimations.current.pressAnimations[strum.column % NoteAnimations.current.pressAnimations.length], 24, false);
-	strum.animation.addByPrefix('confirm', NoteAnimations.current.confirmAnimations[strum.column % NoteAnimations.current.confirmAnimations.length], 24, false);
-	
-	// TODO: add an easy way to do indices for strums
+	strum.reloadNote('NOTE_assets', strum.texSuffix, 'pixelUI');
 	strum.antialiasing = false;
 
-	strum.scale.set(noteScale * 6.0, noteScale * 6.0);    
+	var ns = noteScale * 6.0;
+	strum.scale.set(ns, ns);    
 	strum.updateHitbox();
-
-	strum.defScale.x = strum.scale.x;
-	strum.defScale.y = strum.scale.y;
-
-	if(lastAnim != null)
-	{
-		strum.playAnim(lastAnim, true);
-	}
+	strum.defScale.set(ns, ns);
 }
-
-
-var suffixes = [
-	"left",
-	"down",
-	"up",
-	"right"
-];
 
 function onSetupNoteSplash(x, y, column, texture, hueColor, satColor, brtColor, note){
 	if(this.textureLoaded == texture && !StringTools.startsWith(texture, "pixelUI") && Paths.imageExists("pixelUI/" + texture)){

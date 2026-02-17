@@ -1,12 +1,6 @@
 package funkin.scripts;
 
-import haxe.CallStack;
-#if USING_FLXANIMATE
-import animate.FlxAnimate;
-import animate.FlxAnimateFrames;
-#end
 import funkin.scripts.FunkinScript.ScriptType;
-import funkin.objects.IndependentVideoSprite;
 import funkin.scripts.*;
 import funkin.scripts.Globals.*;
 
@@ -188,7 +182,6 @@ class FunkinHScript extends FunkinScript
 		
 		setDefaultVars();
 		setFlixelVars();
-		setVideoVars();
 		setFNFVars();
 		
 		set("ShaderFilter", openfl.filters.ShaderFilter);
@@ -263,8 +256,12 @@ class FunkinHScript extends FunkinScript
 		set("FlxRuntimeShader", flixel.addons.display.FlxRuntimeShader);
 		#end
 		#if USING_FLXANIMATE
-		set("FlxAnimate", FlxAnimate);
-		set("FlxAnimateFrames", FlxAnimateFrames);
+		set("FlxAnimate", animate.FlxAnimate);
+		set("FlxAnimateFrames", animate.FlxAnimateFrames);
+		#end
+		#if VIDEOS_ALLOWED
+		set("FlxVideo", hxvlc.flixel.FlxVideo);
+		set("FlxVideoSprite", hxvlc.flixel.FlxVideoSprite);
 		#end
 		// Enums
 		set("FlxBarFillDirection", flixel.ui.FlxBar.FlxBarFillDirection);
@@ -278,46 +275,8 @@ class FunkinHScript extends FunkinScript
 		set("FlxAxes", Wrappers.FlxAxes);
 		set("FlxColor", Wrappers.SowyColor);
 		set("FlxPoint", Wrappers.FlxPoint);
-	}
 
-	private function setVideoVars() {
-		// TODO: create a compatibility wrapper for the various versions
-		// (so you can use any version of hxcodec and use the same versions)
-
-		#if !VIDEOS_ALLOWED
-		set("hxcodec", "0");
-		set("MP4Handler", null);
-		set("MP4Sprite", null);
-		#else
-		#if (hxCodec >= "3.0.0")
-		set("hxcodec", "3.0.0");
-		set("MP4Handler", hxcodec.flixel.FlxVideo);
-		set("MP4Sprite", hxcodec.flixel.FlxVideoSprite); // idk how hxcodec 3.0.0 works :clueless:
-		#elseif (hxCodec >= "2.6.1")
-		set("hxcodec", "2.6.1");
-		set("MP4Handler", hxcodec.VideoHandler);
-		set("MP4Sprite", hxcodec.VideoSprite);
-		#elseif (hxCodec == "2.6.0")
-		set("hxcodec", "2.6.0");
-		set("MP4Handler", VideoHandler);
-		set("MP4Sprite", VideoSprite);
-		#elseif (hxCodec)
-		set("hxcodec", "1.0.0");
-		set("MP4Handler", vlc.MP4Handler);
-		set("MP4Sprite", vlc.MP4Sprite);
-		#else
-		set("hxcodec", "0");
-		#end
-		#if (hxvlc)
-		set("hxvlc", "1.0.0");
-		set("MP4Handler", hxvlc.flixel.FlxVideo);
-		set("MP4Sprite", hxvlc.flixel.FlxVideoSprite);
-		#else
-		set("hxvlc", "0");
-		#end
-		#end	
-		set("VideoSprite", IndependentVideoSprite); // Should use this in future !
-
+		set("ShaderFilter", openfl.filters.ShaderFilter);
 	}
 
 	private function setFNFVars() {

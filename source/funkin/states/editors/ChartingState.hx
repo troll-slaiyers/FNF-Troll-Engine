@@ -135,13 +135,35 @@ class ChartingState extends MusicBeatState
 	public var offset:Float = 0;
 	public var notetypeScripts:Map<String, FunkinHScript> = [];
 
-	var hudList:Array<String> = [
-		'Default'
-	];
+	public var hudSkin(default, set):String = 'default';
+	public var hudSkinScript:Null<FunkinHScript> = null;
+	public var hudSkinScripts:Map<String, FunkinHScript> = [];
+
+	public function getHudSkinScript(name:String):Null<FunkinHScript> {
+		if (name.length == 0 || hudSkinScripts.exists(name))
+			return hudSkinScripts.get(name);
+
+		var path = Paths.getHScriptPath('hudskins/$name');
+		if (path == null)
+			return null;
+		
+		var script:FunkinHScript = FunkinHScript.fromFile(path, name);
+		hudSkinScripts.set(name, script);
+		return script;
+	}
+		
+	public function set_hudSkin(value:String) {
+		//hudSkinScript?.call("onSkinUnload");
+		hudSkinScript = getHudSkinScript(value);
+		hudSkin = value;
+		//hudSkinScript?.call("onSkinLoad");
+		return hudSkin;
+	}
 
 	var noteTypeList:Array<String>;
 	var songNoteTypeList:Array<String> = [];
 	var eventStuff:Array<Array<String>>;
+	var hudList:Array<String>;
 
 	var UI_box:FlxUITabMenu;
 
@@ -631,6 +653,7 @@ class ChartingState extends MusicBeatState
 		FlxG.mouse.visible = true;
 		super.create();
 
+		loadSkinStuff();
 		loadEventStuff();
 		loadNoteStuff();
 		onChartLoaded();
@@ -714,13 +737,10 @@ class ChartingState extends MusicBeatState
 		addEventsUI();
 		addChartingUI();
 		addTracksUI();
-
-		reloadKeyAnimations(_song.keyCount);
-
-
+		
 		////
-		updateStrumline();
-		adjustCamPos();
+		hudSkin = _song.hudSkin;
+		updateKeyCount(_song.keyCount);
 		changeSection(curSec, false);		
 
 		//
@@ -731,37 +751,67 @@ class ChartingState extends MusicBeatState
 			waveformTrackDropDown.selectedId = "None";
 	}
 
-	function updateStrumline() {
-		strumLineNotes.clear();
+	function updateStrumline() {		
 		var fieldAmount:Int = 2;
-
-		strumLine.setGraphicSize(GRID_SIZE * (1 + _song.keyCount * fieldAmount), 4);
-		strumLine.updateHitbox();
-
 		var totalStrums:Int = _song.keyCount * fieldAmount;
 
-		for (i in 0...totalStrums) {
-			var note:StrumNote = strumLineNotes.members[i];
-			if (note != null) {
-				note.revive();
-				continue;
+		strumLine.setGraphicSize(GRID_SIZE * (1 + totalStrums), 4);
+		strumLine.updateHitbox();
+
+		inline function setupStrum(fieldColumn:Int, posColumn:Int) {
+			var strum:StrumNote = strumLineNotes.recycle();
+			if (strum != null) {
+				strum.column = fieldColumn;
+				strum.reloadNote();
+				strum.noteMod = _song.hudSkin;
+				strum.revive();
+			}else {
+				strum = new StrumNote(0, 0, fieldColumn, null, _song.hudSkin);
+				strumLineNotes.add(strum);
 			}
-			
-			note = new StrumNote(GRID_SIZE * (i+1), strumLine.y, i % _song.keyCount);
-			note.playAnim('static', true);
-			note.setGraphicSize(GRID_SIZE, GRID_SIZE);
-			note.updateHitbox();
-			note.scrollFactor.set(1, 1);
-			strumLineNotes.add(note);
+			strum.setPosition(GRID_SIZE * (1 + posColumn), strumLine.y);
+			strum.setGraphicSize(GRID_SIZE, GRID_SIZE);
+			strum.updateHitbox();
+			strum.ID = posColumn;
+			return strum;
 		}
 
-		for (i in totalStrums...strumLineNotes.length) {
-			var note:StrumNote = strumLineNotes.members[i];
-			if (note != null) {
-				note.kill();
-				continue;
-			} 
+		strumLineNotes.killMembers();
+		for (i in 0...totalStrums)
+			setupStrum(i % _song.keyCount, i);
+		
+		/*
+		var eventStrum = setupStrum(-1, -1);
+		if (eventStrum != null) {
+			eventStrum.animation.addByPrefix('static', 'arrowSQUARE', 24, false);
+			eventStrum.animation.addByPrefix('pressed', 'square press', 24, false);
+			eventStrum.animation.addByPrefix('confirm', 'square confirm', 24, false);
+			eventStrum.playAnim('static', true);
 		}
+		*/
+	}
+
+	function loadSkinStuff() {
+		hudList = ['default'];
+		#if MODS_ALLOWED
+		var skinsLoaded:Map<String, Bool> = new Map();
+		var directories:Array<String> = Paths.getFolders('hudskins');
+		for (i in 0...directories.length) {
+			var directory:String = directories[i];
+			if(FileSystem.exists(directory)) {
+				for (file in FileSystem.readDirectory(directory)) {
+					var path = haxe.io.Path.join([directory, file]);
+					if (!FileSystem.isDirectory(path) && Paths.isHScript(path)) {
+						var skinToCheck:String = file.substr(0, file.length - 8);
+						if(!skinsLoaded.exists(skinToCheck)) {
+							hudList.push(skinToCheck);
+							skinsLoaded.set(skinToCheck, true);
+						}
+					}
+				}
+			}
+		}
+		#end
 	}
 
 	function loadEventStuff() {
@@ -974,28 +1024,6 @@ class ChartingState extends MusicBeatState
 		blockPressWhileTypingOnStepper.push(stepperKeyCount);
 
 		////
-		var skins:Array<String> = ['default'];
-		#if MODS_ALLOWED
-		var skinsLoaded:Map<String, Bool> = new Map();
-		var directories:Array<String> = Paths.getFolders('hudskins');
-		for (i in 0...directories.length) {
-			var directory:String = directories[i];
-			if(FileSystem.exists(directory)) {
-				for (file in FileSystem.readDirectory(directory)) {
-					var path = haxe.io.Path.join([directory, file]);
-					if (!FileSystem.isDirectory(path) && Paths.isHScript(path)) {
-						var skinToCheck:String = file.substr(0, file.length - 8);
-						if(!skinsLoaded.exists(skinToCheck)) {
-							skins.push(skinToCheck);
-							skinsLoaded.set(skinToCheck, true);
-						}
-					}
-				}
-			}
-		}
-		#end
-
-		////
 		var characters:Array<Null<String>> = CharacterData.getAllCharacters();
 		characters.sort(CoolUtil.alphabeticalSort);
 		characters.insert(0, "null");
@@ -1051,24 +1079,20 @@ class ChartingState extends MusicBeatState
 
 		var skinDropdown = new CustomFlxUIDropDownMenu(
 			stageDropDown.x, stageDropDown.y + 40, 
-			FlxUIDropDownMenu.makeStrIdLabelArray(skins, true), 
+			FlxUIDropDownMenu.makeStrIdLabelArray(hudList, true), 
 			function(skin:String){
-				_song.hudSkin = skins[Std.parseInt(skin)];
+				hudSkin = _song.hudSkin = hudList[Std.parseInt(skin)];
 			}
 		);
 		skinDropdown.selectedLabel = _song.hudSkin;
 		blockPressWhileScrolling.push(skinDropdown);
 
-		var arrowSkin = _song.arrowSkin;
-		if (arrowSkin == null) arrowSkin = '';
-		
-		var splashSkin = _song.splashSkin;
-		if (splashSkin == null) splashSkin = '';
-
+		var arrowSkin = _song.arrowSkin ?? '';		
 		var noteSkinInputText = new FlxUIInputText(player2DropDown.x, player2DropDown.y + 40, 150, arrowSkin, 8);
 		noteSkinInputText.name = 'song_arrowSkin';
 		blockPressWhileTypingOn.push(noteSkinInputText);
 
+		var splashSkin = _song.splashSkin ?? '';
 		var noteSplashesInputText = new FlxUIInputText(noteSkinInputText.x, noteSkinInputText.y + 35, 150, splashSkin, 8);
 		noteSplashesInputText.name = 'song_noteSplashes';
 		blockPressWhileTypingOn.push(noteSplashesInputText);
@@ -2045,7 +2069,7 @@ class ChartingState extends MusicBeatState
 		}
 	}
 
-	function reloadKeyAnimations(count:Int) {
+	function updateKeyCount(count:Int) {
 		_song.keyCount = Math.ceil(Math.max(1, count));
 		NoteAnimations.refreshKeyAnimations(_song.keyCount);
 		NoteAnimations.remap4KArray(_song.keyCount, defaultNoteColours, noteColours);
@@ -2098,7 +2122,7 @@ class ChartingState extends MusicBeatState
 					updateNoteSteps();
 				
 				case 'song_keyCount':
-					reloadKeyAnimations(Std.int(nums.value));
+					updateKeyCount(Std.int(nums.value));
 				case 'song_speed':
 					_song.speed = nums.value;
 				
@@ -2138,10 +2162,10 @@ class ChartingState extends MusicBeatState
 					_song.song = sender.text;
 
 				case 'song_arrowSkin':
-					_song.arrowSkin = sender.text;
+					PlayState.arrowSkin = _song.arrowSkin = sender.text;
 
 				case 'song_noteSplashes':
-					_song.splashSkin = sender.text;
+					PlayState.splashSkin = _song.splashSkin = sender.text;
 
 				case 'event_value1':
 					if (curSelectedEvent != null) {
@@ -2499,29 +2523,24 @@ class ChartingState extends MusicBeatState
 			
 			if (note.strumTime <= Conductor.songPosition) {
 				if (inst.playing && !note.wasGoodHit) {
-					if (note.column > -1)
-					{
-						// This is a note.
-
-						if (!note.ignoreNote)
-						{					
-							var strum:StrumNote = strumLineNotes.members[note.realColumn];
-							if (strum != null) {
-								strum.playAnim('confirm', true, note);
-								strum.resetAnim = (note.sustainLength / 1000) + 0.15;
-							}
-
-							if (!note.hitsoundDisabled && (note.mustPress ? options.playSoundBf : options.playSoundDad) && playedSound[note.realColumn] != true) {
+					var strum:StrumNote = strumLineNotes.getFirst(strum -> (strum.exists && strum.ID == note.realColumn));
+					
+					if (note.column >= 0) {
+						if (!note.ignoreNote) {
+							var soundAllowed = !note.hitsoundDisabled && (note.mustPress ? options.playSoundBf : options.playSoundDad);
+							if (soundAllowed && playedSound[note.realColumn] != true) {
 								(options.panHitSounds ? (note.mustPress ? plrHitsound : oppHitsound) : hitsound).play(true);
 								playedSound[note.realColumn] = true;
 							}
-							
 						}
-					}else{
-						// This is an event.
-
+					}else {
 						if (options.playSoundEvents)
 							hitsound.play(true);
+					}
+
+					if (strum != null) {
+						strum.playAnim('confirm', true, note);
+						strum.resetAnim = (note.sustainLength / 1000) + 0.15;
 					}
 				}
 
@@ -2548,6 +2567,27 @@ class ChartingState extends MusicBeatState
 	}
 
 	function updateKeys(elapsed:Float) {
+		if (FlxG.keys.pressed.CONTROL) {
+			if (FlxG.keys.justPressed.Z) {
+				undo();
+			}
+			if (FlxG.keys.justPressed.Y) {
+				redo();
+			}
+			if (FlxG.keys.justPressed.S) {
+				saveLevel();
+			}
+			if (FlxG.keys.justPressed.Q) {
+				// is broken :(
+				useQuantNotes = !useQuantNotes;
+				updateGrid();
+			}
+			if (FlxG.keys.justPressed.O) {
+				openSongSelect();
+			}
+			return;
+		}
+
 		if (FlxG.keys.justPressed.M) {
 			new ChangeMustHitSectionAction(curSec, FlxG.keys.pressed.CONTROL);
 		}	
@@ -2557,30 +2597,6 @@ class ChartingState extends MusicBeatState
 				new ChangeSustainAction(curSelectedNote, Conductor.stepCrochet, false);
 			if (FlxG.keys.justPressed.Q)
 				new ChangeSustainAction(curSelectedNote, -Conductor.stepCrochet, false);
-		}
-
-		if (FlxG.keys.pressed.CONTROL) {
-			if (FlxG.keys.justPressed.Z) {
-				undo();
-				return;
-			}
-			if (FlxG.keys.justPressed.Y) {
-				redo();
-				return;
-			}
-			if (FlxG.keys.justPressed.S) {
-				saveLevel();
-				return;
-			}
-			if (FlxG.keys.justPressed.Q) {
-				useQuantNotes = !useQuantNotes;
-				updateGrid();
-				return;
-			}
-			if (FlxG.keys.justPressed.O) {
-				openSongSelect();
-				return;
-			}
 		}
 
 		if(FlxG.keys.justPressed.Z && curZoom > 0) {
@@ -3337,9 +3353,9 @@ class ChartingState extends MusicBeatState
 		}
 	}
 
-	function initNoteType(notetype:String){
-		if(notetype == '') return;
-		if(notetypeScripts.exists(notetype)) return;
+	function initNoteType(notetype:String) {
+		if (notetype.length == 0 || notetypeScripts.exists(notetype))
+			return;
 
 		var file:Null<String> = Paths.getHScriptPath('notetypes/$notetype');
 		if (file != null) {
@@ -3352,13 +3368,12 @@ class ChartingState extends MusicBeatState
 
 	function setupNoteData(i:NoteData, sectionNumber:Int):Note {
 		var daField:Int = Math.floor(i.column / _song.keyCount);
-		var note:Note = new Note(i.strumTime, i.column % _song.keyCount, null, daField, (i.sustainLength <= 0 ? TAP : HEAD), true);
+		var note:Note = new Note(i.strumTime, i.column % _song.keyCount, null, daField, (i.sustainLength <= 0 ? TAP : HEAD), true, hudSkin);
 		note.chartData = i;
 		note.realColumn = i.column;
 		note.mustPress = i.column < _song.keyCount;
 		note.sustainLength = i.sustainLength;
 		note.canQuant = useQuantNotes;
-		note.reloadNote();
 		initNoteType(i.noteType);
 		note.noteType = i.noteType;
 
@@ -3396,7 +3411,7 @@ class ChartingState extends MusicBeatState
     }
 
 	function setupEventData(i:PsychEventNote, sectionNumber:Int) {
-		var note:Note = new Note(i.strumTime, -1, null, -1, 0, true);
+		var note:Note = new Note(i.strumTime, -1, null, -1, 0, true, hudSkin);
 		note.realColumn -1;
 		note.chartData = i;
 		note.usesDefaultColours = false;
@@ -3712,6 +3727,20 @@ class ChartingState extends MusicBeatState
 		return _song.notes[section]?.sectionBeats;
 
 	override function destroy() {
+		for (script in notetypeScripts) {
+			if (script == null) continue;
+			script.call("onDestroy");
+			script.stop();
+		}
+		notetypeScripts.clear();
+		
+		for (script in hudSkinScripts) {
+			if (script == null) continue;
+			script.call("onDestroy");
+			script.stop();
+		}
+		hudSkinScripts.clear();
+		
 		if (_session != null) {
 			_session.curSec = curSec;
 			_session.songPosition = Conductor.songPosition;

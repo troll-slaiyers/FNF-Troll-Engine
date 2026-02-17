@@ -1,5 +1,6 @@
 package funkin.states;
 
+import hxvlc.flixel.FlxVideo;
 import funkin.objects.notes.NoteAnimations;
 import funkin.objects.cutscenes.Cutscene;
 #if VIDEOS_ALLOWED
@@ -1250,8 +1251,8 @@ class PlayState extends MusicBeatState
 
 	}
 
-	var curVideo:VideoHandler = null;
-	public function startVideo(name:String):VideoHandler
+	var curVideo:FlxVideo = null;
+	public function startVideo(name:String):FlxVideo
 	{
 		#if !VIDEOS_ALLOWED
 		inCutscene = true;
@@ -1260,19 +1261,16 @@ class PlayState extends MusicBeatState
 		startAndEnd();
 		return null;
 		#else
-
 		var filepath:String = Paths.video(name);
-		if (!Paths.exists(filepath))
-		{
+		if (!Paths.exists(filepath)) {
 			FlxG.log.warn('Couldnt find video file: ' + name);
 			startAndEnd();
 			return null;
 		}
-		var video:VideoHandler = curVideo = new VideoHandler();
-		#if (hxvlc)
+
+		var video:FlxVideo = curVideo = new FlxVideo();
 		video.load(filepath);
-		video.onEndReached.add(() ->
-		{
+		video.onEndReached.add(() -> {
 			video.dispose();
 			if (FlxG.game.contains(video))
 				FlxG.game.removeChild(video);
@@ -1281,20 +1279,6 @@ class PlayState extends MusicBeatState
 			startAndEnd();
 		});
 		video.play();
-		#elseif (hxCodec >= "3.0.0")
-		video.play(filepath);
-		video.onEndReached.add(()->{
-			video.dispose();
-
-			if (curVideo == video)
-				curVideo = null;
-			startAndEnd();
-		}, true);
-		#else
-		video.playVideo(filepath);
-		video.finishCallback = startAndEnd;
-		#end
-
 		return video;
 		#end
 	}

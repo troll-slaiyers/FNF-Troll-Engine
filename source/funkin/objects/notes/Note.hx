@@ -36,6 +36,7 @@ enum abstract SustainPart(Int) from Int to Int {
 
 private typedef NoteScriptState = {
 	var notetypeScripts:Map<String, FunkinHScript>;
+	function getHudSkinScript(name:String):Null<FunkinHScript>;
 }
 
 class Note extends NoteObject {
@@ -281,6 +282,10 @@ class Note extends NoteObject {
 	}
 
 	////
+	var instance(get, never):NoteScriptState;
+	inline function get_instance():NoteScriptState
+		return inEditor ? ChartingState.instance : PlayState.instance;
+
 	private function set_texture(value:String):String {
 		if (tex != value) reloadNote(value, texSuffix);
 		return tex;
@@ -309,8 +314,7 @@ class Note extends NoteObject {
 		updateColours();
 
 		////
-		if (!inEditor && PlayState.instance != null)
-			genScript = PlayState.instance.getHudSkinScript(value);
+		genScript = instance?.getHudSkinScript(value);
 
 		////
 		var loaded:Bool;
@@ -355,8 +359,6 @@ class Note extends NoteObject {
 
 		if (noteType != value) {
 			noteType = value;
-			
-			var instance:NoteScriptState = inEditor ? ChartingState.instance : PlayState.instance;
 			noteScript = instance?.notetypeScripts.get(value);
 			
 			if (noteScript != null)
@@ -428,7 +430,7 @@ class Note extends NoteObject {
 		super(NOTE);
 
 		this.strumTime = this.visualTime = strumTime;
-		this.column = column;
+		this.column = this.realColumn = column;
 		this.prevNote = prevNote;
 		this.fieldIndex = fieldIndex;
 		this.holdType = susPart;
@@ -461,7 +463,7 @@ class Note extends NoteObject {
 	public var tex:String;
 	public var texSuffix:String = '';
 
-	public function reloadNote(texture:String = '', suffix:String = '', folder:String = '', hInd:Int = 0, vInd:Int = 0) {
+	public function reloadNote(texture:String = '', suffix:String = '', folder:String = '') {
 		tex = texture;
 		texSuffix = suffix;
 

@@ -1,25 +1,14 @@
 package funkin.states.base;
 
-#if !VIDEOS_ALLOWED typedef VideoHandler = Dynamic;
-#elseif (hxCodec >= "3.0.0") typedef VideoHandler = hxcodec.flixel.FlxVideo;
-#elseif (hxCodec >= "2.6.1") typedef VideoHandler = hxcodec.VideoHandler;
-#elseif (hxCodec == "2.6.0") typedef VideoHandler = VideoHandler;
-#elseif (hxCodec) typedef VideoHandler = vlc.MP4Handler; 
-#elseif (hxvlc) typedef VideoHandler = hxvlc.flixel.FlxVideo; typedef Location = hxvlc.util.Location;
-#else typedef VideoHandler = Dynamic;
-#end
-
-#if !hxvlc
+#if (VIDEOS_ALLOWED && hxvlc)
+import hxvlc.flixel.FlxVideo;
+import hxvlc.util.Location;
+#else
 typedef Location = String;
 #end
 
-#if !VIDEOS_ALLOWED
-class VideoPlayerState extends BaseVideoPlayerState
-{
-
-}
-#elseif hxvlc
-class VideoPlayerState extends BaseVideoPlayerState
+#if (VIDEOS_ALLOWED && hxvlc)
+class VideoPlayerState extends BaseVideoPlayerState<FlxVideo>
 {
 	override function createVideo() {
 		if (!Paths.exists(videoPath)){
@@ -28,7 +17,7 @@ class VideoPlayerState extends BaseVideoPlayerState
 		}else{
 			trace('Loading video: $videoPath');
 
-			video = new VideoHandler();
+			video = new FlxVideo();
 			video.onEndReached.add(endVideo);
 			FlxG.addChildBelowMouse(video);
 			
@@ -52,38 +41,11 @@ class VideoPlayerState extends BaseVideoPlayerState
 		FlxG.removeChild(video);
 	}
 }
-
-#elseif(hxCodec >= "3.0.0")
-class VideoPlayerState extends BaseVideoPlayerState
-{
-	override function createVideo() {
-		video = new VideoHandler();
-		video.onEndReached.add(endVideo);
-		video.play(videoPath);		
-	}
-	override function pauseVideo() {
-		video.pause();
-	}
-	override function destroyVideo() {
-		FlxG.game.removeChild(video);
-	}
-}
-
-#elseif(hxCodec)
-class VideoPlayerState extends BaseVideoPlayerState
-{
-	override function createVideo() {
-		video = new VideoHandler();
-		video.finishCallback = endVideo;
-		video.playVideo(videoPath);
-	}
-	override function pauseVideo() {
-		video.pause();
-	}
-}
+#else
+class VideoPlayerState extends BaseVideoPlayerState<Dynamic> {}
 #end
 
-class BaseVideoPlayerState extends MusicBeatState
+class BaseVideoPlayerState<VideoHandler> extends MusicBeatState
 {  
 	var videoPath:Location;
 	var onComplete:Void -> Void;
