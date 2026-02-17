@@ -13,35 +13,37 @@ typedef DialogueLine = {
 	var character:String;
 	var character_anim:String;
 	var text_speed:Float;
-	var text_size:Int;//custom font size
+	var text_size:Int; // custom font size
 	var line_sound:Array<String>; 
 	var box_animation:String;
 }
 
-class DialogueCutscene extends Cutscene{
-	var dialogueText:FlxTypeText;
-	public var curLine:Int = 0;
-	var box:DialogueBox;
-	var dialogueFile:DialogueFile;
+class DialogueCutscene extends Cutscene
+{
 	/**
 	 * How long it should take until the dialogue first starts
 	 * Set to 0 for instant start time.
 	*/
 	public var introDelay:Float = 2;
-	/**
-	 * Whether the player is able to progress the dialogue.
-	*/
+	
+	/** Whether the player is able to progress the dialogue. **/
 	public var canProgressDialogue:Bool = false;
-	/**
-	 * Array that will be filled with all the dialogue characters.
-	 */
-	var characters:Array<DialogueCharacter> = [];
-	/**
-	 * Variable that allows you to keep all characters on screen if you want too.
-	 */
+	
+	/** Variable that allows you to keep all characters on screen if you want too. **/
 	public var keepAllCharactersOnScreen:Bool = false;
-	var finishedLine:Bool = false;
+
+	/** Array that will be filled with all the dialogue characters. **/
+	var characters:Array<DialogueCharacter> = [];
+
+	public var curLine:Int = 0;
+	
+	var dialogueFile:DialogueFile;
+	var dialogueText:FlxTypeText;
+	var box:DialogueBox;
 	var curCharacter:DialogueCharacter;
+
+	var finishedLine:Bool = false;
+	
 	public function new(dialoguePath:String)
 	{
 		super();
@@ -64,26 +66,23 @@ class DialogueCutscene extends Cutscene{
 		dialogueText.antialiasing = box.antialiasing;
 		dialogueText.borderSize = box.shadowWidth;
 		add(dialogueText);
-		dialogueText.completeCallback = function()
-		{
-			finishLine();
-		}
+		dialogueText.completeCallback = finishLine;
 
-		new FlxTimer().start(introDelay, function(tmr:FlxTimer)
-		{
+		new FlxTimer().start(introDelay, function(tmr:FlxTimer) {
 			canProgressDialogue = true;
 			box.visible = true;
 			createNewLine();
 		});
 
 		this.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-	} 
+	}
+
 	public function finishLine()
 	{
 		finishedLine = true;
 		box.script?.call("onFinishLineDialogue");
-
 	}
+
 	function loadCharacters()		
 	{
 		var characterMap:Map<String, Bool> = new Map<String, Bool>();
@@ -104,8 +103,8 @@ class DialogueCutscene extends Cutscene{
 			add(char);
 			characters.push(char);
 		}
-
 	}
+
 	override function update(elapsed:Float)
 	{
 	   	if (FlxG.keys.justPressed.SPACE && canProgressDialogue)
@@ -134,6 +133,7 @@ class DialogueCutscene extends Cutscene{
 		box?.script?.call("onSkipLine");
 		dialogueText.skip();
 	}
+
 	/**
 	 * Creates a new line of dialogue.
 	 */
@@ -175,6 +175,7 @@ class DialogueCutscene extends Cutscene{
 		dialogueText.resetText(curDialogueLine.text);
 		dialogueText.start(curDialogueLine.text_speed);
 	}
+
 	/**
 	 * Function that's only called when dialogue is ending.
 	 * @param wasSkipped 
@@ -188,6 +189,7 @@ class DialogueCutscene extends Cutscene{
 			destroy();
 		});
 	}
+
 	/**
 	 * Returns Text Size for the current line.
 	 * This is done so we can use custom text sizes for each line.
@@ -201,6 +203,7 @@ class DialogueCutscene extends Cutscene{
 		curLine = 0;
 		createNewLine();
 	}
+
 	/**
 	 * Function thats called to retrieve text sound.
 	 * Leaving all fields empty, will not play a sound.
@@ -218,6 +221,7 @@ class DialogueCutscene extends Cutscene{
 		if(dialogueTalkSound != null)
 		dialogueText.sounds = [for (dialogueSound in dialogueTalkSound) FlxG.sound.load(Paths.sound(dialogueSound), 0.6)];
 	}
+
 	/**
 	 * Play dialogue box animation
 	 * @param _anim 
