@@ -185,13 +185,11 @@ class FunkinHScript extends FunkinScript
 		set("script", this);
 		set("global", Globals.variables);
 		set("FunkinHScript", FunkinHScript);
-		
+
 		setDefaultVars();
 		setFlixelVars();
 		setVideoVars();
 		setFNFVars();
-		
-		set("ShaderFilter", openfl.filters.ShaderFilter);
 
 		for (variable => arg in defaultVars)
 			set(variable, arg);
@@ -278,6 +276,8 @@ class FunkinHScript extends FunkinScript
 		set("FlxAxes", Wrappers.FlxAxes);
 		set("FlxColor", Wrappers.SowyColor);
 		set("FlxPoint", Wrappers.FlxPoint);
+
+		set("ShaderFilter", openfl.filters.ShaderFilter);
 	}
 
 	private function setVideoVars() {
