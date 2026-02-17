@@ -1,8 +1,7 @@
 package funkin.objects.cutscenes;
-import flixel.util.FlxColor;
-import lime.utils.Assets;
-import haxe.Json;
+
 import funkin.scripts.*;
+
 typedef BoxData = {
 	var graphic:String;
 	var antialiasing:Bool;
@@ -24,7 +23,7 @@ typedef TextData = {
 	var width:Int;
 	var color:String;
 	var shadow_color:String;
-    var shadow_width:Float;
+	var shadow_width:Float;
 }
 
 typedef AnimsArray = {
@@ -51,9 +50,9 @@ class DialogueBox extends FlxSprite
 	public var textOffsets:Array<Int>= [170, 450];
 	public var textWidth:Int = 700;
 	
-    public function new(_boxtype:String)
-    {
-        super();
+	public function new(_boxtype:String)
+	{
+		super();
 		var path:String = ('assets/boxes/$_boxtype.json');
 		jsonFile = Paths.getJson(path);
 		if(jsonFile != null)
@@ -63,17 +62,17 @@ class DialogueBox extends FlxSprite
 		}
 			
 		else trace('Couldnt load $_boxtype dialogue box!');
-    }
+	}
 
 	function loadJSON()
 	{	
-	    frames = Paths.getSparrowAtlas(jsonFile.graphic);
+		frames = Paths.getSparrowAtlas(jsonFile.graphic);
 
 		for (anim in jsonFile.animations) 
 			animation.addByPrefix(anim.animName, anim.animPrefix, anim.fps, anim.looped);
 
 		x = jsonFile.offsets[0];
-        y = jsonFile.offsets[1];
+		y = jsonFile.offsets[1];
 		scale.set(jsonFile.scale,jsonFile.scale);
 
 		//this can probably be fixed, i dont think we need all ts
@@ -88,9 +87,9 @@ class DialogueBox extends FlxSprite
 		dialogueTalkSound = jsonFile.dialogue_talk_sfx;
 		dialoguePressedSound = jsonFile.dialogue_pressed_sfx;
 
-	    scrollFactor.set();
+		scrollFactor.set();
 
-	    updateHitbox();
+		updateHitbox();
 
 		startScript();
 	}

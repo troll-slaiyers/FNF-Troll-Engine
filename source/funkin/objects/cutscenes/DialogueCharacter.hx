@@ -1,12 +1,11 @@
 package funkin.objects.cutscenes;
-#if USING_FLXANIMATE
-import animate.FlxAnimate;
-import animate.FlxAnimateFrames;
-import animate.FlxAnimateController;
-#end
-import flixel.FlxSprite;
+
 import funkin.data.CharacterData;
 import flixel.graphics.frames.FlxAtlasFrames;
+
+#if USING_FLXANIMATE
+import animate.FlxAnimate;
+#end
 
 typedef DialogueCharacterFile = {
 	var graphic:String;
@@ -22,8 +21,8 @@ typedef DialogueCharacterFile = {
 typedef DialogueAnimArray = {
 	var name:String;
 	var fps:Int;
-    var prefix:String;
-    var looped:Bool;
+	var prefix:String;
+	var looped:Bool;
 }
 #if USING_FLXANIMATE
 class DialogueCharacter extends FlxAnimate
@@ -31,21 +30,21 @@ class DialogueCharacter extends FlxAnimate
 class DialogueCharacter extends FlxSprite
 #end
 {
-    /**
-     * JSON file to be used.
-     */
-    var jsonFile:DialogueCharacterFile;
-    /**
-     *  Current character thats loaded.
+	/**
+	 * JSON file to be used.
+	 */
+	var jsonFile:DialogueCharacterFile;
+	/**
+	 *  Current character thats loaded.
 	 *  Defaults to bf-pixel
 	 */
-    public var curChar:String = 'bf-pixel';
+	public var curChar:String = 'bf-pixel';
 	public var talkSound:Array<String> = null;
 	public function new( _character:String)
-    {
-        super();
+	{
+		super();
 		
-        final path:String = ('assets/boxes/characters/$_character.json');
+		final path:String = ('assets/boxes/characters/$_character.json');
 
 		jsonFile = Paths.getJson(path);
 
@@ -56,7 +55,7 @@ class DialogueCharacter extends FlxSprite
 
 		} else trace('Couldnt load $_character');
 		 
-    }
+	}
 
 	private function loadJSON()
 	{
@@ -90,13 +89,13 @@ class DialogueCharacter extends FlxSprite
 
 
 		}
-        x = jsonFile.offsets[0];
-        y = jsonFile.offsets[1];
+		x = jsonFile.offsets[0];
+		y = jsonFile.offsets[1];
 
-        antialiasing = jsonFile.antialiasing;
-        scale.set(jsonFile.scale, jsonFile.scale);
+		antialiasing = jsonFile.antialiasing;
+		scale.set(jsonFile.scale, jsonFile.scale);
 		talkSound  = jsonFile.talk_sound;
-        for (curAnim in jsonFile.animations)
+		for (curAnim in jsonFile.animations)
 		{
 			#if USING_FLXANIMATE
 			if(isAnimateAtlas)
