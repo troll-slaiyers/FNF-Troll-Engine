@@ -53,15 +53,13 @@ class DialogueBox extends FlxSprite
 	public function new(_boxtype:String)
 	{
 		super();
-		var path:String = ('assets/boxes/$_boxtype.json');
-		jsonFile = Paths.getJson(path);
-		if(jsonFile != null)
-		{
+		jsonFile = Paths.json('boxes/$_boxtype.json');
+
+		if (jsonFile != null) {
 			currentBoxStyle = _boxtype;
 			loadJSON();
-		}
-			
-		else trace('Couldnt load $_boxtype dialogue box!');
+		}else
+			trace('Couldnt load $_boxtype dialogue box!');
 	}
 
 	function loadJSON()
