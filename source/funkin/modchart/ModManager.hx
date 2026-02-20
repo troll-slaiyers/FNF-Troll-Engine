@@ -85,7 +85,7 @@ class ModManager {
 	
 	public function registerDefaultModifiers()
 	{
-		var quickRegs:Array<Any> = [
+		var quickRegs:Array<Class<Modifier>> = [
 			ReverseModifier,
 			SwapModifier,
 			DrunkModifier,
@@ -458,20 +458,24 @@ class ModManager {
 			}
 		}
 
+		inline function sortActiveMods(){
+			active_mods.sort((a, b) -> Std.int(get(a).getOrder() - get(b).getOrder()));
+		}
+
 		// remove all inactive mods (we do it after pushing new ones so that we dont end up checking mods we KNOW arent executing)
 		for (mod_name in discarded_mods){
 			//trace("discarded " + mod_name + " for " + player);
 			active_mods.remove(mod_name);
+			sortActiveMods();
 		}
 		
 		for (mod in activated_mods){
 			if(!active_mods.contains(mod)){ // prob a redundant check but better safe than sorry
 				active_mods.push(mod);
+				sortActiveMods();
 				//trace("activated " + mod + " for " + player);
 			}
 		}
-		
-		active_mods.sort((a, b) -> Std.int(get(a).getOrder() - get(b).getOrder()));
 	}
 
 	function runNodes()
