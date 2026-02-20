@@ -179,12 +179,10 @@ class FunkinHScript extends FunkinScript
 		set("script", this);
 		set("global", Globals.variables);
 		set("FunkinHScript", FunkinHScript);
-		
+
 		setDefaultVars();
 		setFlixelVars();
 		setFNFVars();
-		
-		set("ShaderFilter", openfl.filters.ShaderFilter);
 
 		for (variable => arg in defaultVars)
 			set(variable, arg);
