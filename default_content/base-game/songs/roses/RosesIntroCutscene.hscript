@@ -1,9 +1,8 @@
 import funkin.objects.cutscenes.DialogueCutscene;
-import flixel.sound.FlxSound;
 import flixel.FlxG;
-function onCreate() {
-	
-	if (!PlayState.isStoryMode && PlayState.seenCutscene) {
+
+function onCreate() {	
+	if (!PlayState.isStoryMode || PlayState.seenCutscene) {
 		script.stop();
 		return;
 	}
