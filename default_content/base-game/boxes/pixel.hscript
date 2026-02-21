@@ -1,0 +1,36 @@
+var bg:FlxSprite;
+var alphaIn:FlxTimer;
+function onCreate()
+{    	
+	game.camFollowPos.x = 650;
+	game.camFollowPos.y =  500;
+	game.camFollow.x = game.camFollowPos.x;
+	game.camFollow.y = game.camFollowPos.y;
+	bg = CoolUtil.blankSprite(FlxG.width, FlxG.height, 0xFFB3DFd8);
+	bg.camera = game.camOther;
+	bg.alpha = 0;
+	game.add(bg);
+	
+	alphaIn = new FlxTimer().start(0.83, function(tmr:FlxTimer)
+	{
+		bg.alpha += (1 / 5) * 0.7;
+		if (bg.alpha > 0.7)
+		{
+			bg.alpha = 0.7;
+		}
+	}, 5);
+}
+
+function onDialogueEnded() {
+	if(alphaIn!= null)alphaIn.cancel();
+	new FlxTimer().start(0.2, function(tmr:FlxTimer)
+	{
+		bg.alpha -= 1 / 5 * 0.7;
+	}, 5);
+}
+
+
+function onNewLine()
+{
+	this.animation.play('pressed');
+}

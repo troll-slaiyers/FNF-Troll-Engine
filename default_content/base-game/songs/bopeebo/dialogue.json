@@ -1,0 +1,38 @@
+{
+	"dialogue": [
+		{
+			"sound": "",
+			"textSpeed": 0.05,
+			"character": "dad",
+			"box_animation": "normal",
+			"characterAnim": "normal",
+			"text": "HEY!"
+		},
+		{
+			"sound": "",
+			"textSpeed": 0.05,
+			"character": "dad",
+			"box_animation": "normal",
+			"characterAnim": "normal",
+			"text": "You think you can just sing with my daughter like that?"
+		},
+		{
+			"sound": "",
+			"character": 0.05,
+			"portrait": "dad",
+			"box_animation": "normal",
+			"characterAnim": "normal",
+			"text": "If you want to date her..."
+		},
+		{
+			"sound": "",
+			"character": 0.05,
+			"portrait": "dad",
+			"box_animation": "normal",
+			"characterAnim": "normal",
+			"text": "You're going to have to go through ME first!"
+
+		}
+	],
+	"box_style": "funkin"
+}

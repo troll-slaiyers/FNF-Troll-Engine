@@ -1,0 +1,13 @@
+import funkin.objects.cutscenes.DialogueCutscene;
+import flixel.FlxG;
+
+function onCreate() {	
+	if (!PlayState.isStoryMode || PlayState.seenCutscene) {
+		script.stop();
+		return;
+	}
+	
+	FlxG.sound.play(Paths.sound('ANGRY'));
+	FlxG.sound.play(Paths.sound('ANGRY_TEXT_BOX'));
+	game.startCutscenes.push(new DialogueCutscene('songs/roses/dialogue.json'));
+}

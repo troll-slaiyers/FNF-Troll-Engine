@@ -1,0 +1,31 @@
+{
+    "graphic": "dialogue_box_basic",
+	"antialiasing": true,
+	"scale": 1.0,
+	"offsets":[50, 360],
+	"dialogue_talk_sfx": ["pixelText"],
+	"dialogue_pressed_sfx": "clickText",
+	"animations": [
+		{
+			"offsets": [0, 0],
+			"looped": true,
+			"fps": 24,
+			"animName": "normal",
+			"animPrefix": "speech bubble normal"
+		},
+		{
+			"offsets": [0, 0],
+			"looped": true,
+			"fps": 24,
+			"animName": "normalOpen",
+			"animPrefix": "Speech Bubble Normal Open"
+		}
+	],
+	"text": {
+		"font":"Pixel Arial 11 Bold",
+		"size": 35,
+		"offsets": [180,480],
+		"color": "#000000",
+		"width": 900
+	}
+}

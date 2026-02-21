@@ -1,0 +1,23 @@
+{
+	"dialogue": [
+		{
+			"text_speed": 0.06,
+			"character": "senpai",
+			"character_anim": "normal",
+			"text": "Ah, a new fair maiden has come in search of true love!"
+		},
+		{
+			"text_speed": 0.06,
+			"character": "senpai",
+			"character_anim": "talk",
+			"text": "A serenade between gentlemen shall decide where her beautiful heart shall reside."
+		},
+		{
+			"text_speed": 0.2,
+			"character": "bf-pixel",
+			"character_anim": "normal",
+			"text": "Beep bo bop"
+		}
+	],
+	"box_style": "pixel"
+}

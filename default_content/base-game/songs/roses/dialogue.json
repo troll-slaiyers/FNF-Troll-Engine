@@ -1,0 +1,24 @@
+{
+	"dialogue": [
+		{
+			"text_speed": 0.04,
+			"character": "senpai-angry",
+			"character_anim": "normal",
+			"text": "Not bad for an ugly worm."
+		},
+		{
+			"text_speed": 0.04,
+			"character": "senpai-angry",
+			"character_anim": "talk",
+			"text": "But this time I'll rip your nuts off right after your girlfriend finishes gargling mine."
+		},
+		{
+			"text_speed": 0.08,
+			"text_size": 55,
+			"character": "bf-pixel",
+			"character_anim": "normal",
+			"text": "Bop beep be be skdoo bep"
+		}
+	],
+	"box_style": "pixel"
+}

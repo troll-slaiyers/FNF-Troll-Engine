@@ -1,0 +1,27 @@
+{
+    "graphic": "pixelUI/dialogueBox-evil",
+	"antialiasing": false,
+	"scale": 5.4,
+	"offsets":[-30, 20],
+	"dialogue_talk_sfx": ["pixelText"],
+	"dialogue_pressed_sfx": "clickText",
+	"animations": [
+		{
+			"offsets": [
+				-5,
+				0
+			],
+			"looped": false,
+			"fps": 24,
+			"animName": "pressed",
+			"animPrefix": "Spirit Textbox spawn instance"
+		}
+	],
+	"text": {
+		"font":"Pixel Arial 11 Bold",
+		"size": 35,
+		"offsets": [180,470],
+		"color": "#FFFFFFF",
+		"width": 900
+	}
+}

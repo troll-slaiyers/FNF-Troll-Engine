@@ -1,0 +1,64 @@
+import funkin.objects.cutscenes.DialogueCutscene;
+var senpaiEvil:FlxSprite;
+var redBG:FlxSprite;
+function onCreateCutscene()
+{
+	game.camFollowPos.x = 450;
+	game.camFollowPos.y =  600;
+	game.camFollow.x = game.camFollowPos.x;
+	game.camFollow.y = game.camFollowPos.y;
+
+    redBG = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFff1b31);
+	redBG.scrollFactor.set();
+	redBG.antialiasing = false;
+	game.add(redBG);
+
+    senpaiEvil = new FlxSprite();
+	senpaiEvil.frames = Paths.getSparrowAtlas('weeb/senpaiCrazy');
+	senpaiEvil.animation.addByPrefix('idle', 'Senpai Pre Explosion', 24, false);
+	senpaiEvil.setGraphicSize(Std.int(senpaiEvil.width * 6));
+	senpaiEvil.scrollFactor.set();
+	senpaiEvil.updateHitbox();
+	senpaiEvil.screenCenter();
+	senpaiEvil.antialiasing = false;
+	senpaiEvil.x += 300;
+	senpaiEvil.alpha = 0.0001; //fuck it
+    game.add(senpaiEvil);
+	timeline.easeProperties(10, 45, senpaiEvil, {alpha: 1}, FlxEase.linear);
+
+ 	whiteFlash = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFFFFFFF);
+	whiteFlash.scrollFactor.set();
+	whiteFlash.antialiasing = false;
+	whiteFlash.alpha = 0;
+	game.add(whiteFlash);
+
+	game.camHUD.visible = false;
+	
+	timeline.playAnimation(40, senpaiEvil, "idle");
+	this.sound(40, "Senpai_Dies", false);
+
+	timeline.easeProperties(110, 150, whiteFlash, {alpha: 1}, FlxEase.linear);
+	timeline.once(200, ()-> {
+		senpaiEvil.visible = false;
+		redBG.visible = false;
+	
+	});
+	timeline.easeProperties(200, 240, whiteFlash, {alpha: 0}, FlxEase.linear);
+
+	timeline.finish(240);
+}
+function onCutsceneEnd(wasSkipped: Bool){
+	
+	
+	senpaiEvil.visible = false;
+	redBG.visible = false;
+	whiteFlash.visible = false;
+	
+	game.camHUD.visible = true;
+	game.startCutscenes.push(new DialogueCutscene('songs/thorns/dialogue.json'));
+	
+	FlxG.sound.playMusic(Paths.music('LunchboxScary'), 0);
+	FlxG.sound.music.fadeIn(1, 0, 0.8);
+
+}
+

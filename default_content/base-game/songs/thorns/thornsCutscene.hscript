@@ -1,0 +1,9 @@
+import funkin.objects.cutscenes.TimelineCutscene;
+
+function onCreate(){
+	if(PlayState.isStoryMode && !PlayState.seenCutscene)
+		game.startCutscenes.push(new TimelineCutscene('thorns'));
+}
+function onCountdownStarted() {
+	FlxG.sound.music.fadeOut(1.5, 0, (_) -> FlxG.sound.music.stop());
+}

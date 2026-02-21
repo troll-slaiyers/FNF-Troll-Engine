@@ -1,0 +1,14 @@
+{
+    "graphic": "pixelUI/portrait-boyfriend",
+    "scale": 5.4,
+    "offsets": [760, 242],
+    "antialiasing": false,
+    "animations": [
+    {
+      "name": "normal",
+      "prefix": "portraitEnter",
+      "frameRate": 12,
+      "looped": false
+    }
+]
+}
