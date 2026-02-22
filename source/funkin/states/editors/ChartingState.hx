@@ -41,7 +41,7 @@ import lime.media.AudioBuffer;
 import lime.ui.FileDialog;
 import openfl.geom.Rectangle;
 import flixel.util.FlxSort;
-import funkin.data.ChartingTipText;
+import funkin.objects.ChartingTipText;
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
