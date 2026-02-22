@@ -13,6 +13,7 @@ import funkin.scripts.FunkinHScript;
 import funkin.data.ChartData;
 import funkin.data.BaseSong;
 import funkin.data.Song;
+import flixel.group.FlxGroup;
 
 import funkin.objects.notes.*;
 import funkin.objects.ui.CustomFlxUI;
@@ -21,7 +22,6 @@ import math.CoolMath;
 import math.CoolMath.floorDecimal;
 
 import flixel.*;
-import flixel.group.FlxGroup;
 import flixel.util.FlxGradient;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.ui.*;
@@ -41,7 +41,7 @@ import lime.media.AudioBuffer;
 import lime.ui.FileDialog;
 import openfl.geom.Rectangle;
 import flixel.util.FlxSort;
-
+import funkin.data.ChartingTipText;
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
@@ -124,7 +124,6 @@ class ChartingState extends MusicBeatState
 
 	public var options:ChartingStateOptions = getSavedOptions();
 
-	var helpTextGrp:FlxTypedGroup<FlxText>;
 
 	var oppHitsound:FlxSound;
 	var plrHitsound:FlxSound;
@@ -261,7 +260,7 @@ class ChartingState extends MusicBeatState
 	public static var quantization:Int = 16;
 	public var quantizationMult:Float = (quantization / 16);
 	public static var curQuant = 3;
-
+	var tipObject:ChartingTipText;
 	var quantTxt:FlxText;
 
 	public var quantNames:Array<String> = [
@@ -538,40 +537,16 @@ class ChartingState extends MusicBeatState
 		focusArrow.flipY = true;
 		add(focusArrow);
 
-		////
-		var text =
-		"W/S or Mouse Wheel - Change strum time
-		\nA/D - Go to the previous/next section
-		\nUp/Down - Change strum Time with snapping
-		\nLeft/Right - Change Snap
-		\nHold Shift to move 4x faster
-		\nHold Control and click on an arrow to select it
-		\nZ/X - Zoom in/out
-		\n
-		\nEnter - Play your chart
-		\nQ/E - Decrease/Increase Note Sustain Length
-		\nSpace - Stop/Resume song
-		\n
-		\nF1 - Hide/Show help
-		";
-		
-		helpTextGrp = new FlxTypedGroup<FlxText>();
-		helpTextGrp.exists = !options.hideHelp;
-		add(helpTextGrp);
+		var tipTxt:FlxText = new FlxText(12, 300,0, "F1 - Hide/Show help", 20);
+		tipTxt.setFormat(null, 18, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		tipTxt.borderSize = 2;
+		tipTxt.scrollFactor.set(0, 0);
+		add(tipTxt);
+	
+		tipObject = new ChartingTipText(0, 0);
+		tipObject.exists = false;
+		add(tipObject);
 
-		var tipTextY = FlxG.height/2 + GRID_SIZE;
-		var tipTextArray:Array<String> = text.split('\n');
-		for (i in 0...tipTextArray.length) {
-			var tipText:FlxText = new FlxText(12, tipTextY + i * 12, 0, tipTextArray[i], 14);
-			tipText.setFormat(null, 14, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
-			tipText.antialiasing = false;
-			tipText.borderSize = 1.25;
-			tipText.scrollFactor.set();
-			tipText.antialiasing = ClientPrefs.globalAntialiasing;
-			helpTextGrp.add(tipText);
-		}
-
-		////
 		prevRenderedSustains = new FlxTypedGroup<FlxSprite>();
 		prevRenderedNotes = new FlxTypedGroup<Note>();
 
@@ -2735,11 +2710,11 @@ class ChartingState extends MusicBeatState
 			var nextSection:Int = (curSec + shiftThing) % _song.notes.length;
 			changeSection(nextSection);
 		}
-
+		
 		if (FlxG.keys.justPressed.F1) {
-			helpTextGrp.exists = !helpTextGrp.exists;
-			options.hideHelp = !helpTextGrp.exists;
+			tipObject.exists = !tipObject.exists; 
 		}
+		
 
 		if (FlxG.keys.justPressed.ENTER) {
 			autosaveSong();
