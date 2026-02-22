@@ -193,12 +193,14 @@ class CharacterEditorState extends MusicBeatState {
 		ghostCamPointer.color = FlxColor.BLUE;
 		ghostCamPointer.alpha = 0;
 		ghostCamPointer.visible = false;
+		ghostCamPointer.antialiasing = false;
 		add(ghostCamPointer);
 
 		cameraFollowPointer = new FlxSprite().loadGraphic(pointer);
 		cameraFollowPointer.setGraphicSize(40, 40);
 		cameraFollowPointer.updateHitbox();
 		cameraFollowPointer.color = FlxColor.RED;
+		cameraFollowPointer.antialiasing = false;
 		add(cameraFollowPointer);
 
 		originMarker = new FlxSprite(0, 0, Paths.image("stageeditor/originMarker"));
