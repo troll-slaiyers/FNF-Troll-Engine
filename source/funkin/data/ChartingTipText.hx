@@ -18,7 +18,7 @@ class ChartingTipText extends FlxGroup
 		\nEnter - Play your chart
 		\nQ/E - Decrease/Increase Note Sustain Length
 		\nSpace - Stop/Resume song
-        \nM - Change Section Camera focus
+        \nM - Change Camera Section focus
         \nR - Go to start of section
         \nTAB - Change UI Section
         \n
@@ -41,7 +41,7 @@ class ChartingTipText extends FlxGroup
 
 		var tipTextArray:Array<String> = text.split('\n');
 		for (i in 0...tipTextArray.length) {
-			var tipText:FlxText = new FlxText(0, y + (i * 13) + 40, bg.width, tipTextArray[i], 16);
+			var tipText:FlxText = new FlxText(0, y + (i * 13) + 45, bg.width, tipTextArray[i], 16);
 			tipText.setFormat(null, 14, FlxColor.WHITE, CENTER);
 			tipText.antialiasing = false;
 			tipText.borderSize = 1.25;

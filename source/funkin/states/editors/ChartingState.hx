@@ -13,7 +13,6 @@ import funkin.scripts.FunkinHScript;
 import funkin.data.ChartData;
 import funkin.data.BaseSong;
 import funkin.data.Song;
-import flixel.group.FlxGroup;
 
 import funkin.objects.notes.*;
 import funkin.objects.ui.CustomFlxUI;
@@ -22,6 +21,7 @@ import math.CoolMath;
 import math.CoolMath.floorDecimal;
 
 import flixel.*;
+import flixel.group.FlxGroup;
 import flixel.util.FlxGradient;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.ui.*;
