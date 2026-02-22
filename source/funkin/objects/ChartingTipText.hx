@@ -1,4 +1,4 @@
-package funkin.data;
+package funkin.objects;
 import flixel.text.FlxText;
 import flixel.group.FlxGroup;
 import flixel.util.FlxColor;
