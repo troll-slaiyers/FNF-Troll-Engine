@@ -1,7 +1,7 @@
 package funkin.states.options;
 
-import funkin.objects.notes.NoteAnimations;
-import funkin.objects.notes.Note;
+import funkin.game.notes.NoteAnimations;
+import funkin.game.notes.Note;
 import funkin.states.options.BindsBullshit.KeyboardNavHelper;
 import funkin.states.options.BindsBullshit.BindButton;
 import funkin.CoolUtil.overlapsMouse as overlaps;

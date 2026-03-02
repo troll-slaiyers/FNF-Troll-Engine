@@ -1,0 +1,68 @@
+package funkin.game.playfields;
+
+import funkin.game.notes.StrumNote;
+import funkin.game.notes.NoteObject.ObjectType;
+import haxe.exceptions.NotImplementedException;
+import flixel.graphics.FlxGraphic;
+import flixel.util.FlxColor;
+import flixel.system.FlxAssets.FlxShader;
+import funkin.objects.shaders.NoteColorSwap;
+import haxe.ds.Vector as FastVector;
+import openfl.Vector;
+@:structInit
+class RenderObject {
+	public var graphic:FlxGraphic;
+	public var shader:FlxShader;
+	public var column:Int;
+	public var alphas:Array<Float>;
+	public var glows:Array<Float>;
+	public var uvData:Vector<Float>;
+	public var vertices:Vector<Float>;
+	public var indices:Vector<Int>;
+	public var zIndex:Float;
+	public var objectType:ObjectType;
+	public var colorSwap:NoteColorSwap;
+	public var antialiasing:Bool;
+}
+
+class FieldBase extends FlxObject {
+	public var color:FlxColor = FlxColor.WHITE;
+	public var glowColor:FlxColor = FlxColor.WHITE;
+
+	public function preDraw()throw new NotImplementedException();
+
+	public var forcePreDraw:Bool = false;
+	
+	public var tryForceHoldsBehind:Bool = true; // Field tries to push holds behind receptors
+
+	public var isProxy:Bool = false; // dumb and hardcoded but oh well
+	
+	/**
+	 * Z-Index Modifier
+	 * Used to push the field behind others or pull it infront of others.
+	 */
+	public var zIndexMod:Float = 0;
+
+	/**
+	 * Used by preDraw to store RenderObjects to be drawn
+	 */
+	public var drawQueue:Array<RenderObject> = [];
+
+	public var alpha:Float = 1;
+	/*
+	 * The PlayField used to determine the notes to render
+	 * Required!
+	 */
+	public var field:PlayField;
+
+	/**
+	 * All of the strums in the playfield attached to this notefield
+	 */
+	@:isVar
+	public var members(get, never):Array<StrumNote> = [];
+
+	function get_members()
+		return field.strumNotes;
+
+	public function getNotefield() {return null;}
+}

@@ -10,13 +10,13 @@ import funkin.states.base.Prompt;
 import funkin.data.StageData;
 import funkin.data.CharacterData;
 import funkin.objects.AttachedFlxText;
-import funkin.objects.hud.HealthIcon;
+import funkin.game.hud.HealthIcon;
 import funkin.scripts.FunkinHScript;
 import funkin.data.ChartData;
 import funkin.data.BaseSong;
 import funkin.data.Song;
 
-import funkin.objects.notes.*;
+import funkin.game.notes.*;
 import funkin.objects.ui.CustomFlxUI;
 
 import math.CoolMath;
