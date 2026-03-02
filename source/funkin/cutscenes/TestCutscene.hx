@@ -1,4 +1,4 @@
-package funkin.objects.cutscenes;
+package funkin.cutscenes;
 
 import flixel.tweens.FlxEase;
 

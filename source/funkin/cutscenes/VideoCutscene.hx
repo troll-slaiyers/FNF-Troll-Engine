@@ -1,4 +1,4 @@
-package funkin.objects.cutscenes;
+package funkin.cutscenes;
 
 // idc to do hxcodec etc lmao!
 #if hxvlc

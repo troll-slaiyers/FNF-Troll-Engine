@@ -1,6 +1,6 @@
-package funkin.objects.cutscenes;
+package funkin.cutscenes;
 
-import funkin.objects.cutscenes.Timeline.SoundAction;
+import funkin.cutscenes.components.Timeline;
 
 
 // Could do a TimelineCutscene/ScriptedTimelineCutscene

@@ -1,4 +1,4 @@
-package funkin.objects.cutscenes;
+package funkin.cutscenes;
 
 import funkin.scripts.FunkinHScript;
 import funkin.scripts.ScriptedClassShit.InstanceInterp;
