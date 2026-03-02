@@ -1,4 +1,4 @@
-package funkin.objects.cutscenes;
+package funkin.cutscenes;
 
 import flixel.system.FlxAssets.FlxSoundAsset;
 import flixel.group.FlxGroup.FlxTypedGroup;

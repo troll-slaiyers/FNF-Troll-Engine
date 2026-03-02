@@ -1,7 +1,7 @@
 package funkin.states;
 
 import funkin.states.PlayState;
-import funkin.objects.cutscenes.Cutscene;
+import funkin.cutscenes.Cutscene;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;

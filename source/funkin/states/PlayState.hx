@@ -1,12 +1,12 @@
 package funkin.states;
 
 import funkin.objects.notes.NoteAnimations;
-import funkin.objects.cutscenes.Cutscene;
+import funkin.cutscenes.Cutscene;
 #if VIDEOS_ALLOWED
 import hxvlc.flixel.FlxVideo;
-import funkin.objects.cutscenes.VideoCutscene;
+import funkin.cutscenes.VideoCutscene;
 #end
-import funkin.objects.cutscenes.DialogueCutscene;
+import funkin.cutscenes.DialogueCutscene;
 import funkin.objects.playfields.PlayField.NoteCallback;
 import funkin.data.Cache;
 import funkin.data.Level;

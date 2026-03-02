@@ -1,13 +1,9 @@
-package funkin.objects.cutscenes;
+package funkin.cutscenes.components;
 
 import flixel.util.typeLimit.OneOfTwo;
 import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.tweens.FlxEase;
-
-#if USING_FLXANIMATE
-import animate.FlxAnimate;
-import animate.FlxAnimateFrames;
-#end
+import funkin.objects.Character;
 
 class TimelineAction {
 	public var parent:Timeline;

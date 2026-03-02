@@ -1,5 +1,7 @@
-package funkin.objects.cutscenes;
+package funkin.cutscenes;
 
+import funkin.cutscenes.components.DialogueBox;
+import funkin.cutscenes.components.DialogueCharacter;
 import flixel.addons.text.FlxTypeText;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
