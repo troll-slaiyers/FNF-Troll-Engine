@@ -4,7 +4,7 @@ import funkin.objects.ui.ColorPicker;
 import flixel.group.FlxGroup;
 import haxe.io.Path;
 import funkin.util.FileUtil;
-import funkin.objects.hud.HealthIcon;
+import funkin.game.hud.HealthIcon;
 import funkin.objects.Character;
 import funkin.data.CharacterData;
 import funkin.objects.ui.CustomFlxUI;

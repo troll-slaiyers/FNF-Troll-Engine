@@ -847,8 +847,8 @@ class ClientPrefs {
 	];
 
 	public static function loadDefaultKeys() {
-		final minKeyCount = funkin.objects.notes.Note.minKeyCount;
-		final maxKeyCount = funkin.objects.notes.Note.maxKeyCount;
+		final minKeyCount = funkin.game.notes.Note.minKeyCount;
+		final maxKeyCount = funkin.game.notes.Note.maxKeyCount;
 
 		for (i in minKeyCount - 1...maxKeyCount) {
 			for (j in 0...i + 1) {

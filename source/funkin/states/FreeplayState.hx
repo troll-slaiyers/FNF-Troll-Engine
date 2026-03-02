@@ -3,7 +3,7 @@ package funkin.states;
 import math.CoolMath;
 import funkin.util.InputFormatter;
 import flixel.util.FlxColor;
-import funkin.objects.hud.HealthIcon;
+import funkin.game.hud.HealthIcon;
 
 import sys.FileSystem;
 import funkin.data.Song;
