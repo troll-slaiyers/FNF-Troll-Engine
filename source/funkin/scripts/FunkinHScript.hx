@@ -42,46 +42,12 @@ class FunkinHScript extends FunkinScript
 		
 	}
 
-	inline public static function parseString(script:String, ?name:String = "Script"):Null<Expr>
+	public static function parseString(script:String, ?name:String = "Script"):Null<Expr>
 	{
 		parser.line = 1;
-		return parser.parseString(script, name);
-	}
 
-	inline public static function parseFile(file:String, ?name:String):Null<Expr>
-		return parseString(Paths.getContent(file), (name == null ? file : name));
-
-	public static function blankScript(?name, ?additionalVars, ?interp:Interp)
-	{
-		return new FunkinHScript(null, name, additionalVars, false, interp);
-	}
-
-	/**
-		Creates a `FunkinHScript` instance with code from a string.  
-
-		@param script The script code.
-		@param name An optional name to give the script.
-		@param additionalVars A map of variables to define on this script before running its code.
-		@param doCreateCall Whether to call `onCreate` on this script.
-		@returns A `FunkinHScript` instance.
-	**/
-	public static function _fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):FunkinHScript
-		return new FunkinHScript(parseString(script, name), name, additionalVars, doCreateCall, interp);
-
-	/**
-		Creates a `FunkinHScript` instance with code from a string.  
-		If a parsing error occurs, a message box is displayed.
-
-		@param script The script code.
-		@param name An optional name to give the script.
-		@param additionalVars A map of variables to define on this script before running its code.
-		@param doCreateCall Whether to call `onCreate` on this script.
-		@returns A `FunkinHScript` instance.
-	**/
-	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):Null<FunkinHScript>
-	{
 		try {
-			return _fromString(script, name, additionalVars, doCreateCall, interp);
+			return parser.parseString(script, name);
 		}
 		catch (e:haxe.Exception) {
 			var errMsg = 'Error parsing hscript! ' #if hscriptPos + '$name:' + parser.line + ', ' #end + e.message;
@@ -95,25 +61,13 @@ class FunkinHScript extends FunkinScript
 		return null;
 	}
 
-	/**
-		Creates a `FunkinHScript` instance with code from a file.  
-		If a parsing error occurs, a message box is displayed.  
-
-		@param file The *full* path containing the script code.
-		@param name An optional name to give the script.
-		@param additionalVars A map of variables to define on this script before running its code.
-		@param doCreateCall Whether to call `onCreate` on this script.
-		@returns A `FunkinHScript` instance.
-	**/
-	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):Null<FunkinHScript>
+	public static function parseFile(file:String, ?name:String):Null<Expr>
 	{
-		name ??= file;
-
 		try {
 			var fileContent = Paths.getContent(file);
 			if (fileContent != null) {
 				print('Loading haxe script from: $file');
-				return _fromString(fileContent, name, additionalVars, doCreateCall, interp);
+				return parseString(fileContent, name ?? file);
 			}else {
 				print('HScript file "$file" not found!');
 			}
@@ -127,7 +81,7 @@ class FunkinHScript extends FunkinScript
 
 			#if (cpp && windows)
 			if (Windows.msgBox(msg, title, RETRYCANCEL | ERROR) == RETRY)
-				return fromFile(file, name, additionalVars, doCreateCall, interp);
+				return parseFile(file, name);
 			#else
 			Application.current.window.alert(msg, title);
 			#end
@@ -135,6 +89,46 @@ class FunkinHScript extends FunkinScript
 		}
 
 		return null;
+	}
+
+	public static inline function blankScript(?name, ?additionalVars, ?interp:Interp)
+	{
+		return new FunkinHScript(null, name, additionalVars, false, interp);
+	}
+
+	public static inline function fromExpr(parsed:Expr, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):Null<FunkinHScript>
+	{
+		return new FunkinHScript(parsed, name, additionalVars, doCreateCall, interp);
+	}
+
+	/**
+		Creates a `FunkinHScript` instance with code from a string.  
+		If a parsing error occurs, a message box is displayed.
+
+		@param script The script code.
+		@param name An optional name to give the script.
+		@param additionalVars A map of variables to define on this script before running its code.
+		@param doCreateCall Whether to call `onCreate` on this script.
+		@returns A `FunkinHScript` instance.
+	**/
+	public static inline function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):Null<FunkinHScript>
+	{
+		return fromExpr(parseString(script, name), name, additionalVars, doCreateCall, interp);
+	}
+
+	/**
+		Creates a `FunkinHScript` instance with code from a file.  
+		If a parsing error occurs, a message box is displayed.  
+
+		@param file The *full* path containing the script code.
+		@param name An optional name to give the script.
+		@param additionalVars A map of variables to define on this script before running its code.
+		@param doCreateCall Whether to call `onCreate` on this script.
+		@returns A `FunkinHScript` instance.
+	**/
+	public static inline function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):Null<FunkinHScript>
+	{
+		return fromExpr(parseFile(file, name), name, additionalVars, doCreateCall, interp);
 	}
 
 	public static function fromName(key:String, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):Null<FunkinHScript>
