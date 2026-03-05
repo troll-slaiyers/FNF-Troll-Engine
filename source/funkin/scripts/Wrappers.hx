@@ -3,7 +3,7 @@ package funkin.scripts;
 import flixel.util.FlxColor;
 import flixel.math.FlxMath;
 
-@:build(funkin.macros.ScriptingMacro.createEnumWrapper(funkin.data.JudgmentManager.Judgment))
+@:build(funkin.macros.ScriptingMacro.createEnumWrapper(funkin.game.JudgmentManager.Judgment))
 class Judgment{}
 
 @:build(funkin.macros.ScriptingMacro.createEnumWrapper(flixel.text.FlxText.FlxTextAlign))

@@ -1,8 +1,8 @@
 package funkin.game.notes;
 
-import funkin.data.JudgmentManager.Judgment;
-import funkin.data.JudgmentManager.JudgmentData;
-import funkin.data.JudgmentManager.HitResult;
+import funkin.game.JudgmentManager.Judgment;
+import funkin.game.JudgmentManager.JudgmentData;
+import funkin.game.JudgmentManager.HitResult;
 import funkin.scripts.*;
 import funkin.states.PlayState;
 import funkin.states.editors.ChartingState;

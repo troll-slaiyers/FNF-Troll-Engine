@@ -6,7 +6,7 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import lime.app.Event;
 import funkin.game.modchart.ModManager;
-import funkin.data.JudgmentManager;
+import funkin.game.JudgmentManager;
 import funkin.game.notes.*;
 import funkin.states.PlayState;
 import funkin.states.PlayState.instance as game;

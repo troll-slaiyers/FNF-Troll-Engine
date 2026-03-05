@@ -5,7 +5,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.tweens.*;
 import funkin.game.hud.JudgementCounter;
-import funkin.data.JudgmentManager.JudgmentData;
+import funkin.game.JudgmentManager.JudgmentData;
 import funkin.game.playfields.*;
 
 using funkin.util.FlxTextFormatData;

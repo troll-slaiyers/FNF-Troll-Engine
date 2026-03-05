@@ -1,4 +1,4 @@
-package funkin.data;
+package funkin.game;
 
 import hscript.Expr;
 import funkin.scripts.ScriptedClassShit;

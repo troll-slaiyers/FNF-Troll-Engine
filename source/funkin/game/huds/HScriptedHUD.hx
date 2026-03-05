@@ -2,7 +2,7 @@ package funkin.game.huds;
 
 import flixel.util.FlxColor;
 import funkin.game.playfields.PlayField;
-import funkin.data.JudgmentManager.JudgmentData;
+import funkin.game.JudgmentManager.JudgmentData;
 import funkin.scripts.FunkinHScript;
 
 class HScriptedHUD extends BaseHUD {
