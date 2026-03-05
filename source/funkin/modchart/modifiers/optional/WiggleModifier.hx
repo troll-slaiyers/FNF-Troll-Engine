@@ -17,7 +17,7 @@ class WiggleModifier extends NoteModifier {
 			if (note.isSustainNote)
 				val += getSubmodValue("wiggleHolds", player);
 		}
-		pos.x += FlxMath.fastSin((visualDiff / FlxG.height) * getSubmodValue("wiggleSpeed", player) ) * (val * 250);
+		pos.x += Math.sin((visualDiff / FlxG.height) * getSubmodValue("wiggleSpeed", player) ) * (val * 250);
 		return pos;
 	}
 

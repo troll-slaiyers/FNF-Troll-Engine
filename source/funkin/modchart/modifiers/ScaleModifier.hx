@@ -34,8 +34,8 @@ class ScaleModifier extends NoteModifier {
 
 		var angle = 0;
 		var rad = angle * Math.PI / 180;
-		var sin = FlxMath.fastSin(rad);
-		var cos = FlxMath.fastCos(rad);
+		var sin = Math.sin(rad);
+		var cos = Math.cos(rad);
 
 		scale.x *= (sin * squishY) + (cos * squishX);
 		scale.y *= (cos * squishY) + (sin * squishX);

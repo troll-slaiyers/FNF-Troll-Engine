@@ -14,7 +14,7 @@ class DrunkModifier extends NoteModifier {
 
 	inline function applyDrunk(axis:String, player:Int, time:Float, visualDiff:Float, data:Float, ?mathFunc:Float->Float){
 		if (mathFunc == null)
-			mathFunc = FlxMath.fastCos;
+			mathFunc = Math.cos;
 		var perc = axis == '' ? getValue(player) : getSubmodValue('drunk${axis}', player);
 		var speed = getSubmodValue('drunk${axis}Speed', player);
 		var period = getSubmodValue('drunk${axis}Period', player);
@@ -30,7 +30,7 @@ class DrunkModifier extends NoteModifier {
 	inline function applyTipsy(axis:String, player:Int, time:Float, visualDiff:Float, data:Float, ?mathFunc:Float->Float)
 	{
 		if(mathFunc == null)
-			mathFunc = FlxMath.fastCos;
+			mathFunc = Math.cos;
 
 		var perc = getSubmodValue('tipsy${axis}', player);
 		var speed = getSubmodValue('tipsy${axis}Speed', player);
@@ -44,7 +44,7 @@ class DrunkModifier extends NoteModifier {
 
 	inline function applyBumpy(axis:String, player:Int, time:Float, visualDiff:Float, data:Float, ?mathFunc:Float->Float){
 		if (mathFunc == null)
-			mathFunc = FlxMath.fastSin;
+			mathFunc = Math.sin;
 		var perc = getSubmodValue('bumpy${axis}', player);
 		var period = getSubmodValue('bumpy${axis}Period', player);
 		var offset = getSubmodValue('bumpy${axis}Offset', player);
@@ -89,31 +89,31 @@ class DrunkModifier extends NoteModifier {
 		// tangent
 
 		pos.x += 
-			applyDrunk("Tan", player, time, visualDiff, data, CoolMath.fastTan) + 
-			applyTipsy("TanX", player, time, visualDiff, data, CoolMath.fastTan)
-			+ applyBumpy("TanX", player, time, visualDiff, data, CoolMath.fastTan);
+			applyDrunk("Tan", player, time, visualDiff, data, Math.tan) + 
+			applyTipsy("TanX", player, time, visualDiff, data, Math.tan)
+			+ applyBumpy("TanX", player, time, visualDiff, data, Math.tan);
 		pos.y += 
-			applyDrunk("TanY", player, time, visualDiff, data, CoolMath.fastTan) 
-			+ applyTipsy("Tan", player, time, visualDiff, data, CoolMath.fastTan)
-			+ applyBumpy("TanY", player, time, visualDiff, data, CoolMath.fastTan);
+			applyDrunk("TanY", player, time, visualDiff, data, Math.tan) 
+			+ applyTipsy("Tan", player, time, visualDiff, data, Math.tan)
+			+ applyBumpy("TanY", player, time, visualDiff, data, Math.tan);
 		pos.z += 
-			applyDrunk("TanZ", player, time, visualDiff, data, CoolMath.fastTan) 
-			+ applyTipsy("TanZ", player, time, visualDiff, data, CoolMath.fastTan)
-			+ applyBumpy("Tan", player, time, visualDiff, data, CoolMath.fastTan);
+			applyDrunk("TanZ", player, time, visualDiff, data, Math.tan) 
+			+ applyTipsy("TanZ", player, time, visualDiff, data, Math.tan)
+			+ applyBumpy("Tan", player, time, visualDiff, data, Math.tan);
 
 		// tangent column
 		pos.x += 
-			applyDrunk('Tan$data', player, time, visualDiff, data, CoolMath.fastTan) 
-			+ applyTipsy('TanX$data', player, time, visualDiff, data, CoolMath.fastTan)
-			+ applyBumpy('TanX$data', player, time, visualDiff, data, CoolMath.fastTan);
+			applyDrunk('Tan$data', player, time, visualDiff, data, Math.tan) 
+			+ applyTipsy('TanX$data', player, time, visualDiff, data, Math.tan)
+			+ applyBumpy('TanX$data', player, time, visualDiff, data, Math.tan);
 		pos.y += 
-			applyDrunk('TanY$data', player, time, visualDiff, data, CoolMath.fastTan) 
-			+ applyTipsy('Tan$data', player, time, visualDiff, data, CoolMath.fastTan)
-			+ applyBumpy('TanY$data', player, time, visualDiff, data, CoolMath.fastTan);
+			applyDrunk('TanY$data', player, time, visualDiff, data, Math.tan) 
+			+ applyTipsy('Tan$data', player, time, visualDiff, data, Math.tan)
+			+ applyBumpy('TanY$data', player, time, visualDiff, data, Math.tan);
 		pos.z += 
-			applyDrunk('TanZ$data', player, time, visualDiff, data, CoolMath.fastTan) 
-			+ applyTipsy('TanZ$data', player, time, visualDiff, data, CoolMath.fastTan)
-			+ applyBumpy('Tan$data', player, time, visualDiff, data, CoolMath.fastTan);
+			applyDrunk('TanZ$data', player, time, visualDiff, data, Math.tan) 
+			+ applyTipsy('TanZ$data', player, time, visualDiff, data, Math.tan)
+			+ applyBumpy('Tan$data', player, time, visualDiff, data, Math.tan);
 			
 		return pos;
 	}

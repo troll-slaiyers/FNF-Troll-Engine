@@ -63,7 +63,7 @@ class AlphaModifier extends NoteModifier
 			alpha -= getSubmodValue('stealth$column', player);
 
 		if(getSubmodValue("blink",player)!=0){
-			var f = CoolMath.quantizeAlpha(FlxMath.fastSin(time*10),0.3333);
+			var f = CoolMath.quantizeAlpha(Math.sin(time*10),0.3333);
 			alpha += CoolMath.scale(f,0,1,-1,0);
 		}
 

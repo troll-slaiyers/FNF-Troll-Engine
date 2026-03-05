@@ -2444,7 +2444,7 @@ class ChartingState extends MusicBeatState
 		}
 
 		colorSine += elapsed;
-		var sineColor:Float = 0.7 + 0.3 * FlxMath.fastSin(Math.PI * colorSine);
+		var sineColor:Float = 0.7 + 0.3 * Math.sin(Math.PI * colorSine);
 		var sineColor:Int = Math.round(sineColor * 255);
 		var sineColor = FlxColor.fromRGB(sineColor, sineColor, sineColor, 255);
 

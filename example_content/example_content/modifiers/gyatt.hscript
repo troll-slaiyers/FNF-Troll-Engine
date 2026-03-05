@@ -20,7 +20,7 @@ function isRenderMod()
 	
 function onCreatePost(){
 	vPadding = modMgr.vPadding;
-	sin = FlxMath.fastSin;
+	sin = Math.sin;
 	bound = FlxMath.bound;
 }
 
