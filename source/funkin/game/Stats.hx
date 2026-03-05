@@ -1,10 +1,10 @@
-package funkin.data;
+package funkin.game;
 
-import funkin.data.JudgmentManager.HitResult;
-import funkin.data.JudgmentManager.PBot;
-import funkin.data.JudgmentManager.Wife3;
-import funkin.data.JudgmentManager.JudgmentData;
-import funkin.data.Highscore.ScoreRecord;
+import funkin.game.JudgmentManager.HitResult;
+import funkin.game.JudgmentManager.PBot;
+import funkin.game.JudgmentManager.Wife3;
+import funkin.game.JudgmentManager.JudgmentData;
+import funkin.data.Highscore;
 import lime.app.Event;
 
 enum abstract AccuracySystem(String) from String to String

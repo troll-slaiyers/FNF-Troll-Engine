@@ -1,4 +1,4 @@
-package funkin.data;
+package funkin.game;
 
 import funkin.game.notes.Note;
 

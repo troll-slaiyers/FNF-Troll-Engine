@@ -8,7 +8,7 @@ import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
 
 import funkin.game.playfields.PlayField;
-import funkin.data.JudgmentManager.JudgmentData;
+import funkin.game.JudgmentManager.JudgmentData;
 
 typedef PsychHUD = TraditionalHUD;
 
