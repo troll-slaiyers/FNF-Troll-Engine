@@ -1,80 +1,12 @@
-package funkin.game;
+package funkin.game.events;
 
-import hscript.Expr;
-import funkin.scripts.ScriptedClassShit;
-import funkin.scripts.FunkinHScript;
+import funkin.scripts.Globals;
+import funkin.objects.Character;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
-import funkin.objects.Character;
 import flixel.util.FlxColor;
-import funkin.scripts.Globals;
-import funkin.data.ChartData.PsychEvent as EventData;
-import funkin.states.PlayState.instance as game;
-import funkin.states.PlayState;
 
 using StringTools;
-
-/*
-	Song event classes to be used by PlayState only!!!
-	TODO: get rid of that psych value1 value2 bs!!!
-	Might make a json for the description, event data structure definition, maybe support to change chart editor icon? lmao 
-	Will be handled by a diff class tho (SongEventData), don't want to pozz this class, it should be for PlayState shit only!
-*/
-class SongEvent {
-	public final id:String;
-
-	private function new(id:String)
-		this.id = id;
-
-	public function onLoad():Void {}
-
-	/**
-		@returns Whether this event data should be pushed into the events list or not.
-	**/
-	public function shouldPush(data:EventData):Bool return true;
-
-	/**
-		@returns Offset time in milliseconds, how much earlier should this event be triggered.
-	**/
-	public function getOffset(data:EventData):Float return 0.0;
-
-	/** 
-		Called for every event data with this `SongEvent`'s `id`.  
-		@param data Event data
-	**/
-	public function onPush(data:EventData):Void {}
-
-	public function onTrigger(data:EventData, ?time:Float):Void {}
-
-	public function update(elapsed:Float):Void {}
-
-	public function destroy():Void {}
-}
-
-class ScriptedSongEvent extends SongEvent implements IScriptedClass {
-	final script:FunkinHScript;
-
-	private function new(id:String, expr:Expr) {
-		super(id);
-		this.script = FunkinHScript.fromExpr(expr, id, null, false, new InstanceInterp(this));
-	}
-
-	public function callOnScript(func:String, ?args:Array<Dynamic>):Dynamic
-		return script.executeFunc(func, args);
-	
-	public function existsOnScript(func:String):Bool
-		return script.exists(func);
-
-	public static function fromName(name:String) {
-		var path = Paths.getHScriptPath('events/$name');
-		if (path == null) return null;
-
-		var expr = FunkinHScript.parseFile(path);
-		if (expr == null) return null;
-
-		return new ScriptedSongEvent(name, expr);
-	}
-}
 
 class DefaultSongEvent extends SongEvent {
 	override function onPush(data:EventData) 
@@ -310,39 +242,5 @@ class DefaultSongEvent extends SongEvent {
 					trace('Set Property event error: $value1 | $value2');
 				}
 		}
-	}
-}
-
-class SongEventManager {
-	private final eventMap:Map<String, SongEvent> = [];
-
-	public function new() {}
-
-	public function get(id:String):Null<SongEvent> {
-		if (exists(id))
-			return eventMap[id];
-
-		var event:SongEvent;
-		event = ScriptedSongEvent.fromName(id);
-		event ??= new DefaultSongEvent(id);
-
-		if (event != null)
-			eventMap[id] = event;
-			
-		return event;
-	}
-
-	public function exists(id:String):Bool
-		return eventMap.exists(id);
-
-	public function update(elapsed:Float) {
-		for (event in eventMap)
-			event.update(elapsed);
-	}
-
-	public function destroy() {
-		for (event in eventMap)
-			event.destroy();
-		eventMap.clear();
 	}
 }

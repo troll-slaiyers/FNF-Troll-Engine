@@ -494,7 +494,7 @@ class PlayState extends MusicBeatState
 	public var modchartSounds:Map<String, FlxSound> = new Map();
 
 	public var notetypeScripts:Map<String, FunkinHScript> = []; // custom notetypes for scriptVer '1'
-	public var eventManager = new funkin.data.SongEvent.SongEventManager();
+	public var eventManager = new funkin.game.events.SongEventManager();
 
 	public var hudSkin(default, set):String;
 	public var hudSkinScript:FunkinHScript; // this is the HUD skin used for countdown, judgements, etc
