@@ -335,16 +335,42 @@ class Paths
 	}
 	static public function getJson(path:String):Null<Dynamic>
 	{
-		var ret:Null<Dynamic> = null;
-		try{
-			var raw = Paths.getContent(path);
+		var parsed:Null<Dynamic> = null;
+		var raw = Paths.getContent(path);
+
+		try {
 			if (raw != null)
-				ret = haxe.Json.parse(raw);
-		}catch(e){
-			haxe.Log.trace('$path: $e', null);
+				parsed = Json.parse(raw);
+		}
+		catch(e:haxe.Exception) {
+			var e = e.message;
+			
+			/* LIKE SI TE VALE BERGA */
+			inline function includeLinePosition() {
+				var matchStr = 'at position ';
+				var matchIdx = e.lastIndexOf(matchStr);
+				if (matchIdx == -1) return;
+
+				var position:String = e.substring(matchIdx + matchStr.length, e.length);
+				var position:Null<Int> = Std.parseInt(position);
+				//if (position == null) return;
+				
+				var line:Int = 1;
+				for (i in 0...position)
+					if (raw.fastCodeAt(i) == '\n'.code)
+						line++;
+				
+				if (line > 1)
+					e += ' (line $line)';
+
+				return;
+			}
+			includeLinePosition();
+
+			print('$path: $e');
 		}
 
-		return ret;
+		return parsed;
 	}
 	inline static public function getSparrowAtlas(key:String, ?library:String):FlxAtlasFrames
 	{
@@ -544,17 +570,8 @@ class Paths
 	/** Return the contents of a file, parsed as a JSON. **/
 	static public function json(key:String):Null<Dynamic>
 	{
-		var rawJSON:Null<String> = text(key);
-		if (rawJSON == null) 
-			return null;
-		
-		try{
-			return Json.parse(rawJSON);
-		}catch(e){
-			haxe.Log.trace('$key: $e', null);
-		}
-		
-		return null;
+		var path:Null<String> = getPath(key);
+		return (path == null) ? null : getJson(path);
 	}
 
 	public static inline function getFolderPath(folder:String = ""):String

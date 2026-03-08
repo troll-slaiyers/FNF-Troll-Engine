@@ -9,11 +9,11 @@ function onLoad()
 	stageMap.set(game.stage.curStage, game.stage);
 }
 
-function onTrigger(value1, value2)
+function onTrigger(data:EventData)
 {
-	var stage = stageMap.get(value1);
+	var stage = stageMap.get(data.value1);
 	if (stage==null) {
-		trace("Error: Could not get stage "+value1);
+		trace("Error: Could not get stage "+data.value1);
 		return;
 	}
 	
@@ -24,7 +24,7 @@ function onTrigger(value1, value2)
 	game.remove(game.stage);
 	game.remove(game.stage.foreground);
 	
-	if (value2 == "true")
+	if (data.value2 == "true")
 	{
 		game.stage.destroy();
 		game.stage.foreground.destroy();
@@ -57,7 +57,7 @@ function onPush(event)
 	stageMap.set(stage.curStage, stage);
 }
 
-function onDestroy()
+function destroy()
 {
 	for (stage in stageMap){
 		stage.foreground.destroy();

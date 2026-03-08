@@ -12,18 +12,32 @@ using haxe.macro.TypeTools;
 using haxe.macro.ExprTools;
 using haxe.macro.Tools;
 
+enum List<T> {
+	Whitelist(list:Array<T>);
+	Blacklist(list:Array<T>);
+}
+
 class ScriptingMacro 
 {
+	/**
+	 * Function name wrapper prefix for functions that are defined on the script super object
+	 * For example 'state._super_create()' will be accessible via super.create() on the script.
+	 */
+	public static final SUPER_WRAPPER_PREFIX = '__super__'; 
+
 	//// https://code.haxe.org/category/macros/enum-abstract-values.html
 	macro public static function createEnumWrapper(typePath:Expr):Array<Field>
 	{
-		var type = Context.getType(typePath.toString());
 		var fields:Array<Field> = Context.getBuildFields();
+		
+		#if !display
+		if (Sys.args().indexOf("--no-output") != -1) return fields; // code completion
 
+		var type = Context.getType(typePath.toString());
 		switch (type.follow()) {
 			case TAbstract(_.get() => ab, _) if (ab.meta.has(":enum")):
 				for (field in ab.impl.get().statics.get()) {
-					var fieldName = field.name;
+					var fieldName:String = field.name;
 
 					if (fields.findByName(fieldName)==null && field.meta.has(":enum") && field.meta.has(":impl")) {
 						fields.push({
@@ -39,6 +53,7 @@ class ScriptingMacro
 				// The given type is not an abstract, or doesn't have @:enum metadata, show a nice error message.
 				throw new Error(type.toString() + " should be @:enum abstract", typePath.pos);
 		}
+		#end
 		
 		return fields;		
 	}
@@ -57,11 +72,6 @@ class ScriptingMacro
 		#if true
 		*/
 
-		/**
-		 * Function name wrapper prefix for functions that are defined on the script super object
-		 * For example 'state._super_create()' will be accessible via super.create() on the script.
-		 */
-		final SUPER_WRAPPER_PREFIX = '_super_'; 
 		/**
 		 * for the extending functions that are passed to the script on each function call. 
 		 * Ex: 'stateupdate()'
@@ -627,5 +637,189 @@ class ScriptingMacro
 
 		return fields;
 
+	}
+
+	public static macro function setupScriptedClass(?list:List<String>):Array<Field> {
+		////
+		var fields:Array<Field> = Context.getBuildFields();
+		var macroCallPos = Context.currentPos();
+		var localClass = Context.getLocalClass();
+
+		var cl:ClassType = localClass.get();
+		var classFullName:String = localClass.toString();
+
+		////
+		var superClass:ClassType = cl.superClass?.t.get();
+		if (superClass == null)
+			Context.fatalError('$classFullName doesn\'t extend a class!', macroCallPos);
+
+		#if !display
+		if (Sys.args().indexOf("--no-output") != -1) return fields; // code completion
+
+		////
+		function isFieldListed(name:String):Bool {
+			return switch(list) {
+				case Whitelist(l): l.contains(name);
+				case Blacklist(l): !l.contains(name);
+				default: true;
+			}
+		}
+
+		function lazyBitch(type:Type):Type
+			return switch (type) {
+				case TLazy(f): lazyBitch(f());
+				default: type;
+			}
+
+		function defToExpr(e:ExprDef):Expr
+			return {pos: macroCallPos, expr: e};
+
+		function typedExprDefToExpr(ted:TypedExprDef):Expr {
+			switch(ted) {
+				case null: return null;
+				case TConst(c):
+					return switch(c) {
+						case TInt(i): macro $v{i};
+						case TFloat(s): macro $v{Std.parseFloat(s)};
+						case TString(s): macro $v{s};
+						case TBool(b): macro $v{b};
+						case TNull: macro $v{null};
+						default: throw 'Unexpected constant type ($c)';
+					}
+				default: throw 'Unexpected argument default value expr ($ted)';
+			}
+		}
+
+		////
+
+		// Extract valid function ClassFields from super classes
+		// Valid functions are not static, final, inline, dynamic or macro.
+		var superFields:Map<String, ClassField> = [];
+		while (superClass != null) {
+			for (f in superClass.fields.get()) {
+				if (!f.isFinal && f.kind.match(FMethod(MethNormal)) && isFieldListed(f.name))
+					superFields.set(f.name, f);
+			}
+
+			superClass = superClass.superClass?.t.get();
+		}
+
+		////
+		cl.isFinal = true;
+
+		var superWrapperFields:Array<ObjectField> = [];
+
+		//var printer = new haxe.macro.Printer();
+
+		for (name => f in superFields) {
+			////
+			var fargs:Array<FunctionArg> = [];
+			var ret:ComplexType = null;
+			var returnsVoid:Bool = false;
+
+			switch(lazyBitch(f.type)) {
+				case TFun(_, r):
+					returnsVoid = r.toString() == "Void"; // lol idk if there's a better staright forward way
+					ret = r.toComplexType();
+
+					switch(f.expr().expr) {
+						case TFunction(tfunc):
+							var tfargs:Array<{value:Null<TypedExpr>, v:TVar}> = tfunc.args;
+							for (i => a in tfargs) {
+								fargs[i] = {
+									// opt: false, // leaving opt as false seems to work since `?argument:T` unifies with `argument:Null<T>`
+									name: a.v.name, 
+									type: a.v.t.toComplexType(), 
+									value: typedExprDefToExpr(a.value?.expr)
+								};								
+							}
+						default:
+					}
+				default:
+					throw "Wtf, non-function encountered! " + f.name + ": " + f.type;
+			}
+
+			var argIdentsArray:Array<Expr> = [for (a in fargs) macro $i{a.name}];
+
+			// existsOnScript("name")
+			var existsExpr = defToExpr(ECall(macro $i{"existsOnScript"}, [macro $v{name}]));
+
+			// callOnScript("name", [arg1, arg2, ... argN])
+			var scriptCallExpr = defToExpr(ECall(macro $i{"callOnScript"}, [macro $v{name}, macro $a{argIdentsArray}]));
+
+			// super.name(arg1, arg2, ... argN)
+			var superCallExpr = defToExpr(ECall(macro $p{["super", name]}, argIdentsArray));
+
+			var expr = defToExpr(ETernary(existsExpr, scriptCallExpr, superCallExpr));
+
+			if (!returnsVoid)
+				expr = defToExpr(EReturn(expr));
+
+			var fiel;
+			fields.push(fiel = {
+				name: name,
+				access: [AOverride],
+				pos: macroCallPos,
+				kind: FFun({
+					/*
+					ret: ret,
+					params: [for (p in f.params) {
+						name: p.name,
+					}],
+					*/
+					args: fargs,
+					expr: expr,
+				}),
+			});
+
+			//// super.function wrapper
+			var wrapperFuncName = SUPER_WRAPPER_PREFIX + name;
+			fields.push({
+				name: wrapperFuncName,
+				access: [APrivate],
+				meta: [{name: ":noCompletion", pos: macroCallPos}],
+				pos: macroCallPos,
+				kind: FFun({
+					//ret: ret,
+					args: fargs,
+					expr: defToExpr(EReturn(superCallExpr)),
+				}),
+			});
+
+			superWrapperFields.push({
+				field: name,
+				expr: macro $i{wrapperFuncName}
+			});
+
+			//trace(sret.toString(), printer.printField(fiel));
+		}
+
+		//// `super` object for hscript
+		var name = SUPER_WRAPPER_PREFIX + 'wrapper';
+		fields.push({
+			name: name,
+			access: [APrivate],
+			pos: macroCallPos,
+			// kind: FVar(null, defToExpr(EObjectDecl(superWrapperFields))),
+			kind: FProp("get", "null", macro :Dynamic),
+		});
+
+		var expr = defToExpr(EObjectDecl(superWrapperFields));
+		expr = defToExpr(EBinop(OpAssignOp(OpNullCoal), macro $i{name}, expr));
+		expr = defToExpr(EReturn(expr));
+
+		fields.push({
+			name: 'get_$name',
+			access: [APrivate],
+			pos: macroCallPos,
+			kind: FFun({
+				ret: macro :Dynamic,
+				args: [],
+				expr: expr,
+			})
+		});
+		#end
+
+		return fields;
 	}
 }

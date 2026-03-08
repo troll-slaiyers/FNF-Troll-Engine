@@ -13,9 +13,6 @@ class CoolMath/*Games*/{
 	inline public static function coolLerp(current:Float, target:Float, elapsed:Float):Float
 		return FlxMath.lerp(target, current, Math.exp(-elapsed));
 
-	inline public static function fastTan(radians:Float):Float
-		return FlxMath.fastSin(radians) / FlxMath.fastCos(radians);
-
 	inline public static function square(angle:Float) {
 		var fAngle = angle % (Math.PI * 2);
 

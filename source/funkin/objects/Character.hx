@@ -1,5 +1,6 @@
 package funkin.objects;
 
+import funkin.scripts.ScriptedClassShit.InstanceInterp;
 import flixel.graphics.frames.FlxAtlasFrames;
 import funkin.states.PlayState;
 import funkin.scripts.FunkinScript.ScriptType;
@@ -762,7 +763,7 @@ class Character extends FlxSprite
 			for (key in ['characters/$script', 'characters/scripts/$script']){
 				var hscriptFile = Paths.getHScriptPath(key);
 				if (hscriptFile != null) {
-					var script = FunkinHScript.fromFile(hscriptFile, hscriptFile, defaultVars);
+					var script = FunkinHScript.fromFile(hscriptFile, hscriptFile, defaultVars, true, new InstanceInterp(this));
 					pushScript(script);
 					break;
 				}

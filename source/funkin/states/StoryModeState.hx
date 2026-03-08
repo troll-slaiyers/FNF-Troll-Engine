@@ -306,18 +306,22 @@ class StoryModeState extends MusicBeatState {
 		}
 		add(difficultyRight);
 
-		for(idx in 0...levels.length){
-			var level:Level = levels[idx];
+		for (idx => level in levels) {
+			Paths.currentModDirectory = level.folder;
+
 			var title = level.createTitle();
 			title.alpha = idx==selectedLevel ? 1 : 0;
 			title.ID = idx;
 			levelTitles.add(title);
+			
 			var backgroundGroup = new FlxSpriteGroup();
 			backgroundGroup.ID = idx;
 			backgroundGroup.y = 56;
+
 			var propGroup = new FlxSpriteGroup();
 			propGroup.ID = idx;
 			propGroup.y = 56;
+			
 			// todo bg group
 			level.populateGroup(propGroup, backgroundGroup);
 			levelBGGroups.push(backgroundGroup);
@@ -362,10 +366,10 @@ class StoryModeState extends MusicBeatState {
 
 			var ang:Float = (relativeIndex / levels.length) * (Math.PI * 2);
 			
-			title.scale.x = FlxMath.lerp(title.scale.x, (relativeIndex == 0 ? 1.1 : 0.9) + (((FlxMath.fastCos(ang) - 1) * radius) / 1280), lerpVal);
+			title.scale.x = FlxMath.lerp(title.scale.x, (relativeIndex == 0 ? 1.1 : 0.9) + (((Math.cos(ang) - 1) * radius) / 1280), lerpVal);
 				
-			title.y = FlxMath.lerp(title.y, levelTitles.y + ((FlxMath.fastSin(ang) * radius)), lerpVal);
-			title.alpha = FlxMath.lerp(title.alpha, FlxMath.fastCos(ang) * (relativeIndex == 0 ? 1 : 0.6), lerpVal);
+			title.y = FlxMath.lerp(title.y, levelTitles.y + ((Math.sin(ang) * radius)), lerpVal);
+			title.alpha = FlxMath.lerp(title.alpha, Math.cos(ang) * (relativeIndex == 0 ? 1 : 0.6), lerpVal);
 			title.scale.y = title.scale.x;
 
 			if(title.alpha < 0)title.alpha = 0;
@@ -456,6 +460,8 @@ class StoryModeState extends MusicBeatState {
 			newLevel = 0;
 
 		selectedLevel = newLevel;
+
+		Paths.currentModDirectory = levels[selectedLevel].folder;
 
 		if (!silent)
 			FlxG.sound.play(Paths.sound("scrollMenu"));

@@ -468,7 +468,7 @@ class CoolUtil {
 			units++;
 		}
 
-		return Math.round(Bytes * 100) / 100 + switch (units) {
+		return Math.fround(Bytes * 100) / 100 + switch (units) {
 			case 0: "Bytes";
 			case 1: "kB";
 			case 2: "MB";

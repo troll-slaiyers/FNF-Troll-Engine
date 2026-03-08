@@ -1,11 +1,5 @@
-function shouldPush(eventNote):Bool{
-	return true;
-}
-function getOffset(eventNote): Float{
-	return 0;
-}
-
-function onTrigger(value1:Dynamic, value2:Dynamic, time:Float){ 
-	var volume = value2 != "" ? Std.parseFloat(value2) : 1;
-	FlxG.sound.play(Paths.sound(value1), volume);
+function onTrigger(data:EventData, time:Float){ 
+	var volume = Std.parseFloat(data.value2);
+	if (Math.isNaN(volume)) volume = 1;
+	FlxG.sound.play(Paths.sound(data.value1), volume);
 }

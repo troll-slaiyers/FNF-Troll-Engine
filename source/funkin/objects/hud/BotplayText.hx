@@ -1,6 +1,5 @@
 package funkin.objects.hud;
 
-import flixel.math.FlxMath.fastSin as sin;
 import flixel.math.FlxAngle.TO_RAD;
 import flixel.text.FlxText;
 
@@ -26,7 +25,7 @@ class BotplayText extends FlxText
 	}
 
 	override function draw(){
-		alpha = 1.0 - sin(botplaySine * TO_RAD);
+		alpha = 1.0 - Math.sin(botplaySine * TO_RAD);
 		super.draw();
 	}
 }

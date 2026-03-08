@@ -1,5 +1,7 @@
 package funkin.data;
 
+import hscript.Expr;
+import funkin.scripts.ScriptedClassShit;
 import funkin.scripts.FunkinHScript;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
@@ -49,71 +51,28 @@ class SongEvent {
 	public function destroy():Void {}
 }
 
-class ScriptedSongEvent extends SongEvent {
+class ScriptedSongEvent extends SongEvent implements IScriptedClass {
 	final script:FunkinHScript;
-	
-	#if ALLOW_DEPRECATION
-	// why couldn't you give onTrigger the full data structure like every other function!!!!!!!!!!!!! ughh
-	var useNewAPI:Bool;
-	#end
 
-	private function new(id:String, script:FunkinHScript) {
+	private function new(id:String, expr:Expr) {
 		super(id);
-		this.script = script;
-		script.set('this', this);
-		#if ALLOW_DEPRECATION
-		this.useNewAPI = script.get("useNewAPI") == true;
-		#end
+		this.script = FunkinHScript.fromExpr(expr, id, null, false, new InstanceInterp(this));
 	}
 
-	override function onLoad() {
-		callScript("onLoad");
-	}
-
-	override function shouldPush(data:EventData):Bool {
-		return switch(callScript("shouldPush", [data])) {
-			#if ALLOW_DEPRECATION
-			case Globals.Function_Stop: false;
-			#end
-			case false: false;
-			default: true;
-		}
-	}
-
-	override function getOffset(data:EventData):Float {
-		var r = callScript("getOffset", [data]);
-		return (r != null) && (r is Int || r is Float) ? r : 0.0;
-	}
-
-	override function onPush(data:EventData):Void {
-		callScript("onPush", [data]);
-	}
-	
-	override function onTrigger(data:EventData, ?time:Float):Void {
-		#if ALLOW_DEPRECATION
-		(!useNewAPI) ? callScript("onTrigger", [data.value1, data.value2, time]) :
-		#end
-		callScript("onTrigger", [data, time]);
-	}
-	
-	override function update(elapsed:Float):Void {
-		callScript("elapsed", [elapsed]);
-	}
-	
-	override function destroy():Void {
-		callScript("destroy");
-		script.stop();
-	}
-
-	public function callScript(func:String, ?args:Array<Dynamic>):Null<Dynamic> {
+	public function callOnScript(func:String, ?args:Array<Dynamic>):Dynamic
 		return script.executeFunc(func, args);
-	}
+	
+	public function existsOnScript(func:String):Bool
+		return script.exists(func);
 
 	public static function fromName(name:String) {
 		var path = Paths.getHScriptPath('events/$name');
 		if (path == null) return null;
-		var script = FunkinHScript.fromFile(path, name, null, false);
-		return new ScriptedSongEvent(name, script);
+
+		var expr = FunkinHScript.parseFile(path);
+		if (expr == null) return null;
+
+		return new ScriptedSongEvent(name, expr);
 	}
 }
 
@@ -364,10 +323,7 @@ class SongEventHandler {
 			return eventMap[id];
 
 		var event:SongEvent;
-
 		event = ScriptedSongEvent.fromName(id);
-
-		// TODO: make hardcoded events good, separate them into their own classes instead of a big ass switch block
 		event ??= new DefaultSongEvent(id);
 
 		if (event != null)

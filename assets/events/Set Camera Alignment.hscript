@@ -1,19 +1,13 @@
-function shouldPush(eventNote):Bool{
-	return true;
-}
+var camPoint = FlxPoint.get();
 
-function getOffset(eventNote):Float{
-	return 0;
-}
-
-function onTrigger(value1, value2, time)
+function onTrigger(data, time)
 {
 	if (game.stageData.camera_speed == null)
 		game.cameraSpeed = 1.0;
 	else
 		game.cameraSpeed = game.stageData.camera_speed;
 
-	var sowy = Std.parseFloat(value1);
+	var sowy = Std.parseFloat(data.value1);
 	if (!Math.isNaN(sowy))
 	{	
 		var camDad = game.dad.getCamera();
@@ -44,18 +38,20 @@ function onTrigger(value1, value2, time)
 			minY = bfY;
 		}
 		
-		game.triggerEventNote(
-			"Camera Follow Pos",
-			Std.string(FlxMath.lerp(minX, maxX, sowy)), 
-			Std.string(FlxMath.lerp(minY, maxY, sowy))
-		);
+		camPoint.x = FlxMath.lerp(minX, maxX, sowy);
+		camPoint.y = FlxMath.lerp(minY, maxY, sowy);
+		game.addCameraPoint(camPoint);
 		
-		var cusSpeed = Std.parseFloat(value2);
+		var cusSpeed = Std.parseFloat(data.value2);
 		if (!Math.isNaN(cusSpeed))
 			game.cameraSpeed *= cusSpeed;
 	}
 	else
 	{
-		game.triggerEventNote("Camera Follow Pos", "", "");
+		game.cameraPoints.remove(camPoint);
 	}
+}
+
+function destroy() {
+	camPoint.put();
 }

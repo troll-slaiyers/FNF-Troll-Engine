@@ -62,7 +62,7 @@ using StringTools;
 using CoolerStringTools;
 
 #if DISCORD_ALLOWED
-import funkin.api.Discord;
+using funkin.api.Discord;
 #end
 
 import funkin.states.base.VideoPlayerState;
@@ -165,10 +165,12 @@ class PlayState extends MusicBeatState
 
 	public var extraData:Map<String, Dynamic> = [];
 
-	var legacyOnCreatePost:Bool = true; // Can be set by scripts to make onCreatePost be called where it used to be (before the countdown and super.create)
+	#if ALLOW_DEPRECATION
+	var legacyOnCreatePost:Bool = false; // Can be set by scripts to make onCreatePost be called where it used to be (before the countdown and super.create)
 	// NOTE: Make this false probably before 1.0 or 1.1 releases
 	// true by default rn just for the sake of not breaking things
 	// You can set it to false in a script if you wanna make sure things dont break when its false tho
+	#end
 
 	public static var instance:PlayState;
 
@@ -472,7 +474,7 @@ class PlayState extends MusicBeatState
 	#if DISCORD_ALLOWED
 	// Discord RPC variables
 	var updateDiscordRPC:Bool = true;
-	var discordRPCParams:DiscordClientPresenceParams = {};
+	var discordRPCParams:DiscordPresenceParams = {};
 	var detailsText:String = "";
 	var detailsPausedText:String = "";
 	#end
@@ -968,8 +970,10 @@ class PlayState extends MusicBeatState
 			addKeyboardEvents();
 
 		////
+		#if ALLOW_DEPRECATION
 		if(legacyOnCreatePost) // Just incase shit breaks???
-			callOnAllScripts('onCreatePost');
+			onCreatePost();
+		#end
 
 		add(ratingGroup);
 		add(playfields);
@@ -1080,12 +1084,18 @@ class PlayState extends MusicBeatState
 
 		songIntroCutscene();
 
+		#if ALLOW_DEPRECATION
 		if(!legacyOnCreatePost) // Just incase shit breaks???
-			callOnAllScripts('onCreatePost');
+		#end
+		onCreatePost();
 
 		finishedCreating = true;
 
 		Paths.clearUnusedMemory();
+	}
+
+	inline function onCreatePost() {
+		signals.onCreatePost.dispatch();
 	}
 
 	function updateKeybinds() {
@@ -2032,17 +2042,19 @@ class PlayState extends MusicBeatState
 		if (!updateDiscordRPC)
 			return;
 
-		final timeLeft:Float = (songLength - Conductor.songPosition - ClientPrefs.noteOffset);
-		final detailsText:String = (detailsText!=null) ? detailsText : this.detailsText;
+		final detailsText:String = detailsText ?? this.detailsText;
+		var timeLeft:Float = 0;
 
 		if (isDead)
 			discordRPCParams.details = 'Game Over - $detailsText';
 		else if (paused)
 			discordRPCParams.details = detailsPausedText;
-		else if (timeLeft > 0.0)
+		else {
 			discordRPCParams.details = detailsText;
-		else
-			discordRPCParams.details = detailsText;
+			timeLeft = (songLength - Conductor.songPosition - ClientPrefs.noteOffset);
+		}
+		
+		discordRPCParams.setRemainingTime(timeLeft);
 
 		DiscordClient.changePresence(discordRPCParams);
 	}

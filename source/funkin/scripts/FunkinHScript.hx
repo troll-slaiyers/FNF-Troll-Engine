@@ -42,31 +42,64 @@ class FunkinHScript extends FunkinScript
 		
 	}
 
-	inline public static function parseString(script:String, ?name:String = "Script"):Null<Expr>
+	public static function parseString(script:String, ?name:String = "Script"):Null<Expr>
 	{
 		parser.line = 1;
-		return parser.parseString(script, name);
+
+		try {
+			return parser.parseString(script, name);
+		}
+		catch (e:haxe.Exception) {
+			var errMsg = 'Error parsing hscript! ' #if hscriptPos + '$name:' + parser.line + ', ' #end + e.message;
+			trace(errMsg);
+
+			#if desktop
+			Application.current.window.alert(errMsg, "Error on haxe script!");
+			#end
+		}
+
+		return null;
 	}
 
-	inline public static function parseFile(file:String, ?name:String):Null<Expr>
-		return parseString(Paths.getContent(file), (name == null ? file : name));
-
-	public static function blankScript(?name, ?additionalVars)
+	public static function parseFile(file:String, ?name:String):Null<Expr>
 	{
-		return new FunkinHScript(null, name, additionalVars, false);
+		try {
+			var fileContent = Paths.getContent(file);
+			if (fileContent != null) {
+				print('Loading haxe script from: $file');
+				return parseString(fileContent, name ?? file);
+			}else {
+				print('HScript file "$file" not found!');
+			}
+		}
+		catch(e:haxe.Exception) {
+			var msg = "Error parsing hscript! " + e.message;
+			print(e.message);
+
+			#if desktop
+			var title = "Error on haxe script!";
+
+			#if (cpp && windows)
+			if (Windows.msgBox(msg, title, RETRYCANCEL | ERROR) == RETRY)
+				return parseFile(file, name);
+			#else
+			Application.current.window.alert(msg, title);
+			#end
+			#end
+		}
+
+		return null;
 	}
 
-	/**
-		Creates a `FunkinHScript` instance with code from a string.  
+	public static inline function blankScript(?name, ?additionalVars, ?interp:Interp)
+	{
+		return new FunkinHScript(null, name, additionalVars, false, interp);
+	}
 
-		@param script The script code.
-		@param name An optional name to give the script.
-		@param additionalVars A map of variables to define on this script before running its code.
-		@param doCreateCall Whether to call `onCreate` on this script.
-		@returns A `FunkinHScript` instance.
-	**/
-	public static function _fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true):FunkinHScript
-		return new FunkinHScript(parseString(script, name), name, additionalVars, doCreateCall);
+	public static inline function fromExpr(parsed:Expr, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):Null<FunkinHScript>
+	{
+		return new FunkinHScript(parsed, name, additionalVars, doCreateCall, interp);
+	}
 
 	/**
 		Creates a `FunkinHScript` instance with code from a string.  
@@ -78,21 +111,9 @@ class FunkinHScript extends FunkinScript
 		@param doCreateCall Whether to call `onCreate` on this script.
 		@returns A `FunkinHScript` instance.
 	**/
-	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true):FunkinHScript
+	public static inline function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):Null<FunkinHScript>
 	{
-		try {
-			return _fromString(script, name, additionalVars, doCreateCall);
-		}
-		catch (e:haxe.Exception) {
-			var errMsg = 'Error parsing hscript! ' #if hscriptPos + '$name:' + parser.line + ', ' #end + e.message;
-			trace(errMsg);
-
-			#if desktop
-			Application.current.window.alert(errMsg, "Error on haxe script!");
-			#end
-		}
-
-		return new FunkinHScript(null, name, additionalVars, doCreateCall);
+		return fromExpr(parseString(script, name), name, additionalVars, doCreateCall, interp);
 	}
 
 	/**
@@ -105,36 +126,19 @@ class FunkinHScript extends FunkinScript
 		@param doCreateCall Whether to call `onCreate` on this script.
 		@returns A `FunkinHScript` instance.
 	**/
-	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true):FunkinHScript
+	public static inline function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):Null<FunkinHScript>
 	{
-		name ??= file;
+		return fromExpr(parseFile(file, name), name, additionalVars, doCreateCall, interp);
+	}
 
-		try {
-			var fileContent = Paths.getContent(file);
-			if (fileContent != null) {
-				print('Loading haxe script from: $file');
-				return _fromString(fileContent, name, additionalVars, doCreateCall);
-			}else {
-				print('HScript file: "$file" not found!');
-			}
-		}
-		catch(e:haxe.Exception) {
-			var msg = "Error parsing hscript! " + e.message;
-			print(e.message);
-
-			#if desktop
-			var title = "Error on haxe script!";
-
-			#if (cpp && windows)
-			if (Windows.msgBox(msg, title, RETRYCANCEL | ERROR) == RETRY)
-				return fromFile(file, name, additionalVars, doCreateCall);
-			#else
-			Application.current.window.alert(msg, title);
-			#end
-			#end
-		}
-
-		return new FunkinHScript(null, name, additionalVars, doCreateCall);
+	public static function fromName(key:String, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp):Null<FunkinHScript>
+	{
+		var file = Paths.getHScriptPath(key);
+		if (file != null)
+			return fromFile(file, name, additionalVars, doCreateCall, interp);
+		
+		print('HScript file "$key" not found!');
+		return null;
 	}
 
 	private static inline function trim_redundant_error_trace(message:String, posInfo:haxe.PosInfos):String
@@ -148,10 +152,11 @@ class FunkinHScript extends FunkinScript
 	}
 
 	////
-	private var interpreter(default, null):Interp = new Interp();
+	private var interpreter(default, null):Interp;
 
-	public function new(?parsed:Expr, ?name:String = "HScript", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true)
+	public function new(?parsed:Expr, ?name:String = "HScript", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp)
 	{
+		interpreter = interp ??= new Interp();
 		super(name, ScriptType.HSCRIPT);
 
 		set("Std", Std);

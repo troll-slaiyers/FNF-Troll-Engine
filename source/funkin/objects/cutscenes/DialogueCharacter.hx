@@ -44,9 +44,7 @@ class DialogueCharacter extends FlxSprite
 	{
 		super();
 		
-		final path:String = ('assets/boxes/characters/$_character.json');
-
-		jsonFile = Paths.getJson(path);
+		jsonFile = Paths.json('boxes/characters/$_character.json');
 
 		if(jsonFile != null)// fuck me pls
 		{

@@ -1490,7 +1490,7 @@ class FlxCamera extends FlxBasic
 				_helperMatrix.identity();
 				_helperMatrix.translate(-width * 0.5, -height * 0.5);
 				_helperMatrix.scale(scaleX, scaleY);
-				_helperMatrix.rotateWithTrig(FlxMath.fastCos(scrollAngle * 0.0174533), FlxMath.fastSin(scrollAngle * 0.0174533));
+				_helperMatrix.rotateWithTrig(Math.cos(scrollAngle * 0.0174533), Math.sin(scrollAngle * 0.0174533));
 				_helperMatrix.translate(width * 0.5, height * 0.5);
 				if (!positionMovesSprite)_helperMatrix.translate(x, y);
 				_helperMatrix.scale(FlxG.scaleMode.scale.x, FlxG.scaleMode.scale.y);

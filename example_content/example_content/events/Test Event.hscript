@@ -18,10 +18,14 @@ function onPush(eventNote){
 	trace("Event was pushed! Value 1: " + eventNote.value1 + ", Value 2: " + eventNote.value2);
 }
 
-function onTrigger(value1:Dynamic, value2:Dynamic, time:Float){
-	trace("Event was triggered with values " + value1 + " and " + value2);
+function onTrigger(eventNote, time:Float){
+	trace("Event was triggered with values " + eventNote.value1 + " and " + eventNote.value2);
 }
 
 function update(elapsed:Float) {
 	// Called on every PlayState update cycle
+}
+
+function destroy() {
+	// Called before PlayState is destroyed
 }

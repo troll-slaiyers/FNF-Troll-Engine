@@ -4,7 +4,6 @@ import funkin.data.MusicData;
 import flixel.math.FlxMath;
 import funkin.input.Controls;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.addons.ui.FlxUIState;
 import openfl.media.Sound;
 import openfl.ui.MouseCursor;
 import openfl.ui.Mouse;
@@ -52,7 +51,7 @@ enum abstract SongSyncMode(String) to String {
 	"sectionHit"
 ]))
 #end
-class MusicBeatState extends FlxUIState
+class MusicBeatState extends FlxTransitionableState
 {
 	public var updateSongPos:Bool = true;
 	

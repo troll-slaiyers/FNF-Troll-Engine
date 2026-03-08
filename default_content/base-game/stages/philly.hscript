@@ -110,7 +110,7 @@ function updateTrainPos(){
 		}
 		if(phillyTrain.x < -4000 && trainFinishing)
 			resetTrain();
-		else
+		else if (game.gf != null && game.gf != null)
 			game.gf.playAnim("hairBlow");
 	}
 }
@@ -128,7 +128,8 @@ function resetTrain()
 	startedMoving = false;
 	trainCars = 8;
 
-	game.gf.playAnim("hairFall");
+	if (game != null && game.gf != null)
+		game.gf.playAnim("hairFall");
 }
 
 function switchLight(){

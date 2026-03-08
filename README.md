@@ -35,7 +35,7 @@ Expect bugs, breaking changes and little documentation!!! (You can look at the `
 - [swordcube](https://bsky.app/profile/swordcube.bsky.social) - Pixel note splashes + [linc_filedialogs](https://github.com/swordcube/linc_filedialogs) implementation
 - [crowplexus](https://github.com/crowplexus) - Countdown class + [hxdiscord_rpc](https://github.com/MAJigsaw77/hxdiscord_rpc/) implementation
 - [moxie-coder](https://github.com/moxie-coder) - Mac building and workflow help
-- [Unholywanderer](https://github.com/unholywanderer) - what the nuts
+- [Unholywanderer](https://github.com/unholywanderer) - what the [nuts](https://tenor.com/view/stupid-fucking-burping-rat-bleghhhhhhh-blahhhhhhhhh-stupid-burping-rat-gif-15365543192916498953)
 - [Gab](https://github.com/michisock) - We like him!!!
 - [Lat](https://x.com/latzephr) - [Original Week 6 health bar and timer concept](https://x.com/latzephr/status/1771139155881234576)
 - [AllyTS](https://x.com/NewTioSans) - Mine Note texture

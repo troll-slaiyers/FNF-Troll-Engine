@@ -3,9 +3,6 @@ package funkin.modchart.modifiers;
 import math.CoolMath;
 import math.CoolMath.triangle;
 import math.CoolMath.square;
-import flixel.math.FlxMath.fastSin as sin;
-import flixel.math.FlxMath.fastCos as cos;
-import math.CoolMath.fastTan as tan;
 class PathModifier extends NoteModifier
 {	
 	override function getName()
@@ -169,7 +166,7 @@ class PathModifier extends NoteModifier
 			var period = this.getSubmodValue("digitalPeriod", player);
 			var offset = this.getSubmodValue("digitalOffset", player);
 
-			pos.x += (digitalVal * Note.halfWidth) * Math.floor(0.5 + (steps * FlxMath.fastSin(getDigitalAngle(diff, offset, period)))) / steps;
+			pos.x += (digitalVal * Note.halfWidth) * Math.floor(0.5 + (steps * Math.sin(getDigitalAngle(diff, offset, period)))) / steps;
 		}
 
 		var digitalZVal = getSubmodValue("digitalZ", player);
@@ -178,7 +175,7 @@ class PathModifier extends NoteModifier
 			var period = this.getSubmodValue("digitalZPeriod", player);
 			var offset = this.getSubmodValue("digitalZOffset", player);
 
-			pos.z += (digitalZVal * Note.halfWidth) * Math.floor(0.5 + (steps * FlxMath.fastSin(getDigitalAngle(diff, offset, period)))) / steps;
+			pos.z += (digitalZVal * Note.halfWidth) * Math.floor(0.5 + (steps * Math.sin(getDigitalAngle(diff, offset, period)))) / steps;
 		}
 
 		return pos;

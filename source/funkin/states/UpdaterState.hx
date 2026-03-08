@@ -40,6 +40,41 @@ typedef DLProgress = {
 	var done:Bool;
 }
 
+private function formatDecimal(Number:Float, Precision = 2):String {
+	var mult:Float = 1;
+	for (_ in 0...Precision)
+		mult *= 10;
+	
+	var formatted = Std.string(Math.fround(Number * mult) / mult);
+	var sowy = formatted.lastIndexOf('.');
+
+	if (sowy == -1) {
+		formatted += '.';
+		sowy = 0;
+	}else
+		sowy = formatted.length - sowy - 1;
+
+	for (_ in sowy...Precision)
+		formatted += '0';
+
+	return formatted;
+}
+
+private function formatBytes(Bytes:Float, Precision = 2):String {
+	var units:Int = 0;
+	while (Bytes >= 1024) {
+		Bytes /= 1024;
+		units++;
+	}
+
+	return formatDecimal(Bytes, Precision) + switch(units) {
+		case 0: " Bytes";
+		case 1: "kB";
+		case 2: "MB";
+		default: "GB";
+	};
+}
+
 @:noScripting
 class UpdaterState extends MusicBeatState {
 	var release:Release;
@@ -290,8 +325,9 @@ class UpdaterState extends MusicBeatState {
 			fileBar.setRange(0, prog.bytesTotal);
 			fileBar.value = prog.bytesFinished;
 			
-			updateText.text = 'Downloading ${file.fileName} (${prog.bytesFinished} / ${prog.bytesTotal}) (${prog.currentFile} / ${prog.totalFiles})';
-			// TODO: format the bytes downloaded and total into more readable things (KB, MB, etc)
+			var finished = formatBytes(prog.bytesFinished);
+			var total = formatBytes(prog.bytesTotal);
+			updateText.text = 'Downloading ${file.fileName} ($finished / $total) (${prog.currentFile} / ${prog.totalFiles})';
 		});
 		stream.addEventListener(Event.COMPLETE, function(e:Event) {
 			fileBar.percent = 100;
@@ -318,8 +354,6 @@ class UpdaterState extends MusicBeatState {
 		stream.load(new URLRequest(file.link));
 	}
 
-	var done:Bool = false;
-
 	override function update(elapsed:Float){
 		super.update(elapsed);
 		
@@ -329,12 +363,12 @@ class UpdaterState extends MusicBeatState {
 
 		}else if(FlxG.keys.justPressed.I){
 			Main.outOfDate = false;
-			MusicBeatState.switchState(new TitleState());
-			if (FlxG.save.data.ignoredUpdates == null)
-				FlxG.save.data.ignoredUpdates = [];
 			
+			FlxG.save.data.ignoredUpdates ??= [];
 			FlxG.save.data.ignoredUpdates.push(release.tag_name);
 			FlxG.save.flush();
+
+			MusicBeatState.switchState(new TitleState());
 		}else if(FlxG.keys.justPressed.Y){
 			startDownload();
 		}
@@ -351,18 +385,10 @@ class UpdaterState extends MusicBeatState {
 		{
 			var github:Github = new Github(); // leaving the user and repo blank means it'll derive it from the repo the mod is compiled from
 			// if it cant find the repo you compiled in, it'll just default to troll engine's repo
-			recentRelease = github.getReleases((release:Release) ->{
-				return (Main.downloadBetas || !release.prerelease);
-			})[0];			
-
-			if (FlxG.save.data.ignoredUpdates == null){
-				FlxG.save.data.ignoredUpdates = [];
-				FlxG.save.flush();
-			}
+			recentRelease = github.getReleases((release:Release) -> (Main.downloadBetas || !release.prerelease))[0];
 			
-			if (recentRelease != null && FlxG.save.data.ignoredUpdates.contains(recentRelease.tag_name))
+			if (recentRelease != null && FlxG.save.data.ignoredUpdates?.contains(recentRelease.tag_name) == true)
 				recentRelease = null;
-
 		}else{
 			recentRelease = null;
 		}
@@ -373,15 +399,22 @@ class UpdaterState extends MusicBeatState {
 	public static function checkOutOfDate():Bool{
 		var outOfDate = false;
 
-		if (ClientPrefs.checkForUpdates && Main.recentRelease != null)
-		{
+		if (!ClientPrefs.checkForUpdates) {
+			trace('Update checking is disabled by the user');
+		}
+		else if (Main.recentRelease == null) {
+			trace('No recent release found');
+		}
+		else {
 			var recentRelease = Main.recentRelease;
+			var tagName:funkin.data.SemanticVersion = recentRelease.tag_name;
+
+			trace('Newest version: $tagName | Current: ${Main.Version.semanticVersion}');
 			
 			// hoping this works lol
-			var tagName:funkin.data.SemanticVersion = recentRelease.tag_name;
 			if (tagName > Main.Version.semanticVersion){
 				outOfDate = true;
-				trace('New version found! Newest version: $tagName | Current: ${Main.Version.semanticVersion}');
+				trace('New version found!');
 			}
 		}
 

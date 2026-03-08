@@ -1,9 +1,10 @@
-function onTrigger(value1, value2, time)
+function onTrigger(data, time)
 {
-    var beat = Std.parseInt(value1);
-    if (beat == null || Math.isNaN(beat)) beat = -1;
-    var intensity = Std.parseFloat(value2);
-    if(intensity == null || Math.isNaN(intensity))intensity = 1;
+    var beat = Std.parseInt(data.value1);
+    if (Math.isNaN(beat)) beat = -1;
+    
+	var intensity = Std.parseFloat(data.value2);
+    if (Math.isNaN(intensity)) intensity = 1;
 
     game.zoomEveryBeat = beat;
     game.camZoomingMult = intensity;

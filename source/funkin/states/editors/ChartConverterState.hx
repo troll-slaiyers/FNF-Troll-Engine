@@ -23,7 +23,7 @@ import moonchart.backend.FormatDetector;
 import moonchart.formats.BasicFormat;
 import moonchart.formats.BasicFormat.DynamicFormat;
 
-class ChartConverterState extends MusicBeatState
+class ChartConverterState extends funkin.states.base.CustomFlxUIState
 {
 	var formatList:Array<Format>;
 	

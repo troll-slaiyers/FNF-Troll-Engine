@@ -8,16 +8,15 @@ class SowyBaseButton extends FlxButton{
 	public function new(X:Float = 0, Y:Float = 0, ?OnClick:Void->Void)
 	{
 		super(X, Y, OnClick);
-
-		onOver.callback = onover;
-		onOut.callback = onout;
 	}
 
-	// wtf it works
-	function onover():Void{
+	override function onOverHandler():Void{
 		Mouse.cursor = MouseCursor.BUTTON;
+		super.onOverHandler();
 	}
-	function onout():Void{
+
+	override function onOutHandler() {
 		Mouse.cursor = MouseCursor.AUTO;
+		super.onOutHandler();
 	}
 }

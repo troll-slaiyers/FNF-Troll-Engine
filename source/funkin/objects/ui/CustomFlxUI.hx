@@ -22,6 +22,8 @@ class CustomFlxUITabMenu extends FlxUITabMenu {
 class CustomFlxUINumericStepper extends FlxUINumericStepper {
 	public var hoveringText:Bool = false;
 
+	public var callback:(value:Float, action:String) -> Void;
+
 	public function new(X:Float = 0, Y:Float = 0, StepSize:Float = 1, DefaultValue:Float = 0, Min:Float = -999, Max:Float = 999, Decimals:Int = 0,
 			Stack:Int = FlxUINumericStepper.STACK_HORIZONTAL, ?TextField:FlxText, ?ButtonPlus:FlxUITypedButton<FlxSprite>, ?ButtonMinus:FlxUITypedButton<FlxSprite>,
 			IsPercent:Bool = false) {
@@ -53,6 +55,11 @@ class CustomFlxUINumericStepper extends FlxUINumericStepper {
 		value = Std.parseFloat(fuit.text);
 		_doCallback(FlxUINumericStepper.EDIT_EVENT);
 		_doCallback(FlxUINumericStepper.CHANGE_EVENT);
+	}
+
+	override function _doCallback(event_name:String) {
+		if (callback != null) callback(value, event_name);
+		return super._doCallback(event_name);
 	}
 }
 
