@@ -1,9 +1,9 @@
 package funkin.states;
 
-import hxvlc.flixel.FlxVideo;
 import funkin.objects.notes.NoteAnimations;
 import funkin.objects.cutscenes.Cutscene;
 #if VIDEOS_ALLOWED
+import hxvlc.flixel.FlxVideo;
 import funkin.objects.cutscenes.VideoCutscene;
 #end
 import funkin.objects.cutscenes.DialogueCutscene;
@@ -1263,16 +1263,10 @@ class PlayState extends MusicBeatState
 
 	}
 
+	#if VIDEOS_ALLOWED
 	var curVideo:FlxVideo = null;
 	public function startVideo(name:String):FlxVideo
 	{
-		#if !VIDEOS_ALLOWED
-		inCutscene = true;
-
-		FlxG.log.warn('Video not supported!');
-		startAndEnd();
-		return null;
-		#else
 		var filepath:String = Paths.video(name);
 		if (!Paths.exists(filepath)) {
 			FlxG.log.warn('Couldnt find video file: ' + name);
@@ -1292,8 +1286,16 @@ class PlayState extends MusicBeatState
 		});
 		video.play();
 		return video;
-		#end
 	}
+	#else
+	public function startVideo(name:String):Bool
+	{
+		inCutscene = true;
+		FlxG.log.warn('Video not supported!');
+		startAndEnd();
+		return false;
+	}
+	#end
 
 	function startAndEnd()
 	{
