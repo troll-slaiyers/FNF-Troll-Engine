@@ -23,7 +23,12 @@
 
 	<define name="USE_EPIC_JUDGEMENT" />
 	<define name="HSCRIPT_ALLOWED" />
-	<define name="VIDEOS_ALLOWED" if="cpp" />
+	<!--
+	Compile with `-D DISABLE_VIDEOS` to disable them without having to comment this
+	Example
+		`lime test cpp -D DISABLE_VIDEOS
+	-->
+	<define name="VIDEOS_ALLOWED" if="cpp" unless="DISABLE_VIDEOS" />
 	<define name="FILESYSTEM_ALLOWED" if="native || desktop"/>
 	<define name="MODS_ALLOWED" if="desktop FILESYSTEM_ALLOWED" />
 	<define name="DISCORD_ALLOWED" if="desktop cpp" unless="display false" />
