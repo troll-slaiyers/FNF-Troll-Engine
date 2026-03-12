@@ -9,7 +9,7 @@ import openfl.text.TextField;
 import openfl.text.TextFormat;
 import openfl.text.TextFormatAlign;
 
-class FPSCounter extends TextField {
+class DebugDisplay extends TextField {
 	/** Allows the FPS counter to lie about your framerate because Lime sucks and framerates goes above whats desired **/
 	public var canLie:Bool = true;
 
@@ -53,7 +53,13 @@ class FPSCounter extends TextField {
 		FlxG.signals.gameResized.add(onGameResized);
 
 		FlxG.signals.preStateCreate.add((nextState) -> {
-			currentState = Type.getClassName(Type.getClass(nextState));
+			currentState = Std.string(nextState);
+			getDebugText = if (nextState is funkin.states.base.MusicBeatState) {
+				var nextState:funkin.states.base.MusicBeatState = cast nextState;
+				nextState.getDebugText;
+			}else {
+				null;
+			}
 		});
 	}
 
@@ -69,21 +75,22 @@ class FPSCounter extends TextField {
 		_previousTime = Main.getTime();
 		if (_updateClock >= 1000) {
 			currentFPS = (canLie && FlxG.drawFramerate > 0) ? FlxMath.minInt(_framesPassed, FlxG.drawFramerate) : _framesPassed;
-			var text:String = 'FPS: $currentFPS';
-
-			if (showDebug)
-				text += '\n' + _getDebugText();
 
 			if (currentFPS <= FlxG.drawFramerate * 0.5)
 				textColor = 0xFFFF0000;
 			else
 				textColor = 0xFFFFFFFF;
 
-			this.text = text;
-
 			_framesPassed = 0;
 			_updateClock = 0;
 		}
+
+		var text:String = 'FPS: $currentFPS';
+		if (showDebug)
+			text += '\n' + _getDebugText();
+
+		this.text = text;
+		
 		_previousTime = Main.getTime();
 	}
 
@@ -93,7 +100,10 @@ class FPSCounter extends TextField {
 
 	@:noCompletion
 	private inline function _getDebugText():String {
-		return 'MEM: ' + get_memoryUsageString() + '\nState: $currentState' + (getDebugText != null ? "\n" + getDebugText() : "");
+		var str = 'MEM: ' + get_memoryUsageString();
+		str += '\nState: $currentState';
+		str += (getDebugText != null ? "\n" + getDebugText() : "");
+		return str;
 	}
 
 	@:noCompletion

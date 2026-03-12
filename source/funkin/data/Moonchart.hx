@@ -98,7 +98,11 @@ class MoonchartSong extends BaseSong
 
 			var convertedData:JsonSong = cast new SupportedFormat().fromFormat(basicFormat, diffData.ID).data.song;
 			convertedData._path = diffData.chartPath;
+			#if hxdr_libs
+			convertedData.tracks = {inst: [basicFormat.data.MUSIC]};
+			#else
 			convertedData.tracks = {inst: [FileNameUtil.withoutExtension(basicFormat.data.MUSIC)]};
+			#end
 			convertedData.metadata ??= {};
 			convertedData.metadata.songName = basicFormat.data.TITLE;
 			
@@ -119,6 +123,19 @@ class MoonchartSong extends BaseSong
 	public function getSongFile(fileName:String):String
 	{
 		return MoonchartUtil.extendPath(ss.folderPath, fileName);
+	}
+
+	/**
+		Returns an FlxSoundAsset for the track of name trackName
+	**/
+	override function getTrackSound(trackName:String)
+	{
+		#if hxdr_libs
+		if (ss.sowyFormat.basicFormat is StepManiaBasic)
+			return funkin.data.Sound.fromFile(this.getSongFile(trackName));
+		#end
+
+		return super.getTrackSound(trackName);
 	}
 }
 
@@ -170,6 +187,7 @@ class MoonchartContent
 			f.diffFindFunc = (id, path, files) -> DiffFinder.fromVSliceFiles(bf, path, files, id);
 		}
 		formatMap.get(STEPMANIA).diffSortFunc = stringSort.bind(SM_DIFFICULTIES);
+		formatMap.get(STEPMANIA_SHARK).diffSortFunc = stringSort.bind(SM_DIFFICULTIES);
 
 		////
 		initialized = true;
@@ -185,15 +203,20 @@ class MoonchartContent
 		freeplaySongs.resize(0);
 
 		for (sowyFormat in formatMap) {
-			sowyFormat.scanSongs();
-			var formatSongs:Array<MoonchartSong> = [];
-			for (sowySong in sowyFormat.songs) {
-				var song = new MoonchartSong(sowySong);
-				//songs.set(song.songId, song);
-				formatSongs.push(song);
+			try {
+				sowyFormat.scanSongs();
+				var formatSongs:Array<MoonchartSong> = [];
+				for (sowySong in sowyFormat.songs) {
+					var song = new MoonchartSong(sowySong);
+					//songs.set(song.songId, song);
+					formatSongs.push(song);
+				}
+				formatSongs.sort((a, b) -> alphabeticalSort(a.songId, b.songId));
+				for (song in formatSongs) freeplaySongs.push(song);
+			}catch(e) {
+				trace("Error scanning format " + sowyFormat.ID + ": " + e);
+				throw e;
 			}
-			formatSongs.sort((a, b) -> alphabeticalSort(a.songId, b.songId));
-			for (song in formatSongs) freeplaySongs.push(song);
 		}
 	}
 }

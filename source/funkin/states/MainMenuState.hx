@@ -58,8 +58,8 @@ class MainMenuState extends MusicBeatState
 
 		persistentUpdate = persistentDraw = true;
 
-		camFollow = new FlxObject(0, 0, 1, 1);
-		camFollowPos = new FlxObject(0, 0, 1, 1);
+		camFollow = new FlxObject();
+		camFollowPos = new FlxObject();
 		add(camFollow);
 		add(camFollowPos);
 
@@ -85,11 +85,12 @@ class MainMenuState extends MusicBeatState
 		menuItems = new FlxTypedGroup<FlxSprite>();
 		add(menuItems);
 
-		var offset:Float = 108 - (Math.max(optionShit.length, 4) - 4) * 80;
+		var spacing:Float = 140;
+		var offset:Float = 108 - Math.max(optionShit.length - 4, 0) * 80;
 		var scr:Float = (optionShit.length < 6) ? 0 : (optionShit.length - 4) * 0.135;
 		for (i => optionName in optionShit)
 		{
-			var menuItem:FlxSprite = new FlxSprite(0, (i * 140) + offset);
+			var menuItem:FlxSprite = new FlxSprite(0, offset + (i * spacing));
 			
 			menuItem.frames = Paths.getSparrowAtlas('mainmenu/$optionName');
 			menuItem.animation.addByPrefix('idle', '$optionName idle', 24);

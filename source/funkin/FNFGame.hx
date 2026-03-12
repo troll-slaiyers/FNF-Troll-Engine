@@ -52,11 +52,6 @@ class FNFGame extends FlxGame
 			openfl.events.FullScreenEvent.FULL_SCREEN, 
 			(e) -> FlxG.save.data.fullscreen = e.fullScreen
 		);
-
-		////
-		#if CRASH_HANDLER
-		CrashHandler.init();
-		#end
 	}
 
 	private function _onKeyPress(e:KeyboardEvent) {

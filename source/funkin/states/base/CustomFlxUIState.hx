@@ -17,11 +17,32 @@ import flixel.addons.ui.interfaces.IFlxUIButton;
 **/
 @:noScripting
 class CustomFlxUIState extends MusicBeatState implements IEventGetter implements IFlxUIState {
+	//// Some tooltip utility funcs
+	inline function fontDef() {
+		return new flixel.addons.ui.FontDef(flixel.system.FlxAssets.FONT_DEFAULT);
+	}
+
+	inline function oneLineTip(title:String, ?width:Int):flixel.addons.ui.FlxUITooltipManager.FlxUITooltipData {
+		var anchor = new flixel.addons.ui.Anchor(0, 2, "center", "bottom", "center", "top");
+		
+		var titleFontDef = fontDef();
+		titleFontDef.format.align = "center";
+		
+		return {title: title, body: "", anchor: anchor, style: {titleWidth: width, bodyWidth: width, titleFormat: titleFontDef}};
+	}
+	
+	inline function simpleTip(title:String, body:String = ""):flixel.addons.ui.FlxUITooltipManager.FlxUITooltipData {
+		var fontDef = fontDef();
+		fontDef.format.align = "left";
+		return {title: title, body: body, style: {titleFormat: fontDef, bodyFormat: fontDef}};
+	}
+
+	////
 	public function new() {
 		super();
 		tooltips = new CustomFlxUITooltipManager();
 		@:privateAccess tooltips.tooltip.visible = false;
-		tooltips.delay = 0.3;
+		tooltips.delay = 0.45;
 	}
 
 	override function tryUpdate(elapsed:Float):Void

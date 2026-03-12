@@ -50,4 +50,8 @@ class HScriptedState extends MusicBeatState
 
 		return null;
 	}
+
+	override function toString():String {
+		return 'HScriptedState($scriptPath)';
+	}
 }
