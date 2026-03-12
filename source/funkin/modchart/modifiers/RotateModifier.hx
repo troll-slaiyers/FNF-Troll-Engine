@@ -17,7 +17,7 @@ class RotateModifier extends NoteModifier { // this'll be rotateX in ModManager
 	}
 
 	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField) {
-		var origin:Vector3 = daOrigin ?? new Vector3(field.field.getBaseX(data), FlxG.height* 0.5);
+		var origin:Vector3 = daOrigin ?? Vector3.weak(field.field.getBaseX(data), FlxG.height* 0.5);
 
 		pos.decrementBy(origin); // diff
 		VectorHelpers.rotateV3(pos, // out 

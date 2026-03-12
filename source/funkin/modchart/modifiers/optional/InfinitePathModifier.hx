@@ -15,7 +15,7 @@ class InfinitePathModifier extends CustomPathModifier {
 		while (r < 360) {
 			for (data in 0...infPath.length) {
 				var rad = r * Math.PI / 180;
-				infPath[data].push(new Vector3(
+				infPath[data].push(Vector3.get(
 					FlxG.width * 0.5 + (Math.sin(rad)) * 600,
 					FlxG.height * 0.5 + (Math.sin(rad) * Math.cos(rad)) * 600, 
 					0

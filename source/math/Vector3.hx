@@ -6,15 +6,19 @@ package math;
 	`Vector3` is a vector suitable for three-dimensional
 	math, containing (x, y, z) components
 **/
+import flixel.util.FlxPool;
 #if !lime_debug
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
-class Vector3
+class Vector3 implements IFlxPooled
 {
+
+	private static var pool:FlxPool<Vector3> = new FlxPool<Vector3>(Vector3.new.bind(0., 0., 0.));
+
     public static var ZERO(get, never):Vector3;
     static function get_ZERO(){
-        return new Vector3(0, 0, 0);
+        return Vector3.get(0, 0, 0);
 	}
 
 	/**
@@ -60,6 +64,9 @@ class Vector3
 	**/
 	public var z:Float;
 
+	private var inPool:Bool = false;
+	private var _weak:Bool = false;
+
 	/**
 		Creates a new `Vector3` instance
 		@param	x	(Optional) An initial x value (default is 0)
@@ -82,8 +89,9 @@ class Vector3
 	**/
 	public inline function add(a:Vector3, result:Vector3 = null):Vector3
 	{
-		if (result == null) result = new Vector3();
+		result ??= Vector3.get();
 		result.setTo(this.x + a.x, this.y + a.y, this.z + a.z);
+		a.putWeak();
 		return result;
 	}
 
@@ -109,7 +117,7 @@ class Vector3
 	**/
 	public inline function clone():Vector3
 	{
-		return new Vector3(x, y, z);
+		return Vector3.get(x, y, z);
 	}
 
 	/**
@@ -120,8 +128,7 @@ class Vector3
 		@return A `Vector3` instance containing the linearly interpolated value
 	**/
 	public function lerp(goal:Vector3, alpha:Float, result:Null<Vector3> = null):Vector3{
-		if (result==null) 
-			result = new Vector3();
+		result ??= Vector3.get();
 
 		//https://gamedev.stackexchange.com/questions/18615/how-do-i-linearly-interpolate-between-two-vectors
 		result.setTo(
@@ -153,8 +160,9 @@ class Vector3
 	**/
 	public inline function crossProduct(a:Vector3, result:Vector3 = null):Vector3
 	{
-		if (result == null) result = new Vector3();
+		result ??= Vector3.get();
 		result.setTo(y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.x);
+		a.putWeak();
 		return result;
 	}
 
@@ -309,10 +317,41 @@ class Vector3
 	**/
 	public inline function subtract(a:Vector3, result:Vector3 = null):Vector3
 	{
-		if (result == null) result = new Vector3();
+		result ??= Vector3.get();
 		result.setTo(x - a.x, y - a.y, z - a.z);
+		a.putWeak();
 		return result;
 	}
+
+	public static function get(x:Float = 0., y:Float = 0., z:Float = 0.):Vector3 {
+		var vec = pool.get();
+		vec.setTo(x, y, z);
+		vec.inPool = false;
+		return vec;
+	}
+
+	public static function weak(x:Float = 0., y:Float = 0., z:Float = 0.) {
+		var vec = get(x, y, z);
+		vec._weak = true;
+		return vec;
+	}
+
+	public function put() {
+		if (!inPool) {
+			inPool = true;
+			_weak = false;
+			pool.putUnsafe(this);
+		}
+	}
+
+	public function putWeak() {
+		if (_weak) {
+			put();
+		}
+	}
+
+	public function destroy() {}
+
 
 	@:dox(hide) public inline function toString():String
 	{
@@ -332,16 +371,16 @@ class Vector3
 
 	private inline static function get_X_AXIS():Vector3
 	{
-		return new Vector3(1, 0, 0);
+		return Vector3.get(1, 0, 0);
 	}
 
 	private inline static function get_Y_AXIS():Vector3
 	{
-		return new Vector3(0, 1, 0);
+		return Vector3.get(0, 1, 0);
 	}
 
 	private inline static function get_Z_AXIS():Vector3
 	{
-		return new Vector3(0, 0, 1);
+		return Vector3.get(0, 0, 1);
 	}
 }

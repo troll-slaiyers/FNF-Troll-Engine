@@ -7,7 +7,7 @@ class ColumnRotateModifier extends NoteModifier { // this'll be rotateX in ModMa
 	override function getOrder()
 		return Modifier.ModifierOrder.LAST - 10;
 
-	private var origin = new Vector3(); 
+	private var origin = Vector3.get(); 
 	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
 		origin.x = field.field.getBaseX(data);
 		origin.y = FlxG.height * 0.5;
