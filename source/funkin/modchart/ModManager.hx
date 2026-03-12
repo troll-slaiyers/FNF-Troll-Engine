@@ -109,7 +109,7 @@ class ModManager {
 			quickRegister(Type.createInstance(mod, [this]));
 
 		quickRegister(new RotateModifier(this));
-		quickRegister(new RotateModifier(this, 'center', Vector3.weak(FlxG.width* 0.5, FlxG.height* 0.5)));
+		quickRegister(new RotateModifier(this, 'center', Vector3.get(FlxG.width* 0.5, FlxG.height* 0.5)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
 
 		registerAux("alwaysDraw");
