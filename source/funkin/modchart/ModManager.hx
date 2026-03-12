@@ -109,7 +109,7 @@ class ModManager {
 			quickRegister(Type.createInstance(mod, [this]));
 
 		quickRegister(new RotateModifier(this));
-		quickRegister(new RotateModifier(this, 'center', new Vector3(FlxG.width* 0.5, FlxG.height* 0.5)));
+		quickRegister(new RotateModifier(this, 'center', Vector3.weak(FlxG.width* 0.5, FlxG.height* 0.5)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
 
 		registerAux("alwaysDraw");
@@ -617,8 +617,7 @@ class ModManager {
 		if (exclusions == null) 
 			exclusions = []; // since [] cant be a default value for.. some reason?? "its not constant!!" kys haxe
 		
-		if (pos == null)
-			pos = new Vector3();
+		pos ??= Vector3.weak();
 
 		var speed:Float = if (obj.objType == NOTE)
 			getNoteSpeed(cast obj, player, field.songSpeed);

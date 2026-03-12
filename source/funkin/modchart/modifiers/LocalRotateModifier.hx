@@ -15,7 +15,7 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
 
 	}
 
-	private var origin = new Vector3(0.0, FlxG.height * 0.5, 0.0);
+	private var origin = Vector3.get(0.0, FlxG.height * 0.5, 0.0);
 	private function getFieldOrigin(field:NoteField):Vector3 {
 		final field = field.field;
 		final FKC = field.keyCount;

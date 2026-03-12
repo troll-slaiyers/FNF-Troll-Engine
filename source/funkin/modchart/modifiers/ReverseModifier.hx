@@ -51,7 +51,7 @@ class ReverseModifier extends NoteModifier
 		#end
 	}
 
-	var distanceVec = new Vector3();
+	var distanceVec = Vector3.get();
 
 	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:NoteObject, field:NoteField)
 	{

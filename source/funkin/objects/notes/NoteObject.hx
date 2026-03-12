@@ -28,7 +28,7 @@ class NoteObject extends FlxSprite {
 	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
 
 	public var handleRendering:Bool = true;
-	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
+	public var vec3Cache:Vector3 = Vector3.get(); // for vector3 operations in modchart code
 
 	#if ALLOW_DEPRECATION
 	@:deprecated("noteData is deprecated! Use `column` instead.")
@@ -62,6 +62,7 @@ class NoteObject extends FlxSprite {
 
 	override function destroy() {
 		defScale = FlxDestroyUtil.put(defScale);
+		vec3Cache = FlxDestroyUtil.put(vec3Cache);
 		super.destroy();
 	}
 

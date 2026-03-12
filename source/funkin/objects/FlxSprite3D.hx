@@ -1,5 +1,6 @@
 package funkin.objects;
 
+import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxColor;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.system.FlxAssets.FlxShader;
@@ -23,13 +24,13 @@ class FlxSprite3D extends FlxSprite {
 	function set_roll(val:Float) return angle = val;
 
 	////
-	private var _camPos = new Vector3();
-	private var _camOrigin = new Vector3(); // vertex origin
-	private var _sprPos = new Vector3();
-	private var quad0 = new Vector3();
-	private var quad1 = new Vector3();
-	private var quad2 = new Vector3();
-	private var quad3 = new Vector3();
+	private var _camPos = Vector3.get();
+	private var _camOrigin = Vector3.get(); // vertex origin
+	private var _sprPos = Vector3.get();
+	private var quad0 = Vector3.get();
+	private var quad1 = Vector3.get();
+	private var quad2 = Vector3.get();
+	private var quad3 = Vector3.get();
 	private var _vertices = new Vector<Float>(12, false);
 	private var _indices = new Vector<Int>(12, false, [for (i in 0...12) i]);
 	private var _uvData = new Vector<Float>(12, false);
@@ -205,5 +206,16 @@ class FlxSprite3D extends FlxSprite {
 	{
 		super.loadGraphic(graphic, animated, frameWidth, frameHeight, unique, key);
 		return this;
+	}
+
+	override function destroy() {
+		super.destroy();
+		_camPos = FlxDestroyUtil.put(_camPos);
+		_camOrigin = FlxDestroyUtil.put(_camOrigin);
+		_sprPos = FlxDestroyUtil.put(_sprPos);
+		quad0 = FlxDestroyUtil.put(quad0);
+		quad1 = FlxDestroyUtil.put(quad1);
+		quad2 = FlxDestroyUtil.put(quad2);
+		quad3 = FlxDestroyUtil.put(quad3);
 	}
 }

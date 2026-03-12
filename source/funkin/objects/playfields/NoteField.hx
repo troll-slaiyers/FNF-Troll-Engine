@@ -1,30 +1,26 @@
 package funkin.objects.playfields;
 
+import flixel.util.FlxDestroyUtil;
 import funkin.modchart.modifiers.ReverseModifier;
 import funkin.modchart.Modifier;
 import flixel.math.FlxMath;
 import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
 import flixel.util.FlxSort;
-import flixel.util.FlxDestroyUtil;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.system.FlxAssets.FlxShader;
 import math.Vector3;
 import math.VectorHelpers;
 import openfl.Vector;
-import openfl.geom.ColorTransform;
 import funkin.modchart.ModManager;
 import funkin.modchart.Modifier.RenderInfo;
-import funkin.objects.shaders.NoteColorSwap;
 import funkin.states.PlayState;
 import funkin.states.PlayState.instance as game;
 import haxe.ds.Vector as FastVector;
 import funkin.objects.playfields.FieldBase;
 
 using StringTools;
-
-
 
 final scalePoint = FlxPoint.get(1, 1);
 
@@ -107,6 +103,14 @@ class NoteField extends FieldBase
 	}
 
 	var lookupMap = new haxe.ds.ObjectMap<Dynamic, RenderObject>();
+
+	override function destroy() {
+		super.destroy();
+		quad0 = FlxDestroyUtil.put(quad0);
+		quad1 = FlxDestroyUtil.put(quad1);
+		quad2 = FlxDestroyUtil.put(quad2);
+		quad3 = FlxDestroyUtil.put(quad3);
+	}
 
 	// does all the drawing logic, best not to touch unless you know what youre doing
 	override function preDraw()
@@ -328,8 +332,8 @@ class NoteField extends FieldBase
 		p1.z = 0.0;
 
 		wid /= 2.0;
-		var quad0 = new Vector3(-wid);
-		var quad1 = new Vector3(wid);
+		var quad0 = Vector3.get(-wid);
+		var quad1 = Vector3.get(wid);
 		var scale:Float = (z!=0.0) ? (1.0 / z) : 1.0;
 
 		if (!spiralHolds || simpleDraw) {
@@ -347,8 +351,8 @@ class NoteField extends FieldBase
 		var unit = p2;
 
 		var w = (quad0.subtract(quad1, quad0).length / 2) * scale;
-		var off1 = new Vector3(unit.y * w, 	-unit.x * w,	0.0);
-		var off2 = new Vector3(-off1.x, 	-off1.y,		0.0);
+		var off1 = Vector3.weak(unit.y * w, 	-unit.x * w,	0.0);
+		var off2 = Vector3.weak(-off1.x, 	-off1.y,		0.0);
 
 		return [p1.add(off1, off1), p1.add(off2, off2), p1];
 	}
@@ -588,10 +592,10 @@ class NoteField extends FieldBase
 		}
 	}
 
-	private var quad0 = new Vector3(); // top left
-	private var quad1 = new Vector3(); // top right
-	private var quad2 = new Vector3(); // bottom left
-	private var quad3 = new Vector3(); // bottom right
+	private var quad0 = Vector3.get(); // top left
+	private var quad1 = Vector3.get(); // top right
+	private var quad2 = Vector3.get(); // bottom left
+	private var quad3 = Vector3.get(); // bottom right
 	function drawNote(sprite:NoteObject, pos:Vector3, ?nextPos:Vector3):Null<RenderObject>
 	{
 		if (!sprite.exists || !sprite.visible)
