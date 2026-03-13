@@ -351,6 +351,8 @@ class NoteField extends FieldBase
 		var unit = p2;
 
 		var w = (quad0.subtract(quad1, quad0).length / 2) * scale;
+		quad0.put();
+		quad1.put();
 		var off1 = Vector3.weak(unit.y * w, 	-unit.x * w,	0.0);
 		var off2 = Vector3.weak(-off1.x, 	-off1.y,		0.0);
 
