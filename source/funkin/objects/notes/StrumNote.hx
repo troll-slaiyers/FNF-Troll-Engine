@@ -125,7 +125,7 @@ class StrumNote extends NoteObject {
 		}
 
 		var textureKey:String = getTextureKey();
-		frames = Paths.getSparrowAtlas(textureKey);
+		frames = Paths.sparrowAtlas(textureKey);
 		frames != null ? loadNoteAnims() : loadGraphic(Paths.image(textureKey));
 
 		scale.x = scale.y = Note.spriteScale;

@@ -522,7 +522,7 @@ class Note extends NoteObject {
 		if (wasQuant != isQuant)
 			updateColours();
 
-		frames = Paths.getSparrowAtlas(textureKey);
+		frames = Paths.sparrowAtlas(textureKey);
 		frames != null ? loadNoteAnims() : loadGraphic(Paths.image(textureKey));
 		if (inEditor)
 			setGraphicSize(ChartingState.GRID_SIZE, ChartingState.GRID_SIZE);

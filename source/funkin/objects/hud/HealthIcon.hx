@@ -20,7 +20,7 @@ using StringTools;
 	// Maybe the prefix constants should be in the health icon instead???
 	
 	override function changeIcon(char:String){
-		frames = Paths.getSparrowAtlas('icons/$char');
+		frames = Paths.sparrowAtlas('icons/$char');
 		animation.addByPrefix("idle", IDLE_PREFIX, 24);
 		animation.addByPrefix("losing", LOSING_PREFIX, 24);
 		final animFrames:Array<FlxFrame> = new Array<FlxFrame>();
@@ -120,13 +120,14 @@ class HealthIcon extends FlxSprite
 	}
 
 	public function changeIcon(char:String) {
-		var file:Null<FlxGraphic> = Paths.image('icons/$char', null, !(FlxG.state is ChartingState)); 
+		var allowGPU:Bool = !(FlxG.state is ChartingState);
+		var file:Null<FlxGraphic> = Paths.image('icons/$char', null, allowGPU); 
 
-		if(file == null)
-			file = Paths.image('icons/icon-$char', null, !(FlxG.state is ChartingState)); // base game compat
-		
-		if(file == null) 
-			file = Paths.image('icons/face', null, !(FlxG.state is ChartingState)); // Prevents crash from missing icon
+		if (file == null)
+			file = Paths.image('icons/icon-$char', null, allowGPU); // base game compat
+
+		if (file == null)
+			file = Paths.image('icons/face', null, allowGPU); // Prevents crash from missing icon
 
 		if (file != null){
 			//// TODO: sparrow atlas icons? would make the implementation of extra behaviour (ex: winning icons) way easier

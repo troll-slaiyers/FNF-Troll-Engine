@@ -63,9 +63,9 @@ class StageProp extends FlxSprite {
 		else
 		#end
 		if (Paths.fileExists('images/${propData.graphic}.txt', TEXT))
-			prop.frames = Paths.getPackerAtlas(propData.graphic);
+			prop.frames = Paths.packerAtlas(propData.graphic);
 		else if (Paths.fileExists('images/${propData.graphic}.xml', TEXT))
-			prop.frames = Paths.getSparrowAtlas(propData.graphic);
+			prop.frames = Paths.sparrowAtlas(propData.graphic);
 		else
 			prop.loadGraphic(Paths.image(propData.graphic));
 

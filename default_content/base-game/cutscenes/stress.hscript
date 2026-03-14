@@ -61,7 +61,7 @@ function onCreateCutscene()
 	game.camGame.zoom = 1.2;
 	
 	tankmanimate = new FlxAnimate(game.dadGroup.x, game.dadGroup.y);
-	tankmanimate.frames = Paths.getTextureAtlas('cutscenes/stress/tankman');
+	tankmanimate.frames = Paths.animateAtlas('cutscenes/stress/tankman');
 	tankmanimate.applyStageMatrix = true;
 	tankmanimate.x += game.dad.positionArray[0];
 	tankmanimate.y += game.dad.positionArray[1];
@@ -76,7 +76,7 @@ function onCreateCutscene()
 	game.addBehindDad(tankmanimate);
 
 	boyfrimate = new FlxAnimate(game.boyfriendGroup.x, game.boyfriendGroup.y);
-	boyfrimate.frames = Paths.getTextureAtlas('cutscenes/stress/boyfriend');
+	boyfrimate.frames = Paths.animateAtlas('cutscenes/stress/boyfriend');
 	boyfrimate.applyStageMatrix = true;
 	boyfrimate.x += game.boyfriend.positionArray[0];
 	boyfrimate.y += game.boyfriend.positionArray[1];
@@ -93,7 +93,7 @@ function onCreateCutscene()
 	game.addBehindDad(boyfrimate);
 
 	speakimate = new FlxAnimate(game.gfGroup.x, game.gfGroup.y);
-	speakimate.frames = Paths.getTextureAtlas('cutscenes/stress/gfpico');
+	speakimate.frames = Paths.animateAtlas('cutscenes/stress/gfpico');
 	speakimate.applyStageMatrix = true;
 	speakimate.x += game.gf.positionArray[0];
 	speakimate.y += game.gf.positionArray[1];
@@ -102,7 +102,7 @@ function onCreateCutscene()
 	speakimate.y += 454;
 
 	gfTurninDemon = new FlxSprite(speakimate.x, speakimate.y);
-	gfTurninDemon.frames = Paths.getSparrowAtlas("cutscenes/stress/gfTurnsDemon");
+	gfTurninDemon.frames = Paths.sparrowAtlas("cutscenes/stress/gfTurnsDemon");
 	gfTurninDemon.animation.addByPrefix("turn", "GF Turnin Demon W Effect instance 1", 24, false);
 	gfTurninDemon.visible = false;
 	gfTurninDemon.scrollFactor.set(speakimate.scrollFactor.x, speakimate.scrollFactor.y);

@@ -1861,7 +1861,7 @@ class Checkbox extends WidgetSprite
 	public function new(x:Float = 0, y:Float = 0, defaultToggled:Bool = false)
 	{
 		super(x, y);
-		frames = Paths.getSparrowAtlas("optionsMenu/checkbox");
+		frames = Paths.sparrowAtlas("optionsMenu/checkbox");
 		animation.addByPrefix("toggled", "selected", 0, false);
 		animation.addByPrefix("idle", "deselected", 0, false);
 		animation.play("idle", true);

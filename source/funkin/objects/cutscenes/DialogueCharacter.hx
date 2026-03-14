@@ -64,18 +64,18 @@ class DialogueCharacter extends FlxSprite
 		switch (fileType)
 		{
 			case "texture":	
-				frames = Paths.getTextureAtlas(jsonFile.graphic);
+				frames = Paths.animateAtlas(jsonFile.graphic);
 				isAnimateAtlas = true;
 			case "packer":	
-				frames = Paths.getPackerAtlas(jsonFile.graphic);
+				frames = Paths.packerAtlas(jsonFile.graphic);
 			case "sparrow":	
 				//this probably be something in a diff file tbh
-				var frames:FlxAtlasFrames = Paths.getSparrowAtlas(jsonFile.graphic);
+				var frames:FlxAtlasFrames = Paths.sparrowAtlas(jsonFile.graphic);
 				if(jsonFile.extra_graphics != null && jsonFile.extra_graphics.length > 0){
 					for(i in jsonFile.extra_graphics){
 						if (!atlases.contains(i)) {
 							atlases.push(i);
-							var subAtlas:FlxAtlasFrames = Paths.getSparrowAtlas(i);
+							var subAtlas:FlxAtlasFrames = Paths.sparrowAtlas(i);
 							if (subAtlas==null)continue;
 							@:privateAccess
 							if (!frames.usedGraphics.contains(subAtlas.parent))

@@ -35,7 +35,7 @@ function onCreateCutscene(){
 		game.remove(tankmanimate);
 
 	tankmanimate = new FlxAnimate(game.dadGroup.x, game.dadGroup.y);
-	tankmanimate.frames = Paths.getTextureAtlas('cutscenes/ugh/tankman');
+	tankmanimate.frames = Paths.animateAtlas('cutscenes/ugh/tankman');
 	tankmanimate.x += game.dad.positionArray[0];
 	tankmanimate.y += game.dad.positionArray[1];
 	tankmanimate.anim.addBySymbol('wellwellwell', 'TANK TALK 1 P1',24, false, false, false);

@@ -44,7 +44,7 @@ class NotesSubState extends MusicBeatSubstate
 		if (ClientPrefs.noteSkin == "Quants") {
 			// fuck you
 			valuesArray = ClientPrefs.quantHSV;
-			noteFrames = Paths.getSparrowAtlas('QUANTNOTE_assets');
+			noteFrames = Paths.sparrowAtlas('QUANTNOTE_assets');
 			noteAnimations = ['purple0', 'blue0', 'green0', 'red0'];
 			namesArray = [
 				"4th",
@@ -74,7 +74,7 @@ class NotesSubState extends MusicBeatSubstate
 			];
 		} else {
 			valuesArray = ClientPrefs.arrowHSV;
-			noteFrames = Paths.getSparrowAtlas('NOTE_assets');
+			noteFrames = Paths.sparrowAtlas('NOTE_assets');
 			noteAnimations = ['purple0', 'blue0', 'green0', 'red0', 'square0'];
 			namesArray = ["Left", "Down", "Up", "Right", "Center"];
 			defaults = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];

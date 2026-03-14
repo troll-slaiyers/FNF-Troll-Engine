@@ -372,7 +372,8 @@ class Paths
 
 		return parsed;
 	}
-	inline static public function getSparrowAtlas(key:String, ?library:String):FlxAtlasFrames
+
+	inline static public function sparrowAtlas(key:String, ?library:String):FlxAtlasFrames
 	{
 		var rawXml = Paths.getContent(getPath('images/$key.xml'));
 		return rawXml == null ? null : FlxAtlasFrames.fromSparrow(
@@ -381,7 +382,7 @@ class Paths
 		);
 	}
 
-	inline static public function getPackerAtlas(key:String, ?library:String):FlxAtlasFrames
+	inline static public function packerAtlas(key:String, ?library:String):FlxAtlasFrames
 	{
 		var txtPath:String = getPath('images/$key.txt');
 		return FlxAtlasFrames.fromSpriteSheetPacker(
@@ -390,7 +391,7 @@ class Paths
 		);
 	}
 
-	inline static public function getTextureAtlas(key:String, ?library:String)
+	inline static public function animateAtlas(key:String, ?library:String)
 	{
 		#if USING_FLXANIMATE
 		var path = animateAtlasPath(key, library);
@@ -399,6 +400,26 @@ class Paths
 		return null;
 		#end
 	}
+
+	#if ALLOW_DEPRECATION
+	@:deprecated("getSparrowAtlas is deprecated, use sparrowAtlas instead.")
+	inline static public function getSparrowAtlas(key:String, ?library:String):FlxAtlasFrames
+	{
+		return sparrowAtlas(key, library);
+	}
+
+	@:deprecated("getPackerAtlas is deprecated, use packerAtlas instead.")
+	inline static public function getPackerAtlas(key:String, ?library:String):FlxAtlasFrames
+	{
+		return packerAtlas(key, library);
+	}
+
+	@:deprecated("getTextureAtlas is deprecated, use animateAtlas instead.")
+	inline static public function getTextureAtlas(key:String, ?library:String)
+	{
+		return animateAtlas(key, library);
+	}
+	#end
 
 	/** returns a FlxRuntimeShader but with file names lol **/ 
 	public static function getShader(fragFile:String = null, vertFile:String = null, version:Int = null):FlxRuntimeShader

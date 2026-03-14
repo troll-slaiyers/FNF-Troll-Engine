@@ -104,9 +104,9 @@ class LevelStageProp extends FlxSprite
 		else 
 		#end
 		if (Paths.fileExists('images/${propData.graphic}.txt', TEXT))
-			prop.frames = Paths.getPackerAtlas(propData.graphic);
+			prop.frames = Paths.packerAtlas(propData.graphic);
 		else if (Paths.fileExists('images/${propData.graphic}.xml', TEXT))
-			prop.frames = Paths.getSparrowAtlas(propData.graphic);
+			prop.frames = Paths.sparrowAtlas(propData.graphic);
 		else
 			prop.loadGraphic(Paths.image(propData.graphic));
 
@@ -283,7 +283,7 @@ class StoryModeState extends MusicBeatState {
 		add(difficultySpr);
 
 		difficultyLeft = new FlxSprite();
-		difficultyLeft.frames = Paths.getSparrowAtlas('storymenu/ui/arrows');
+		difficultyLeft.frames = Paths.sparrowAtlas('storymenu/ui/arrows');
 		difficultyLeft.animation.addByPrefix("idle", "leftIdle", 24);
 		difficultyLeft.animation.addByPrefix("press", "leftConfirm", 24, false);
 		difficultyLeft.animation.play("idle");
@@ -295,7 +295,7 @@ class StoryModeState extends MusicBeatState {
 		add(difficultyLeft);
 
 		difficultyRight = new FlxSprite();
-		difficultyRight.frames = Paths.getSparrowAtlas('storymenu/ui/arrows');
+		difficultyRight.frames = Paths.sparrowAtlas('storymenu/ui/arrows');
 		difficultyRight.animation.addByPrefix("idle", "rightIdle", 24);
 		difficultyRight.animation.addByPrefix("press", "rightConfirm", 24, false);
 		difficultyRight.animation.play("idle");

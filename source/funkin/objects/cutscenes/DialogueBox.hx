@@ -64,7 +64,7 @@ class DialogueBox extends FlxSprite
 
 	function loadJSON()
 	{	
-		frames = Paths.getSparrowAtlas(jsonFile.graphic);
+		frames = Paths.sparrowAtlas(jsonFile.graphic);
 
 		for (anim in jsonFile.animations) 
 			animation.addByPrefix(anim.animName, anim.animPrefix, anim.fps, anim.looped);

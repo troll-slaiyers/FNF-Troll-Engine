@@ -149,9 +149,6 @@ class Character extends FlxSprite
 
 	/**BLAMMED LIGHTS!! idk not used anymore**/
 	public var colorTween:FlxTween;
-	
-	/** Whether the Character is using texture Atlas or not*/
-	public var isAtlas:Bool = false;
 
 	//Used on Character Editor
 	public var animationsArray:Array<AnimArray> = [];
@@ -192,8 +189,8 @@ class Character extends FlxSprite
 	#end
 
 	#if !USING_FLXANIMATE
-	public var anim(get, never):flixel.animation.FlxAnimationController;
-	@:noCompletion function get_anim() return this.animation;
+	@:noCompletion public var isAnimate(get, never):Bool;
+	@:noCompletion inline function get_anim() return false;
 	#end
 
 	override function destroy()
@@ -221,16 +218,16 @@ class Character extends FlxSprite
 		switch (fileType)
 		{
 			case "texture":	
-				frames = Paths.getTextureAtlas(imageFile);
-				isAtlas = true;
-			case "packer":	frames = Paths.getPackerAtlas(imageFile);
+				frames = Paths.animateAtlas(imageFile);
+				isAnimate = true;
+			case "packer":	frames = Paths.packerAtlas(imageFile);
 			case "sparrow":	
-				var frames:FlxAtlasFrames = Paths.getSparrowAtlas(imageFile);
+				var frames:FlxAtlasFrames = Paths.sparrowAtlas(imageFile);
 				if(json.images != null && json.images.length > 0){
 					for(i in json.images){
 						if (!atlases.contains(i)) {
 							atlases.push(i);
-							var subAtlas:FlxAtlasFrames = Paths.getSparrowAtlas(i);
+							var subAtlas:FlxAtlasFrames = Paths.sparrowAtlas(i);
 							if (subAtlas==null)continue;
 							@:privateAccess
 							if (!frames.usedGraphics.contains(subAtlas.parent))
@@ -272,7 +269,7 @@ class Character extends FlxSprite
 					if(anim.image == null)continue;
 					if(!atlases.contains(anim.image)){
 						atlases.push(anim.image);
-						var subAtlas:FlxAtlasFrames = Paths.getSparrowAtlas(anim.image);
+						var subAtlas:FlxAtlasFrames = Paths.sparrowAtlas(anim.image);
 						var frames: FlxAtlasFrames = cast frames;
 						@:privateAccess
 						if (!frames.usedGraphics.contains(subAtlas.parent))
@@ -296,7 +293,7 @@ class Character extends FlxSprite
 				}
 
 				////
-				if (!isAtlas) {
+				if (!isAnimate) {
 					if (animIndices != null && animIndices.length > 0)
 						animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
 					else
@@ -667,7 +664,7 @@ class Character extends FlxSprite
 
 	public function quickAnimAdd(name:String, animToAdd:String)
 	{
-		if (!isAtlas)
+		if (!isAnimate)
 			animation.addByPrefix(name, animToAdd, 24, false);
 		#if USING_FLXANIMATE
 		else 

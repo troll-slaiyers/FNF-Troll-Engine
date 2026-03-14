@@ -69,7 +69,7 @@ class NoteSplash extends NoteObject {
 
 	function loadAnims(skin:String) {
 		textureLoaded = skin;
-		frames = Paths.getSparrowAtlas(skin);
+		frames = Paths.sparrowAtlas(skin);
 		for (i in 1...animationAmount + 1) {
 			for (j in 0...PlayState.keyCount) {
 				animation.addByPrefix('note$j-$i',

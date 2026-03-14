@@ -140,7 +140,7 @@ class TitleState extends MusicBeatState
 		//
 		titleText = new FlxSprite(140, FlxG.height - 100);
 		titleText.exists = false;
-		titleText.frames = Paths.getSparrowAtlas('titleEnter');
+		titleText.frames = Paths.sparrowAtlas('titleEnter');
 
 		titleText.animation.addByPrefix('idle', "ENTER IDLE", 24);
 		titleText.animation.addByPrefix('press', ClientPrefs.flashing ? "ENTER PRESSED" : "ENTER FREEZE", 24);

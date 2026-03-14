@@ -6,7 +6,7 @@ class TestCutscene extends TimelineCutscene {
 	override function createCutscene(){
 		super.createCutscene();
 		var cummies = new FlxSprite();
-		cummies.frames = Paths.getSparrowAtlas("characters/BOYFRIEND");
+		cummies.frames = Paths.sparrowAtlas("characters/BOYFRIEND");
 		cummies.animation.addByPrefix("hey", "BF HEY", 24, false);
 		cummies.animation.addByPrefix("idle", "BF idle dance", 24, true);
 		cummies.animation.play("idle", true);

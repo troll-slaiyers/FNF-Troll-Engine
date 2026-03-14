@@ -92,7 +92,7 @@ class MainMenuState extends MusicBeatState
 		{
 			var menuItem:FlxSprite = new FlxSprite(0, offset + (i * spacing));
 			
-			menuItem.frames = Paths.getSparrowAtlas('mainmenu/$optionName');
+			menuItem.frames = Paths.sparrowAtlas('mainmenu/$optionName');
 			menuItem.animation.addByPrefix('idle', '$optionName idle', 24);
 			menuItem.animation.addByPrefix('selected', '$optionName selected', 24);
 			menuItem.animation.play('idle');

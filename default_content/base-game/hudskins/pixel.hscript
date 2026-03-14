@@ -180,7 +180,7 @@ function onSetupNoteSplash(x, y, column, texture, hueColor, satColor, brtColor, 
 }
 
 function onLoadSplashAnims(texture){
-	this.frames = Paths.getSparrowAtlas('pixelUI/' + texture);
+	this.frames = Paths.sparrowAtlas('pixelUI/' + texture);
 	this.animation.addByPrefix('splash', 'note splash ' + StringTools.replace(NoteAnimations.current.noteAnimations[column %  NoteAnimations.current.noteAnimations.length], '0', '') + ' ' + FlxG.random.int(1, this.animationAmount), 24, false);
 	this.scale.set(noteScale * 5.0, noteScale * 5.0);
 	this.antialiasing = false;

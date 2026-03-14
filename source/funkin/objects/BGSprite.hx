@@ -6,7 +6,7 @@ class AltBGSprite extends FlxSprite
 {
 	public function new(x:Float = 0, y:Float = 0, image:String, ?anim:String, ?loop:Bool=false) {
 		super(x, y);
-		frames = Paths.getSparrowAtlas(image);
+		frames = Paths.sparrowAtlas(image);
 		animation.addByPrefix("idle", anim, 24, loop);
 		animation.play("idle");
 	}
@@ -20,7 +20,7 @@ class BGSprite extends FlxSprite
 		super(x, y);
 
 		if (animArray != null) {
-			frames = Paths.getSparrowAtlas(image);
+			frames = Paths.sparrowAtlas(image);
 			for (i in 0...animArray.length) {
 				var anim:String = animArray[i];
 				animation.addByPrefix(anim, anim, 24, loop);

@@ -253,7 +253,7 @@ class AlphaCharacter extends FlxSprite
 	public function new()
 	{
 		super(x, y);
-		frames = Paths.getSparrowAtlas('alphabet');
+		frames = Paths.sparrowAtlas('alphabet');
 	}
 
 	public function createCharacter(character:String) {
