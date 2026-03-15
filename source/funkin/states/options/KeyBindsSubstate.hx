@@ -19,7 +19,7 @@ import flixel.addons.ui.U as FlxU;
 using StringTools;
 
 inline function getKeyName(id:Int):String
-	return funkin.input.InputFormatter.getKeyName(id);
+	return funkin.util.InputFormatter.getKeyName(id);
 
 inline function getJustPressed():Int
 	return FlxG.keys.firstJustPressed();

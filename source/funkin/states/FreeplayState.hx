@@ -1,7 +1,7 @@
 package funkin.states;
 
 import math.CoolMath;
-import funkin.input.InputFormatter;
+import funkin.util.InputFormatter;
 import flixel.util.FlxColor;
 import funkin.objects.hud.HealthIcon;
 

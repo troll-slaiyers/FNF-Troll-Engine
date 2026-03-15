@@ -1,6 +1,6 @@
 package funkin.objects;
 
-import funkin.input.Controls;
+import funkin.Controls;
 import funkin.objects.Alphabet;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import haxe.Constraints.Function;
