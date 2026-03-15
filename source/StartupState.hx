@@ -4,7 +4,7 @@ import funkin.*;
 import funkin.states.base.MusicBeatState;
 
 import funkin.data.Highscore;
-import funkin.input.Controls;
+import funkin.Controls;
 
 import flixel.FlxG;
 import flixel.FlxState;

@@ -1,7 +1,6 @@
-package funkin.input;
-import flixel.input.keyboard.FlxKey;
+package funkin.util;
 
-using StringTools;
+import flixel.input.keyboard.FlxKey;
 
 class InputFormatter 
 {
