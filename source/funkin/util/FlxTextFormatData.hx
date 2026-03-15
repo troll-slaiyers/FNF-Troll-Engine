@@ -1,4 +1,4 @@
-package funkin.data;
+package funkin.util;
 
 import flixel.text.FlxText;
 import funkin.Paths;

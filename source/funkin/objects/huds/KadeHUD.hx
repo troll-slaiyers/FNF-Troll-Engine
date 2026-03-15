@@ -9,7 +9,7 @@ import flixel.util.FlxColor;
 import funkin.states.PlayState;
 import funkin.objects.hud.FNFHealthBar.ShittyBar;
 using StringTools;
-using CoolerStringTools;
+using funkin.util.CoolerStringTools;
 
 /**
 	Kade Engine 1.6 HUD

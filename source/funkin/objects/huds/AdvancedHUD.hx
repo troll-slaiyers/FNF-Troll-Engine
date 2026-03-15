@@ -8,7 +8,7 @@ import funkin.objects.hud.JudgementCounter;
 import funkin.data.JudgmentManager.JudgmentData;
 import funkin.objects.playfields.*;
 
-using funkin.data.FlxTextFormatData;
+using funkin.util.FlxTextFormatData;
 
 class AdvancedHUD extends CommonHUD
 {

@@ -356,7 +356,7 @@ class PauseSubState extends MusicBeatSubstate
 		for (chartId in charts)
 			menu.addTextOption(chartId, {onAccept: playChart.bind(chartId)});
 
-		ss.add(new FlxSignalHolder(
+		ss.add(new funkin.util.FlxSignalHolder(
 			FlxG.signals.postUpdate, 
 			function() {
 				if (controls.BACK) {

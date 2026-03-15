@@ -7,7 +7,7 @@ import Type.ValueType;
 import flixel.*;
 import flixel.group.FlxGroup;
 
-using SpriteTools;
+using funkin.util.SpriteTools;
 using StringTools;
 
 class Util

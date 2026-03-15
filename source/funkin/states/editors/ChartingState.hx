@@ -54,6 +54,7 @@ import sys.FileSystem;
 import openfl.media.Sound;
 #end
 
+using funkin.util.SpriteTools;
 using StringTools;
 using Lambda;
 
@@ -369,7 +370,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		var bg:FlxSprite = new FlxSprite(0, 0, Paths.image('menuDesat'));
 		bg.color = FlxColor.fromHSB(Std.random(64) * 5.625, 0.15, 0.15);
 		bg.scrollFactor.set();
-		bg.scale.x = bg.scale.y = SpriteTools.getFillScale(bg);
+		bg.scale.x = bg.scale.y = bg.getFillScale();
 		bg.screenCenter();
 		add(bg);
 
@@ -3294,7 +3295,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		leftIcon.setPosition(GRID_SIZE * (1 + _song.keyCount * 0.5) - leftIcon.width * 0.5, 5);
 		rightIcon.setPosition(GRID_SIZE * (1 + _song.keyCount * 1.5) - rightIcon.width * 0.5, 5);
 
-		SpriteTools.objectCenter(focusArrow, focusIcon, X);
+		focusArrow.objectCenter(focusIcon, X);
 		focusArrow.y = focusIcon.y + focusIcon.height;
 	}
 

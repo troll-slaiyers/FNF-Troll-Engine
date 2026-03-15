@@ -9,7 +9,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.FlxSubState;
 import openfl.display.BitmapData;
-using SpriteTools;
+using funkin.util.SpriteTools;
 
 class ColorPicker extends FlxButton {
 	public var callback:FlxColor -> Void;
