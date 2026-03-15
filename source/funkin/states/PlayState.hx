@@ -59,7 +59,7 @@ import lime.media.openal.ALEffect;
 import openfl.events.KeyboardEvent;
 
 using StringTools;
-using CoolerStringTools;
+using funkin.util.CoolerStringTools;
 
 #if DISCORD_ALLOWED
 using funkin.api.Discord;

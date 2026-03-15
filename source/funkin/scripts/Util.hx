@@ -19,7 +19,7 @@ import animate.FlxAnimate;
 import animate.FlxAnimateFrames;
 #end
 
-using SpriteTools;
+using funkin.util.SpriteTools;
 using StringTools;
 
 class Util

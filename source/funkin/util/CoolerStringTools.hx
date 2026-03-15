@@ -1,3 +1,5 @@
+package funkin.util;
+
 import flixel.FlxG;
 
 class CoolerStringTools {
