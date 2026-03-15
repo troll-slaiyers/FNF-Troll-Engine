@@ -1,6 +1,6 @@
 package funkin.states;
 
-using funkin.data.FlxTextFormatData;
+using funkin.util.FlxTextFormatData;
 
 import funkin.data.GameplayOption;
 
