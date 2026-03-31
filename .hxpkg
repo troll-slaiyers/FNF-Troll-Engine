@@ -29,12 +29,16 @@
 			},
 			{
 				"name": "hscript",
-				"link": "https://github.com/nebulazorua/t-hscript",
+				"link": "https://github.com/troll-slaiyers/t-hscript",
 				"branch": "master"
 			},
 			{
+				"name": "no-spoon",
+				"version": "0.2.0"
+			},
+			{
 				"name": "hxvlc",
-				"version": "2.1.4"
+				"version": "2.2.6"
 			},
 			{
 				"name": "flixel-animate",
@@ -60,7 +64,7 @@
 			},
 			{
 				"name": "linc_filedialogs",
-				"link": "https://github.com/swordcube/linc_filedialogs",
+				"link": "https://github.com/dazKind/linc_filedialogs",
 				"branch": "main"
 			}
 		]

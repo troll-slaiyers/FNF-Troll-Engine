@@ -1,6 +1,6 @@
 package funkin.states.editors;
 
-import flixel.addons.transition.FlxTransitionableState;
+import funkin.states.base.TransitionableState;
 
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
@@ -45,7 +45,7 @@ class MasterEditorMenu extends MusicBeatState
 		this.persistentUpdate = true;
 		super.create();
 		FlxG.mouse.visible = false;
-		FlxTransitionableState.skipNextTransOut = true;
+		TransitionableState.skipNextTransOut = true;
 		FlxG.camera.bgColor = FlxColor.BLACK;
 
 		#if DISCORD_ALLOWED

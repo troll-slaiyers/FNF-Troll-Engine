@@ -27,6 +27,7 @@ class NoteObject extends FlxSprite {
 	public var offsetY:Float = 0;
 	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
 
+	/** Prevents the default FlxSprite `draw` function from being called. **/
 	public var handleRendering:Bool = true;
 	public var vec3Cache:Vector3 = Vector3.get(); // for vector3 operations in modchart code
 

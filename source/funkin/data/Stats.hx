@@ -1,6 +1,6 @@
 package funkin.data;
 
-import funkin.data.JudgmentManager.Judgment;
+import funkin.data.JudgmentManager.HitResult;
 import funkin.data.JudgmentManager.PBot;
 import funkin.data.JudgmentManager.Wife3;
 import funkin.data.JudgmentManager.JudgmentData;
@@ -17,12 +17,6 @@ enum abstract AccuracySystem(String) from String to String
 	var WIFE3 = "Wife3";
 	/** Millisecond-based accuracy using V-Slice's PBOT1 algorithm**/
 	var PBOT = "PBot";
-}
-
-typedef NoteHitInfo = {
-	var strumTime:Float;
-	var judgment:Judgment;
-	var hitDiff:Float;
 }
 
 class Stats {
@@ -79,7 +73,7 @@ class Stats {
 	/** Array of note hit differences in milliseconds **/
 	public var noteDiffs:Array<Float> = [];
 	/** Array of note hit results (hit time, judgement, hit difference), in order **/
-	public var judged:Array<NoteHitInfo> = [];
+	public var judged:Array<HitResult> = [];
 
 	public var judgements:Map<String, Int> = [
 		"epic" => 0,

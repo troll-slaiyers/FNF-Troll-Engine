@@ -3,7 +3,7 @@ package funkin;
 import funkin.scripts.Globals;
 import funkin.states.base.MusicBeatState;
 
-import flixel.addons.transition.FlxTransitionableState;
+import funkin.states.base.TransitionableState;
 import flixel.util.typeLimit.NextState;
 import flixel.input.keyboard.FlxKey;
 
@@ -28,9 +28,6 @@ class FNFGame extends FlxGame
 		startFullscreen = startFullscreen ?? FlxG.save.data.fullscreen;
 
 		super(gameWidth, gameHeight, initialState, updateFramerate, drawFramerate, skipSplash, startFullscreen);
-		#if FLX_SOUND_TRAY
-		_customSoundTray = flixel.system.ui.DefaultFlxSoundTray;
-		#end
 
 		FlxG.sound.volume = FlxG.save.data.volume;
 		FlxG.mouse.useSystemCursor = true;
@@ -78,8 +75,8 @@ class FNFGame extends FlxGame
 				if (e.shiftKey) {
 					funkin.Paths.clearStoredMemory();
 					funkin.Paths.clearUnusedMemory();
-					FlxTransitionableState.skipNextTransIn = true;
-					FlxTransitionableState.skipNextTransOut = true;
+					TransitionableState.skipNextTransIn = true;
+					TransitionableState.skipNextTransOut = true;
 					if (_state != null) _state.visible = false;
 					MusicBeatState.switchState(new funkin.states.MainMenuState());
 				}else {

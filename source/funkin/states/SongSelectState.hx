@@ -1,7 +1,7 @@
 package funkin.states;
 
 import funkin.states.options.OptionsSubstate;
-import flixel.addons.transition.FlxTransitionableState;
+import funkin.states.base.TransitionableState;
 import flixel.text.FlxText;
 import funkin.data.Song;
 import funkin.data.BaseSong;
@@ -57,8 +57,8 @@ class SongSelectState extends MusicBeatSubstate
 
 	override public function create() 
 	{
-		FlxTransitionableState.skipNextTransIn = true;
-		FlxTransitionableState.skipNextTransOut = true;
+		TransitionableState.skipNextTransIn = true;
+		TransitionableState.skipNextTransOut = true;
 		this.persistentDraw = false;
 		this.persistentUpdate = false;
 		super.create();

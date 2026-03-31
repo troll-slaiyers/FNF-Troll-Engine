@@ -5,7 +5,7 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
-import flixel.addons.transition.FlxTransitionableState;
+import funkin.states.base.TransitionableState;
 import flixel.effects.FlxFlicker;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.text.FlxText;
@@ -52,9 +52,6 @@ class MainMenuState extends MusicBeatState
 		DiscordClient.changePresence({details: "In the Menus"});
 		#end
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
-
-		transIn = FlxTransitionableState.defaultTransIn;
-		transOut = FlxTransitionableState.defaultTransOut;
 
 		persistentUpdate = persistentDraw = true;
 
@@ -231,7 +228,7 @@ class MainMenuState extends MusicBeatState
 			else if (FlxG.keys.anyJustPressed(debugKeys))
 			{
 				selectedSomethin = true;
-				FlxTransitionableState.skipNextTransOut = true;
+				TransitionableState.skipNextTransOut = true;
 				switchState(new MasterEditorMenu());
 			}
 			#end

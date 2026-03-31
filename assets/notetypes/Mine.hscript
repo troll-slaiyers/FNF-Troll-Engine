@@ -6,7 +6,7 @@ function setupNote(note:Note){
     note.noMissAnimation = true;
 }
 
-function onGoodNoteHitPost(note:Note){
+function onNoteMissPost(note:Note){
     FlxG.sound.play(Paths.sound("mineExplode"));
 }
 

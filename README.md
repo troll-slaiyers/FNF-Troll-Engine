@@ -31,6 +31,7 @@ Expect bugs, breaking changes and little documentation!!! (You can look at the `
 - [SrtHero278](https://github.com/SrtHero278) - Notefield optimizations
 - [Vortex](https://github.com/Vortex2Oblivion) - Extra keys implementation and a bunch of other improvements
 - [Shadz](https://github.com/ShadzXD) - Flixel-animate implementation
+- [MAJigsaw77](https://github.com/MAJigsaw77) - Creator of [hxdiscord_rpc](https://github.com/MAJigsaw77/hxdiscord_rpc) and [hxvlc](https://github.com/MAJigsaw77/hxvlc)
 - [MaybeMaru](https://github.com/MaybeMaru) - Creator of [Flixel-animate](https://github.com/MaybeMaru/flixel-animate) and [Moonchart](https://github.com/MaybeMaru/moonchart)
 - [swordcube](https://bsky.app/profile/swordcube.bsky.social) - Pixel note splashes + [linc_filedialogs](https://github.com/swordcube/linc_filedialogs) implementation
 - [crowplexus](https://github.com/crowplexus) - Countdown class + [hxdiscord_rpc](https://github.com/MAJigsaw77/hxdiscord_rpc/) implementation

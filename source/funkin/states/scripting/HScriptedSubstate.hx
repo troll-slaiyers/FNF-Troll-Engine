@@ -26,7 +26,7 @@ class HScriptedSubstate extends MusicBeatSubstate
 
 	static public function fromFile(name:String, ?scriptVars:Map<String, Dynamic>)
 	{
-		for (filePath in Paths.getFolders("substates"))
+		for (filePath in Paths.getFolders("states"))
 		{
 			for(ext in Paths.HSCRIPT_EXTENSIONS){
 				var fullPath = filePath + '$name.$ext';

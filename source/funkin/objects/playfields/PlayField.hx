@@ -198,10 +198,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				removeNote(daNote.unhitTail.shift());
 		
 
-		if (daNote.parent != null && daNote.parent.tail.contains(daNote))
+		if (daNote.parent != null)
 			daNote.parent.tail.remove(daNote);
 
- 		if (daNote.parent != null && daNote.parent.unhitTail.contains(daNote))
+ 		if (daNote.parent != null)
 			daNote.parent.unhitTail.remove(daNote); 
 
 		if (noteQueue[daNote.column] != null)
@@ -289,8 +289,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 					continue;
 				var judge:Judgment = judgeManager.judgeNote(note, hitTime);
 				if (judge != UNJUDGED){
-					note.hitResult.judgment = judge;
-					note.hitResult.hitDiff = hitTime - note.strumTime;
+					note.hitResult.fromTimes(judge, note.strumTime, hitTime);
 					noteHitCallback(note, this);
 					return note;
 				}
@@ -501,12 +500,16 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 						noteMissed.dispatch(daNote, this);
 				} 
 
-				if((
-					(daNote.holdingTime>=daNote.sustainLength) && daNote.sustainLength>0 ||
-					daNote.isSustainNote && daNote.strumTime - Conductor.songPosition < -350 ||
-					!daNote.isSustainNote
-					&& (daNote.sustainLength == 0 || daNote.tooLate)
-					&& daNote.strumTime - Conductor.songPosition < -(200 + judgeManager.getWindow(TIER1) + daNote.sustainLength)) && (daNote.tooLate || daNote.wasGoodHit))
+				if (
+					(
+						(!daNote.isSustainNote) ||
+						(daNote.sustainLength > 0 && daNote.holdingTime >= daNote.sustainLength) ||
+						(daNote.isSustainNote && daNote.strumTime - Conductor.songPosition < -350)
+					) && (
+						(daNote.sustainLength == 0 || daNote.tooLate || daNote.wasGoodHit)
+						&& daNote.strumTime - Conductor.songPosition < -(200 + judgeManager.getWindow(TIER1) + daNote.sustainLength)
+					)
+				)
 				{
 					daNote.garbage = true;
 					garbage.push(daNote);
@@ -521,12 +524,17 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if (inControl && autoPlayed)
 		{
 			for(i in 0...keyCount){
-				for (daNote in getTapNotes(i, (note:Note) -> !note.tooLate && !note.wasGoodHit && !note.ignoreNote && !note.hitCausesMiss)){
-					var hitDiff = Conductor.songPosition - daNote.strumTime;
+				for (note in getTapNotes(i, (note:Note) -> !note.tooLate && !note.wasGoodHit && !note.ignoreNote && !note.hitCausesMiss)){
+					var hitTime:Float = Conductor.songPosition;
+					var hitDiff:Float = hitTime - note.strumTime;
 					if (isPlayer && (hitDiff + ClientPrefs.ratingOffset) >= (-5 * (Wife3.timeScale>1 ? 1 : Wife3.timeScale)) || hitDiff >= 0){
-						daNote.hitResult.judgment = judgeManager.useEpics ? TIER5 : TIER4;
-						daNote.hitResult.hitDiff = (hitDiff > -5) ? -5 : hitDiff; 
-						if (noteHitCallback!=null) noteHitCallback(daNote, this);
+						note.hitResult.set(
+							judgeManager.useEpics ? TIER5 : TIER4,
+							(hitDiff > -5) ? -5 : hitDiff,
+							hitTime,
+							true
+						);
+						noteHitCallback(note, this);
 					}
 					
 				}
@@ -541,11 +549,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 					while (noteList.length > 0)
 					{
 						var note:Note = noteList.pop();
-						var judge:Judgment = judgeManager.judgeNote(note, Conductor.songPosition);
+						var hitTime:Float = Conductor.songPosition;
+						var judge:Judgment = judgeManager.judgeNote(note, hitTime);
 						if (judge != UNJUDGED)
 						{
-							note.hitResult.judgment = judge;
-							note.hitResult.hitDiff = Conductor.songPosition - note.strumTime;
+							note.hitResult.fromTimes(judge, note.strumTime, hitTime);			
 							noteHitCallback(note, this);
 						}
 						

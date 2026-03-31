@@ -3,7 +3,6 @@ package funkin.states;
 import funkin.data.StageData;
 import funkin.Conductor;
 import openfl.filters.BlurFilter;
-import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepad;
@@ -60,8 +59,8 @@ class TitleState extends MusicBeatState
 		if (initialized)
 			Paths.clearStoredMemory();
 
-		FlxTransitionableState.skipNextTransIn = true;
 		persistentUpdate = true;
+		transIn = null; // No in transition it looks bad
 
 		////
 		camFollow = new FlxPoint(640, 360);

@@ -42,12 +42,17 @@
 			"type": "git",
 			"dir": null,
 			"ref": "master",
-			"url": "https://github.com/nebulazorua/t-hscript"
+			"url": "https://github.com/troll-slaiyers/t-hscript"
+		},
+		{
+			"name": "no-spoon",
+			"type": "haxelib",
+			"version": "0.2.0"
 		},
 		{
 			"name": "hxvlc",
 			"type": "haxelib",
-			"version": "2.2.5"
+			"version": "2.2.6"
 		},
 		{
 			"name": "flixel-animate",
@@ -83,7 +88,7 @@
 			"type": "git",
 			"dir": null,
 			"ref": "main",
-			"url": "https://github.com/swordcube/linc_filedialogs"
+			"url": "https://github.com/dazKind/linc_filedialogs"
 		}
 	]
 }

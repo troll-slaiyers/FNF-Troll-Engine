@@ -2,7 +2,6 @@ package;
 
 import funkin.*;
 import funkin.states.base.MusicBeatState;
-import funkin.transitions.FadeTransition;
 
 import funkin.data.Highscore;
 import funkin.input.Controls;
@@ -10,7 +9,7 @@ import funkin.input.Controls;
 import flixel.FlxG;
 import flixel.FlxState;
 import flixel.tweens.*;
-import flixel.addons.transition.FlxTransitionableState;
+import funkin.states.base.TransitionableState;
 
 #if sys
 import Sys.time as getTime;
@@ -31,7 +30,7 @@ using StringTools;
 
 // Loads the title screen, alongside some other stuff.
 
-class StartupState extends FlxTransitionableState
+class StartupState extends TransitionableState
 {
 	public function new()
 	{
@@ -72,8 +71,7 @@ class StartupState extends FlxTransitionableState
 		UpdaterState.clearTemps("./");
 		#end
 
-		FlxTransitionableState.defaultTransIn = FadeTransition;
-		FlxTransitionableState.defaultTransOut = FadeTransition;
+		TransitionableState.defaultTransition = funkin.transitions.FadeTransition;
 
 		#if FUNNY_ALLOWED
 		var bread = Main.bread;

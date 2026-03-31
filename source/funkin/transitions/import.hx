@@ -1,5 +1,4 @@
 package funkin.transitions;
 
-import flixel.addons.transition.Transition;
-import flixel.addons.transition.FlxTransitionableState;
-import flixel.addons.transition.FlxTransitionSprite.TransitionStatus;
+import funkin.transitions.Transition;
+import funkin.states.base.TransitionableState;

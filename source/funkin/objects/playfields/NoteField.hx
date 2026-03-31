@@ -156,7 +156,7 @@ class NoteField extends FieldBase
 
 			if (songSpeed != 0)
 			{
-				if (daNote.wasGoodHit && daNote.sustainLength > 0)
+				if (daNote.holdingTime > 0)
 					continue;
 				
 				var speed:Float = modManager.getNoteSpeed(daNote, modNumber, songSpeed);
@@ -422,25 +422,33 @@ class NoteField extends FieldBase
 		var useSpiralHolds = modManager.getValue("spiralHolds", modNumber) != 0;
 
 
+		var strumSub = (crotchet / holdSubdivisions);
 		for (sub in 0...holdSubdivisions)
 		{
 			var prog = sub / (holdSubdivisions + 1);
 			var nextProg = (sub + 1) / (holdSubdivisions + 1);
-			var strumSub = (crotchet / holdSubdivisions);
-			var strumOff = (strumSub * sub);
-			strumSub *= sv;
-			strumOff *= sv;
+			var strumSub = strumSub;
+			var strumOff = strumSub * sub;
 			
 			if ((hold.wasGoodHit || hold.parent.wasGoodHit) && !hold.tooLate) {
-				var scale:Float = 1 - ((strumDiff + crotchet) / crotchet);
+				var scale:Float = -strumDiff / crotchet;
 				if (scale <= 0.0) {
 					strumSub = 0;
 					strumOff = 0;
 				}else if (scale < 1) {
+					scale *= sv;
 					strumSub *= scale;
 					strumOff *= scale;
 				}
+			}else { 
+				strumOff *= sv;
+				strumSub *= sv;
 			}
+
+			var vDiff = visualDiff + (strumOff * Note.pixelsPerMS);
+			var vDiff2 = vDiff + (strumSub * Note.pixelsPerMS);
+			var diff = strumDiff + strumOff;
+			var diff2 = diff + strumSub;
 
 			scalePoint.set(1, 1);
 
@@ -452,10 +460,7 @@ class NoteField extends FieldBase
 			};
 
 			if (hold.copyAlpha)
-				info = modManager.getExtraInfo((visualDiff + ((strumOff + strumSub) * Note.pixelsPerMS)) * -speed, strumDiff + strumOff + strumSub, curDecBeat, info, hold, modNumber, hold.column);
-
-			var topWidth = scalePoint.x * FlxMath.lerp(tWid, bWid, prog);
-			var botWidth = scalePoint.x * FlxMath.lerp(tWid, bWid, nextProg);
+				info = modManager.getExtraInfo(vDiff2 * -speed, diff2, curDecBeat, info, hold, modNumber, hold.column);
 
 			var alphaMult = hold.baseAlpha;
 
@@ -464,15 +469,17 @@ class NoteField extends FieldBase
 			
 			info.alpha *= FlxMath.lerp(alphaMult, 1, info.glow);
 
-			if(lastMe == null) // first sexment
-			{
-				var basePos = modManager.getPos(-(visualDiff + ((strumOff + strumSub) * Note.pixelsPerMS)) * speed, strumDiff + strumOff + strumSub, curDecBeat, hold.column, modNumber, hold, this,
-					perspectiveArrDontUse, hold.vec3Cache);
-
+			if (lastMe == null) { // first sexment
+				var basePos = modManager.getPos(vDiff2 * -speed, diff2, curDecBeat, hold.column, modNumber, hold, this, perspectiveArrDontUse, hold.vec3Cache);
 				zIndex = basePos.z;
 			}
-			var top = lastMe ?? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * Note.pixelsPerMS)), strumDiff + strumOff, useSpiralHolds, lookAheadTime);
-			var bot = getPoints(hold, botWidth, speed, (visualDiff + ((strumOff + strumSub) * Note.pixelsPerMS)), strumDiff + strumOff + strumSub, useSpiralHolds, lookAheadTime);
+
+			var topWidth = scalePoint.x * FlxMath.lerp(tWid, bWid, prog);
+			var botWidth = scalePoint.x * FlxMath.lerp(tWid, bWid, nextProg);
+
+			var top = lastMe ?? getPoints(hold, topWidth, speed, vDiff, diff, useSpiralHolds, lookAheadTime);
+			var bot = getPoints(hold, botWidth, speed, vDiff2, diff2, useSpiralHolds, lookAheadTime);
+
 			if (!hold.copyY) {
 				var a:Float = (crotchet + 1) * Note.pixelsPerMS * speed;
 				
@@ -572,7 +579,7 @@ class NoteField extends FieldBase
 		{
 			var ogTop = top;
 			top = bottom;
-			bottom = top;
+			bottom = ogTop;
 		}
 
 		switch (sprite.frame.angle) {

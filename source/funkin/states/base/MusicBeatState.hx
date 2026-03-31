@@ -3,7 +3,7 @@ package funkin.states.base;
 import funkin.data.MusicData;
 import flixel.math.FlxMath;
 import funkin.input.Controls;
-import flixel.addons.transition.FlxTransitionableState;
+import funkin.states.base.TransitionableState;
 import openfl.media.Sound;
 import openfl.ui.MouseCursor;
 import openfl.ui.Mouse;
@@ -51,7 +51,7 @@ enum abstract SongSyncMode(String) to String {
 	"sectionHit"
 ]))
 #end
-class MusicBeatState extends FlxTransitionableState
+class MusicBeatState extends TransitionableState
 {
 	private var curSection:Int = 0;
 	private var curStep(get, set):Int;
@@ -354,8 +354,8 @@ class MusicBeatState extends FlxTransitionableState
 
 	public static function resetState(?skipTrans:Bool = false) {
 		if (skipTrans) {
-			FlxTransitionableState.skipNextTransIn = true;
-			FlxTransitionableState.skipNextTransOut = true;
+			TransitionableState.skipNextTransIn = true;
+			TransitionableState.skipNextTransOut = true;
 		}
 
 		#if SCRIPTABLE_STATES

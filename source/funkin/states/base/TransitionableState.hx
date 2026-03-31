@@ -1,20 +1,19 @@
-package flixel.addons.transition;
+package funkin.states.base;
 // modified by Nebula the Zorua for Andromeda Engine 1.0
 // replaces the TransitionData bullshit with substates
 // the substate should have a start, setStatus and finishCallback property
 // after that, how the substate behaves is up to you.
 
+// modified by riconuts for Troll Engine 0.3
+// replaces the substate bullshit with a custom Transition class
+// custom transitions should override the create and start methods, then call finish when they're done.
 
 import flixel.FlxState;
-import flixel.FlxSubState;
-import flixel.addons.transition.FlxTransitionSprite.TransitionStatus;
+import funkin.transitions.Transition;
 
-class FlxTransitionableState extends FlxState
+class TransitionableState extends FlxState
 {
-	/** Default intro transition. Used when `transIn` is null **/
-	public static var defaultTransIn:Class<Transition> = null;
-	/** Default outro transition. Used when `transOut` is null **/
-	public static var defaultTransOut:Class<Transition> = null;
+	public static var defaultTransition:Class<Transition> = null;
 
 	public static var skipNextTransIn:Bool = false;
 	public static var skipNextTransOut:Bool = false;
@@ -24,15 +23,13 @@ class FlxTransitionableState extends FlxState
 	/** Outro transition to use before switching to another state **/
 	public var transOut:Class<Transition>;
 
-	public var hasTransIn(get, never):Bool;
-	public var hasTransOut(get, never):Bool;
-
-	/** Transition substate **/
-	public var transition:Transition;
+	/** Transition instance **/
+	public var transition:Transition = null;
 
 	////
 	var transitionCamera:FlxCamera = null;
-	var transOutFinished:Bool = false;
+
+	static var _lastTransition:Transition = null;
 
 	var _requestedTransition:Transition;
 	var _requestTransitionReset:Bool;
@@ -50,8 +47,8 @@ class FlxTransitionableState extends FlxState
 	 */
 	public function new(?TransIn:Class<Transition>, ?TransOut:Class<Transition>)
 	{
-		this.transIn = (TransIn == null) ? defaultTransIn : TransIn;
-		this.transOut = (TransOut == null) ? defaultTransOut : TransOut;
+		this.transIn = TransIn ?? defaultTransition;
+		this.transOut = TransOut ?? defaultTransition;
 
 		super();
 	}
@@ -97,20 +94,9 @@ class FlxTransitionableState extends FlxState
 
 	override function startOutro(onOutroComplete:() -> Void)
 	{
-		if (!hasTransOut)
-			onOutroComplete();
-		else if (!_exiting)
-		{
-			// play the exit transition, and when it's done call FlxG.switchState
-			_exiting = true;
-			transitionOut(onOutroComplete);
-			
-			if (skipNextTransOut)
-			{
-				skipNextTransOut = false;
-				finishTransOut();
-			}
-		}
+		// play the exit transition, and when it's done call FlxG.switchState
+		_exiting = true;
+		transitionOut(onOutroComplete);
 	}
 
 	/**
@@ -118,15 +104,13 @@ class FlxTransitionableState extends FlxState
 	 */
 	public function transitionIn():Void
 	{
-		if (skipNextTransIn || !hasTransIn) {
+		if (skipNextTransIn || transIn == null) {
 			skipNextTransIn = false;
 			finishTransIn();
 			return;
 		}
 
-		var transition = Type.createInstance(transIn, []);
-		transition.finishCallback = finishTransIn;
-		startTransition(transition, IN);
+		_startTransition(transIn, IN, finishTransIn);
 	}
 
 	/**
@@ -136,13 +120,27 @@ class FlxTransitionableState extends FlxState
 	{
 		_onExit = OnExit;
 
-		if (hasTransOut){
-			var transition = Type.createInstance(transOut, []);
-			transition.finishCallback = finishTransOut;
-			startTransition(transition, OUT);
-		}else{
-			_onExit();
+		if (skipNextTransOut || transOut == null) {
+			skipNextTransOut = false;
+			finishTransOut();
+			return;
 		}
+
+		_startTransition(transOut, OUT, finishTransOut);
+	}
+
+	function _startTransition(cl:Class<Transition>, status:TransitionStatus, onComplete:Void->Void) {
+		if (!_lastTransition?.exists || !Std.isOfType(_lastTransition, cl)) {
+			_lastTransition?.destroy(); // just in case
+			_lastTransition = Type.createInstance(cl, []);
+		}else {
+			// Prevent resetTransition from nuking the current transition
+			if (transition == _lastTransition)
+				transition = null;
+		}
+
+		_lastTransition.finishCallback = onComplete;
+		startTransition(_lastTransition, status);
 	}
 
 	public function startTransition(requestedTrans:Transition, status:TransitionStatus)
@@ -203,16 +201,6 @@ class FlxTransitionableState extends FlxState
 		return camera;
 	}
 
-	function get_hasTransIn():Bool
-	{
-		return transIn != null;
-	}
-
-	function get_hasTransOut():Bool
-	{
-		return transOut != null;
-	}
-
 	function finishTransIn()
 	{
 		if (transition != null)
@@ -221,9 +209,7 @@ class FlxTransitionableState extends FlxState
 
 	function finishTransOut()
 	{
-		transOutFinished = true;
-
-		if (!_exiting)
+		if (transition != null && !_exiting)
 		{
 			transition.close();
 		}

@@ -173,7 +173,7 @@ class NotesSubState extends MusicBeatSubstate
 			var line = strLines[i];
 			if (line == null) break;
 
-			for (j => v in line.split(' '))
+			for (j => v in line.split(','))
 				hsb[j] = Std.parseInt(v) ?? 0;
 		}
 		updateValueVisuals();
@@ -182,19 +182,21 @@ class NotesSubState extends MusicBeatSubstate
 	function saveToString():String {
 		var txt = "";
 		for (vals in valuesArray)
-			txt += vals.join(" ") + "\n";
+			txt += vals.join(",") + "\n";
 		return txt.rtrim();
 	}
 
 	function openValuesFile() {
 		sys.FileSystem.createDirectory('user_hsb');
-		CoolUtil.showOpenDialog("Open File", "user_hsb", onOpenValuesFile);
+		CoolUtil.showOpenDialog("Open File", "user_hsb/hsb.csv", onOpenValuesFile);
 	}
 
 	function saveValuesFile() {
 		sys.FileSystem.createDirectory('user_hsb');
-		CoolUtil.showSaveDialog(saveToString(), "Save File", 'user_hsb');
+		CoolUtil.showSaveDialog(saveToString(), "Save File", 'user_hsb/hsb.csv');
 	}
+
+	// TODO: add proper presets instead of just this file stuff bruh wtf
 
 	function menuUpdate(elapsed:Float) {
 		if (FlxG.keys.pressed.CONTROL) {

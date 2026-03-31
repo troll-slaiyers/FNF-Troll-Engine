@@ -313,7 +313,7 @@ class DefaultSongEvent extends SongEvent {
 	}
 }
 
-class SongEventHandler {
+class SongEventManager {
 	private final eventMap:Map<String, SongEvent> = [];
 
 	public function new() {}

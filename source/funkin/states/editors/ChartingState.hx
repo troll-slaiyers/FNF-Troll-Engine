@@ -29,7 +29,7 @@ import flixel.util.FlxGradient;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.ui.*;
 import flixel.addons.ui.FlxUIDropDownMenu.FlxUIDropDownHeader;
-import flixel.addons.transition.FlxTransitionableState;
+import funkin.states.base.TransitionableState;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.text.FlxText;
@@ -143,18 +143,18 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 	public var hudSkin(default, set):String = 'default';
 	public var hudSkinScript:Null<FunkinHScript> = null;
-	public var hudSkinScripts:Map<String, FunkinHScript> = [];
+	public var hudSkinMap:Map<String, FunkinHScript> = [];
 
 	public function getHudSkinScript(name:String):Null<FunkinHScript> {
-		if (name.length == 0 || hudSkinScripts.exists(name))
-			return hudSkinScripts.get(name);
+		if (name.length == 0 || hudSkinMap.exists(name))
+			return hudSkinMap.get(name);
 
 		var path = Paths.getHScriptPath('hudskins/$name');
 		if (path == null)
 			return null;
 		
 		var script:FunkinHScript = FunkinHScript.fromFile(path, name);
-		hudSkinScripts.set(name, script);
+		hudSkinMap.set(name, script);
 		return script;
 	}
 		
@@ -343,7 +343,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		instance = this;
 		updateSongPos = false;
 		
-		FlxTransitionableState.skipNextTransOut = true;
+		TransitionableState.skipNextTransOut = true;
 		MusicBeatState.stopMenuMusic();
 
 		plrHitsound = new FlxSound().loadEmbedded(Paths.sound("monoHitsound"));
@@ -633,7 +633,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 		Conductor.cleanup();
 		Conductor.mapBPMChanges(_song);
-		Conductor.bpm = (_song.bpm);
+		Conductor.changeBPM(_song.bpm);
 		metroInterval = (60 / _song.bpm) * 1000;
 
 		this.tracks = Conductor.tracks;
@@ -836,7 +836,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		var beat:Float = 0;
 		for (i => section in allSections) {			
 			if (section.changeBPM)
-				Conductor.bpm = (section.bpm);
+				Conductor.changeBPM(section.bpm);
 
 			while (section.sectionNotes.length > 0) {
 				var note = section.sectionNotes.pop();
@@ -847,7 +847,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			sectionStarts[i] = fuckFloatingPoints(Conductor.stepToMs(beat * 4));
 			beat += getSectionBeats(i);
 		}
-		Conductor.bpm = (bimp);
+		Conductor.changeBPM(bimp);
 		
 		allNotes.sort((a, b) -> return Std.int(b.strumTime - a.strumTime)); // descending order
 
@@ -1326,7 +1326,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			if (copyIdx < 0) return;
 
 			////
-			copySection(curSection, copyIdx, true, true);
+			copySection(curSection, copyIdx, check_notesSec.checked, check_eventsSec.checked);
 		});
 		copyLastButton.resize(60, 30);
 		
@@ -1782,8 +1782,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		// TODO: freeplay data shit idunno
 
 		////
-		final fileDialog = new FileDialog();
-		fileDialog.onOpen.add(function(resource) {
+		function onOpenMetadata(resource) {
 			var str:String = (resource:Bytes).toString();
 			if (str != null && str.length > 0) {
 				var data:Dynamic = Json.parse(str);
@@ -1796,10 +1795,10 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				modcharterInputText.text = data.modcharter;
 				extraInfoInputText.text = (data.extraInfo?.join(',') ?? "");
 			}
-		});
+		}
 
 		var loadButton = newFlxUIButton(10, extraInfoInputText.y + 30, "Load Metadata", function() {			
-			fileDialog.open('json', getSongPath("metadata.json"), 'Load Metadata');
+			CoolUtil.showOpenDialog("Load Metadata", getSongPath("metadata.json"), ["JSON file", "*.json"], onOpenMetadata);
 		});
 
 		////
@@ -1812,7 +1811,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			_song.metadata.extraInfo = extraInfoInputText.text.split(',');
 
 			var data:String = Json.stringify(_song.metadata, "\t");
-			fileDialog.save(data, 'json', getSongPath("metadata.json"), 'Save Metadata');
+			CoolUtil.showSaveDialog(data, "Save Metadata", getSongPath("metadata.json"), ["JSON file", "*.json"]);
 		});
 
 		////
@@ -2140,7 +2139,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	}
 
 	function updateKeyCount(count:Int) {
-		_song.keyCount = Math.ceil(Math.max(1, count));
+		PlayState.keyCount = _song.keyCount = Math.ceil(Math.max(1, count));
 		NoteAnimations.refreshKeyAnimations(_song.keyCount);
 		NoteAnimations.remap4KArray(_song.keyCount, defaultNoteColours, noteColours);
 
@@ -2398,6 +2397,31 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		Conductor.songPosition = lastMixPos + lastMixTimer;
 	}
 
+	override function updateSteps() {
+		var oldStep:Int = Conductor.curStep;
+		Conductor.updateSteps();
+		var curStep:Int = Conductor.curStep;
+
+		if (oldStep != curStep) {
+			if (curStep > 0) {
+				stepHit();
+				if (curStep % 4 == 0)
+					beatHit();
+			}
+
+			/*
+			if (PlayState.SONG != null) {
+				if (oldStep < curStep)
+					updateSection();
+				else
+					rollbackSection();
+			}
+			*/
+
+			tryResync();
+		}
+	}
+
 	var inputBlocked = false;
 	function checkIsTyping():Bool {
 		for (inputText in blockPressWhileTypingOn) {
@@ -2595,31 +2619,27 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			else if (Conductor.songPosition >= currentSectionEnd) {
 				while (Conductor.songPosition >= currentSectionEnd) {
 					var nextSection:Int = curSection + 1;
-					if (_song.notes[nextSection] == null)
-						pushSection();
+					if (_song.notes[nextSection] == null) {
+						var sb = _song.notes[curSection].sectionBeats;
+						pushSection(sb);
+					}
 					curSection = nextSection;
 					currentSectionEnd = sectionStartTime(1);
 				}
-				reloadGridLayer();
-				updateSectionUI();
-				eventStepperStrumTime.stepSize = Conductor.stepCrochet;
-				stepperStrumTime.stepSize = Conductor.stepCrochet;
-				stepperSusLength.stepSize = Conductor.stepCrochet;
+				currentSectionStart = sectionStartTime();
+				onSectionChange();
 			}
 			else if (Conductor.songPosition < currentSectionStart) {
 				while (Conductor.songPosition < currentSectionStart) {
 					curSection = curSection - 1;
 					currentSectionStart = sectionStartTime();
 				}
-				reloadGridLayer();
-				updateSectionUI();
-				eventStepperStrumTime.stepSize = Conductor.stepCrochet;
-				stepperStrumTime.stepSize = Conductor.stepCrochet;
-				stepperSusLength.stepSize = Conductor.stepCrochet;
+				currentSectionEnd = sectionStartTime(1);
+				onSectionChange();
 			}
 		}
 
-		Conductor.updateSteps();
+		updateSteps();
 		strumLineUpdateY();
 
 		if (strumLineNotes.visible = quantArrow.visible = options.vortex) {
@@ -3221,6 +3241,8 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	{
 		if (_song.notes[sec] != null) {
 			curSection = sec;
+			currentSectionStart = sectionStartTime();
+			currentSectionEnd = sectionStartTime(1);
 
 			if (updateMusic) {
 				pauseTracks();
@@ -3228,9 +3250,13 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				Conductor.updateSteps();
 			}
 
-			reloadGridLayer();
-			updateSectionUI();
+			onSectionChange();
 		}
+	}
+
+	function onSectionChange() {
+		reloadGridLayer();
+		updateSectionUI();
 		eventStepperStrumTime.stepSize = Conductor.stepCrochet;
 		stepperStrumTime.stepSize = Conductor.stepCrochet;
 		stepperSusLength.stepSize = Conductor.stepCrochet;
@@ -3389,7 +3415,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}
 
 		if (Conductor.bpm != daBPM) {
-			Conductor.bpm = (daBPM);
+			Conductor.changeBPM(daBPM);
 			metronomeStepper.value = daBPM;
 			metroInterval = (60 / daBPM) * 1000;
 		}
@@ -3540,11 +3566,11 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
         var crochet:Float;
         if (Conductor.songPosition <= strumTime) {
             map = Conductor.getBPMFromSeconds(strumTime);
-            crochet = (60 / map.bpm) * 1000;
+            crochet = Conductor.calculateCrochet(map.bpm);
         }
         else {
             map = Conductor.getBPMFromSeconds(Conductor.songPosition);
-            crochet = (60 / Conductor.getBPMFromSeconds(strumTime).bpm) * 1000;
+            crochet = Conductor.calculateCrochet(Conductor.getBPMFromSeconds(strumTime).bpm);
         }
         
         return map.songTime + ((strumTime - map.songTime) / crochet * Conductor.crochet);
@@ -3878,12 +3904,12 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}
 		notetypeScripts.clear();
 		
-		for (script in hudSkinScripts) {
+		for (script in hudSkinMap) {
 			if (script == null) continue;
 			script.call("onDestroy");
 			script.stop();
 		}
-		hudSkinScripts.clear();
+		hudSkinMap.clear();
 
 		saveOptions();
 		

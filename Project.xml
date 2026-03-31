@@ -137,15 +137,19 @@
 	<haxelib name="linc_filedialogs" if="desktop cpp" />
 
 	<haxelib name="hxdr_libs" if="cpp false"/>
+
+	<haxelib name="no-spoon" />	
+	<haxeflag name="--macro" value="Spork.stuff()" />
 		
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
 	<assets path="flixel/flixel-ui/img" embed="true"/>
 
 	<section if="CRASH_HANDLER">
-		<haxedef name="HXCPP_STACK_TRACE" />
 		<haxedef name="HXCPP_CHECK_POINTER" />
 		<haxedef name="HXCPP_STACK_LINE" />
+		<haxedef name="HXCPP_STACK_TRACE" />
+		<haxedef name="HXCPP_CATCH_SEGV" />
 		<haxedef name="openfl-enable-handle-error" />
 	</section>
 		

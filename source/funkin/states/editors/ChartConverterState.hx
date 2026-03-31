@@ -35,9 +35,6 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 	var metaPath:String;
 	var chartPaths:Array<String>;
 
-	var chartDialog:FileDialog;
-	var metaDialog:FileDialog;
-
 	////
 	var infoText:FlxText;
 
@@ -51,12 +48,6 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 		bg.scrollFactor.set();
 		bg.screenCenter();
 		add(bg);
-
-		chartDialog = new FileDialog();
-		chartDialog.onSelectMultiple.add(onSelectChartFiles);
-
-		metaDialog = new FileDialog();
-		metaDialog.onSelectMultiple.add(onSelectMetaFiles);
 
 		var x = FlxG.width / 3 - 200;
 		var y = FlxG.height / 2;
@@ -154,9 +145,9 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 			case FlxUITypedButton.CLICK_EVENT:
 				switch(sender.name) {
 					case 'selectMetaButt':
-						metaDialog.browse(OPEN_MULTIPLE);
+						CoolUtil.showOpenMultipleDialog(onSelectMetaFiles);
 					case 'selectChartsButt':
-						chartDialog.browse(OPEN_MULTIPLE);
+						CoolUtil.showOpenMultipleDialog(onSelectChartFiles);
 					case 'convertFilesButt':
 						convert();
 				}
