@@ -7,6 +7,7 @@ import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxColor;
 import funkin.objects.shaders.ColorSwap;
+import funkin.util.FileUtil;
 
 using StringTools;
 
@@ -188,12 +189,12 @@ class NotesSubState extends MusicBeatSubstate
 
 	function openValuesFile() {
 		sys.FileSystem.createDirectory('user_hsb');
-		CoolUtil.showOpenDialog("Open File", "user_hsb/hsb.csv", onOpenValuesFile);
+		FileUtil.showOpenDialog("Open File", "user_hsb/hsb.csv", onOpenValuesFile);
 	}
 
 	function saveValuesFile() {
 		sys.FileSystem.createDirectory('user_hsb');
-		CoolUtil.showSaveDialog(saveToString(), "Save File", 'user_hsb/hsb.csv');
+		FileUtil.showSaveDialog(saveToString(), "Save File", 'user_hsb/hsb.csv');
 	}
 
 	// TODO: add proper presets instead of just this file stuff bruh wtf
