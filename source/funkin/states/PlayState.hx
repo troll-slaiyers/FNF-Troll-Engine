@@ -500,6 +500,12 @@ class PlayState extends MusicBeatState
 	public var hudSkinScript:FunkinHScript; // this is the HUD skin used for countdown, judgements, etc
 	public var hudSkinMap:Map<String, FunkinHScript> = []; // Doing this so you can do shit like i.e having it swap between pixel and normal HUD
 
+	/**
+	 * Variable used for enabling subdivisions on hold notes.
+	 * Turned off by default as this is only needed for Modcharts.
+	 * This is temporary until hold notes are rewritten.
+	 */
+	public var useHoldSubdivisions:Bool = false;
 	////
 	@:noCompletion function set_hudSkin(value:String){		
 		hudSkinScript?.call("onSkinUnload");
@@ -1932,7 +1938,7 @@ class PlayState extends MusicBeatState
 		for(field in playfields){
 /* 			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds; */
 			field.noteField.drawDistMod = ClientPrefs.drawDistanceModifier;
-			field.noteField.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs) + 1;
+			field.noteField.holdSubdivisions = !useHoldSubdivisions ? 1 : Std.int(ClientPrefs.holdSubdivs) + 1;
 		}
 
 		if (ClientPrefs.controllerMode) {

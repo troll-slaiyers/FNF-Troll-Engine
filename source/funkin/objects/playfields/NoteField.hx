@@ -36,14 +36,14 @@ class NoteField extends FieldBase
 	var HOLD_INDICES:Vector<Int> = new Vector<Int>(0, false);
 
 	public var holdSubdivisions(default, set):Int;
-	public var optimizeHolds = false; //ClientPrefs.optimizeHolds;
+	public var optimizeHolds = false; //ClientPrefs.optimizeHolds; does ts do anything?
 	public var defaultShader:FlxShader = new FlxShader();
 
 	public function new(field:PlayField)
 	{
 		super(0, 0);
 		this.field = field;
-		this.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs);
+		this.holdSubdivisions = !game.useHoldSubdivisions ? 1 : Std.int(ClientPrefs.holdSubdivs);
 	}
 	override public function getNotefield() {return this;}
 
