@@ -3,6 +3,7 @@ package funkin.states.editors;
 import funkin.objects.ui.ColorPicker;
 import flixel.group.FlxGroup;
 import haxe.io.Path;
+import funkin.util.FileUtil;
 import funkin.objects.hud.HealthIcon;
 import funkin.objects.Character;
 import funkin.data.CharacterData;
@@ -1360,7 +1361,7 @@ class CharacterEditorState extends funkin.states.base.CustomFlxUIState {
 		var data:String = Json.stringify(json, "\t");
 
 		if (data.length > 0) {
-			CoolUtil.showSaveDialog(data, "Save Character", '$charName.json', ["JSON file", "*.json"], onSaveComplete, onSaveCancel);
+			FileUtil.showSaveDialog(data, "Save Character", '$charName.json', ["JSON file", "*.json"], onSaveComplete, onSaveCancel);
 		}
 	}
 }

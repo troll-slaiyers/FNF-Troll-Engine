@@ -42,7 +42,7 @@ import haxe.io.Path;
 import haxe.io.Bytes;
 import flixel.system.FlxAssets.FlxSoundAsset;
 import lime.media.AudioBuffer;
-import lime.ui.FileDialog;
+import funkin.util.FileUtil;
 import openfl.geom.Rectangle;
 import flixel.util.FlxSort;
 #if DISCORD_ALLOWED
@@ -927,7 +927,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 			var json = {"song": {"events": _song.events}}
 			var data:String = Json.stringify(json, "\t");
-			CoolUtil.showSaveDialog(data, 'Save Events', getSongPath('events.json'), ["JSON file", '*.json']);
+			FileUtil.showSaveDialog(data, 'Save Events', getSongPath('events.json'), ["JSON file", '*.json']);
 		});
 
 		var saveZipButton = newFlxUIButton(110, saveEventJson.y + 30, 'Save as ZIP', function() {
@@ -942,7 +942,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				if (b != null) zip.addBytes(b, name);
 			}
 
-			CoolUtil.showSaveDialog(zip.finalize(), "Save File", getSongPath(_song.song + ".zip"), ["ZIP File", "*.zip"]);
+			FileUtil.showSaveDialog(zip.finalize(), "Save File", getSongPath(_song.song + ".zip"), ["ZIP File", "*.zip"]);
 		});
 
 		///
@@ -987,7 +987,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}
 
 		var loadEventJson:FlxUIButton = newFlxUIButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Open Events', function() {
-			final openEvents:Void->Void = CoolUtil.showOpenDialog.bind('Open Events', getSongPath('events.json'), ['*.json'], onOpenEvents);
+			final openEvents:Void->Void = FileUtil.showOpenDialog.bind('Open Events', getSongPath('events.json'), ['*.json'], onOpenEvents);
 			showWarning('This action will clear the current events.\n\nProceed?', openEvents);
 		});
 
@@ -1799,7 +1799,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}
 
 		var loadButton = newFlxUIButton(10, extraInfoInputText.y + 30, "Load Metadata", function() {			
-			CoolUtil.showOpenDialog("Load Metadata", getSongPath("metadata.json"), ["JSON file", "*.json"], onOpenMetadata);
+			FileUtil.showOpenDialog("Load Metadata", getSongPath("metadata.json"), ["JSON file", "*.json"], onOpenMetadata);
 		});
 
 		////
@@ -1812,7 +1812,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			_song.metadata.extraInfo = extraInfoInputText.text.split(',');
 
 			var data:String = Json.stringify(_song.metadata, "\t");
-			CoolUtil.showSaveDialog(data, "Save Metadata", getSongPath("metadata.json"), ["JSON file", "*.json"]);
+			FileUtil.showSaveDialog(data, "Save Metadata", getSongPath("metadata.json"), ["JSON file", "*.json"]);
 		});
 
 		////
@@ -3876,7 +3876,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		var fileName:String = getChartFileName();
 		var data:String = encodeChartJson();
 		if (data != null && data.length > 0) {
-			CoolUtil.showSaveDialog(data.trim(), "Save Chart", getSongPath(fileName), ["JSON file", "*.json"], onSaveComplete, onSaveCancel);
+			FileUtil.showSaveDialog(data.trim(), "Save Chart", getSongPath(fileName), ["JSON file", "*.json"], onSaveComplete, onSaveCancel);
 		}
 	}
 
