@@ -1,7 +1,7 @@
 package funkin.states.options;
 
-import funkin.objects.notes.NoteAnimations;
-import funkin.objects.notes.Note;
+import funkin.game.notes.NoteAnimations;
+import funkin.game.notes.Note;
 import funkin.states.options.BindsBullshit.KeyboardNavHelper;
 import funkin.states.options.BindsBullshit.BindButton;
 import funkin.CoolUtil.overlapsMouse as overlaps;
@@ -19,7 +19,7 @@ import flixel.addons.ui.U as FlxU;
 using StringTools;
 
 inline function getKeyName(id:Int):String
-	return funkin.input.InputFormatter.getKeyName(id);
+	return funkin.util.InputFormatter.getKeyName(id);
 
 inline function getJustPressed():Int
 	return FlxG.keys.firstJustPressed();

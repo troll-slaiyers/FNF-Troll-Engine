@@ -1,9 +1,9 @@
 package funkin.states;
 
 import math.CoolMath;
-import funkin.input.InputFormatter;
+import funkin.util.InputFormatter;
 import flixel.util.FlxColor;
-import funkin.objects.hud.HealthIcon;
+import funkin.game.hud.HealthIcon;
 
 import sys.FileSystem;
 import funkin.data.Song;
@@ -18,7 +18,7 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 
 using StringTools;
-using CoolerStringTools;
+using funkin.util.CoolerStringTools;
 
 @:injectMoreFunctions([
 	"onSelectSong",

@@ -2,8 +2,8 @@ package funkin.states.options;
 
 // too lazy to finish merging this w the keyboard version rn
 import math.CoolMath;
-import funkin.objects.notes.NoteAnimations;
-import funkin.objects.notes.Note;
+import funkin.game.notes.NoteAnimations;
+import funkin.game.notes.Note;
 import funkin.states.options.BindsBullshit.KeyboardNavHelper;
 import funkin.states.options.BindsBullshit.BindButton;
 import flixel.input.gamepad.FlxGamepadInputID;

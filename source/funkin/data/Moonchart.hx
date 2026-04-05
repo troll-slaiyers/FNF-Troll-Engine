@@ -21,7 +21,7 @@ import sys.io.File;
 import funkin.CoolUtil.alphabeticalSort;
 import funkin.CoolUtil.stringSort;
 
-using CoolerStringTools;
+using funkin.util.CoolerStringTools;
 using StringTools;
 
 typedef StepManiaDynamic = moonchart.formats.StepMania.StepManiaBasic<moonchart.parsers.StepManiaParser.StepManiaFormat>;

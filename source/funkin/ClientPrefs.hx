@@ -2,7 +2,7 @@ package funkin;
 
 #if !macro
 import Main.Version;
-import funkin.input.Controls;
+import funkin.Controls;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.util.FlxSave;
@@ -847,8 +847,8 @@ class ClientPrefs {
 	];
 
 	public static function loadDefaultKeys() {
-		final minKeyCount = funkin.objects.notes.Note.minKeyCount;
-		final maxKeyCount = funkin.objects.notes.Note.maxKeyCount;
+		final minKeyCount = funkin.game.notes.Note.minKeyCount;
+		final maxKeyCount = funkin.game.notes.Note.maxKeyCount;
 
 		for (i in minKeyCount - 1...maxKeyCount) {
 			for (j in 0...i + 1) {

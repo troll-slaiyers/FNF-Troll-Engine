@@ -11,7 +11,7 @@ import flixel.util.FlxColor;
 import haxe.io.Path;
 import haxe.Json;
 
-using CoolerStringTools;
+using funkin.util.CoolerStringTools;
 using StringTools;
 
 class Level {

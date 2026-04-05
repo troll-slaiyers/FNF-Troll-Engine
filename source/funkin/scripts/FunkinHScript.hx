@@ -8,7 +8,7 @@ import funkin.states.PlayState;
 import funkin.states.base.MusicBeatState;
 import funkin.states.base.MusicBeatSubstate;
 
-import funkin.input.Controls;
+import funkin.Controls;
 import funkin.api.Windows;
 
 import flixel.FlxG;
@@ -301,17 +301,17 @@ class FunkinHScript extends FunkinScript
 		set("GameOverSubstate", funkin.states.GameOverSubstate);
 		set("Song", funkin.data.Song);
 		set("BGSprite", funkin.objects.BGSprite);
-		set("RatingSprite", funkin.objects.hud.RatingGroup.RatingSprite);
+		set("RatingSprite", funkin.game.hud.RatingGroup.RatingSprite);
 
-		set("Note", funkin.objects.notes.Note);
-		set("NoteObject", funkin.objects.notes.NoteObject);
-		set("NoteSplash", funkin.objects.notes.NoteSplash);
-		set("StrumNote", funkin.objects.notes.StrumNote);
-		set("PlayField", funkin.objects.playfields.PlayField);
-		set("NoteField", funkin.objects.playfields.NoteField);
+		set("Note", funkin.game.notes.Note);
+		set("NoteObject", funkin.game.notes.NoteObject);
+		set("NoteSplash", funkin.game.notes.NoteSplash);
+		set("StrumNote", funkin.game.notes.StrumNote);
+		set("PlayField", funkin.game.playfields.PlayField);
+		set("NoteField", funkin.game.playfields.NoteField);
 
-		set("ProxyField", funkin.objects.proxies.ProxyField);
-		set("ProxySprite", funkin.objects.proxies.ProxySprite);
+		set("ProxyField", funkin.game.playfields.ProxyField);
+		set("ProxySprite", funkin.objects.ProxySprite);
 		set("AltBGSprite", funkin.objects.BGSprite.AltBGSprite);
 
 		set("FlxSprite3D", funkin.objects.FlxSprite3D);
@@ -320,26 +320,26 @@ class FunkinHScript extends FunkinScript
 		set("AttachedText", funkin.objects.AttachedText);
 
 		set("Character", funkin.objects.Character);
-		set("HealthIcon", funkin.objects.hud.HealthIcon);
+		set("HealthIcon", funkin.game.hud.HealthIcon);
 
-		set("Wife3", funkin.data.JudgmentManager.Wife3);
-		set("PBot", funkin.data.JudgmentManager.PBot);
-		set("JudgmentManager", funkin.data.JudgmentManager);
+		set("Wife3", funkin.game.JudgmentManager.Wife3);
+		set("PBot", funkin.game.JudgmentManager.PBot);
+		set("JudgmentManager", funkin.game.JudgmentManager);
 		set("Judgement", Wrappers.Judgment);
 
-		set("ModManager", funkin.modchart.ModManager);
-		set("Modifier", funkin.modchart.Modifier);
-		set("SubModifier", funkin.modchart.SubModifier);
-		set("NoteModifier", funkin.modchart.NoteModifier);
-		set("EventTimeline", funkin.modchart.EventTimeline);
-		set("StepCallbackEvent", funkin.modchart.events.StepCallbackEvent);
-		set("CallbackEvent", funkin.modchart.events.CallbackEvent);
-		set("ModEvent", funkin.modchart.events.ModEvent);
-		set("EaseEvent", funkin.modchart.events.EaseEvent);
-		set("SetEvent", funkin.modchart.events.SetEvent);
+		set("ModManager", funkin.game.modchart.ModManager);
+		set("Modifier", funkin.game.modchart.Modifier);
+		set("SubModifier", funkin.game.modchart.SubModifier);
+		set("NoteModifier", funkin.game.modchart.NoteModifier);
+		set("EventTimeline", funkin.game.modchart.EventTimeline);
+		set("StepCallbackEvent", funkin.game.modchart.events.StepCallbackEvent);
+		set("CallbackEvent", funkin.game.modchart.events.CallbackEvent);
+		set("ModEvent", funkin.game.modchart.events.ModEvent);
+		set("EaseEvent", funkin.game.modchart.events.EaseEvent);
+		set("SetEvent", funkin.game.modchart.events.SetEvent);
 
-		set("HScriptedHUD", funkin.objects.huds.HScriptedHUD);
-		set("HScriptModifier", funkin.modchart.HScriptModifier);
+		set("HScriptedHUD", funkin.game.huds.HScriptedHUD);
+		set("HScriptModifier", funkin.game.modchart.HScriptModifier);
 
 		set("HScriptedState", funkin.states.scripting.HScriptedState);
 		set("HScriptedSubstate", funkin.states.scripting.HScriptedSubstate);

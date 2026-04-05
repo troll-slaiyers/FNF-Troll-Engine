@@ -1,40 +1,40 @@
 package funkin.states;
 
-import funkin.objects.notes.NoteAnimations;
-import funkin.objects.cutscenes.Cutscene;
+import funkin.game.notes.NoteAnimations;
+import funkin.game.cutscenes.Cutscene;
 #if VIDEOS_ALLOWED
 import hxvlc.flixel.FlxVideo;
-import funkin.objects.cutscenes.VideoCutscene;
+import funkin.game.cutscenes.VideoCutscene;
 #end
-import funkin.objects.cutscenes.DialogueCutscene;
-import funkin.objects.playfields.PlayField.NoteCallback;
+import funkin.game.cutscenes.DialogueCutscene;
+import funkin.game.playfields.PlayField.NoteCallback;
 import funkin.data.Cache;
 import funkin.data.Level;
 import funkin.data.BaseSong;
 import funkin.data.ChartData;
 import funkin.data.StageData;
 import funkin.data.CharacterData;
-import funkin.objects.notes.Note;
-import funkin.objects.notes.NoteSplash;
-import funkin.objects.notes.StrumNote;
+import funkin.game.notes.Note;
+import funkin.game.notes.NoteSplash;
+import funkin.game.notes.StrumNote;
 import funkin.objects.Fish;
 import funkin.objects.Stage;
 import funkin.objects.Character;
-import funkin.objects.huds.*;
-import funkin.objects.hud.RatingGroup;
-import funkin.objects.hud.Countdown;
-import funkin.objects.playfields.*;
-import funkin.data.Stats;
-import funkin.data.JudgmentManager;
+import funkin.game.huds.*;
+import funkin.game.hud.RatingGroup;
+import funkin.game.hud.Countdown;
+import funkin.game.playfields.*;
+import funkin.game.Stats;
+import funkin.game.JudgmentManager;
 import funkin.data.Highscore;
 import funkin.states.GameOverSubstate;
 import funkin.states.PauseSubState;
-import funkin.modchart.ModManager;
+import funkin.game.modchart.ModManager;
 import funkin.states.editors.CharacterEditorState;
 import funkin.states.editors.ChartingState;
 import funkin.states.options.OptionsSubstate;
 import funkin.scripts.*;
-import funkin.scripts.Util;
+import funkin.objects.DebugText;
 import flixel.*;
 import flixel.util.*;
 import flixel.util.FlxSignal;
@@ -59,7 +59,7 @@ import lime.media.openal.ALEffect;
 import openfl.events.KeyboardEvent;
 
 using StringTools;
-using CoolerStringTools;
+using funkin.util.CoolerStringTools;
 
 #if DISCORD_ALLOWED
 using funkin.api.Discord;
@@ -494,7 +494,7 @@ class PlayState extends MusicBeatState
 	public var modchartSounds:Map<String, FlxSound> = new Map();
 
 	public var notetypeScripts:Map<String, FunkinHScript> = []; // custom notetypes for scriptVer '1'
-	public var eventManager = new funkin.data.SongEvent.SongEventManager();
+	public var eventManager = new funkin.game.events.SongEventManager();
 
 	public var hudSkin(default, set):String;
 	public var hudSkinScript:FunkinHScript; // this is the HUD skin used for countdown, judgements, etc

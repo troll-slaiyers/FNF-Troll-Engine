@@ -3,8 +3,8 @@ package funkin.states;
 import funkin.data.MusicData;
 import funkin.data.Song;
 import funkin.data.PauseMenuOption;
-import funkin.input.Controls;
-import funkin.objects.hud.Countdown;
+import funkin.Controls;
+import funkin.game.hud.Countdown;
 import funkin.states.options.OptionsSubstate;
 import funkin.states.PlayState.instance as game;
 import flixel.FlxG;
@@ -356,7 +356,7 @@ class PauseSubState extends MusicBeatSubstate
 		for (chartId in charts)
 			menu.addTextOption(chartId, {onAccept: playChart.bind(chartId)});
 
-		ss.add(new FlxSignalHolder(
+		ss.add(new funkin.util.FlxSignalHolder(
 			FlxG.signals.postUpdate, 
 			function() {
 				if (controls.BACK) {

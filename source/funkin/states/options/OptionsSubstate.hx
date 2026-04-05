@@ -19,7 +19,7 @@ import flixel.util.FlxColor;
 import flixel.addons.ui.FlxUI9SliceSprite;
 import openfl.geom.Rectangle;
 
-using funkin.data.FlxTextFormatData;
+using funkin.util.FlxTextFormatData;
 
 #if DISCORD_ALLOWED
 import funkin.api.Discord;
@@ -722,7 +722,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		prevScreenY = FlxG.mouse.screenY;
 		#end
 
-		add(new FlxSignalHolder(FlxG.sound.onVolumeChange, onVolumeChange));
+		add(new funkin.util.FlxSignalHolder(FlxG.sound.onVolumeChange, onVolumeChange));
 		onVolumeChange(FlxG.sound.volume);
 
 		checkWindows();
