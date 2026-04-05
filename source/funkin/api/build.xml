@@ -13,7 +13,6 @@
     <files id='trollengine_externs'>
         <compilervalue name="-I" value="${PROJECT_DIR}/include/" />
         <file name="${PROJECT_DIR}/src/memory.cpp" />
-        <file name="${PROJECT_DIR}/src/darkmode.cpp" if="windows" />
         <file name="${PROJECT_DIR}/src/refreshrate.cpp" if="linux" />
     </files>
 
@@ -22,9 +21,6 @@
         <section if="linux">
             <lib name="-lX11" />
             <lib name="-lXrandr" />
-        </section>
-        <section if="windows">
-            <lib name="dwmapi.lib" />
         </section>
     </target>
 </xml>

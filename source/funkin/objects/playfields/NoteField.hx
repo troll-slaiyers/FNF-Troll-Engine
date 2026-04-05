@@ -534,17 +534,17 @@ class NoteField extends FieldBase
 		var bottom = 0.0;
 		switch (sprite.frame.angle) {
 			case ANGLE_0:
-				var height = frameRect.height - frameRect.y;
-				top = frameRect.y + (uvSub + uvOffset) * height;
-				bottom = frameRect.y + uvOffset * height;
+				var height = frameRect.bottom - frameRect.top;
+				top = frameRect.top + (uvSub + uvOffset) * height;
+				bottom = frameRect.top + uvOffset * height;
 			case ANGLE_90:
-				var width = frameRect.width - frameRect.x;
-				top = frameRect.x + (uvSub + uvOffset) * width;
-				bottom = frameRect.x + uvOffset * width;
+				var width = frameRect.right - frameRect.left;
+				top = frameRect.left + (uvSub + uvOffset) * width;
+				bottom = frameRect.left + uvOffset * width;
 			case ANGLE_270:
-				var width = frameRect.x - frameRect.width;
-				top = frameRect.width + uvOffset * width;
-				bottom = frameRect.width + (uvSub + uvOffset) * width;
+				var width = frameRect.left - frameRect.right;
+				top = frameRect.right + uvOffset * width;
+				bottom = frameRect.right + (uvSub + uvOffset) * width;
 		}
 
 		if (flipY)
@@ -556,20 +556,20 @@ class NoteField extends FieldBase
 
 		switch (sprite.frame.angle) {
 			case ANGLE_0:
-				uv[subIndex] = uv[subIndex + 4] = frameRect.x;
-				uv[subIndex + 2] = uv[subIndex + 6] = frameRect.width;
+				uv[subIndex] = uv[subIndex + 4] = frameRect.left;
+				uv[subIndex + 2] = uv[subIndex + 6] = frameRect.right;
 				uv[subIndex + 1] = uv[subIndex + 3] = top;
 				uv[subIndex + 5] = uv[subIndex + 7] = bottom;
 			case ANGLE_90:
 				uv[subIndex] = uv[subIndex + 4] = top;
 				uv[subIndex + 2] = uv[subIndex + 6] = bottom;
-				uv[subIndex + 1] = uv[subIndex + 3] = frameRect.height;
-				uv[subIndex + 5] = uv[subIndex + 7] = frameRect.y;
+				uv[subIndex + 1] = uv[subIndex + 3] = frameRect.bottom;
+				uv[subIndex + 5] = uv[subIndex + 7] = frameRect.top;
 			case ANGLE_270:
 				uv[subIndex] = uv[subIndex + 2] = bottom;
 				uv[subIndex + 4] = uv[subIndex + 6] = top;
-				uv[subIndex + 1] = uv[subIndex + 5] = frameRect.y;
-				uv[subIndex + 3] = uv[subIndex + 7] = frameRect.height;
+				uv[subIndex + 1] = uv[subIndex + 5] = frameRect.top;
+				uv[subIndex + 3] = uv[subIndex + 7] = frameRect.bottom;
 		}
 	}
 
@@ -717,10 +717,10 @@ class NoteField extends FieldBase
 				]);
 		}
 		var uvData = new Vector<Float>(8, false, [
-			frameRect.x,		frameRect.y,
-			frameRect.width,	frameRect.y,
-			frameRect.x,		frameRect.height,
-			frameRect.width,	frameRect.height
+			frameRect.left,		frameRect.top,
+			frameRect.right,	frameRect.top,
+			frameRect.left,		frameRect.bottom,
+			frameRect.right,	frameRect.bottom
 		]);
 		var shader = sprite.shader != null ? sprite.shader : defaultShader;
 		if (shader != sprite.shader)

@@ -487,8 +487,8 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		vertices[prevVerticesPos] = point.x;
 		vertices[prevVerticesPos + 1] = point.y;
 
-		uvtData[prevVerticesPos] = frame.uv.x;
-		uvtData[prevVerticesPos + 1] = frame.uv.y;
+		uvtData[prevVerticesPos] = frame.uv.left;
+		uvtData[prevVerticesPos + 1] = frame.uv.top;
 
 		point.set(frame.frame.width, 0);
 		point.transform(matrix);
@@ -496,8 +496,8 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		vertices[prevVerticesPos + 2] = point.x;
 		vertices[prevVerticesPos + 3] = point.y;
 
-		uvtData[prevVerticesPos + 2] = frame.uv.width;
-		uvtData[prevVerticesPos + 3] = frame.uv.y;
+		uvtData[prevVerticesPos + 2] = frame.uv.right;
+		uvtData[prevVerticesPos + 3] = frame.uv.top;
 
 		point.set(frame.frame.width, frame.frame.height);
 		point.transform(matrix);
@@ -505,8 +505,8 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		vertices[prevVerticesPos + 4] = point.x;
 		vertices[prevVerticesPos + 5] = point.y;
 
-		uvtData[prevVerticesPos + 4] = frame.uv.width;
-		uvtData[prevVerticesPos + 5] = frame.uv.height;
+		uvtData[prevVerticesPos + 4] = frame.uv.right;
+		uvtData[prevVerticesPos + 5] = frame.uv.bottom;
 
 		point.set(0, frame.frame.height);
 		point.transform(matrix);
@@ -516,8 +516,8 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 
 		point.put();
 
-		uvtData[prevVerticesPos + 6] = frame.uv.x;
-		uvtData[prevVerticesPos + 7] = frame.uv.height;
+		uvtData[prevVerticesPos + 6] = frame.uv.left;
+		uvtData[prevVerticesPos + 7] = frame.uv.bottom;
 
 		indices[prevIndicesPos] = prevNumberOfVertices;
 		indices[prevIndicesPos + 1] = prevNumberOfVertices + 1;

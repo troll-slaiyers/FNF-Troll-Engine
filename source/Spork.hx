@@ -135,6 +135,37 @@ class Spork {
 				return program;
 			}
 		});
+
+		// Modified to add back _elapsedMS cause I make use of that!!! wtf!!!
+		Spoon.bend("flixel.FlxGame", macro class {
+			var _elapsedMS:Float = 0;
+			
+			function updateElapsed(deltaTime:Float):Void
+			@:privateAccess {
+				_elapsedMS = deltaTime;
+				FlxG.elapsed = FlxG.timeScale * (deltaTime / 1000.0); // variable timestep
+
+				var max = FlxG.maxElapsed * FlxG.timeScale;
+
+				if (FlxG.elapsed > max)
+					FlxG.elapsed = max;
+			}
+		});
+
+		// Modified to show the linear volume instead of the log value fuckklgkjdfg
+		Spoon.bend("flixel.system.ui.FlxSoundTray", macro class {
+			function showIncrement():Void
+			{
+				final volume = FlxG.sound.muted ? 0 : FlxG.sound.logToLinear(FlxG.sound.volume);
+				showAnim(volume, silent ? null : volumeUpSound);
+			}
+			
+			function showDecrement():Void
+			{
+				final volume = FlxG.sound.muted ? 0 : FlxG.sound.logToLinear(FlxG.sound.volume);
+				showAnim(volume, silent ? null : volumeDownSound);
+			}
+		});
 		#end
 	}
 }

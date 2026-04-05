@@ -516,11 +516,6 @@ class IntroSequence extends FlxTypedGroup<FlxBasic> {
 		bg.scale.set(FlxG.width, FlxG.height);
 		bg.updateHitbox();
 		add(bg);
-		
-		FlxTween.tween(bg, {alpha: 0.86}, Conductor.crochet * 0.005, {
-			ease: FlxEase.quadInOut,
-			songBased: true,
-		});
 
 		//
 		textGroup = new FlxTypedGroup<Alphabet>();
@@ -598,6 +593,9 @@ class IntroSequence extends FlxTypedGroup<FlxBasic> {
 	}
 
 	override function update(e) {
+		var prog = Math.min(1.0, Conductor.curDecBeat / 5);
+		bg.alpha = FlxMath.lerp(1.0, 0.86, FlxEase.quadInOut(prog));
+
 		super.update(e);
 		updateIntro();
 	}

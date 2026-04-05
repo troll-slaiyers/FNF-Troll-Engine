@@ -39,18 +39,8 @@ import openfl.utils.AssetType;
 /**
  * This is the universal flixel sound object, used for streaming, music, and sound effects.
  */
-
-enum SoundContext {
-	SFX;
-	MUSIC;
-	MISC;
-}
 class FlxSound extends FlxBasic
 {
-	public static var defaultPitch:Float = 1;
-	
-	public var context:SoundContext = SFX;
-
 	var effectAux:ALAuxiliaryEffectSlot = AL.createAux(); // TODO: add removeAux
 
 	/**
@@ -223,7 +213,7 @@ class FlxSound extends FlxBasic
 	/**
 	 * Internal tracker for pitch.
 	 */
-	var _pitch:Float = defaultPitch;
+	var _pitch:Float = 1.0;
 	#end
 
 	/**
@@ -273,7 +263,6 @@ class FlxSound extends FlxBasic
 		_time = 0;
 		_paused = false;
 		_volume = 1.0;
-		_pitch = defaultPitch;
 		_volumeAdjust = 1.0;
 		looped = false;
 		loopTime = 0.0;
@@ -286,11 +275,13 @@ class FlxSound extends FlxBasic
 		amplitudeLeft = 0;
 		amplitudeRight = 0;
 		autoDestroy = false;
-		effect = null;
 
 		if (_transform == null)
 			_transform = new SoundTransform();
 		_transform.pan = 0;
+
+		_pitch = 1;
+		effect = null;
 	}
 
 	override public function destroy():Void
@@ -488,7 +479,7 @@ class FlxSound extends FlxBasic
 		exists = true;
 		onComplete = OnComplete;
 		#if FLX_PITCH
-		pitch = defaultPitch;
+		pitch = 1;
 		#end
 		_length = (_sound == null) ? 0 : _sound.length;
 		endTime = _length;
@@ -649,20 +640,12 @@ class FlxSound extends FlxBasic
 	{
 		if (_transform != null)
 		{
-			var mod:Float = switch(context) {
-				case SFX: ClientPrefs.sfxVolume;
-				case MUSIC: ClientPrefs.songVolume;
-				default: 1.0;
-			}
-
 			_transform.volume = #if FLX_SOUND_SYSTEM (FlxG.sound.muted ? 0 : 1) * FlxG.sound.volume * #end
-				(group != null ? group.volume : 1) * _volume * _volumeAdjust * mod;
-		}		
+				(group != null ? group.volume : 1) * _volume * _volumeAdjust;
+		}
 
 		if (_channel != null)
-		{
 			_channel.soundTransform = _transform;
-		}
 	}
 
 	inline function get_audioSource()

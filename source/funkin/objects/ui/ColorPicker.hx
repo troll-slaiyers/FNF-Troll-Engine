@@ -344,9 +344,9 @@ class ColorPickerSubstate extends FlxSubState {
 
 	override function update(elapsed:Float) {
 		if (holding == null && FlxG.mouse.justPressed) {
-			if (FlxG.mouse.overlaps(hueSatSpr))
+			if (FlxG.mouse.overlaps(hueSatSpr, camera))
 				holding = false;
-			else if (FlxG.mouse.overlaps(brightnessSpr))
+			else if (FlxG.mouse.overlaps(brightnessSpr, camera))
 				holding = true;
 		}
 		else if (!FlxG.mouse.pressed)
@@ -354,14 +354,16 @@ class ColorPickerSubstate extends FlxSubState {
 
 		////
 		if (holding != null) {
-			var pos = FlxG.mouse.getPositionInCameraView(camera);
+			var pos = FlxG.mouse.getViewPosition(camera);
 
 			if (holding == false) {
-				hStepper.value = CoolMath.scale(pos.x, hueSatSpr.x, hueSatSpr.x + hueSatSpr.width, 0, 360);
-				sStepper.value = CoolMath.scale(pos.y, hueSatSpr.y, hueSatSpr.y + hueSatSpr.height, 0, 100);
+				var bounds = hueSatSpr.getScreenBounds(camera);
+				hStepper.value = CoolMath.scale(pos.x, bounds.left, bounds.right, 0, 360);
+				sStepper.value = CoolMath.scale(pos.y, bounds.top, bounds.bottom, 0, 100);
 			}
 			else if (holding == true) {
-				vStepper.value = CoolMath.scale(pos.y, brightnessSpr.y, brightnessSpr.y + brightnessSpr.height, 0, 100);
+				var bounds = brightnessSpr.getScreenBounds(camera);
+				vStepper.value = CoolMath.scale(pos.y, bounds.top, bounds.bottom, 0, 100);
 			}
 
 			pos.put();

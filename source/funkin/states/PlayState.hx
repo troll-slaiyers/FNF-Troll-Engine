@@ -1542,7 +1542,6 @@ class PlayState extends MusicBeatState
 			trace('WARNING: Failed to load track $trackName');
 
 		var newTrack = CoolUtil.makeSound(sndAsset);
-		newTrack.context = MUSIC;
 		newTrack.pitch = playbackRate;
 		newTrack.filter = sndFilter;
 		newTrack.effect = sndEffect;
