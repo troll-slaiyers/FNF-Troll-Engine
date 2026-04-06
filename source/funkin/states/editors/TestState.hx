@@ -1,5 +1,6 @@
 package funkin.states.editors;
 
+import funkin.game.stage.Stage;
 import funkin.data.StageData;
 import funkin.states.TitleState.TitleLogo;
 import flixel.util.FlxColor;

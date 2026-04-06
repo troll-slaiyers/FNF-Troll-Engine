@@ -5,7 +5,7 @@ import flixel.group.FlxGroup;
 import haxe.io.Path;
 import funkin.util.FileUtil;
 import funkin.game.hud.HealthIcon;
-import funkin.objects.Character;
+import funkin.game.stage.Character;
 import funkin.data.CharacterData;
 import funkin.objects.ui.CustomFlxUI;
 import flixel.FlxCamera;

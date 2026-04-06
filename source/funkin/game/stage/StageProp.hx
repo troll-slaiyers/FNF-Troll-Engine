@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.game.stage;
 
 import funkin.data.StageData;
 import flixel.system.FlxAssets.FlxGraphicAsset;

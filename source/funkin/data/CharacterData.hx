@@ -1,6 +1,6 @@
 package funkin.data;
 
-import funkin.objects.Character;
+import funkin.game.stage.Character;
 import flixel.util.FlxColor;
 import funkin.data.VSliceCharacterData;
 import funkin.data.AndromedaCharacterData;

@@ -11,7 +11,7 @@ import funkin.game.notes.*;
 import funkin.states.PlayState;
 import funkin.states.PlayState.instance as game;
 import funkin.Conductor.curDecBeat;
-import funkin.objects.Character;
+import funkin.game.stage.Character;
 
 using StringTools;
 

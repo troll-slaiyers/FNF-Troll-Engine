@@ -300,7 +300,7 @@ class FunkinHScript extends FunkinScript
 		set("MusicBeatSubstate", MusicBeatSubstate);
 		set("GameOverSubstate", funkin.states.GameOverSubstate);
 		set("Song", funkin.data.Song);
-		set("BGSprite", funkin.objects.BGSprite);
+		set("BGSprite", funkin.game.stage.BGSprite);
 		set("RatingSprite", funkin.game.hud.RatingGroup.RatingSprite);
 
 		set("Note", funkin.game.notes.Note);
@@ -312,14 +312,14 @@ class FunkinHScript extends FunkinScript
 
 		set("ProxyField", funkin.game.playfields.ProxyField);
 		set("ProxySprite", funkin.objects.ProxySprite);
-		set("AltBGSprite", funkin.objects.BGSprite.AltBGSprite);
+		set("AltBGSprite", funkin.game.stage.BGSprite.AltBGSprite);
 
 		set("FlxSprite3D", funkin.objects.FlxSprite3D);
 
 		set("AttachedSprite", funkin.objects.AttachedSprite);
 		set("AttachedText", funkin.objects.AttachedText);
 
-		set("Character", funkin.objects.Character);
+		set("Character", funkin.game.stage.Character);
 		set("HealthIcon", funkin.game.hud.HealthIcon);
 
 		set("Wife3", funkin.game.JudgmentManager.Wife3);

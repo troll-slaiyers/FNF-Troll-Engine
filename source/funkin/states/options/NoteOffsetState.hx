@@ -11,6 +11,8 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxStringUtil;
 import funkin.scripts.FunkinHScript;
+import funkin.game.stage.Stage;
+import funkin.game.stage.Character;
 import funkin.states.options.ComboPositionSubstate;
 
 using StringTools;

@@ -6,4 +6,4 @@ import funkin.game.notes.*;
 import funkin.game.playfields.*;
 import funkin.game.hud.*;
 import funkin.game.huds.BaseHUD;
-import funkin.objects.Character;
+import funkin.game.stage.Character;

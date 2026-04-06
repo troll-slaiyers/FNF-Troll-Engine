@@ -63,7 +63,7 @@ class MasterEditorMenu extends MusicBeatState
 		menu.callbacks.onAccept = function(i, _){
 			switch(options[i]) {
 				case 'Song Select': MusicBeatState.switchState(new SongSelectState()); return;
-				case 'Character Editor': MusicBeatState.switchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
+				case 'Character Editor': MusicBeatState.switchState(new CharacterEditorState(funkin.game.stage.Character.DEFAULT_CHARACTER, false));
 				case 'Chart Editor': LoadingState.loadAndSwitchState(new ChartingState(), false);
 				case 'VSlice Converter': MusicBeatState.switchState(new funkin.states.editors.VSliceConverter());
 				/*

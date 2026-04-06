@@ -3,7 +3,7 @@ package funkin.game.cutscenes.components;
 import flixel.util.typeLimit.OneOfTwo;
 import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.tweens.FlxEase;
-import funkin.objects.Character;
+import funkin.game.stage.Character;
 
 class TimelineAction {
 	public var parent:Timeline;

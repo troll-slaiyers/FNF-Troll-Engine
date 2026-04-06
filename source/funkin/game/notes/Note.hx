@@ -8,7 +8,7 @@ import funkin.states.PlayState;
 import funkin.states.editors.ChartingState;
 import funkin.objects.shaders.NoteColorSwap;
 import funkin.game.playfields.*;
-import funkin.objects.Character;
+import funkin.game.stage.Character;
 
 using StringTools;
 

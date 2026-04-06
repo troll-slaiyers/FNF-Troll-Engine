@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.game.stage;
 
 import funkin.scripts.ScriptedClassShit.InstanceInterp;
 import flixel.group.FlxGroup;

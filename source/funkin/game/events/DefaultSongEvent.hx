@@ -1,7 +1,7 @@
 package funkin.game.events;
 
 import funkin.scripts.Globals;
-import funkin.objects.Character;
+import funkin.game.stage.Character;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxColor;

@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.game.stage.Character;
 import funkin.data.CharacterData;
 import openfl.media.Sound;
 import funkin.scripts.Globals;

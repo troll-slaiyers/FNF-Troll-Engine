@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.game.stage.Stage;
 import funkin.data.StageData;
 import funkin.Conductor;
 import openfl.filters.BlurFilter;

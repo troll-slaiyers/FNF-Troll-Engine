@@ -1,6 +1,6 @@
 package funkin.data;
 
-import funkin.objects.Character;
+import funkin.game.stage.Character;
 import funkin.data.CharacterData;
 
 @:publicFields
