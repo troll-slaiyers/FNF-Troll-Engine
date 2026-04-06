@@ -1896,13 +1896,13 @@ class PlayState extends MusicBeatState
 	}
 
 	inline function addKeyboardEvents() {
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);
+		FlxG.stage.window.onKeyDownPrecise.add(onKeyDownEvent);
+		FlxG.stage.window.onKeyUpPrecise.add(onKeyUpEvent);
 	}
 
 	inline function removeKeyboardEvents() {
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);
+		FlxG.stage.window.onKeyDownPrecise.remove(onKeyDownEvent);
+		FlxG.stage.window.onKeyUpPrecise.remove(onKeyUpEvent);
 	}
 
 	public function optionsChanged(options:Array<String>){
@@ -3070,11 +3070,17 @@ class PlayState extends MusicBeatState
 	public var strumsBlocked:Array<Bool> = [];
 	var pressed:Array<FlxKey> = [];
 
-	private function onKeyDownEvent(event:KeyboardEvent)
-		onKeyPress(event.keyCode);
+	inline static function convertKeyCode(input:lime.ui.KeyCode):FlxKey
+	{
+		@:privateAccess
+		return openfl.ui.Keyboard.__convertKeyCode(input);
+	}
 
-	private function onKeyUpEvent(event:KeyboardEvent)
-		onKeyRelease(event.keyCode);
+	private function onKeyDownEvent(keyCode:lime.ui.KeyCode, keyMode:lime.ui.KeyModifier, timestamp:haxe.Int64)
+		onKeyPress(convertKeyCode(keyCode));
+
+	private function onKeyUpEvent(keyCode:lime.ui.KeyCode, keyMode:lime.ui.KeyModifier, timestamp:haxe.Int64)
+		onKeyRelease(convertKeyCode(keyCode));
 
 	private function onKeyPress(key:FlxKey):Void
 	{
