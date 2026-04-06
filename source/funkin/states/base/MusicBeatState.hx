@@ -2,7 +2,7 @@ package funkin.states.base;
 
 import funkin.data.MusicData;
 import flixel.math.FlxMath;
-import funkin.Controls;
+import funkin.input.Controls;
 import funkin.states.base.TransitionableState;
 import openfl.media.Sound;
 import openfl.ui.MouseCursor;
@@ -93,7 +93,7 @@ class MusicBeatState extends TransitionableState
 	}
 
 	@:noCompletion inline function get_controls():Controls
-		return funkin.Controls.firstActive;
+		return funkin.input.Controls.firstActive;
 
 	@:noCompletion function get_canBeScripted()
 		return canBeScripted;

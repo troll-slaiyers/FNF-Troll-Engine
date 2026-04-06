@@ -1,7 +1,7 @@
 package funkin.states.base;
 
 import funkin.scripts.FunkinHScript;
-import funkin.Controls;
+import funkin.input.Controls;
 import flixel.FlxSubState;
 
 @:autoBuild(funkin.macros.ScriptingMacro.addScriptingCallbacks([
@@ -47,7 +47,7 @@ class MusicBeatSubstate extends FlxSubState
 	private var controls(get, never):Controls;
 
 	inline function get_controls():Controls
-		return funkin.Controls.firstActive;
+		return funkin.input.Controls.firstActive;
 
 	override function update(elapsed:Float)
 	{		

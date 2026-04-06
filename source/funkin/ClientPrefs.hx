@@ -2,7 +2,7 @@ package funkin;
 
 #if !macro
 import Main.Version;
-import funkin.Controls;
+import funkin.input.Controls;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.util.FlxSave;

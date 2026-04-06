@@ -8,7 +8,7 @@ import funkin.states.PlayState;
 import funkin.states.base.MusicBeatState;
 import funkin.states.base.MusicBeatSubstate;
 
-import funkin.Controls;
+import funkin.input.Controls;
 import funkin.api.Windows;
 
 import flixel.FlxG;

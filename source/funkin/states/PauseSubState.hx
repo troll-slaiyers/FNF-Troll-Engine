@@ -3,7 +3,7 @@ package funkin.states;
 import funkin.data.MusicData;
 import funkin.data.Song;
 import funkin.data.PauseMenuOption;
-import funkin.Controls;
+import funkin.input.Controls;
 import funkin.game.hud.Countdown;
 import funkin.states.options.OptionsSubstate;
 import funkin.states.PlayState.instance as game;
