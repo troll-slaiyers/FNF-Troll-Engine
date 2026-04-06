@@ -2118,7 +2118,7 @@ class PlayState extends MusicBeatState
 	function stepHold(note:Note, field:PlayField)
 	{
 		callOnScripts("onHoldStep", [note, field]);
-		note.noteScript?.call("onHoldStep", [note, field]);
+		note.noteTypeHandler?.onHoldStep(note, field);
 		note.genScript?.call("onHoldStep", [note, field]);
 
 		if(field.isPlayer){
@@ -2133,7 +2133,7 @@ class PlayState extends MusicBeatState
 	function pressHold(note:Note, field:PlayField)
 	{
 		callOnScripts("onHoldPress", [note, field]);
-		note.noteScript?.call("onHoldPress", [note, field]);
+		note.noteTypeHandler?.onHoldPress(note, field);
 		note.genScript?.call("onHoldPress", [note, field]);
 
 		if (cpuControlled && note.isRoll && ClientPrefs.hitsoundBehav == 'Key Press')
@@ -2144,7 +2144,7 @@ class PlayState extends MusicBeatState
 	function releaseHold(note:Note, field:PlayField):Void
 	{
 		callOnScripts("onHoldRelease", [note, field]);
-		note.noteScript?.call("onHoldRelease", [note, field]);
+		note.noteTypeHandler?.onHoldRelease(note, field);
 		note.genScript?.call("onHoldRelease", [note, field]);	
 	}
 
@@ -2155,7 +2155,7 @@ class PlayState extends MusicBeatState
 		unspawnNotes.remove(dunceNote);
 
 		callOnScripts('onSpawnNotePost', [dunceNote]);
-		dunceNote.noteScript?.call("onSpawnNotePost", [dunceNote]);
+		dunceNote.noteTypeHandler?.onSpawnNotePost(dunceNote, field);
 	}
 
 	function field_noteRemoved(note:Note, field:PlayField) {
@@ -3254,7 +3254,7 @@ class PlayState extends MusicBeatState
 		if(callOnScripts("onNoteMiss", [daNote, field]) == Globals.Function_Stop)
 			return;
 		
-		if (daNote.noteScript?.call("onNoteMiss", [daNote, field]) == Globals.Function_Stop)
+		if (daNote.noteTypeHandler?.onNoteMiss(daNote, field) == Globals.Function_Stop)
 			return;
 
 		////
@@ -3300,7 +3300,7 @@ class PlayState extends MusicBeatState
 
 		////
 		callOnScripts("onNoteMissPost", [daNote, field]);
-		daNote.noteScript?.call("onNoteMissPost", [daNote, field]);
+		daNote.noteTypeHandler?.onNoteMissPost(daNote, field);
 		daNote.genScript?.call("onNoteMissPost", [daNote, field]); 
 	}
 
@@ -3350,7 +3350,7 @@ class PlayState extends MusicBeatState
 		if (callOnScripts("onOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
 
-		if (note.noteScript?.call("onOpponentNoteHit", [note, field]) == Globals.Function_Stop)
+		if (note.noteTypeHandler?.onOpponentNoteHit(note, field) == Globals.Function_Stop)
 			return;
 
 		if (!note.isSustainNote && opponentHPDrain > 0 && health > opponentHPDrain)
@@ -3360,7 +3360,7 @@ class PlayState extends MusicBeatState
 
 		// Script shit
 		callOnScripts("onOpponentNoteHitPost", [note, field]);
-		note.noteScript?.call("onOpponentNoteHitPost", [note, field]);
+		note.noteTypeHandler?.onOpponentNoteHitPost(note, field);
 		note.genScript?.call("onOpponentNoteHitPost", [note, field]);
 	
 	}
@@ -3375,7 +3375,7 @@ class PlayState extends MusicBeatState
 	function commonNoteHit(note:Note, field:PlayField){ // things done by all note hit functions
 		camZooming = true;
 
-		if (note.noteScript?.call("onNoteHit", [note, field]) == Globals.Function_Stop)
+		if (note.noteTypeHandler?.onNoteHit(note, field) == Globals.Function_Stop)
 			return;
 
 		if (callOnScripts("onNoteHit", [note, field]) == Globals.Function_Stop)
@@ -3397,7 +3397,7 @@ class PlayState extends MusicBeatState
 
 		// Sing animations
 		var chars: Array<Character> = getNoteCharacters(note, field);
-		if (note.noteScript?.call("playSingAnim", [note, field, chars]) != Globals.Function_Stop)
+		if (note.noteTypeHandler?.playSingAnim(note, field, chars) != Globals.Function_Stop)
 			for (char in chars) 
 				char.playNote(note, field);
 
@@ -3409,7 +3409,7 @@ class PlayState extends MusicBeatState
 		}
 
 		callOnScripts("onNoteHitPost", [note, field]);
-		note.noteScript?.call("onNoteHitPost", [note, field]);
+		note.noteTypeHandler?.onNoteHitPost(note, field);
 		note.genScript?.call("onNoteHitPost", [note, field]);
 
 		////
@@ -3427,7 +3427,7 @@ class PlayState extends MusicBeatState
 		if (note.wasGoodHit || (field.autoPlayed && (note.ignoreNote || note.breaksCombo)))
 			return;
 
-		if (note.noteScript?.call("onGoodNoteHit", [note, field]) == Globals.Function_Stop)
+		if (note.noteTypeHandler?.onGoodNoteHit(note, field) == Globals.Function_Stop)
 			return;
 		if (callOnScripts("onGoodNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
@@ -3463,7 +3463,7 @@ class PlayState extends MusicBeatState
 		commonNoteHit(note, field);
 		// Script shit
 		callOnScripts("onGoodNoteHitPost", [note, field]);
-		note.noteScript?.call("onGoodNoteHitPost", [note, field]);
+		note.noteTypeHandler?.onGoodNoteHitPost(note, field);
 		note.genScript?.call("onGoodNoteHitPost", [note, field]); // might be useful for some things i.e judge explosions
 	}
 

@@ -1,5 +1,6 @@
 package funkin.objects.notes;
 
+import funkin.objects.notes.NoteType.NoteTypeManager;
 import funkin.data.JudgmentManager.Judgment;
 import funkin.data.JudgmentManager.JudgmentData;
 import funkin.data.JudgmentManager.HitResult;
@@ -101,8 +102,7 @@ class Note extends NoteObject {
 	/**note generator script (used for shit like pixel notes or skin mods) ((script provided by the HUD skin))*/
 	public var genScript:FunkinHScript;
 
-	/**note type script*/
-	public var noteScript:FunkinHScript;
+	public var noteTypeHandler:NoteType;
 
 	// basic stuff
 	public var beat:Float = 0;
@@ -323,7 +323,7 @@ class Note extends NoteObject {
 		var hsb = isQuant ? ClientPrefs.quantHSV[quants.indexOf(quant)] : getNoteColours(currentAnimations);
 		colorSwap.setHSBIntArray(hsb);
 
-		noteScript?.executeFunc("onUpdateColours", [this]);
+		noteTypeHandler?.onUpdateColours(this);
 		genScript?.executeFunc("onUpdateColours", [this]);
 	}
 
@@ -369,33 +369,17 @@ class Note extends NoteObject {
 		noteSplashTexture = PlayState.splashSkin;
 
 		if (noteType != value) {
-			noteType = value;
-			noteScript = instance?.notetypeScripts.get(value);
+			noteTypeHandler = NoteTypeManager.get(value);
 			
-			if (noteScript != null)
-				noteScript.executeFunc("setupNote", [this], null, ["super" => _setupNoteType]);
-			else
-				_setupNoteType();
-
-			genScript?.executeFunc("onNoteTypeSet", [this]);
+			if (noteTypeHandler != null) {
+				noteTypeHandler.setupNote(this);
+				noteType = noteTypeHandler.id;
+			}else {
+				noteType = value;
+			}
 		}
 
-		if (usesDefaultColours) {
-			if (colorSwap.hue != hue || colorSwap.saturation != sat || colorSwap.brightness != brt)
-				usesDefaultColours = false; // just incase
-		}
-
-		if (colorSwap.hue == hue)
-			colorSwap.hue -= 0.0127;
-		if (colorSwap.saturation == sat)
-			colorSwap.saturation -= 0.0127;
-		if (colorSwap.brightness == brt)
-			colorSwap.brightness -= 0.0127;
-
-		////
-
-		noteScript?.executeFunc("onSetupNotePost", [this]);
-		genScript?.executeFunc("onNoteTypeSetPost", [this]);
+		genScript?.executeFunc("onNoteTypeSet", [this], this, ["this" => this]);
 
 		////
 		updateColours();
@@ -410,29 +394,6 @@ class Note extends NoteObject {
 			noteSplashBrt = colorSwap.brightness;
 		}
 		return value;
-	}
-
-	function _setupNoteType() {
-		// default notes. these values won't get set if you make a script for them!
-		switch (noteType) {
-			case 'Alt Animation':
-				characterHitAnimSuffix = "-alt";
-				characterMissAnimSuffix = "-altmiss";
-
-			case 'Hey!':
-				characterHitAnimName = 'hey';
-				// TODO
-
-			//case 'Hurt Note':
-					
-
-			case 'GF Sing':
-				gfNote = true;
-
-			case 'No Animation':
-				noAnimation = true;
-				noMissAnimation = true;
-		}
 	}
 
 	override function toString() {
@@ -479,9 +440,6 @@ class Note extends NoteObject {
 		texSuffix = suffix;
 
 		if (genScript?.executeFunc("onReloadNote", [this, texture, suffix]) == Globals.Function_Stop)
-			return;
-		
-		if (noteScript?.executeFunc("onReloadNote", [this, texture, suffix]) == Globals.Function_Stop)
 			return;
 
 		////
@@ -542,16 +500,10 @@ class Note extends NoteObject {
 		updateHitbox();
 		////
 		genScript?.executeFunc("onReloadNotePost", [this, texture, suffix]);
-		noteScript?.executeFunc("onReloadNotePost", [this, texture, suffix]);
 	}
 
 	public function loadNoteAnims() {
 		var changed = false;
-
-		if (noteScript != null && noteScript.exists("onLoadNoteAnims")) {
-			noteScript.executeFunc("onLoadNoteAnims", [this], null, ["super" => _loadNoteAnims]);
-			changed = true;
-		}
 
 		if (genScript != null && genScript.exists("onLoadNoteAnims")) {
 			genScript.executeFunc("onLoadNoteAnims", [this], null, ["super" => _loadNoteAnims, "noteTypeLoaded" => changed]);
@@ -561,7 +513,6 @@ class Note extends NoteObject {
 		if (!changed)
 			_loadNoteAnims();
 
-		noteScript?.executeFunc("onLoadNoteAnimsPost", [this], null, ["noteAnimsChanged" => changed]);
 		genScript?.executeFunc("onLoadNoteAnimsPost", [this], null, ["noteAnimsChanged" => changed]);
 
 	}
@@ -603,7 +554,7 @@ class Note extends NoteObject {
 			return;
 
 
-		noteScript?.executeFunc("onNoteUpdate", [this, elapsed]);
+		noteTypeHandler?.onNoteUpdate(this, elapsed);
 		genScript?.executeFunc("onNoteUpdate", [this, elapsed]);
 
 		var diff = (strumTime - Conductor.songPosition);
@@ -617,23 +568,11 @@ class Note extends NoteObject {
 		// did you know if you always return UNJUDGED a note won't be hittable?
 		// i thought that was interesting
 		// (aka fake notes when)
-		if (noteScript != null) {
-			var judge = noteScript.executeFunc("judgeNote", [this, hitDiff], this);
-			if (judge != null) return judge;
-		}
-		return null;
+		return noteTypeHandler?.judgeNote(this, hitDiff);
 	}
 
 	public function transformJudgeData(dataToMutate:JudgmentData): JudgmentData {
-		switch(noteType){
-
-			default:
-				var ret:Dynamic = noteScript?.executeFunc("transformJudgeData", [this]);
-				if (ret != null && ret != null)
-					return cast ret;
-		}
-
-		return dataToMutate;
+		return noteTypeHandler?.transformJudgeData(this, dataToMutate) ?? dataToMutate;
 	}
 
 
