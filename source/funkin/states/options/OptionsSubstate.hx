@@ -477,7 +477,6 @@ class OptionsSubstate extends MusicBeatSubstate
 		previewSound = FlxG.sound.play(Paths.sound(name), volume, false, null, true, ()->{previewSound = null;});
 	}
 
-	private var lastFlixelVolume:Float = CoolMath.snap(FlxG.sound.volume, 0.1);
 	function onNumberChanged(option:String, oldVal:Float, newVal:Float)
 	{
 		switch (option)
@@ -561,6 +560,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	var whitePixel:FlxGraphic;
 
+	var lastFlixelVolume:Float = CoolMath.snap(FlxG.sound.logToLinear(FlxG.sound.volume), 0.1);
 	var ignoreVolumeChange:Bool = false;
 	function onVolumeChange(val:Float) {
 		if (ignoreVolumeChange || FlxG.sound.muted)
@@ -568,7 +568,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		forceWidgetUpdate = true;
 		ignoreVolumeChange = true;
-		changeNumber("masterVolume", Math.ffloor(FlxG.sound.logToLinear(val) * 100), true);
+		changeNumber("masterVolume", Math.fround(FlxG.sound.logToLinear(val) * 10) * 10, true);
 		ignoreVolumeChange = false;
 	}
 
