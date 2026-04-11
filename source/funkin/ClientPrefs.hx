@@ -2,6 +2,7 @@ package funkin;
 
 #if !macro
 import Main.Version;
+import funkin.data.Language;
 import funkin.input.Controls;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
@@ -750,6 +751,16 @@ class ClientPrefs {
 				type: Toggle,
 				value: true,
 				data: []
+			},
+			"language" => {
+				display: "Language",
+				desc: "",
+				type: Dropdown,
+				value: "en",
+				data: [
+					"requiresRestart" => true,
+					"options" => ["en", "es", "pt-BR"],
+				],
 			}
 
 		];
@@ -819,8 +830,6 @@ class ClientPrefs {
 		0.5, 0.6,
 		0.6, 0.6,
 	];
-
-	public static var locale:String = 'en';
 
 	// I'd like to rewrite the whole Controls.hx thing tbh
 	// I think its shitty and can stand a rewrite but w/e
@@ -917,8 +926,6 @@ class ClientPrefs {
 		defaultOptionDefinitions.get("framerate").value = getRefreshRate();
 		defaultOptionDefinitions.get("fieldFramerate").value = getRefreshRate();
 
-		// locale = openfl.system.Capabilities.language;
-
 		optionSave.bind("options_v2");
 		loadDefaultKeys();
 
@@ -995,7 +1002,7 @@ class ClientPrefs {
 			arrowHSV.push([0, 0, 0]);
 		}
 
-		Paths.locale = ClientPrefs.locale;
+		ClientPrefs.language = Language.locale = ClientPrefs.language;
 
 		if (Main.fpsVar != null) {
 			Main.fpsVar.background = ClientPrefs.fpsBG;

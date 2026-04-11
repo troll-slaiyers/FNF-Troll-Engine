@@ -3,7 +3,6 @@ package funkin;
 import haxe.io.Bytes;
 import openfl.utils.ByteArray;
 import haxe.ds.StringMap;
-import funkin.data.LocalizationMap;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.FlxGraphic;
@@ -111,6 +110,8 @@ class Paths
 		Paths.pushGlobalContent();
 		Paths.getModDirectories();
 		#end
+
+		funkin.data.Language.reloadList();
 	}
 
 	/// haya I love you for the base cache dump I took to the max
@@ -880,44 +881,25 @@ class Paths
 		Paths.currentModDirectory = '';
 	}
 
-	//// String stuff, should maybe move this to a diff class¿¿¿
-	public static var locale(default, set):String;
-	
-	private static final currentStrings:Map<String, String> = [];
-	
-	@:noCompletion static function set_locale(l:String){
-		if (l != locale) {
-			locale = l;
-			getAllStrings();
-		}
-		return locale;
-	}
+	#if ALLOW_DEPRECATION
+	public static var locale(get, set):String;
 
-	public static function getAllStrings():Void {
-		currentStrings.clear();
-		// trace("refreshing strings");
+	@:noCompletion static inline function get_locale()
+		return funkin.data.Language.locale;
+	@:noCompletion static inline function set_locale(v)
+		return funkin.data.Language.locale = v;
 
-		var checkFiles = ['lang/$locale.txt', 'lang/$locale.lang', "lang/en.txt", "strings.txt"]; 
-		for (filePath in Paths.getFolders("data")) {
-			for (fileName in checkFiles) {
-				var path:String = filePath + fileName;
-				if (!Paths.exists(path)) continue;
-				
-				var file = LocalizationMap.fromFile(path);
-				for (k => v in file) {
-					if (!currentStrings.exists(k))
-						currentStrings.set(k, v);
-				}
-			}
-		}
+	public static inline function getAllStrings():Void {
+		funkin.data.Language.reloadStrings();
 	}
 
 	public static inline function hasString(key:String):Bool
-		return currentStrings.exists(key);
+		return funkin.data.Language.hasString(key);
 
 	public static inline function getString(key:String):Null<String>{
-		return currentStrings.get(key);
+		return funkin.data.Language.getString(key);
 	}
+	#end
 }
 
 private class AltFilePaths {

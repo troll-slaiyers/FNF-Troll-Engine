@@ -28,6 +28,7 @@ import funkin.api.Discord;
 // TODO: Make this easier to theme for mods
 
 typedef Widget = {
+	optionId:String,
 	type:OptionType,
 	optionData:OptionData,
 	locked:Bool,
@@ -200,6 +201,12 @@ class OptionsSubstate extends MusicBeatSubstate
 		
 		"misc" => [
 			[
+				"language",
+				[
+					"language",
+				]
+			],
+			[
 				"accessibility",
 				[
 					"autoPause",
@@ -359,6 +366,8 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		switch (option)
 		{
+			case 'language':
+				funkin.data.Language.locale = newVal;
 			case 'judgePreset':
 				if (windowPresets.exists(newVal))
 				{
@@ -784,6 +793,7 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		var objects:FlxTypedGroup<FlxObject> = new FlxTypedGroup<FlxObject>();
 		var widget:Widget = {
+			optionId: name,
 			type: data.type,
 			optionData: data,
 			locked: false,
@@ -1786,7 +1796,10 @@ class Dropdown extends FlxTypedGroup<FlxBasic>
 		for (idx => value in options)
 		{
 			var label = labels[idx] ??= makeText();
-			label.text = value;
+			if (this.currentWidget.optionId == 'language')
+				label.text = funkin.data.Language.localeList.get(value) ?? value;
+			else
+				label.text = value;
 			@:privateAccess label.regenGraphic();
 
 			if (maxTextWidth < label.width) 
