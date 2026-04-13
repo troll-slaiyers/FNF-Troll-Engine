@@ -132,6 +132,14 @@ class FNFGame extends FlxGame
 		}
 	}
 
+	public function set_vsyncMode(v:String) {
+		FlxG.stage.window.setVSyncMode(switch(v) {
+			case "Adaptive": ADAPTIVE;
+			case "On": ON;
+			default: OFF;
+		});
+	}
+
 	@:noCompletion inline public static function set_specialKeysEnabled(val)
 	{
 		if (val) {

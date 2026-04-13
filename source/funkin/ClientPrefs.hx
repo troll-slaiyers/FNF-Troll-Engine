@@ -614,8 +614,24 @@ class ClientPrefs {
 				type:Number,
 				value:#if !macro FlxG.stage != null ? FlxG.stage.application.window.displayMode.refreshRate : #end
 				60,
-				data:["suffix" => " FPS", "min" => 5, "max" => 360, "step" => 1,]
+				data:["suffix" => " FPS", "min" => 10, "max" => 360, "step" => 1,]
 			},
+			"uncappedFramerate" => {
+				display: "Uncapped Framerate",
+				desc: "",
+				type: Toggle,
+				value: false,
+				data: []
+			},
+			#if VSYNC_ALLOWED
+			"vsyncMode" => {
+				display: "V-Sync Mode",
+				desc: "",
+				type: Dropdown,
+				value: "Off",
+				data: ["options" => ["Off", "On", "Adaptive"]],
+			},
+			#end
 			"lowQuality" => {
 				display: "Low Quality",
 				desc: "When toggled, many assets won't be loaded to try to reduce strain on lower-end PCs.",
@@ -974,7 +990,12 @@ class ClientPrefs {
 		FlxG.autoPause = ClientPrefs.autoPause;
 
 		Main.game.set_antialiasing(globalAntialiasing);
-		Main.game.set_framerate(framerate);
+		#if VSYNC_ALLOWED
+		Main.game.set_vsyncMode(vsyncMode);
+		Main.game.set_framerate((uncappedFramerate || vsyncMode != "Off") ? 0 : framerate);
+		#else
+		Main.game.set_framerate(uncappedFramerate ? 0 : framerate);
+		#end
 
 		#if DISCORD_ALLOWED
 		DiscordClient.hideDetails = discordRPC_hideDetails;

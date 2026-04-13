@@ -151,6 +151,8 @@ class OptionsSubstate extends MusicBeatSubstate
 				"display",
 				[
 					"framerate",
+					"uncappedFramerate",
+					"vsyncMode",
 					"fullscreen", 
 				]
 			],
@@ -355,6 +357,12 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		switch (option)
 		{
+			#if VSYNC_ALLOWED
+			case 'vsyncMode':
+				Main.game.set_vsyncMode(newVal);
+				Main.game.set_framerate((ClientPrefs.uncappedFramerate || newVal != "Off") ? 0 : ClientPrefs.framerate);
+			#end
+
 			case 'judgePreset':
 				if (windowPresets.exists(newVal))
 				{
@@ -395,6 +403,13 @@ class OptionsSubstate extends MusicBeatSubstate
 			case 'globalAntialiasing':
 				Main.game.set_antialiasing(val);
 				
+			case 'uncappedFramerate':
+				#if VSYNC_ALLOWED
+				Main.game.set_framerate((val || ClientPrefs.vsyncMode != "Off") ? 0 : ClientPrefs.framerate);
+				#else
+				Main.game.set_framerate(val ? 0 : ClientPrefs.framerate);
+				#end
+
 			#if(CHECK_FOR_UPDATES || display)
 			case 'downloadBetas' | 'checkForUpdates':
 				Main.downloadBetas = Main.Version.isBeta || ClientPrefs.downloadBetas;
@@ -484,7 +499,11 @@ class OptionsSubstate extends MusicBeatSubstate
 		switch (option)
 		{
 			case 'framerate':
-				Main.game.set_framerate(newVal);
+				#if VSYNC_ALLOWED
+				Main.game.set_framerate((ClientPrefs.uncappedFramerate || ClientPrefs.vsyncMode != "Off") ? 0 : newVal);
+				#else
+				Main.game.set_framerate(ClientPrefs.uncappedFramerate ? 0 : newVal);
+				#end
 
 			case 'epicWindow' | 'sickWindow' | 'goodWindow' | 'badWindow' | 'hitWindow':
 				checkWindows();
