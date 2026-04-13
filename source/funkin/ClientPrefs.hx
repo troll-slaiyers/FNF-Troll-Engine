@@ -619,6 +619,13 @@ class ClientPrefs {
 				60,
 				data:["suffix" => " FPS", "min" => 0, "max" => 360, "step" => 1,]
 			},
+			"vsyncMode" => {
+				display: "V-Sync Mode",
+				desc: "",
+				type: Dropdown,
+				value: "Off",
+				data: ["options" => ["Off", "On", "Adaptive"]],
+			},
 			"lowQuality" => {
 				display: "Low Quality",
 				desc: "When toggled, many assets won't be loaded to try to reduce strain on lower-end PCs.",
@@ -980,6 +987,7 @@ class ClientPrefs {
 
 		Main.game.set_antialiasing(globalAntialiasing);
 		Main.game.set_framerate(framerate);
+		Main.game.set_vsyncMode(vsyncMode);
 
 		#if DISCORD_ALLOWED
 		DiscordClient.hideDetails = discordRPC_hideDetails;

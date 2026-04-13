@@ -151,6 +151,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				"display",
 				[
 					"framerate",
+					"vsyncMode",
 					"fullscreen", 
 				]
 			],
@@ -355,6 +356,8 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		switch (option)
 		{
+			case 'vsyncMode':
+				Main.game.set_vsyncMode(newVal);
 			case 'judgePreset':
 				if (windowPresets.exists(newVal))
 				{
