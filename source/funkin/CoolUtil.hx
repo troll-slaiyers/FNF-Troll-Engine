@@ -188,13 +188,11 @@ class CoolUtil {
 	{
 		camera ??= FlxG.camera;
 
-		FlxG.mouse.getPositionInCameraView(camera, _point);
-		if (camera.containsPoint(_point)) {
-			FlxG.mouse.getWorldPosition(camera, _point);
-			return object.overlapsPoint(_point, true, camera);
-		}
+		if (FlxG.mouse.gameX < camera.x || FlxG.mouse.gameY < camera.y || FlxG.mouse.gameX > camera.x + camera.width || FlxG.mouse.gameY > camera.y + camera.height)
+			return false;
 
-		return false;
+		FlxG.mouse.getWorldPosition(camera, _point);
+		return object.overlapsPoint(_point, true, camera);
 	}
 
 	public static function centerOnObject(obj1:FlxObject, obj2:FlxObject) {
