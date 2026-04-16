@@ -251,41 +251,41 @@ class NoteOffsetState extends MusicBeatState
 	}
 
 	var lastStepHit:Int = -1;
-	override public function stepHit(){
-		super.stepHit();
+	override public function stepHit(step: Int){
+		super.stepHit(step);
 
-		if (lastStepHit == curStep)
+		if (lastStepHit == step)
 			return;
 
 		if (stageScript != null) {
-			stageScript.set("curStep", curStep);
+			stageScript.set("curStep", step);
 			stageScript.call("onStepHit");
 		}
 
-		lastStepHit = curStep;
+		lastStepHit = step;
 	}
 
 	var zoomTween:FlxTween;
 	var lastBeatHit:Int = -1;
-	override public function beatHit()
+	override public function beatHit(beat: Int)
 	{
-		super.beatHit();
+		super.beatHit(beat);
 
-		if(lastBeatHit == curBeat)
+		if (lastBeatHit == beat)
 			return;
 
 		if (stageScript != null){
-			stageScript.set("curBeat", curBeat);
+			stageScript.set("curBeat", beat);
 			stageScript.call("onBeatHit");
 		}
 
-		if(curBeat % 2 == 0)
+		if (beat % 2 == 0)
 		{
 			boyfriend.dance();
 			gf.dance();
 		}
 		
-		if(curBeat % 4 == 2)
+		if (beat % 4 == 2)
 		{
 			FlxG.camera.zoom = 1.15;
 
@@ -308,7 +308,7 @@ class NoteOffsetState extends MusicBeatState
 			});
 		}
 
-		lastBeatHit = curBeat;
+		lastBeatHit = beat;
 	}
 
 	function updateNoteDelay()

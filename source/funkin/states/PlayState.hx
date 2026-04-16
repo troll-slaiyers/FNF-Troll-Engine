@@ -3109,7 +3109,7 @@ class PlayState extends MusicBeatState
 		if (callOnScripts("onKeyPress", [column]) == Globals.Function_Stop)
 			return;
 
-		var hitTime:Float = Conductor.getAccPosition();
+		var hitTime:Float = Conductor.getAccPosition() + ClientPrefs.ratingOffset;
 
 		if(ClientPrefs.hitsoundBehav == 'Key Press' && !cpuControlled)
 			playShithound();
@@ -3521,12 +3521,12 @@ class PlayState extends MusicBeatState
 	}
 	#end
 
-	override function stepHit()
+	override function stepHit(step: Int)
 	{
-		super.stepHit();
+		super.stepHit(step);
 
-		hud.stepHit(curStep);
-		setOnScripts('curStep', curStep);
+		hud.stepHit(step);
+		setOnScripts('curStep', step);
 		callOnScripts('onStepHit');
 	}
 
@@ -3538,24 +3538,24 @@ class PlayState extends MusicBeatState
 		camHUD.zoom += hudZoom * zoomMult;
 	}
 
-	override function beatHit()
+	override function beatHit(beat: Int)
 	{
-		super.beatHit();
+		super.beatHit(beat);
 
-		hud.beatHit(curBeat);
+		hud.beatHit(beat);
 
-		if (camZooming && zoomEveryBeat > 0 && curBeat % zoomEveryBeat == beatToZoom)
+		if (camZooming && zoomEveryBeat > 0 && beat % zoomEveryBeat == beatToZoom)
 		{
 			cameraBump();
 		}
 
 
-		setOnScripts('curBeat', curBeat);
+		setOnScripts('curBeat', beat);
 		callOnScripts('onBeatHit');
 	}
 
-	override function sectionHit(){
-		var sectionData = SONG.notes[curSection];
+	override function sectionHit(section: Int){
+		var sectionData = SONG.notes[section];
 		if (sectionData == null)
 			return;
 
@@ -3565,7 +3565,7 @@ class PlayState extends MusicBeatState
 		if (generatedMusic && !endingSong)
 			moveCameraSection(sectionData);
 
-		setOnScripts("curSection", curSection);
+		setOnScripts("curSection", section);
 		setOnScripts('sectionData', sectionData);
 
 		callOnScripts("onSectionHit");

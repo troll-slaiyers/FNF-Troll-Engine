@@ -106,6 +106,9 @@ class MusicBeatState extends TransitionableState
 	{
 		FlxG.autoPause = ClientPrefs.autoPause;
 		super.create();
+		Conductor.onBeatHit.add(beatHit);
+		Conductor.onStepHit.add(stepHit);
+
 	}
 
 	override function update(elapsed:Float)
@@ -118,6 +121,9 @@ class MusicBeatState extends TransitionableState
 	override public function destroy()
 	{
 		super.destroy();
+
+		Conductor.onBeatHit.remove(beatHit);
+		Conductor.onStepHit.remove(stepHit);
 		
 		if (_extensionScript != null) {
 			_extensionScript.stop();
@@ -125,17 +131,17 @@ class MusicBeatState extends TransitionableState
 		}
 	}
 
-	public function stepHit():Void
+	public function stepHit(step:Int):Void
 	{
 		//trace('Step: ' + curStep);
 	}
 
-	public function beatHit():Void
+	public function beatHit(beat:Int):Void
 	{
 		//trace('Beat: ' + curBeat);
 	}
 
-	public function sectionHit():Void
+	public function sectionHit(section:Int):Void
 	{
 		//trace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
 	}
@@ -205,12 +211,6 @@ class MusicBeatState extends TransitionableState
 		var curStep:Int = Conductor.roundedStep;
 
 		if (oldStep != curStep) {
-			if (curStep > 0) {
-				stepHit();
-				if (curStep % 4 == 0)
-					beatHit();
-			}
-
 			if (PlayState.SONG != null) {
 				if (oldStep < curStep)
 					updateSection();
@@ -258,7 +258,7 @@ class MusicBeatState extends TransitionableState
 	private function _sectionHit() {
 		var sectionData = PlayState.SONG.notes[curSection];
 
-		sectionHit();
+		sectionHit(curSection);
 	}
 
 	function resyncTracks() {

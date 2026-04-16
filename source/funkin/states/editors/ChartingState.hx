@@ -2479,17 +2479,11 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	}
 
 	override function updateSteps() {
-		var oldStep:Int = Conductor.curStep;
+		var oldStep:Int = Conductor.roundedStep;
 		Conductor.updateSteps();
-		var curStep:Int = Conductor.curStep;
+		var curStep:Int = Conductor.roundedStep;
 
 		if (oldStep != curStep) {
-			if (curStep > 0) {
-				stepHit();
-				if (curStep % 4 == 0)
-					beatHit();
-			}
-
 			/*
 			if (PlayState.SONG != null) {
 				if (oldStep < curStep)

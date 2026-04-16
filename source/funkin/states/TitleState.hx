@@ -234,25 +234,25 @@ class TitleState extends MusicBeatState
 		skippedIntro = true;
 	}
 
-	override function stepHit()
+	override function stepHit(step: Int)
 	{
-		super.stepHit();
+		super.stepHit(step);
 
 		if (skippedIntro) {
 			if (bg != null && bg.stageScript != null) {
-				bg.stageScript.set("curStep", curStep);
+				bg.stageScript.set("curStep", step);
 				bg.stageScript.call('onStepHit', []);
 			}
 		}
 	}
 
-	override function beatHit()
+	override function beatHit(beat: Int)
 	{
-		super.beatHit();
+		super.beatHit(beat);
 
 		if (skippedIntro) {
 			if (bg != null && bg.stageScript != null) {
-				bg.stageScript.set("curBeat", curBeat);
+				bg.stageScript.set("curBeat", beat);
 				bg.stageScript.call('onBeatHit', []);
 			}
 		}
@@ -261,9 +261,9 @@ class TitleState extends MusicBeatState
 			logoBl.time = 0;
 	}
 
-	override function sectionHit()
+	override function sectionHit(section:Int)
 	{
-		super.sectionHit();
+		super.sectionHit(section);
 
 		if (skippedIntro) {
 			if (bg != null && bg.stageScript != null) {
@@ -573,7 +573,7 @@ class IntroSequence extends FlxTypedGroup<FlxBasic> {
 		queueOnTime(Conductor.getTimeFromStep(step), func);
 
 	public function queueOnBeat(beat:Float, func:Void -> Void)
-		queueOnStep(Conductor.getTimeFromBeat(beat), func);
+		queueOnTime(Conductor.getTimeFromBeat(beat), func);
 
 	public function queueNewLineOnBeat(beat:Float, text:String, offset:Float = 0)
 		queueOnBeat(beat, newLine.bind(text, offset));

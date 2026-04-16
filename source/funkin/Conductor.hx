@@ -194,7 +194,8 @@ class Conductor {
 
 	#end
 
-	public static var offset:Float = 0;
+	public static var songOffset:Float = 0; // TODO: Implement
+	
 	public static var tracks:Array<FlxSound> = [];
 	public static var pitch:Float = 1.0;
 
@@ -354,17 +355,19 @@ class Conductor {
 	}
 
 
-	public static function getBeatInfoFromTime(time:Float, ?segment: TimeSegment, ?existingInfo:BeatInfo):BeatInfo {
+	public static function getBeatInfoFromTime(time:Float, ?offset:Float = 0, ?segment: TimeSegment, ?existingInfo:BeatInfo):BeatInfo {
 		var seg:TimeSegment = segment == null ? getSegmentFromTime(time) : segment;
 		var info:BeatInfo = existingInfo != null ? existingInfo : {
 			beat: 0,
 			measure: 0,
 			step: 0
 		}
+		
+		var offsettedTime:Float = time - offset;
 
-		info.beat = seg.getBeat(time);
-		info.measure = seg.getMeasure(time);
-		info.step = seg.getStep(time);
+		info.beat = seg.getBeat(offsettedTime);
+		info.measure = seg.getMeasure(offsettedTime);
+		info.step = seg.getStep(offsettedTime);
 
 		return info;
 	}
@@ -374,7 +377,7 @@ class Conductor {
 	public static function updateSteps(){
 		mostRecentSegment = getSegmentFromTime(time);
 		
-		beatInfo = getBeatInfoFromTime(time, mostRecentSegment, beatInfo);
+		beatInfo = getBeatInfoFromTime(time, ClientPrefs.noteOffset, mostRecentSegment, beatInfo);
 
 		if (Math.floor(beatInfo.measure) != roundedMeasure) {
 			onMeasureHit.dispatch(roundedMeasure);
