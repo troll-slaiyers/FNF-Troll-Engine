@@ -30,18 +30,14 @@ class MusicBeatSubstate extends FlxSubState
 
 	////
 	#if true
-	private var curStep(get, set):Int;
-	private var curBeat(get, set):Int;
-	private var curDecStep(get, set):Float;
-	private var curDecBeat(get, set):Float;
+	private var curStep(get, never):Int;
+	private var curBeat(get, never):Int;
+	private var curDecStep(get, never):Float;
+	private var curDecBeat(get, never):Float;
 	@:noCompletion function get_curStep() return Conductor.curStep;
 	@:noCompletion function get_curBeat() return Conductor.curBeat;
 	@:noCompletion function get_curDecStep() return Conductor.curDecStep;
 	@:noCompletion function get_curDecBeat() return Conductor.curDecBeat;
-	@:noCompletion function set_curStep(v) return Conductor.curStep=v;
-	@:noCompletion function set_curBeat(v) return Conductor.curBeat=v;
-	@:noCompletion function set_curDecStep(v) return Conductor.curDecStep=v;
-	@:noCompletion function set_curDecBeat(v) return Conductor.curDecBeat=v;
 	#end
 
 	private var controls(get, never):Controls;

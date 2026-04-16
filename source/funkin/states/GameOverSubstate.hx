@@ -80,7 +80,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		FlxG.camera.bgColor = FlxColor.BLACK;
 		FlxG.camera.follow(camFollowPos, LOCKON, 1);
 
-		Conductor.songPosition = 0;
+		Conductor.time = 0;
 		Conductor.changeBPM(100);
 
 		if (genericBitch != null){
@@ -310,7 +310,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		}
 
 		if (FlxG.sound.music != null && FlxG.sound.music.playing)
-			Conductor.songPosition = FlxG.sound.music.time;
+			Conductor.time = FlxG.sound.music.time;
 
 		if (canEnd){
 			if (controls.ACCEPT)

@@ -52,7 +52,7 @@ class Countdown extends FlxBasic {
 		if (this._cameras == null)
 			this._cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 
-		this.tickDuration = (tickDuration == -1) ? Conductor.beatLength : tickDuration;
+		this.tickDuration = (tickDuration == -1) ? Conductor.beatLengthSecs : tickDuration;
 		this.position = 0;
 		this.finished = false;
 		this.active = true;
@@ -91,7 +91,7 @@ class Countdown extends FlxBasic {
 
 			if (sprite != null)
 			{
-				tween = FlxTween.tween(sprite, {alpha: 0}, Conductor.beatLength, {
+				tween = FlxTween.tween(sprite, {alpha: 0}, Conductor.beatLengthSecs, {
 					ease: FlxEase.cubeInOut,
 					onComplete: function(twn)
 					{

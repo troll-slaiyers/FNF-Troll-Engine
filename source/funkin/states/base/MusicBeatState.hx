@@ -55,10 +55,10 @@ enum abstract SongSyncMode(String) to String {
 class MusicBeatState extends TransitionableState
 {
 	private var curSection:Int = 0;
-	private var curStep(get, set):Int;
-	private var curBeat(get, set):Int;
-	private var curDecStep(get, set):Float;
-	private var curDecBeat(get, set):Float;
+	private var curStep(get, never):Int;
+	private var curBeat(get, never):Int;
+	private var curDecStep(get, never):Float;
+	private var curDecBeat(get, never):Float;
 
 	private var updateSongPos:Bool = true;
 	private var songSyncMode(default, set):SongSyncMode;
@@ -82,10 +82,6 @@ class MusicBeatState extends TransitionableState
 	@:noCompletion inline function get_curBeat() return Conductor.curBeat;
 	@:noCompletion inline function get_curDecStep() return Conductor.curDecStep;
 	@:noCompletion inline function get_curDecBeat() return Conductor.curDecBeat;
-	@:noCompletion inline function set_curStep(v) return Conductor.curStep=v;
-	@:noCompletion inline function set_curBeat(v) return Conductor.curBeat=v;
-	@:noCompletion inline function set_curDecStep(v) return Conductor.curDecStep=v;
-	@:noCompletion inline function set_curDecBeat(v) return Conductor.curDecBeat=v;
 
 	@:noCompletion function set_songSyncMode(v:SongSyncMode):SongSyncMode {
 		songSyncMode = v;
@@ -168,23 +164,23 @@ class MusicBeatState extends TransitionableState
 			case DIRECT:
 				// Ludem Dare sync
 				// Jittery and retarded, but works maybe
-				Conductor.songPosition = inst.time;
+				Conductor.time = inst.time;
 
 			case LEGACY:
 				// Resync Vocals
 				// FUCKING SUCKS DONT USE LMFAO! It's here just incase though
-				Conductor.songPosition += elapsedMS;
+				Conductor.time += elapsedMS;
 				
 			case PSYCH_1_0:
 				// Psych 1.0 method
-				Conductor.songPosition += elapsedMS;
-				Conductor.songPosition = FlxMath.lerp(inst.time, Conductor.songPosition, Math.exp(-elapsedMS * 0.005));
-				var timeDiff:Float = Math.abs(inst.time - Conductor.songPosition);
+				Conductor.time += elapsedMS;
+				Conductor.time = FlxMath.lerp(inst.time, Conductor.time, Math.exp(-elapsedMS * 0.005));
+				var timeDiff:Float = Math.abs(inst.time - Conductor.time);
 				if (timeDiff > 1000)
-					Conductor.songPosition = Conductor.songPosition + 1000 * FlxMath.signOf(timeDiff);
+					Conductor.time = Conductor.time + 1000 * FlxMath.signOf(timeDiff);
 
 			case SYSTEM_TIME:
-				Conductor.songPosition = Conductor.getAccPosition();
+				Conductor.time = Conductor.getAccPosition();
 			
 			case LAST_MIX:
 				// Stepmania method
@@ -196,7 +192,7 @@ class MusicBeatState extends TransitionableState
 					lastMixTimer += elapsedMS;
 				}
 				
-				Conductor.songPosition = lastMixPos + lastMixTimer;
+				Conductor.time = lastMixPos + lastMixTimer;
 
 		}
 
@@ -204,9 +200,9 @@ class MusicBeatState extends TransitionableState
 	}
 
 	private function updateSteps() {
-		var oldStep:Int = Conductor.curStep;
+		var oldStep:Int = Conductor.roundedStep;
 		Conductor.updateSteps();
-		var curStep:Int = Conductor.curStep;
+		var curStep:Int = Conductor.roundedStep;
 
 		if (oldStep != curStep) {
 			if (curStep > 0) {
@@ -261,8 +257,6 @@ class MusicBeatState extends TransitionableState
 
 	private function _sectionHit() {
 		var sectionData = PlayState.SONG.notes[curSection];
-		if (sectionData?.changeBPM)
-			Conductor.changeBPM(sectionData.bpm);
 
 		sectionHit();
 	}
@@ -288,7 +282,7 @@ class MusicBeatState extends TransitionableState
 	inline function getStepsOnSection():Int
 	{		
 		var section = PlayState?.SONG.notes[curSection];
-		return section==null ? 16 : Math.round(Conductor.sectionSteps(section));
+		return section==null ? 16 : Math.round((section.sectionBeats ?? 4.0) * 4);
 	}
 
 	////
@@ -330,7 +324,7 @@ class MusicBeatState extends TransitionableState
 			FlxG.sound.playMusic(Paths.music(key));
 		}
 
-		Conductor.songPosition = FlxG.sound.music.time;
+		Conductor.time = FlxG.sound.music.time;
 		curMusic = key;
 	}
 

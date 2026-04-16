@@ -150,11 +150,11 @@ class ChartData
 			trace('Loading Psych Engine v1.0.0 Chart');
 
 			songJson = cast uncastedJson;
-			var stepCrotchet:Float = Conductor.calculateStepCrochet(songJson.bpm);
+			var stepCrotchet:Float = (60 / songJson.bpm) / 4; //Conductor.calculateStepCrochet(songJson.bpm);
 			var keyCount:Int = songJson.keyCount ?? 4;
 			for (section in songJson.notes){
 				if (section.changeBPM)
-					stepCrotchet = Conductor.calculateStepCrochet(section.bpm);
+					stepCrotchet = (60 / section.bpm) / 4;
 
 				for (note in section.sectionNotes){
 					var note:Array<Dynamic> = cast note;

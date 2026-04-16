@@ -676,8 +676,7 @@ class PlayState extends MusicBeatState
 		songHighscore = Highscore.getScore(songId, difficultyName);
 
 		offset = SONG.offset ?? 0.0;
-		Conductor.mapBPMChanges(SONG);
-		Conductor.changeBPM(SONG.bpm);
+		Conductor.mapTimeSegments(SONG);
 		Conductor.songPosition = PlayState.startOnTime - Conductor.crochet * 5;
 		Conductor.updateSteps();
 
@@ -1376,7 +1375,7 @@ class PlayState extends MusicBeatState
 			// Do the countdown.
 			curCountdown = new Countdown(this);
 			initCountdown(curCountdown);
-			curCountdown.start(Conductor.beatLength); // time is optional but here we are
+			curCountdown.start(Conductor.beatLengthSecs); // time is optional but here we are
 
 			var i = this.members.indexOf(this.notes);
 			(i==-1) ? this.add(curCountdown) : this.insert(i, curCountdown);
@@ -1596,7 +1595,6 @@ class PlayState extends MusicBeatState
 		#end
 
 		////
-		Conductor.changeBPM(PlayState.SONG.bpm);
 		Conductor.tracks = this.tracks;
 		Conductor.pitch = this.playbackRate;
 
@@ -1716,6 +1714,7 @@ class PlayState extends MusicBeatState
 		
 
 		var offset:Float = ClientPrefs.noteOffset - offset;
+		var lastSegment:Int = 0;
 		for (section in noteData) {
 			callOnScripts("onSectionGenerate", [section]);
 			for (noteData in section.sectionNotes) {
@@ -2822,16 +2821,16 @@ class PlayState extends MusicBeatState
 		
 		function onComplete(_) {
 			if (ClientPrefs.simpleJudge){
-				FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, Conductor.stepLength, {
+				FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, Conductor.stepLengthSecs, {
 					ease: FlxEase.quadIn,
 					onComplete: (_) -> timingTxt.visible = false,
-					startDelay: 8 * Conductor.stepLength
+					startDelay: 8 * Conductor.stepLengthSecs
 				});
 			}else{
-				FlxTween.tween(timingTxt, {alpha: 0}, Conductor.stepLength, {
+				FlxTween.tween(timingTxt, {alpha: 0}, Conductor.stepLengthSecs, {
 					// ease: FlxEase.circOut,
 					onComplete: (_) -> timingTxt.visible = false,
-					startDelay: 8 * Conductor.stepLength
+					startDelay: 8 * Conductor.stepLengthSecs
 				});
 			}
 		}
@@ -2861,8 +2860,8 @@ class PlayState extends MusicBeatState
 				if (!spr.alive)
 					return;
 
-				spr.tween = FlxTween.tween(spr.scale, {x: 0, y: 0}, Conductor.stepLength, {
-					startDelay: 8 * Conductor.stepLength,
+				spr.tween = FlxTween.tween(spr.scale, {x: 0, y: 0}, Conductor.stepLengthSecs, {
+					startDelay: 8 * Conductor.stepLengthSecs,
 					ease: FlxEase.quadIn,
 					onComplete: _ -> spr.kill()
 				});
@@ -2882,7 +2881,7 @@ class PlayState extends MusicBeatState
 
 			function onComplete(_) {
 				spr.tween = FlxTween.tween(spr, {alpha: 0.0}, 0.2, {
-					startDelay: Conductor.beatLength,
+					startDelay: Conductor.beatLengthSecs,
 					onComplete: _ -> spr.kill()
 				});
 			}
@@ -2939,8 +2938,8 @@ class PlayState extends MusicBeatState
 					if (!numSpr.alive)
 						return;
 
-					numSpr.tween = FlxTween.tween(numSpr, {alpha: 0.0}, Conductor.stepLength, {
-						startDelay: Math.max(8 * Conductor.stepLength - 0.1, 0.0),
+					numSpr.tween = FlxTween.tween(numSpr, {alpha: 0.0}, Conductor.stepLengthSecs, {
+						startDelay: Math.max(8 * Conductor.stepLengthSecs - 0.1, 0.0),
 						ease: FlxEase.quadIn,
 						onComplete: _ -> numSpr.kill()
 					});

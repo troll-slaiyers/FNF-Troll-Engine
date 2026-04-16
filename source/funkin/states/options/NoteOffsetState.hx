@@ -246,7 +246,7 @@ class NoteOffsetState extends MusicBeatState
 			FlxG.mouse.visible = false;
 		}
 
-		Conductor.songPosition = FlxG.sound.music.time;
+		Conductor.time = FlxG.sound.music.time;
 		super.update(elapsed);
 	}
 

@@ -73,8 +73,8 @@ abstract class FunkinScript
 		#end
 		
 		set('curBpm', Conductor.bpm);
-		set('crochet', Conductor.crochet);
-		set('stepCrochet', Conductor.stepCrochet);
+		set('crochet', Conductor.beatLength);
+		set('stepCrochet', Conductor.stepLength);
 
 		set('curBeat', 0);
 		set('curStep', 0);

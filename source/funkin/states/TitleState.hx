@@ -570,10 +570,10 @@ class IntroSequence extends FlxTypedGroup<FlxBasic> {
 		introEvents.push([time, func]);
 
 	public function queueOnStep(step:Float, func:Void -> Void)
-		queueOnTime(Conductor.stepToMs(step), func);
+		queueOnTime(Conductor.getTimeFromStep(step), func);
 
 	public function queueOnBeat(beat:Float, func:Void -> Void)
-		queueOnStep(beat * 4, func);
+		queueOnStep(Conductor.getTimeFromBeat(beat), func);
 
 	public function queueNewLineOnBeat(beat:Float, text:String, offset:Float = 0)
 		queueOnBeat(beat, newLine.bind(text, offset));

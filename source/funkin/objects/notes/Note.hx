@@ -8,6 +8,7 @@ import funkin.states.PlayState;
 import funkin.states.editors.ChartingState;
 import funkin.objects.shaders.NoteColorSwap;
 import funkin.objects.playfields.*;
+import funkin.Conductor.TimeSegment;
 
 using StringTools;
 
@@ -35,6 +36,11 @@ private typedef NoteScriptState = {
 }
 
 class Note extends NoteObject {
+/* 	public var timingSegmentIndex: Int = 0;
+	@:isVar public var timingSegment(get, null): TimeSegment;
+	@:noCompletion inline function get_timingSegment()
+		return Conductor.timeSegments[timingSegmentIndex]; */
+	
 	/** Whether holds should "glow" / increase in alpha when held */
 	public var holdGlow:Bool = true;
 
@@ -82,10 +88,13 @@ class Note extends NoteObject {
 	inline public static function beatToNoteRow(beat:Float):Int
 		return Math.round(beat * Conductor.ROWS_PER_BEAT);
 
-	public static function getQuant(beat:Float) {
+	public static function getQuant(time:Float) {
+		var segment: TimeSegment = Conductor.getSegmentFromTime(time);
+		var beat = (time - segment.time) / segment.getBeatLength();
+		var rowsPerMeasure = Conductor.ROWS_PER_BEAT * segment.measureNotes;
 		var row:Int = beatToNoteRow(beat);
 		for (data in quants) {
-			if (row % (Conductor.ROWS_PER_MEASURE / data) == 0)
+			if (row % (rowsPerMeasure / data) == 0)
 				return data;
 		}
 		return quants[quants.length - 1]; // invalid
@@ -459,7 +468,7 @@ class Note extends NoteObject {
 		this.isSustainEnd = susPart == END;
 		this.inEditor = inEditor;
 
-		this.beat = Conductor.getBeat(strumTime);
+		this.beat = Conductor.getSegmentFromTime(strumTime).getBeat(strumTime);
 		this.hitsoundDisabled = isSustainNote;
 
 		this.canQuant = ClientPrefs.noteSkin == 'Quants';
@@ -467,7 +476,7 @@ class Note extends NoteObject {
 		if (this.isSustainNote && prevNote != null)
 			this.quant = prevNote.quant;
 		else
-			this.quant = getQuant(Conductor.getBeatSinceChange(this.strumTime));
+			this.quant = getQuant(this.strumTime);
 
 		this.baseAlpha = this.isSustainNote ? 0.6 : 1;
 

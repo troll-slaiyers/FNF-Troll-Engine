@@ -648,8 +648,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		_session ??= makeSession();
 
 		Conductor.cleanup();
-		Conductor.mapBPMChanges(_song);
-		Conductor.changeBPM(_song.bpm);
+		Conductor.mapTimeSegments(_song);
 		metroInterval = (60 / _song.bpm) * 1000;
 
 		this.tracks = Conductor.tracks;
@@ -876,7 +875,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				allNotes.push(note);
 			}
 			
-			sectionStarts[i] = fuckFloatingPoints(Conductor.stepToMs(beat * 4));
+			sectionStarts[i] = fuckFloatingPoints(Conductor.getTimeFromStep(beat * 4)); // This is DEFINITELY SUPER BROKEN  because steps are no longer inherently linked to the beat -neb
 			beat += getSectionBeats(i);
 		}
 		Conductor.changeBPM(bimp);
@@ -915,7 +914,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			}
 			else
 			{
-				if (Math.abs(last.strumTime - event.strumTime) <= Conductor.jackLimit)
+				if (Math.abs(last.strumTime - event.strumTime) <= FlxMath.EPSILON)
 				{
 					var fuck = eventsData[eventsData.length - 1];
 					for (shit in event.subEventsData)
@@ -2286,7 +2285,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 					_song.notes[curSection].bpm = stepperSectionBPM.value;
 					_song.notes[curSection].changeBPM = check.checked;
 					
-					Conductor.mapBPMChanges(_song);
+					Conductor.mapTimeSegments(_song);
 					doUpdateGridObjects = true;
 					updateNoteSteps();
 					updateEventSteps();
@@ -2316,7 +2315,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				
 				case 'song_bpm':
 					_song.bpm = nums.value;
-					Conductor.mapBPMChanges(_song);
+					Conductor.mapTimeSegments(_song);
 					doUpdateGridObjects = true;
 					updateNoteSteps();
 					updateEventSteps();
@@ -2357,7 +2356,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 				case 'section_bpm':
 					_song.notes[curSection].bpm = nums.value;
-					Conductor.mapBPMChanges(_song);
+					Conductor.mapTimeSegments(_song);
 					doUpdateGridObjects = true;
 					updateNoteSteps();
 			}
@@ -2439,7 +2438,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 	function getSnappedTime(snap:Float) {
 		var time = Conductor.songPosition;
-		var bmpEventTime = Conductor.getBPMFromSeconds(time).songTime;
+		var bmpEventTime = Conductor.getSegmentFromTime(time).time;
 		return CoolMath.snap(time - bmpEventTime, snap) + bmpEventTime;
 	}
 
@@ -2600,7 +2599,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		bpmTxt.text =
 		"Time: " + FlxMath.roundDecimal(Conductor.songPosition / 1000, 2) + " / " + FlxMath.roundDecimal(songLength / 1000, 2) +
 		"\n" +
-		'\nBPM: ${Conductor.bpm}' + (Conductor.bpmChangeMap.length <= 1 ? '' : ' ($curBPMChangeIndex / ${Conductor.bpmChangeMap.length - 1})') +
+		'\nBPM: ${Conductor.bpm}' + (Conductor.timeSegments.length <= 1 ? '' : ' ($curBPMChangeIndex / ${Conductor.timeSegments.length - 1})') +
 		'\nSection: $curSection' +
 		"\nBeat: " + floorDecimal(curDecBeat, 2) +
 		'\nStep: $curStep';
@@ -2697,9 +2696,9 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		});
 
 		if (options.metronome && Conductor.playing) {
-			var bpm = Conductor.bpmChangeMap[curBPMChangeIndex];
-			var curTime:Float = metronomeOffsetStepper.value + Conductor.songPosition - bpm.songTime;
-			var metroBeat:Int = bpm.stepTime * 4 + Math.floor(curTime / metroInterval);
+			var bpm = Conductor.timeSegments[curBPMChangeIndex];
+			var curTime:Float = metronomeOffsetStepper.value + Conductor.songPosition - bpm.time;
+			var metroBeat:Int = Math.floor(bpm.startBeat) + Math.floor(curTime / metroInterval);
 
 			if (metroBeat != lastMetroBeat) {
 				FlxG.sound.play(Paths.sound('Metronome_Tick'));
@@ -3555,14 +3554,14 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}
 
 		var strumTime = selectedNotes.strumTime;
-		var strumStep:Float = Conductor.getStep(strumTime);
+		var strumStep:Float = Conductor.getSegmentFromTime(strumTime).getStep(strumTime);
 		var endStep:Float = strumStep;
 		var sustainSteps:Float = 0;
 
 		if (selectedNotes.length > 0) {
 			var endTime = selectedNotes.endTime;
 			if (endTime != strumTime) {
-				endStep = Conductor.getStep(selectedNotes.endTime);
+				endStep = Conductor.getSegmentFromTime(selectedNotes.endTime).getStep(selectedNotes.endTime);
 				sustainSteps = endStep - strumStep;
 			}
 		}
@@ -3631,12 +3630,12 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			return;
 		}
 
-		var strumStep:Float = Conductor.getStep(curSelectedEvent.strumTime);
+		var strumStep:Float = Conductor.getSegmentFromTime(curSelectedEvent.strumTime).getStep(curSelectedEvent.strumTime);
 		eventLabelStrumTime.text = 'Strum Time: (Step $strumStep)';
 	}
 	
 	inline function fuckFloatingPoints(n:Float):Float // haha decimals
-		return CoolMath.snap(n, Conductor.jackLimit);
+		return CoolMath.snap(n, FlxMath.EPSILON);
 
 	inline function formatTime(ms:Float) {
 		var mins = '' + Math.floor(ms / 60000);
@@ -3821,18 +3820,18 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		return getYfromStrumNotes(calcY(strumTime) - getSectionStartTime(curSection), getSectionBeats(sectionNumber));
 
 	public static function calcY(strumTime:Float = 0) {
-        var map:BPMChangeEvent;
+        var map:TimeSegment;
         var crochet:Float;
         if (Conductor.songPosition <= strumTime) {
-            map = Conductor.getBPMFromSeconds(strumTime);
-            crochet = Conductor.calculateCrochet(map.bpm);
+            map = Conductor.getSegmentFromTime(strumTime);
+            crochet = map.getBeatLength();
         }
         else {
-            map = Conductor.getBPMFromSeconds(Conductor.songPosition);
-            crochet = Conductor.calculateCrochet(Conductor.getBPMFromSeconds(strumTime).bpm);
+            map = Conductor.getSegmentFromTime(Conductor.time);
+			crochet = Conductor.getSegmentFromTime(strumTime).getBeatLength();
         }
         
-        return map.songTime + ((strumTime - map.songTime) / crochet * Conductor.crochet);
+        return map.time + ((strumTime - map.time) / crochet * Conductor.beatLength);
     }
 
 	function setupEventData(i:PsychEventNote, sectionNumber:Int) {
@@ -3881,7 +3880,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	
 	function setupSusNote(note:Note):Null<FlxSprite> 
 	{
-		final stepLength = (Conductor.getBPMFromSeconds(note.strumTime).stepCrochet);
+		final stepLength = (Conductor.getSegmentFromTime(note.strumTime).getStepLength());
 		final tailSteps:Float = note.sustainLength / stepLength;
 		var height:Float = tailSteps * GRID_SIZE * zoomList[curZoom];
 		if (!showSusTail)

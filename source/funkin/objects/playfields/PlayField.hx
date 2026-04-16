@@ -327,7 +327,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				strum.alpha = 1;
 		}else {	
 			for (column => strum in strumNotes) {
-				FlxTween.tween(strum, {offsetY: strum.offsetY, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: ((0.5 * 4) / keyCount) + Conductor.beatLength * ((column * 4) / keyCount)});
+				FlxTween.tween(strum, {offsetY: strum.offsetY, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: ((0.5 * 4) / keyCount) + Conductor.beatLengthSecs * ((column * 4) / keyCount)});
 				strum.offsetY -= strum.downScroll ? -10 : 10;
 				strum.alpha = 0;
 			}
@@ -666,6 +666,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 						continue; // holds only get fukt if their parents get fukt
 					if (!last.alive || !current.alive)
 						continue; // just incase
+
+					
 					if (Math.abs(last.strumTime - current.strumTime) <= Conductor.jackLimit)
 					{
 						if (last.sustainLength < current.sustainLength) // keep the longer hold
