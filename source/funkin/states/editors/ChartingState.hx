@@ -865,20 +865,16 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		
 		var bimp = Conductor.bpm;
 		var beat:Float = 0;
-		for (i => section in allSections) {			
-			if (section.changeBPM)
-				Conductor.changeBPM(section.bpm);
-
+		for (i => section in allSections) {
 			while (section.sectionNotes.length > 0) {
 				var note = section.sectionNotes.pop();
 				note.strumTime = fuckFloatingPoints(note.strumTime);
 				allNotes.push(note);
 			}
 			
-			sectionStarts[i] = fuckFloatingPoints(Conductor.getTimeFromStep(beat * 4)); // This is DEFINITELY SUPER BROKEN  because steps are no longer inherently linked to the beat -neb
+			sectionStarts[i] = fuckFloatingPoints(Conductor.getTimeFromBeat(beat)); // This is DEFINITELY SUPER BROKEN  because steps are no longer inherently linked to the beat -neb
 			beat += getSectionBeats(i);
 		}
-		Conductor.changeBPM(bimp);
 		
 		allNotes.sort((a, b) -> return Std.int(b.strumTime - a.strumTime)); // descending order
 
@@ -3673,7 +3669,6 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}
 
 		if (Conductor.bpm != daBPM) {
-			Conductor.changeBPM(daBPM);
 			metronomeStepper.value = daBPM;
 			metroInterval = (60 / daBPM) * 1000;
 		}

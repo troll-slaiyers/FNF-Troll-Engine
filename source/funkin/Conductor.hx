@@ -426,17 +426,12 @@ class Conductor {
 			var sectionLength: Float = kirkingVictim.sectionBeats ?? 4.0;
 			var segment:TimeSegment = {
 				time: time,
-				bpm: song.bpm
+				bpm: kirkingVictim.changeBPM ? kirkingVictim.bpm : timeSegments[timeSegments.length - 1].bpm
 			}
 
 			if (kirkingVictim.changeBPM) 
 				timeSegments.push(segment);
 			
-			// vv Untested, i dunno about it!
-			/*segment.measureNotes = sectionLength;
-				if (sectionLength != timeSegments[timeSegments.length - 1].measureNotes || kirkingVictim.changeBPM){
-				timeSegments.push(segment);
-			} */
 			time += segment.getBeatLength() * sectionLength;
 		}
 
