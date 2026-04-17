@@ -3804,11 +3804,11 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
         var crochet:Float;
         if (Conductor.songPosition <= strumTime) {
             map = Conductor.getSegmentFromTime(strumTime);
-            crochet = map.getBeatLength();
+            crochet = map.beatLength;
         }
         else {
             map = Conductor.getSegmentFromTime(Conductor.time);
-			crochet = Conductor.getSegmentFromTime(strumTime).getBeatLength();
+			crochet = Conductor.getSegmentFromTime(strumTime).beatLength;
         }
         
         return map.time + ((strumTime - map.time) / crochet * Conductor.beatLength);
@@ -3860,7 +3860,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	
 	function setupSusNote(note:Note):Null<FlxSprite> 
 	{
-		final stepLength = (Conductor.getSegmentFromTime(note.strumTime).getStepLength());
+		final stepLength = (Conductor.getSegmentFromTime(note.strumTime).stepLength);
 		final tailSteps:Float = note.sustainLength / stepLength;
 		var height:Float = tailSteps * GRID_SIZE * zoomList[curZoom];
 		if (!showSusTail)

@@ -90,7 +90,7 @@ class Note extends NoteObject {
 
 	public static function getQuant(time:Float) {
 		var segment: TimeSegment = Conductor.getSegmentFromTime(time);
-		var beat = (time - segment.time) / segment.getBeatLength();
+		var beat = (time - segment.time) / segment.beatLength;
 		var rowsPerMeasure = Conductor.ROWS_PER_BEAT * segment.measureNotes;
 		var row:Int = beatToNoteRow(beat);
 		for (data in quants) {

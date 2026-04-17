@@ -19,7 +19,7 @@ class Conductor {
 
 	@:deprecated("You shouid be getting the TimeSegment and calculating this yourself!")
 	@:noCompletion static function get_jackLimit()
-		return currentSegment.getStepLength() / _internalJackLimit;
+		return currentSegment.stepLength / _internalJackLimit;
 
 	
 	public inline static final ROWS_PER_BEAT:Int = 48;
@@ -28,18 +28,25 @@ class Conductor {
 	public static var onBeatHit:FlxTypedSignal<Int->Void> = new FlxTypedSignal<Int->Void>();
 	public static var onMeasureHit:FlxTypedSignal<Int->Void> = new FlxTypedSignal<Int->Void>();
 
-	public static var timeSegments(default, set):Array<TimeSegment> = [];
+	public static var timeSegments(default, set):Array<TimeSegment>;
 
 	@:noCompletion inline static function set_timeSegments(value:Array<TimeSegment>) {
-		value.sort((a, b) -> return Std.int(a.time - b.time));
-		if(value.length == 0)value = [{}];
-		currentSegment = value[0] ?? {};
+		if (value.length == 0)
+			value = [new TimeSegment(0, 100)];
+		else
+			value.sort((a, b) -> return Std.int(a.time - b.time));
+		
+		currentSegment = value[0];
 
 		return timeSegments = value;
 	}
 
 	static var beatInfo:BeatInfo = {beat: 0, step: 0, measure: 0};
-	static var currentSegment: TimeSegment = {};
+	static var currentSegment:TimeSegment;
+
+	private static function __init__() {
+		timeSegments = [];
+	}
 
 	public static var time:Float = 0;
 
@@ -163,29 +170,21 @@ class Conductor {
 	// If we need speed we can binary search! But for now who gaf
 	// This *should* be sorted
 	public static function getSegmentFromTime(time:Float):TimeSegment {
-		if (timeSegments.length == 0)
-			return {};
-		if (timeSegments.length == 1)
-			return timeSegments[0];
-
 		var seg:TimeSegment = timeSegments[0];
+
 		for (segment in timeSegments) {
 			if (segment.time <= time)
 				seg = segment;
 			else if (segment.time > time)
-				return seg;
+				break;
 		}
 
 		return seg;
 	}
 
 	public static function getSegmentFromBeat(beat:Float):TimeSegment {
-		if (timeSegments.length == 0)
-			return {};
-		if (timeSegments.length == 1)
-			return timeSegments[0];
-
 		var seg:TimeSegment = timeSegments[0];
+
 		for (segment in timeSegments) {
 			if (segment.startBeat <= beat)
 				seg = segment;
@@ -201,7 +200,7 @@ class Conductor {
 			return 0;
 		
 		if (timeSegments.length == 1)
-			return step * timeSegments[0].getStepLength();
+			return step * timeSegments[0].stepLength;
 
 		var seg:TimeSegment = timeSegments[0];
 		for (segment in timeSegments) {
@@ -210,7 +209,7 @@ class Conductor {
 			else if (segment.startStep > step)
 				break;
 		}
-		return seg.time + (step - seg.startStep) * seg.getStepLength();
+		return seg.time + (step - seg.startStep) * seg.stepLength;
 	}
 
 	public static function getTimeFromBeat(beat:Float):Float {
@@ -218,7 +217,7 @@ class Conductor {
 			return 0;
 
 		if (timeSegments.length == 1)
-			return beat * timeSegments[0].getBeatLength();
+			return beat * timeSegments[0].beatLength;
 
 		var seg:TimeSegment = timeSegments[0];
 		for (segment in timeSegments) {
@@ -228,7 +227,7 @@ class Conductor {
 				break;
 		}
 
-		return seg.time + (beat - seg.startBeat) * seg.getBeatLength();
+		return seg.time + (beat - seg.startBeat) * seg.beatLength;
 	}
 
 
@@ -343,27 +342,24 @@ class Conductor {
 
 	@:deprecated("Use Conductor.timeSegments to set up BPM changes")
 	public static function changeBPM(bpm: Float){
-		timeSegments = [{
-			time: 0,
-			bpm: bpm
-		}];
+		timeSegments = [new TimeSegment(0, bpm)];
 	}
 	
 	public static function mapTimeSegments(song: SwagSong) {
-		timeSegments = [{bpm: song.bpm}];
+		timeSegments = [new TimeSegment(0, song.bpm)];
 
 		var time: Float = 0;
 		for(kirkingVictim in song.notes){ // get it because TREY'RE GONNA DIE SOON
 			var sectionLength: Float = kirkingVictim.sectionBeats ?? 4.0;
-			var segment:TimeSegment = {
-				time: time,
-				bpm: kirkingVictim.changeBPM ? kirkingVictim.bpm : timeSegments[timeSegments.length - 1].bpm
-			}
+			var segment = new TimeSegment(
+				time,
+				kirkingVictim.changeBPM ? kirkingVictim.bpm : timeSegments[timeSegments.length - 1].bpm
+			);
 
 			if (kirkingVictim.changeBPM) 
 				timeSegments.push(segment);
 			
-			time += segment.getBeatLength() * sectionLength;
+			time += segment.beatLength * sectionLength;
 		}
 
 		finalizeTimeSegments();
@@ -383,53 +379,53 @@ class Conductor {
 		return currentSegment.bpm;
 
 	@:noCompletion inline static function get_beatLength()
-		return currentSegment.getBeatLength();
+		return currentSegment.beatLength;
 	
 	@:noCompletion inline static function get_stepLength()
-		return currentSegment.getStepLength();
+		return currentSegment.stepLength;
 	
 	@:noCompletion inline static function get_beatLengthSecs()
-		return currentSegment.getBeatLength() * 0.001;
+		return currentSegment.beatLengthSecs;
 	
 	@:noCompletion inline static function get_stepLengthSecs()
-		return currentSegment.getStepLength() * 0.001;
+		return currentSegment.stepLengthSecs;
 
 	#if ALLOW_DEPRECATION
 	@:deprecated("Use Conductor.beatLength")
 	public static var crochet(get, null):Float;
 
 	@:noCompletion inline static function get_crochet()
-		return currentSegment.getBeatLength();
+		return beatLength;
 
 	@:deprecated("Use Conductor.stepLength")
 	public static var stepCrochet(get, null):Float;
 
 	@:noCompletion inline static function get_stepCrochet()
-		return currentSegment.getStepLength();
+		return stepLength;
 
 	@:deprecated("Use Conductor.beatLength")
 	public static var crotchet(get, null):Float;
 
 	@:noCompletion inline static function get_crotchet()
-		return currentSegment.getBeatLength();
+		return beatLength;
 
 	@:deprecated("Use Conductor.stepLength")
 	public static var stepCrotchet(get, null):Float;
 
 	@:noCompletion inline static function get_stepCrotchet()
-		return currentSegment.getStepLength();
+		return stepLength;
 
 	@:deprecated("Use Conductor.beatInfo.step or Conductor.step")
 	public static var curDecStep(get, null):Float;
 
 	@:noCompletion inline static function get_curDecStep()
-		return beatInfo.step;
+		return step;
 
 	@:deprecated("Use Conductor.beatInfo.beat or Conductor.beat")
 	public static var curDecBeat(get, null):Float;
 
 	@:noCompletion inline static function get_curDecBeat()
-		return beatInfo.beat;
+		return beat;
 
 	@:deprecated("Use Math.floor(Conductor.beatInfo.beat) or Conductor.roundedBeat")
 	public static var curBeat(get, null):Int;
@@ -456,7 +452,6 @@ class Conductor {
 
 // I hate time signatures it turns out
 
-@:structInit
 class TimeSegment {
 	public var time:Float = 0;
 	public var bpm:Float = 60;
@@ -471,28 +466,37 @@ class TimeSegment {
 	public var measureNotes:Float = 4;
 	public var notation:Float = 4;
 
-	public function getBeatLength() {
-		return ((60 / bpm) * (4 / notation)) * 1000;
-	}
+	public var beatLength:Float;
+	public var stepLength:Float;
+	public var measureLength:Float;
 
-	public function getStepLength() {
-		return ((60 / bpm) / 4) * 1000;
-	}
+	public var beatLengthSecs:Float;
+	public var stepLengthSecs:Float;
 
-	public function getMeasureLength() {
-		return getBeatLength() * measureNotes;
+	public function new(time:Float, bpm:Float, measureNotes:Float = 4, notation:Float = 4) {
+		this.time = time;
+		this.bpm = bpm;
+		this.measureNotes = measureNotes;
+		this.notation = notation;
+
+		this.beatLengthSecs = (60 / bpm) * (4 / notation);
+		this.stepLengthSecs = (60 / bpm) / 4;
+
+		this.beatLength = beatLengthSecs * 1000;
+		this.stepLength = stepLengthSecs * 1000;
+		this.measureLength = beatLength * measureNotes;
 	}
 
 	public function getBeat(at:Float) {
-		return startBeat + (at - time) / getBeatLength();
+		return startBeat + (at - time) / beatLength;
 	}
 
 	public function getStep(at:Float) {
-		return startStep + (at - time) / getStepLength();
+		return startStep + (at - time) / stepLength;
 	}
 
 	public function getMeasure(at:Float) {
-		return startMeasure + (at - time) / getMeasureLength();
+		return startMeasure + (at - time) / measureLength;
 	}
 
 	public function toString() {
