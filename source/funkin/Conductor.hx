@@ -5,52 +5,6 @@ import funkin.data.Song;
 import flixel.math.FlxMath;
 import flixel.util.FlxSignal;
 
-// I hate time signatures it turns out
-
-@:structInit
-class TimeSegment {
-	public var time:Float = 0;
-	public var bpm:Float = 60;
-
-	public var startBeat:Float = 0;
-	public var startStep:Float = 0;
-	public var startMeasure:Float = 0;
-
-	// Time signatures are expressed as measureNotes / notation
-	// A measure should have measureNotes notations (i.e 3/8 means each measure is 3 8ths)
-	// Notation is effectively speed then
-	public var measureNotes:Float = 4;
-	public var notation:Float = 4;
-
-	public function getBeatLength() {
-		return ((60 / bpm) * (4 / notation)) * 1000;
-	}
-
-	public function getStepLength() {
-		return ((60 / bpm) / 4) * 1000;
-	}
-
-	public function getMeasureLength() {
-		return getBeatLength() * measureNotes;
-	}
-
-	public function getBeat(at:Float) {
-		return startBeat + (at - time) / getBeatLength();
-	}
-
-	public function getStep(at:Float) {
-		return startStep + (at - time) / getStepLength();
-	}
-
-	public function getMeasure(at:Float) {
-		return startMeasure + (at - time) / getMeasureLength();
-	}
-
-	public function toString() {
-		return 'Time: $time | BPM: $bpm | Time Sig: $measureNotes/$notation | Start Beat: $startBeat | Start Measure: $startMeasure | Start Step: $startStep';
-	}
-}
-
 typedef BeatInfo = { // Returned by getBeatInfo
 	beat:Float,
 	step:Float,
@@ -123,6 +77,11 @@ class Conductor {
 	/** elapsed playback time before the song was paused **/
 	private static var songStartOffset:Float = 0;
 
+	/** Last inst.time value **/
+	private static var lastMixPos:Float = 0;
+	/** Time passed since inst.time changed **/
+	private static var lastMixTimer:Float = 0;
+
 	public static function startSong(offset:Float = 0) {
 		songStartTimestamp = Main.getTime();
 		songStartOffset = offset;
@@ -177,7 +136,8 @@ class Conductor {
 	public static function getAccPosition():Float {
 		return (!playing) ? time : switch (songSyncMode) {
 			case DIRECT:
-				tracks[0].time;
+				@:privateAccess
+				tracks[0]._channel.position;
 			case SYSTEM_TIME:
 				songStartOffset + (Main.getTime() - songStartTimestamp) * pitch;
 			default:
@@ -312,18 +272,13 @@ class Conductor {
 		} 
 	}
 
-	private static var lastMixTimer:Float = 0;
-	private static var lastMixPos:Float = 0;
-
 	public static function update() {
 		if (!playing) {
-			trace("Conductor is not active");
 			return;
 		}
 
 		var inst = tracks[0];
 		if (inst == null) {
-			trace("No tracks to sync :(");
 			return;
 		}
 
@@ -497,6 +452,52 @@ class Conductor {
 	@:noCompletion inline static function set_songPosition(value: Float)
 		return time = value;
 	#end
+}
+
+// I hate time signatures it turns out
+
+@:structInit
+class TimeSegment {
+	public var time:Float = 0;
+	public var bpm:Float = 60;
+
+	public var startBeat:Float = 0;
+	public var startStep:Float = 0;
+	public var startMeasure:Float = 0;
+
+	// Time signatures are expressed as measureNotes / notation
+	// A measure should have measureNotes notations (i.e 3/8 means each measure is 3 8ths)
+	// Notation is effectively speed then
+	public var measureNotes:Float = 4;
+	public var notation:Float = 4;
+
+	public function getBeatLength() {
+		return ((60 / bpm) * (4 / notation)) * 1000;
+	}
+
+	public function getStepLength() {
+		return ((60 / bpm) / 4) * 1000;
+	}
+
+	public function getMeasureLength() {
+		return getBeatLength() * measureNotes;
+	}
+
+	public function getBeat(at:Float) {
+		return startBeat + (at - time) / getBeatLength();
+	}
+
+	public function getStep(at:Float) {
+		return startStep + (at - time) / getStepLength();
+	}
+
+	public function getMeasure(at:Float) {
+		return startMeasure + (at - time) / getMeasureLength();
+	}
+
+	public function toString() {
+		return 'Time: $time | BPM: $bpm | Time Sig: $measureNotes/$notation | Start Beat: $startBeat | Start Measure: $startMeasure | Start Step: $startStep';
+	}
 }
 
 enum abstract SongSyncMode(String) to String {
