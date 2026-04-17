@@ -94,105 +94,16 @@ class Conductor {
 	public static var roundedMeasure:Int = 0;
 
 	public static var beat(get, never):Float;
-
-	@:noCompletion inline static function get_beat()
-		return beatInfo.beat;
-
 	public static var step(get, never):Float;
-
-	@:noCompletion inline static function get_step()
-		return beatInfo.step;
-
 	public static var measure(get, never):Float;
-
-	@:noCompletion inline static function get_measure()
-		return beatInfo.measure;
 
 	public static var bpm(get, never):Float;
 
-	@:noCompletion inline static function get_bpm()
-		return  mostRecentSegment.bpm;
-
 	public static var beatLength(get, never):Float;
-
-	@:noCompletion inline static function get_beatLength()
-		return mostRecentSegment.getBeatLength();
-	
 	public static var stepLength(get, never):Float;
 
-	@:noCompletion inline static function get_stepLength()
-		return mostRecentSegment.getStepLength();
-
 	public static var beatLengthSecs(get, never):Float;
-
-	@:noCompletion inline static function get_beatLengthSecs()
-		return mostRecentSegment.getBeatLength() * 0.001;
-
 	public static var stepLengthSecs(get, never):Float;
-
-	@:noCompletion inline static function get_stepLengthSecs()
-		return mostRecentSegment.getStepLength() * 0.001;
-
-
-	#if ALLOW_DEPRECATION
-	@:deprecated("Use Conductor.beatLength")
-	@:isVar public static var crochet(get, null):Float;
-
-	@:noCompletion inline static function get_crochet()
-		return mostRecentSegment.getBeatLength();
-
-	@:deprecated("Use Conductor.stepLength")
-	@:isVar public static var stepCrochet(get, null):Float;
-
-	@:noCompletion inline static function get_stepCrochet()
-		return mostRecentSegment.getStepLength();
-
-	@:deprecated("Use Conductor.beatLength")
-	@:isVar public static var crotchet(get, null):Float;
-
-	@:noCompletion inline static function get_crotchet()
-		return mostRecentSegment.getBeatLength();
-
-	@:deprecated("Use Conductor.stepLength")
-	@:isVar public static var stepCrotchet(get, null):Float;
-
-	@:noCompletion inline static function get_stepCrotchet()
-		return mostRecentSegment.getStepLength();
-
-	@:deprecated("Use Conductor.beatInfo.step or Conductor.step")
-	@:isVar public static var curDecStep(get, null):Float;
-
-	@:noCompletion inline static function get_curDecStep()
-		return beatInfo.step;
-
-	@:deprecated("Use Conductor.beatInfo.beat or Conductor.beat")
-	@:isVar public static var curDecBeat(get, null):Float;
-
-	@:noCompletion inline static function get_curDecBeat()
-		return beatInfo.beat;
-
-	@:deprecated("Use Math.floor(Conductor.beatInfo.beat) or Conductor.roundedBeat")
-	@:isVar public static var curBeat(get, null):Int;
-
-	@:noCompletion inline static function get_curBeat()
-		return roundedBeat;
-
-	@:deprecated("Use Math.floor(Conductor.beatInfo.step) or Conductor.roundedStep")
-	@:isVar public static var curStep(get, null):Int;
-
-	@:noCompletion inline static function get_curStep()
-		return roundedStep;
-
-	@:deprecated("Use Conductor.time")
-	@:isVar public static var songPosition(get, set):Float;
-
-	@:noCompletion inline static function get_songPosition()
-		return time;
-
-	@:noCompletion inline static function set_songPosition(value: Float)
-		return time = value;
-
-	#end
 
 	public static var songOffset:Float = 0; // TODO: Implement
 	
@@ -440,4 +351,88 @@ class Conductor {
 
 		finalizeTimeSegments();
 	}
+
+	////
+	@:noCompletion inline static function get_beat()
+		return beatInfo.beat;		
+
+	@:noCompletion inline static function get_step()
+		return beatInfo.step;		
+
+	@:noCompletion inline static function get_measure()
+		return beatInfo.measure;	
+
+	@:noCompletion inline static function get_bpm()
+		return mostRecentSegment.bpm;
+
+	@:noCompletion inline static function get_beatLength()
+		return mostRecentSegment.getBeatLength();
+	
+	@:noCompletion inline static function get_stepLength()
+		return mostRecentSegment.getStepLength();
+	
+	@:noCompletion inline static function get_beatLengthSecs()
+		return mostRecentSegment.getBeatLength() * 0.001;
+	
+	@:noCompletion inline static function get_stepLengthSecs()
+		return mostRecentSegment.getStepLength() * 0.001;
+
+	#if ALLOW_DEPRECATION
+	@:deprecated("Use Conductor.beatLength")
+	public static var crochet(get, null):Float;
+
+	@:noCompletion inline static function get_crochet()
+		return mostRecentSegment.getBeatLength();
+
+	@:deprecated("Use Conductor.stepLength")
+	public static var stepCrochet(get, null):Float;
+
+	@:noCompletion inline static function get_stepCrochet()
+		return mostRecentSegment.getStepLength();
+
+	@:deprecated("Use Conductor.beatLength")
+	public static var crotchet(get, null):Float;
+
+	@:noCompletion inline static function get_crotchet()
+		return mostRecentSegment.getBeatLength();
+
+	@:deprecated("Use Conductor.stepLength")
+	public static var stepCrotchet(get, null):Float;
+
+	@:noCompletion inline static function get_stepCrotchet()
+		return mostRecentSegment.getStepLength();
+
+	@:deprecated("Use Conductor.beatInfo.step or Conductor.step")
+	public static var curDecStep(get, null):Float;
+
+	@:noCompletion inline static function get_curDecStep()
+		return beatInfo.step;
+
+	@:deprecated("Use Conductor.beatInfo.beat or Conductor.beat")
+	public static var curDecBeat(get, null):Float;
+
+	@:noCompletion inline static function get_curDecBeat()
+		return beatInfo.beat;
+
+	@:deprecated("Use Math.floor(Conductor.beatInfo.beat) or Conductor.roundedBeat")
+	public static var curBeat(get, null):Int;
+
+	@:noCompletion inline static function get_curBeat()
+		return roundedBeat;
+
+	@:deprecated("Use Math.floor(Conductor.beatInfo.step) or Conductor.roundedStep")
+	public static var curStep(get, null):Int;
+
+	@:noCompletion inline static function get_curStep()
+		return roundedStep;
+
+	@:deprecated("Use Conductor.time")
+	public static var songPosition(get, set):Float;
+
+	@:noCompletion inline static function get_songPosition()
+		return time;
+
+	@:noCompletion inline static function set_songPosition(value: Float)
+		return time = value;
+	#end
 }
