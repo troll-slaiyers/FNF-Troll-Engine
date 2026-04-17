@@ -65,7 +65,7 @@ class Conductor {
 
 	@:deprecated("You shouid be getting the TimeSegment and calculating this yourself!")
 	@:noCompletion static function get_jackLimit()
-		return mostRecentSegment.getStepLength() / _internalJackLimit;
+		return currentSegment.getStepLength() / _internalJackLimit;
 
 	
 	public inline static final ROWS_PER_BEAT:Int = 48;
@@ -79,13 +79,13 @@ class Conductor {
 	@:noCompletion inline static function set_timeSegments(value:Array<TimeSegment>) {
 		value.sort((a, b) -> return Std.int(a.time - b.time));
 		if(value.length == 0)value = [{}];
-		mostRecentSegment = value[0] ?? {};
+		currentSegment = value[0] ?? {};
 
 		return timeSegments = value;
 	}
 
 	static var beatInfo:BeatInfo = {beat: 0, step: 0, measure: 0};
-	static var mostRecentSegment: TimeSegment = {};
+	static var currentSegment: TimeSegment = {};
 
 	public static var time:Float = 0;
 
@@ -286,9 +286,9 @@ class Conductor {
 
 	// MAYBE: Merge this with updateTime, and change all changes to Conductor.time to use updateTime
 	public static function updateSteps(){
-		mostRecentSegment = getSegmentFromTime(time);
+		currentSegment = getSegmentFromTime(time);
 		
-		beatInfo = getBeatInfoFromTime(time, ClientPrefs.noteOffset, mostRecentSegment, beatInfo);
+		beatInfo = getBeatInfoFromTime(time, ClientPrefs.noteOffset, currentSegment, beatInfo);
 
 		if (Math.floor(beatInfo.measure) != roundedMeasure) {
 			onMeasureHit.dispatch(roundedMeasure);
@@ -363,44 +363,44 @@ class Conductor {
 		return beatInfo.measure;	
 
 	@:noCompletion inline static function get_bpm()
-		return mostRecentSegment.bpm;
+		return currentSegment.bpm;
 
 	@:noCompletion inline static function get_beatLength()
-		return mostRecentSegment.getBeatLength();
+		return currentSegment.getBeatLength();
 	
 	@:noCompletion inline static function get_stepLength()
-		return mostRecentSegment.getStepLength();
+		return currentSegment.getStepLength();
 	
 	@:noCompletion inline static function get_beatLengthSecs()
-		return mostRecentSegment.getBeatLength() * 0.001;
+		return currentSegment.getBeatLength() * 0.001;
 	
 	@:noCompletion inline static function get_stepLengthSecs()
-		return mostRecentSegment.getStepLength() * 0.001;
+		return currentSegment.getStepLength() * 0.001;
 
 	#if ALLOW_DEPRECATION
 	@:deprecated("Use Conductor.beatLength")
 	public static var crochet(get, null):Float;
 
 	@:noCompletion inline static function get_crochet()
-		return mostRecentSegment.getBeatLength();
+		return currentSegment.getBeatLength();
 
 	@:deprecated("Use Conductor.stepLength")
 	public static var stepCrochet(get, null):Float;
 
 	@:noCompletion inline static function get_stepCrochet()
-		return mostRecentSegment.getStepLength();
+		return currentSegment.getStepLength();
 
 	@:deprecated("Use Conductor.beatLength")
 	public static var crotchet(get, null):Float;
 
 	@:noCompletion inline static function get_crotchet()
-		return mostRecentSegment.getBeatLength();
+		return currentSegment.getBeatLength();
 
 	@:deprecated("Use Conductor.stepLength")
 	public static var stepCrotchet(get, null):Float;
 
 	@:noCompletion inline static function get_stepCrotchet()
-		return mostRecentSegment.getStepLength();
+		return currentSegment.getStepLength();
 
 	@:deprecated("Use Conductor.beatInfo.step or Conductor.step")
 	public static var curDecStep(get, null):Float;
