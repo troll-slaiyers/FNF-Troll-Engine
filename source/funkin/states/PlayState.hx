@@ -570,7 +570,7 @@ class PlayState extends MusicBeatState
 		Conductor.cleanup();
 
 		updateSongPos = false;
-		songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
+		Conductor.songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
 
 		Wife3.timeScale = Wife3.judgeScales.get(ClientPrefs.judgeDiff);
 		PBot.missThreshold = Math.max(160, ClientPrefs.hitWindow);
@@ -1910,7 +1910,7 @@ class PlayState extends MusicBeatState
 		if (options.length < 1)
 			return;
 
-		this.songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
+		Conductor.songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
 
 		trace("changed " + options);
 

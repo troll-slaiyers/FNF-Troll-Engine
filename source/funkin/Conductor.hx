@@ -106,6 +106,8 @@ class Conductor {
 	public static var stepLengthSecs(get, never):Float;
 
 	public static var songOffset:Float = 0; // TODO: Implement
+
+	public static var songSyncMode:SongSyncMode = LAST_MIX;
 	
 	public static var tracks:Array<FlxSound> = [];
 	public static var pitch:Float = 1.0;
@@ -137,6 +139,8 @@ class Conductor {
 			snd.pitch = pitch;
 			snd.play(true, getAccPosition());
 		}
+
+		lastMixPos = Conductor.time;
 	}
 
 	public static function pauseSong() {
@@ -170,13 +174,15 @@ class Conductor {
 			Conductor.resumeSong();
 	}
 
-	public static var useAccPosition:Bool = false;
-
 	public static function getAccPosition():Float {
-		if (playing && useAccPosition)
-			return songStartOffset + (Main.getTime() - songStartTimestamp) * pitch;
-		else
-			return Conductor.songPosition;
+		return (!playing) ? time : switch (songSyncMode) {
+			case DIRECT:
+				tracks[0].time;
+			case SYSTEM_TIME:
+				songStartOffset + (Main.getTime() - songStartTimestamp) * pitch;
+			default:
+				time;
+		}
 	}
 
 	public static function cleanup() {
@@ -304,6 +310,62 @@ class Conductor {
 			onStepHit.dispatch(roundedStep);
 			roundedStep = Math.floor(beatInfo.step);
 		} 
+	}
+
+	private static var lastMixTimer:Float = 0;
+	private static var lastMixPos:Float = 0;
+
+	public static function update() {
+		if (!playing) {
+			trace("Conductor is not active");
+			return;
+		}
+
+		var inst = tracks[0];
+		if (inst == null) {
+			trace("No tracks to sync :(");
+			return;
+		}
+
+		@:privateAccess
+		var elapsedMS:Float = FlxG.game._elapsedMS * inst.pitch;
+
+		switch (songSyncMode)
+		{
+			case DIRECT:
+				// Ludem Dare sync
+				// Jittery and retarded, but works maybe
+				Conductor.time = inst.time;
+
+			case LEGACY:
+				// Resync Vocals
+				// FUCKING SUCKS DONT USE LMFAO! It's here just incase though
+				Conductor.time += elapsedMS;
+				
+			case PSYCH_1_0:
+				// Psych 1.0 method
+				Conductor.time += elapsedMS;
+				Conductor.time = FlxMath.lerp(inst.time, Conductor.time, Math.exp(-elapsedMS * 0.005));
+				var timeDiff:Float = Math.abs(inst.time - Conductor.time);
+				if (timeDiff > 1000)
+					Conductor.time = Conductor.time + 1000 * FlxMath.signOf(timeDiff);
+
+			case SYSTEM_TIME:
+				Conductor.time = Conductor.getAccPosition();
+			
+			case LAST_MIX:
+				// Stepmania method
+				// Works for most people it seems??
+				if (lastMixPos != inst.time) {
+					lastMixPos = inst.time;
+					lastMixTimer = 0;
+				}else {
+					lastMixTimer += elapsedMS;
+				}
+				
+				Conductor.time = lastMixPos + lastMixTimer;
+
+		}
 	}
 
 	public static function updateTime(time:Float) {
@@ -435,4 +497,23 @@ class Conductor {
 	@:noCompletion inline static function set_songPosition(value: Float)
 		return time = value;
 	#end
+}
+
+enum abstract SongSyncMode(String) to String {
+	var DIRECT = "Direct";
+	var LEGACY = "Legacy";
+	var PSYCH_1_0 = "Psych 1.0";
+	var LAST_MIX = "Last Mix";
+	var SYSTEM_TIME = "System Time";
+	
+	public static function fromString(str:String):SongSyncMode {
+		return switch (str) {
+			case "Direct": DIRECT;
+			case "Legacy": LEGACY;
+			case "Psych 1.0": PSYCH_1_0;
+			case "System Time": SYSTEM_TIME;
+			//case "Last Mix": LAST_MIX;
+			default: LAST_MIX;
+		}
+	} 
 }

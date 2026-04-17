@@ -20,24 +20,6 @@ import funkin.states.scripting.*;
 import funkin.states.scripting.HScriptOverridenState;
 #end
 
-enum abstract SongSyncMode(String) to String {
-	var DIRECT = "Direct";
-	var LEGACY = "Legacy";
-	var PSYCH_1_0 = "Psych 1.0";
-	var LAST_MIX = "Last Mix";
-	var SYSTEM_TIME = "System Time";
-	
-	public static function fromString(str:String):SongSyncMode {
-		return switch (str) {
-			case "Direct": DIRECT;
-			case "Legacy": LEGACY;
-			case "Psych 1.0": PSYCH_1_0;
-			case "System Time": SYSTEM_TIME;
-			//case "Last Mix": LAST_MIX;
-			default: LAST_MIX;
-		}
-	} 
-}
 #if SCRIPTABLE_STATES
 @:autoBuild(funkin.macros.ScriptingMacro.addScriptingCallbacks([
 	"create",
@@ -61,7 +43,6 @@ class MusicBeatState extends TransitionableState
 	private var curDecBeat(get, never):Float;
 
 	private var updateSongPos:Bool = true;
-	private var songSyncMode(default, set):SongSyncMode;
 	private var controls(get, never):Controls;
 
 	public var canBeScripted(get, default):Bool = false;
@@ -83,12 +64,6 @@ class MusicBeatState extends TransitionableState
 	@:noCompletion inline function get_curDecStep() return Conductor.curDecStep;
 	@:noCompletion inline function get_curDecBeat() return Conductor.curDecBeat;
 
-	@:noCompletion function set_songSyncMode(v:SongSyncMode):SongSyncMode {
-		songSyncMode = v;
-		Conductor.useAccPosition = songSyncMode == SYSTEM_TIME;
-		return songSyncMode;
-	}
-
 	@:noCompletion inline function get_controls():Controls
 		return funkin.input.Controls.firstActive;
 
@@ -99,7 +74,6 @@ class MusicBeatState extends TransitionableState
 	public function new(canBeScripted:Bool = true) {
 		super();
 		this.canBeScripted = canBeScripted;
-		this.songSyncMode = LAST_MIX;
 	}
 
 	override function create()
@@ -147,7 +121,7 @@ class MusicBeatState extends TransitionableState
 	}
 
 	public function getDebugText():String {
-		return 'curSection: ${curSection} • curBeat: ${curBeat} • curStep: ${curStep}';
+		return 'curSection: ${curSection} • curBeat: ${curBeat} • curStep: ${curStep}' + '\n${Conductor.songPosition}';
 	}
 
 	override function toString():String {
@@ -155,53 +129,8 @@ class MusicBeatState extends TransitionableState
 	}
 	
 	////
-	private var lastMixTimer:Float = 0;
-	private var lastMixPos:Float = 0;
-
-	private function updateSongPosition(?inst:FlxSound):Void {
-		inst ??= Conductor.tracks[0] ?? FlxG.sound.music;
-		if (inst == null) return;
-
-		@:privateAccess
-		var elapsedMS:Float = FlxG.game._elapsedMS * inst.pitch;
-
-		switch (songSyncMode)
-		{
-			case DIRECT:
-				// Ludem Dare sync
-				// Jittery and retarded, but works maybe
-				Conductor.time = inst.time;
-
-			case LEGACY:
-				// Resync Vocals
-				// FUCKING SUCKS DONT USE LMFAO! It's here just incase though
-				Conductor.time += elapsedMS;
-				
-			case PSYCH_1_0:
-				// Psych 1.0 method
-				Conductor.time += elapsedMS;
-				Conductor.time = FlxMath.lerp(inst.time, Conductor.time, Math.exp(-elapsedMS * 0.005));
-				var timeDiff:Float = Math.abs(inst.time - Conductor.time);
-				if (timeDiff > 1000)
-					Conductor.time = Conductor.time + 1000 * FlxMath.signOf(timeDiff);
-
-			case SYSTEM_TIME:
-				Conductor.time = Conductor.getAccPosition();
-			
-			case LAST_MIX:
-				// Stepmania method
-				// Works for most people it seems??
-				if (lastMixPos != inst.time) {
-					lastMixPos = inst.time;
-					lastMixTimer = 0;
-				}else {
-					lastMixTimer += elapsedMS;
-				}
-				
-				Conductor.time = lastMixPos + lastMixTimer;
-
-		}
-
+	private function updateSongPosition(?_:FlxSound):Void {
+		Conductor.update();
 		updateSteps();
 	}
 
@@ -263,7 +192,6 @@ class MusicBeatState extends TransitionableState
 
 	function resyncTracks() {
 		Conductor.resyncTracks();
-		lastMixPos = Conductor.songPosition;
 	}
 
 	function tryResync() {
@@ -324,7 +252,8 @@ class MusicBeatState extends TransitionableState
 			FlxG.sound.playMusic(Paths.music(key));
 		}
 
-		Conductor.time = FlxG.sound.music.time;
+		Conductor.tracks = [FlxG.sound.music];
+		Conductor.startSong(FlxG.sound.music.time);
 		curMusic = key;
 	}
 
