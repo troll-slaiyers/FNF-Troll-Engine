@@ -11,26 +11,200 @@ typedef BeatInfo = { // Returned by getBeatInfo
 	measure:Float
 }
 
-// TODO: The Great Member
+// TODO: Turn ConductorInstance into Conductor
 class Conductor {
-	// These should be moved away -Neb
-	private inline static final _internalJackLimit:Float = 192 / 16;
-	@:isVar public static var jackLimit(get, null):Float;
+	public static final instance:ConductorInstance = new ConductorInstance();
 
-	@:deprecated("You shouid be getting the TimeSegment and calculating this yourself!")
-	@:noCompletion static function get_jackLimit()
-		return currentSegment.stepLength / _internalJackLimit;
-
-	
 	public inline static final ROWS_PER_BEAT:Int = 48;
 
-	public static var onStepHit:FlxTypedSignal<Int->Void> = new FlxTypedSignal<Int->Void>();
-	public static var onBeatHit:FlxTypedSignal<Int->Void> = new FlxTypedSignal<Int->Void>();
-	public static var onMeasureHit:FlxTypedSignal<Int->Void> = new FlxTypedSignal<Int->Void>();
+	public static var jackLimit(get, never):Float;
+	@:noCompletion static function get_jackLimit():Float return instance.jackLimit;
 
-	public static var timeSegments(default, set):Array<TimeSegment>;
+	public static var onStepHit(get, never):FlxTypedSignal<Int->Void>;
+	@:noCompletion static function get_onStepHit():FlxTypedSignal<Int->Void> return instance.onStepHit;
 
-	@:noCompletion inline static function set_timeSegments(value:Array<TimeSegment>) {
+	public static var onBeatHit(get, never):FlxTypedSignal<Int->Void>;
+	@:noCompletion static function get_onBeatHit():FlxTypedSignal<Int->Void> return instance.onBeatHit;
+
+	public static var onMeasureHit(get, never):FlxTypedSignal<Int->Void>;
+	@:noCompletion static function get_onMeasureHit():FlxTypedSignal<Int->Void> return instance.onMeasureHit;
+
+	public static var timeSegments(get, set):Array<TimeSegment>;
+	@:noCompletion static function get_timeSegments():Array<TimeSegment> return instance.timeSegments;
+	@:noCompletion static function set_timeSegments(v):Array<TimeSegment> return instance.timeSegments = v;
+
+	public static var time(get, set):Float;
+	@:noCompletion static function get_time():Float return instance.time;
+	@:noCompletion static function set_time(v):Float return instance.time = v;
+
+	public static var roundedStep(get, never):Int;
+	@:noCompletion static function get_roundedStep():Int return instance.roundedStep;
+
+	public static var roundedBeat(get, never):Int;
+	@:noCompletion static function get_roundedBeat():Int return instance.roundedBeat;
+
+	public static var roundedMeasure(get, never):Int;
+	@:noCompletion static function get_roundedMeasure():Int return instance.roundedMeasure;
+
+	public static var beat(get, never):Float;
+	@:noCompletion static function get_beat():Float return instance.beat;
+
+	public static var step(get, never):Float;
+	@:noCompletion static function get_step():Float return instance.step;
+
+	public static var measure(get, never):Float;
+	@:noCompletion static function get_measure():Float return instance.measure;
+
+	public static var bpm(get, never):Float;
+	@:noCompletion static function get_bpm():Float return instance.bpm;
+
+	public static var beatLength(get, never):Float;
+	@:noCompletion static function get_beatLength():Float return instance.beatLength;
+
+	public static var stepLength(get, never):Float;
+	@:noCompletion static function get_stepLength():Float return instance.stepLength;
+
+	public static var beatLengthSecs(get, never):Float;
+	@:noCompletion static function get_beatLengthSecs():Float return instance.beatLengthSecs;
+
+	public static var stepLengthSecs(get, never):Float;
+	@:noCompletion static function get_stepLengthSecs():Float return instance.stepLengthSecs;
+
+	public static var songOffset(get, set):Float;
+	@:noCompletion static function get_songOffset():Float return instance.songOffset;
+	@:noCompletion static function set_songOffset(v):Float return instance.songOffset = v;
+
+	public static var songSyncMode(get, set):SongSyncMode;
+	@:noCompletion static function get_songSyncMode():SongSyncMode return instance.songSyncMode;
+	@:noCompletion static function set_songSyncMode(v):SongSyncMode return instance.songSyncMode = v;
+
+	public static var tracks(get, set):Array<FlxSound>;
+	@:noCompletion static function get_tracks():Array<FlxSound> return instance.tracks;
+	@:noCompletion static function set_tracks(v):Array<FlxSound> return instance.tracks = v;
+
+	public static var pitch(get, set):Float;
+	@:noCompletion static function get_pitch():Float return instance.pitch;
+	@:noCompletion static function set_pitch(v):Float return instance.pitch = v;
+
+	public static var visualPosition(get, set):Float;
+	@:noCompletion static function get_visualPosition():Float return instance.visualPosition;
+	@:noCompletion static function set_visualPosition(v):Float return instance.visualPosition = v;
+
+	public static var playing(get, never):Bool;
+	@:noCompletion static function get_playing():Bool return instance.playing;
+
+	public static inline function startSong(offset:Float = 0) return instance.startSong(offset);
+
+	public static inline function resyncTracks() return instance.resyncTracks();
+
+	public static inline function pauseSong() return instance.pauseSong();
+
+	public static inline function resumeSong() return instance.resumeSong();
+
+	public static inline function changePitch(pitch:Float) return instance.changePitch(pitch);
+
+	public static inline function getAccPosition():Float return instance.getAccPosition();
+
+	public static inline function cleanup() return instance.cleanup();
+
+	public static inline function getSegmentFromTime(time:Float):TimeSegment return instance.getSegmentFromTime(time);
+
+	public static inline function getSegmentFromBeat(beat:Float):TimeSegment return instance.getSegmentFromBeat(beat);
+
+	public static inline function getTimeFromStep(step:Float):Float return instance.getTimeFromStep(step);
+
+	public static inline function getTimeFromBeat(beat:Float):Float return instance.getTimeFromBeat(beat);
+
+	public static inline function getBeatInfoFromTime(time:Float, ?offset:Float = 0, ?segment: TimeSegment, ?existingInfo:BeatInfo):BeatInfo return instance.getBeatInfoFromTime(time, offset, segment, existingInfo);
+
+	public static inline function updateSteps() return instance.updateSteps();
+
+	public static inline function update() return instance.update();
+
+	public static inline function updateTime(time:Float) return instance.updateTime(time);
+
+	public static inline function finalizeTimeSegments() return instance.finalizeTimeSegments();
+
+	public static inline function changeBPM(bpm: Float) return instance.changeBPM(bpm);
+
+	public static inline function mapTimeSegments(song: SwagSong) return instance.mapTimeSegments(song);
+
+	#if ALLOW_DEPRECATION
+	@:deprecated("Use beatLength")
+	public static var crochet(get, null):Float;
+
+	@:noCompletion inline static function get_crochet()
+		return beatLength;
+
+	@:deprecated("Use stepLength")
+	public static var stepCrochet(get, null):Float;
+
+	@:noCompletion inline static function get_stepCrochet()
+		return stepLength;
+
+	@:deprecated("Use beatLength")
+	public static var crotchet(get, null):Float;
+
+	@:noCompletion inline static function get_crotchet()
+		return beatLength;
+
+	@:deprecated("Use stepLength")
+	public static var stepCrotchet(get, null):Float;
+
+	@:noCompletion inline static function get_stepCrotchet()
+		return stepLength;
+
+	@:deprecated("Use beatInfo.step or step")
+	public static var curDecStep(get, null):Float;
+
+	@:noCompletion inline static function get_curDecStep()
+		return step;
+
+	@:deprecated("Use beatInfo.beat or beat")
+	public static var curDecBeat(get, null):Float;
+
+	@:noCompletion inline static function get_curDecBeat()
+		return beat;
+
+	@:deprecated("Use Math.floor(beatInfo.beat) or roundedBeat")
+	public static var curBeat(get, null):Int;
+
+	@:noCompletion inline static function get_curBeat()
+		return roundedBeat;
+
+	@:deprecated("Use Math.floor(beatInfo.step) or roundedStep")
+	public static var curStep(get, null):Int;
+
+	@:noCompletion inline static function get_curStep()
+		return roundedStep;
+
+	@:deprecated("Use time")
+	public static var songPosition(get, set):Float;
+
+	@:noCompletion inline static function get_songPosition()
+		return time;
+
+	@:noCompletion inline static function set_songPosition(value: Float)
+		return time = value;
+	#end
+}
+
+class ConductorInstance {
+	// These should be moved away -Neb
+	private inline static final _internalJackLimit:Float = 192 / 16;
+	@:isVar public var jackLimit(get, null):Float;
+
+	@:deprecated("You shouid be getting the TimeSegment and calculating this yourself!")
+	@:noCompletion function get_jackLimit()
+		return currentSegment.stepLength / _internalJackLimit;
+
+	public var onStepHit:FlxTypedSignal<Int->Void> = new FlxTypedSignal<Int->Void>();
+	public var onBeatHit:FlxTypedSignal<Int->Void> = new FlxTypedSignal<Int->Void>();
+	public var onMeasureHit:FlxTypedSignal<Int->Void> = new FlxTypedSignal<Int->Void>();
+
+	public var timeSegments(default, set):Array<TimeSegment>;
+
+	@:noCompletion inline function set_timeSegments(value:Array<TimeSegment>) {
 		if (value.length == 0)
 			value = [new TimeSegment(0, 100)];
 		else
@@ -41,55 +215,55 @@ class Conductor {
 		return timeSegments = value;
 	}
 
-	static var beatInfo:BeatInfo = {beat: 0, step: 0, measure: 0};
-	static var currentSegment:TimeSegment;
+	var beatInfo:BeatInfo = {beat: 0, step: 0, measure: 0};
+	var currentSegment:TimeSegment;
 
-	private static function __init__() {
+	public function new() {
 		timeSegments = [];
 	}
 
-	public static var time:Float = 0;
+	public var time:Float = 0;
 
-	public static var roundedStep:Int = 0;
-	public static var roundedBeat:Int = 0;
-	public static var roundedMeasure:Int = 0;
+	public var roundedStep:Int = 0;
+	public var roundedBeat:Int = 0;
+	public var roundedMeasure:Int = 0;
 
-	public static var beat(get, never):Float;
-	public static var step(get, never):Float;
-	public static var measure(get, never):Float;
+	public var beat(get, never):Float;
+	public var step(get, never):Float;
+	public var measure(get, never):Float;
 
-	public static var bpm(get, never):Float;
+	public var bpm(get, never):Float;
 
-	public static var beatLength(get, never):Float;
-	public static var stepLength(get, never):Float;
+	public var beatLength(get, never):Float;
+	public var stepLength(get, never):Float;
 
-	public static var beatLengthSecs(get, never):Float;
-	public static var stepLengthSecs(get, never):Float;
+	public var beatLengthSecs(get, never):Float;
+	public var stepLengthSecs(get, never):Float;
 
-	public static var songOffset:Float = 0; // TODO: Implement
+	public var songOffset:Float = 0; // TODO: Implement
 
-	public static var songSyncMode:SongSyncMode = LAST_MIX;
+	public var songSyncMode:SongSyncMode = LAST_MIX;
 	
-	public static var tracks:Array<FlxSound> = [];
-	public static var pitch:Float = 1.0;
+	public var tracks:Array<FlxSound> = [];
+	public var pitch:Float = 1.0;
 
-	public static var visualPosition:Float = 0;
+	public var visualPosition:Float = 0;
 
 	/** Whether the song is currently playing. Use startSong and pauseSong to change this **/
-	public static var playing(default, null):Bool = false;
+	public var playing(default, null):Bool = false;
 
 	/** real time at which the song started playing **/
-	private static var songStartTimestamp:Float = 0;
+	private var songStartTimestamp:Float = 0;
 
 	/** elapsed playback time before the song was paused **/
-	private static var songStartOffset:Float = 0;
+	private var songStartOffset:Float = 0;
 
 	/** Last inst.time value **/
-	private static var lastMixPos:Float = 0;
+	private var lastMixPos:Float = 0;
 	/** Time passed since inst.time changed **/
-	private static var lastMixTimer:Float = 0;
+	private var lastMixTimer:Float = 0;
 
-	public static function startSong(offset:Float = 0) {
+	public function startSong(offset:Float = 0) {
 		songStartTimestamp = Main.getTime();
 		songStartOffset = offset;
 		playing = true;
@@ -98,49 +272,49 @@ class Conductor {
 		resyncTracks();
 	}
 
-	public static function resyncTracks() {
-		Conductor.time = getAccPosition();
+	public function resyncTracks() {
+		this.time = getAccPosition();
 		for (snd in tracks) {
 			snd.stop();
 			snd.pitch = pitch;
 			snd.play(true, getAccPosition());
 		}
 
-		lastMixPos = Conductor.time;
+		lastMixPos = this.time;
 	}
 
-	public static function pauseSong() {
-		if (!Conductor.playing)
+	public function pauseSong() {
+		if (!this.playing)
 			return;
 
-		Conductor.time = getAccPosition();
-		Conductor.playing = false;
+		this.time = getAccPosition();
+		this.playing = false;
 
 		for (snd in tracks) {
 			snd.stop();
 		}
 	}
 
-	public static function resumeSong() {
-		if (Conductor.playing)
+	public function resumeSong() {
+		if (this.playing)
 			return;
 
-		startSong(Conductor.time);
+		startSong(this.time);
 	}
 
-	public static function changePitch(pitch:Float) {
-		var wasPlaying:Bool = Conductor.playing;
-		Conductor.pauseSong();
+	public function changePitch(pitch:Float) {
+		var wasPlaying:Bool = this.playing;
+		this.pauseSong();
 
-		Conductor.pitch = pitch;
+		this.pitch = pitch;
 		for (track in tracks)
 			track.pitch = pitch;
 
 		if (wasPlaying)
-			Conductor.resumeSong();
+			this.resumeSong();
 	}
 
-	public static function getAccPosition():Float {
+	public function getAccPosition():Float {
 		return (!playing) ? time : switch (songSyncMode) {
 			case DIRECT:
 				@:privateAccess
@@ -152,12 +326,12 @@ class Conductor {
 		}
 	}
 
-	public static function cleanup() {
+	public function cleanup() {
 		for (snd in tracks)
 			snd.stop();
 
-		Conductor.songStartTimestamp = 0;
-		Conductor.songStartOffset = 0;
+		this.songStartTimestamp = 0;
+		this.songStartOffset = 0;
 
 		time = 0;
 		playing = false;
@@ -169,7 +343,7 @@ class Conductor {
 
 	// If we need speed we can binary search! But for now who gaf
 	// This *should* be sorted
-	public static function getSegmentFromTime(time:Float):TimeSegment {
+	public function getSegmentFromTime(time:Float):TimeSegment {
 		var seg:TimeSegment = timeSegments[0];
 
 		for (segment in timeSegments) {
@@ -182,7 +356,7 @@ class Conductor {
 		return seg;
 	}
 
-	public static function getSegmentFromBeat(beat:Float):TimeSegment {
+	public function getSegmentFromBeat(beat:Float):TimeSegment {
 		var seg:TimeSegment = timeSegments[0];
 
 		for (segment in timeSegments) {
@@ -195,7 +369,7 @@ class Conductor {
 		return seg;
 	}
 
-	public static function getTimeFromStep(step:Float): Float {
+	public function getTimeFromStep(step:Float):Float {
 		if (timeSegments.length == 0)
 			return 0;
 		
@@ -212,7 +386,7 @@ class Conductor {
 		return seg.time + (step - seg.startStep) * seg.stepLength;
 	}
 
-	public static function getTimeFromBeat(beat:Float):Float {
+	public function getTimeFromBeat(beat:Float):Float {
 		if (timeSegments.length == 0)
 			return 0;
 
@@ -231,7 +405,7 @@ class Conductor {
 	}
 
 
-	public static function getBeatInfoFromTime(time:Float, ?offset:Float = 0, ?segment: TimeSegment, ?existingInfo:BeatInfo):BeatInfo {
+	public function getBeatInfoFromTime(time:Float, ?offset:Float = 0, ?segment: TimeSegment, ?existingInfo:BeatInfo):BeatInfo {
 		var seg:TimeSegment = segment == null ? getSegmentFromTime(time) : segment;
 		var info:BeatInfo = existingInfo != null ? existingInfo : {
 			beat: 0,
@@ -249,8 +423,8 @@ class Conductor {
 	}
 
 
-	// MAYBE: Merge this with updateTime, and change all changes to Conductor.time to use updateTime
-	public static function updateSteps(){
+	// MAYBE: Merge this with updateTime, and change all changes to time to use updateTime
+	public function updateSteps(){
 		currentSegment = getSegmentFromTime(time);
 		
 		beatInfo = getBeatInfoFromTime(time, ClientPrefs.noteOffset, currentSegment, beatInfo);
@@ -271,7 +445,7 @@ class Conductor {
 		} 
 	}
 
-	public static function update() {
+	public function update() {
 		if (!playing) {
 			return;
 		}
@@ -289,23 +463,23 @@ class Conductor {
 			case DIRECT:
 				// Ludem Dare sync
 				// Jittery and retarded, but works maybe
-				Conductor.time = inst.time;
+				this.time = inst.time;
 
 			case LEGACY:
 				// Resync Vocals
 				// FUCKING SUCKS DONT USE LMFAO! It's here just incase though
-				Conductor.time += elapsedMS;
+				this.time += elapsedMS;
 				
 			case PSYCH_1_0:
 				// Psych 1.0 method
-				Conductor.time += elapsedMS;
-				Conductor.time = FlxMath.lerp(inst.time, Conductor.time, Math.exp(-elapsedMS * 0.005));
-				var timeDiff:Float = Math.abs(inst.time - Conductor.time);
+				this.time += elapsedMS;
+				this.time = FlxMath.lerp(inst.time, this.time, Math.exp(-elapsedMS * 0.005));
+				var timeDiff:Float = Math.abs(inst.time - this.time);
 				if (timeDiff > 1000)
-					Conductor.time = Conductor.time + 1000 * FlxMath.signOf(timeDiff);
+					this.time = this.time + 1000 * FlxMath.signOf(timeDiff);
 
 			case SYSTEM_TIME:
-				Conductor.time = Conductor.getAccPosition();
+				this.time = this.getAccPosition();
 			
 			case LAST_MIX:
 				// Stepmania method
@@ -317,19 +491,19 @@ class Conductor {
 					lastMixTimer += elapsedMS;
 				}
 				
-				Conductor.time = lastMixPos + lastMixTimer;
+				this.time = lastMixPos + lastMixTimer;
 
 		}
 	}
 
-	public static function updateTime(time:Float) {
-		Conductor.time = time;
+	public function updateTime(time:Float) {
+		this.time = time;
 	
 		updateSteps();
 	}
 
 
-	public static function finalizeTimeSegments() {
+	public function finalizeTimeSegments() {
 		for (i in 1...timeSegments.length) {
 			var segment:TimeSegment = timeSegments[i];
 			var lastSegment:TimeSegment = timeSegments[i - 1];
@@ -340,12 +514,12 @@ class Conductor {
 		}
 	}
 
-	@:deprecated("Use Conductor.timeSegments to set up BPM changes")
-	public static function changeBPM(bpm: Float){
+	@:deprecated("Use timeSegments to set up BPM changes")
+	public function changeBPM(bpm: Float){
 		timeSegments = [new TimeSegment(0, bpm)];
 	}
 	
-	public static function mapTimeSegments(song: SwagSong) {
+	public function mapTimeSegments(song: SwagSong) {
 		timeSegments = [new TimeSegment(0, song.bpm)];
 
 		var time: Float = 0;
@@ -366,88 +540,29 @@ class Conductor {
 	}
 
 	////
-	@:noCompletion inline static function get_beat()
+	@:noCompletion inline function get_beat()
 		return beatInfo.beat;		
 
-	@:noCompletion inline static function get_step()
+	@:noCompletion inline function get_step()
 		return beatInfo.step;		
 
-	@:noCompletion inline static function get_measure()
+	@:noCompletion inline function get_measure()
 		return beatInfo.measure;	
 
-	@:noCompletion inline static function get_bpm()
+	@:noCompletion inline function get_bpm()
 		return currentSegment.bpm;
 
-	@:noCompletion inline static function get_beatLength()
+	@:noCompletion inline function get_beatLength()
 		return currentSegment.beatLength;
 	
-	@:noCompletion inline static function get_stepLength()
+	@:noCompletion inline function get_stepLength()
 		return currentSegment.stepLength;
 	
-	@:noCompletion inline static function get_beatLengthSecs()
+	@:noCompletion inline function get_beatLengthSecs()
 		return currentSegment.beatLengthSecs;
 	
-	@:noCompletion inline static function get_stepLengthSecs()
+	@:noCompletion inline function get_stepLengthSecs()
 		return currentSegment.stepLengthSecs;
-
-	#if ALLOW_DEPRECATION
-	@:deprecated("Use Conductor.beatLength")
-	public static var crochet(get, null):Float;
-
-	@:noCompletion inline static function get_crochet()
-		return beatLength;
-
-	@:deprecated("Use Conductor.stepLength")
-	public static var stepCrochet(get, null):Float;
-
-	@:noCompletion inline static function get_stepCrochet()
-		return stepLength;
-
-	@:deprecated("Use Conductor.beatLength")
-	public static var crotchet(get, null):Float;
-
-	@:noCompletion inline static function get_crotchet()
-		return beatLength;
-
-	@:deprecated("Use Conductor.stepLength")
-	public static var stepCrotchet(get, null):Float;
-
-	@:noCompletion inline static function get_stepCrotchet()
-		return stepLength;
-
-	@:deprecated("Use Conductor.beatInfo.step or Conductor.step")
-	public static var curDecStep(get, null):Float;
-
-	@:noCompletion inline static function get_curDecStep()
-		return step;
-
-	@:deprecated("Use Conductor.beatInfo.beat or Conductor.beat")
-	public static var curDecBeat(get, null):Float;
-
-	@:noCompletion inline static function get_curDecBeat()
-		return beat;
-
-	@:deprecated("Use Math.floor(Conductor.beatInfo.beat) or Conductor.roundedBeat")
-	public static var curBeat(get, null):Int;
-
-	@:noCompletion inline static function get_curBeat()
-		return roundedBeat;
-
-	@:deprecated("Use Math.floor(Conductor.beatInfo.step) or Conductor.roundedStep")
-	public static var curStep(get, null):Int;
-
-	@:noCompletion inline static function get_curStep()
-		return roundedStep;
-
-	@:deprecated("Use Conductor.time")
-	public static var songPosition(get, set):Float;
-
-	@:noCompletion inline static function get_songPosition()
-		return time;
-
-	@:noCompletion inline static function set_songPosition(value: Float)
-		return time = value;
-	#end
 }
 
 // I hate time signatures it turns out
