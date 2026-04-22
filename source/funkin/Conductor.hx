@@ -105,7 +105,7 @@ class Conductor {
 
 	public static inline function getAccPosition():Float return instance.getAccPosition();
 
-	public static inline function cleanup() return instance.cleanup();
+	public static inline function reset() return instance.reset();
 
 	public static inline function getSegmentFromTime(time:Float):TimeSegment return instance.getSegmentFromTime(time);
 
@@ -186,6 +186,9 @@ class Conductor {
 
 	@:noCompletion inline static function set_songPosition(value: Float)
 		return time = value;
+
+	@:deprecated("Use reset()")
+	@:noCompletion public static inline function cleanup() return instance.reset();
 	#end
 }
 
@@ -326,7 +329,7 @@ class ConductorInstance {
 		}
 	}
 
-	public function cleanup() {
+	public function reset() {
 		for (snd in tracks)
 			snd.stop();
 
@@ -537,6 +540,11 @@ class ConductorInstance {
 		}
 
 		finalizeTimeSegments();
+
+		print('new BPM map BUDDY [');
+		for (seg in timeSegments)
+			print('\t$seg');
+		print(']');
 	}
 
 	////
