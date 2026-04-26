@@ -378,14 +378,21 @@ class PauseSubState extends MusicBeatSubstate
 	}
 
 	function openModifiers() {
+		var ss = new GameplayChangersSubstate();
+		ss.cameras = cameras;
+		this.openSubState(ss);
 		this.persistentDraw = false;
-		this.openSubState(new GameplayChangersSubstate());
 	}
 
 	function openOptions() {
 		this.persistentDraw = false;
-		var daSubstate = new OptionsSubstate();
+		var daSubstate = new OptionsSubstate(true);
 		daSubstate.goBack = function(changedOptions:Array<String>) {
+			game.optionsChanged(changedOptions);
+			closeSubState();
+
+			FlxG.mouse.visible = false;
+
 			var canResume:Bool = true;
 			for (opt in changedOptions) {
 				if (OptionsSubstate.requiresRestart.get(opt) == true) {
@@ -394,10 +401,6 @@ class PauseSubState extends MusicBeatSubstate
 				}
 			}
 
-			game.optionsChanged(changedOptions);
-			closeSubState();
-			
-			FlxG.mouse.visible = false;
 			if (!canResume) {
 				removeOption("resume-song");
 				removeOption("skip-to-time");

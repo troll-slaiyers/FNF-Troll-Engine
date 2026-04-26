@@ -487,28 +487,24 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 					}
 				}
 			}
+
 			// check for note deletion
 			if (daNote.garbage)
 				garbage.push(daNote);
 			else
 			{
 
-				if (daNote.tooLate && daNote.active && !daNote.causedMiss && !daNote.isSustainNote)
+				if (!daNote.causedMiss && daNote.active && daNote.tooLate && !daNote.isSustainNote)
 				{
 					daNote.causedMiss = true;
-					if (!daNote.ignoreNote && (daNote.tooLate || !daNote.wasGoodHit))
+					if (!daNote.ignoreNote)
 						noteMissed.dispatch(daNote, this);
-				} 
+				}
 
 				if (
-					(
-						(!daNote.isSustainNote) ||
-						(daNote.sustainLength > 0 && daNote.holdingTime >= daNote.sustainLength) ||
-						(daNote.isSustainNote && daNote.strumTime - Conductor.songPosition < -350)
-					) && (
-						(daNote.sustainLength == 0 || daNote.tooLate || daNote.wasGoodHit)
-						&& daNote.strumTime - Conductor.songPosition < -(200 + judgeManager.getWindow(TIER1) + daNote.sustainLength)
-					)
+					(!daNote.isSustainNote || (daNote.strumTime - Conductor.songPosition < -350))
+					&& (daNote.sustainLength == 0 || daNote.tooLate || daNote.wasGoodHit)
+					&& daNote.strumTime - Conductor.songPosition < -(200 + judgeManager.getWindow(TIER1) + daNote.sustainLength)
 				)
 				{
 					daNote.garbage = true;

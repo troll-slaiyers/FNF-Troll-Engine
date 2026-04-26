@@ -48,7 +48,8 @@ enum abstract SongSyncMode(String) to String {
 	"closeSubState",
 	"stepHit",
 	"beatHit",
-	"sectionHit"
+	"sectionHit",
+	"getDebugText",
 ]))
 #end
 class MusicBeatState extends TransitionableState
@@ -361,16 +362,27 @@ class MusicBeatState extends TransitionableState
 		#if SCRIPTABLE_STATES
 		if (FlxG.state is HScriptOverridenState) {
 			var state:HScriptOverridenState = cast FlxG.state;
-			var overriden = HScriptOverridenState.fromAnother(state);
+			FlxG.switchState(function() {
+				var overriden = HScriptOverridenState.fromAnother(state);	
+				if (overriden != null)
+					return overriden;
 
-			if (overriden!=null) {
-				FlxG.switchState(overriden);
-			}else {
 				trace("State override script file is gone!", "Switching to", state.parentClass);
-				FlxG.switchState(Type.createInstance(state.parentClass, []));
-			}
+				return Type.createInstance(state.parentClass, []);
+			});
 		} else
 		#end
+		if (FlxG.state is HScriptedState) {
+			var state:HScriptedState = cast FlxG.state;
+			FlxG.switchState(function() {
+				var nextState = HScriptedState.fromPath(state.scriptPath);
+				if (nextState != null)
+					return nextState;
+				
+				trace("State script file is gone!", "Switching to main menu");
+				return new funkin.states.MainMenuState();
+			});
+		}else
 			FlxG.resetState();
 	}
 

@@ -25,8 +25,8 @@ using StringTools;
 
 final class Version
 {
-	public static final engineVersion:String = '0.3.0'; // Used for autoupdating n stuff
-	public static final betaVersion:String = 'rc.1'; // beta version, set it to 0 if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
+	public static final engineVersion:String = '0.3.1'; // Used for autoupdating n stuff
+	public static final betaVersion:String = '0'; // beta version, set it to 0 if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
 	public static final isBeta:Bool = betaVersion != '0';
 
 	public static final buildDate:String = Sowy.getBuildDate();

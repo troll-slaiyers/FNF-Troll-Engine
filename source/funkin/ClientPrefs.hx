@@ -668,6 +668,12 @@ class ClientPrefs {
 				type: Button,
 				data: []
 			},
+			"customizeButtonBinds" => {
+				display: "Customize Button Bindings",
+				desc: "Lets you change your controls. Pretty straight forward, huh?",
+				type: Button,
+				data: []
+			},
 			//
 			"discordRPC" => {
 				display: "Discord Rich Presence",
@@ -892,10 +898,7 @@ class ClientPrefs {
 	public static function save(?definitions:Map<String, OptionData>) {
 		if (definitions != null) {
 			for (key => val in definitions) {
-				if (val.type == Number && val.data.exists("type") && val.data.get("type") == 'percent')
-					Reflect.setField(optionSave.data, key, val.value / 100);
-				else
-					Reflect.setField(optionSave.data, key, val.value);
+				Reflect.setField(optionSave.data, key, val.value);
 			}
 		} else
 			for (name in options)

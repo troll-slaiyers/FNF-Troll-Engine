@@ -2408,23 +2408,7 @@
 				"Inst"
 			]
 		},
-		"events": [
-			[
-				1333.33333333333,
-				[
-					[
-						"Set Camera Alignment",
-						"0.5",
-						""
-					],
-					[
-						"Tween Zoom",
-						"0.7",
-						""
-					]
-				]
-			]
-		],
+		"events": [],
 		"gfVersion": "gf",
 		"displayName": "DadBattle",
 		"needsVoices": true,

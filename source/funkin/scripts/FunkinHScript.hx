@@ -66,10 +66,10 @@ class FunkinHScript extends FunkinScript
 		try {
 			var fileContent = Paths.getContent(file);
 			if (fileContent != null) {
-				print('Loading haxe script from: $file');
+				//print('Loading haxe script from: $file');
 				return parseString(fileContent, name ?? file);
 			}else {
-				print('HScript file "$file" not found!');
+				//print('HScript file "$file" not found!');
 			}
 		}
 		catch(e:haxe.Exception) {
@@ -199,6 +199,7 @@ class FunkinHScript extends FunkinScript
 		}
 
 		if (parsed != null){
+			print('Running haxe script ${parsed.origin}');
 			run(parsed);
 			
 			if (doCreateCall)

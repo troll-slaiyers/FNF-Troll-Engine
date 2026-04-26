@@ -1348,9 +1348,8 @@ class PlayState extends MusicBeatState
 		signals.onModifierRegisterPost.dispatch();
 		callOnScripts('onModifierRegisterPost');
 
-		#if ALLOW_DEPRECATION
-		callOnScripts("generateModchart");
-		#end
+		if (!disableModcharts)
+			callOnScripts("generateModchart");
 	}
 
 	public function startCountdown():Void

@@ -623,9 +623,9 @@ class ScriptingMacro
 					// inject code AFTER the existing class new() code
 					body.push(macro {
 						// TODO: Trim the funkin.states if that exists
-						_startExtensionScript($v{folder}, $v{"extension/" + folderName});
-						if(_extensionScript != null)
-							_startExtensionScript($v{folder}, $v{"extension/" + fullName});
+						_startExtensionScript($v{folder}, $v{"extension/" + fullName});
+						if (_extensionScript == null)
+							_startExtensionScript($v{folder}, $v{"extension/" + folderName});
 					});
 
 					func.expr = macro $b{body};

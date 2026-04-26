@@ -623,6 +623,17 @@ class Note extends NoteObject {
 
 	/*Note hit callbacks, useful for hardcoding but also makes it easier to see what scripts are calling what*/
 
+	public function judgeNote(hitDiff:Float):Null<Judgment> {
+		// did you know if you always return UNJUDGED a note won't be hittable?
+		// i thought that was interesting
+		// (aka fake notes when)
+		if (noteScript != null) {
+			var judge = noteScript.executeFunc("judgeNote", [this, hitDiff], this);
+			if (judge != null) return judge;
+		}
+		return null;
+	}
+
 	public function transformJudgeData(dataToMutate:JudgmentData): JudgmentData {
 		switch(noteType){
 

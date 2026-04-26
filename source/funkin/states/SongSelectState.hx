@@ -168,13 +168,14 @@ class SongSelectState extends MusicBeatSubstate
 
 		if (FlxG.keys.pressed.CONTROL)
 		{
-			openSubState(new GameplayChangersSubstate());
+			var ss = new GameplayChangersSubstate();
+			ss.cameras = cameras;
+			openSubState(ss);
 		}
 
 		if (FlxG.keys.justPressed.SIX)
 		{
 			var ss = new OptionsSubstate();
-			ss.goBack = (_) -> ss.close();
 			openSubState(ss);
 		}
 

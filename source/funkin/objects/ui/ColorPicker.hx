@@ -2,6 +2,7 @@ package funkin.objects.ui;
 
 import math.CoolMath;
 import funkin.objects.ui.CustomFlxUI.CustomFlxUINumericStepper;
+import funkin.objects.ui.CustomFlxUI.CustomFlxInputText;
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 import flixel.ui.FlxButton;
@@ -76,7 +77,7 @@ class ColorPickerSubstate extends FlxSubState {
 	var gStepper:CustomFlxUINumericStepper;
 	var bStepper:CustomFlxUINumericStepper;
 
-	var hexInput:FlxInputText;
+	var hexInput:CustomFlxInputText;
 
 	var hStepper:CustomFlxUINumericStepper;
 	var sStepper:CustomFlxUINumericStepper;
@@ -139,7 +140,7 @@ class ColorPickerSubstate extends FlxSubState {
 		hueSatSpr.updateHitbox();
 		hueSatSpr.scrollFactor.set();
 
-		hueSatPointer = new FlxSprite(0, 0, 'stageeditor/originMarker');
+		hueSatPointer = new FlxSprite(0, 0, 'editors/originMarker');
 		hueSatPointer.offset.x += hueSatPointer.width / 2;
 		hueSatPointer.offset.y += hueSatPointer.height / 2;
 
@@ -180,10 +181,9 @@ class ColorPickerSubstate extends FlxSubState {
 		bStepper.scrollFactor.set();
 
 		////
-		hexInput = new FlxInputText(x, y += 20, 57);
+		hexInput = new CustomFlxInputText(x, y += 20, 57);
 		hexInput.customFilterPattern = ~/[^a-fA-F0-9]*/g; // hex
 		hexInput.filterMode = 4; // CUSTOM_FILTER
-		updateHex();
 		hexInput.callback = (_, action) -> {
 			if (action == "enter")
 				hexUpdated();
@@ -271,6 +271,8 @@ class ColorPickerSubstate extends FlxSubState {
 			if (obj is FlxSprite)
 				cast(obj, FlxSprite).scrollFactor.set();
 		}
+
+		updateHex();
 	}
 
 	function rgbStepperCallback(_, action:String) {
@@ -315,6 +317,7 @@ class ColorPickerSubstate extends FlxSubState {
 		}
 
 		color = CoolUtil.colorFromString(newHex);
+		color.alpha = 255;
 		prevHex = newHex;
 		
 		rStepper.value = color.red;
@@ -334,6 +337,8 @@ class ColorPickerSubstate extends FlxSubState {
 	function updateHex() {
 		hexInput.text = color.toHexString(false, false);
 		prevHex = hexInput.text;
+
+		brightnessSpr.color = FlxColor.fromHSB(hStepper.value, sStepper.value / 100, 1.0);
 	}
 
 	// null=none ; false=huesat ; true=brightness

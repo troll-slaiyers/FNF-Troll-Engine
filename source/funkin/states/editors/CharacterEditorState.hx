@@ -189,7 +189,7 @@ class CharacterEditorState extends funkin.states.base.CustomFlxUIState {
 		charLayer = new FlxTypedGroup<Character>();
 		add(charLayer);
 
-		var pointer:FlxGraphic = FlxGraphic.fromClass(GraphicCursorCross);
+		var pointer:FlxGraphic = Paths.image("editors/cursorCross");
 
 		ghostCamPointer = new FlxSprite().loadGraphic(pointer);
 		ghostCamPointer.setGraphicSize(40, 40);
@@ -207,7 +207,7 @@ class CharacterEditorState extends funkin.states.base.CustomFlxUIState {
 		cameraFollowPointer.antialiasing = false;
 		add(cameraFollowPointer);
 
-		originMarker = new FlxSprite(0, 0, Paths.image("stageeditor/originMarker"));
+		originMarker = new FlxSprite(0, 0, Paths.image("editors/originMarker"));
 		originMarker.offset.set(originMarker.width / 2, originMarker.height / 2);
 		add(originMarker);
 

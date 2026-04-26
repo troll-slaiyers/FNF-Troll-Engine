@@ -14,7 +14,7 @@ class HScriptModifier extends Modifier implements IScriptedClass
 
 	public function new(modMgr:ModManager, ?parent:Modifier)
 	{
-		super(this.modMgr, this.parent);
+		super(modMgr, parent);
 	}
 
 	public function callOnScript(call:String, ?args:Array<Dynamic>):Dynamic

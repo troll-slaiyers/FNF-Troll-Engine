@@ -283,7 +283,6 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 			0,
 			lime.system.System.openFile.bind(CoolUtil.getSystemPath("moonchartConverted/")),
 			null,
-			false,
 			'Open Folder',
 			'OK'
 		));

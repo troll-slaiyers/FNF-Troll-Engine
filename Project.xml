@@ -6,7 +6,7 @@
 
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Friday Night Funkin': Troll Engine" file="Trolled" packageName="com.sowy.trollengine"
+	<app title="Friday Night Funkin': Troll Engine" file="Friday Night Funkin" packageName="com.sowy.trollengine"
 		package="com.sowy.trollengine" main="Main" version="0.2.8" company="Sowy" />
 
 	<set if="switch" name="APP_ID" value="0x0100f6c013bbc000"/>
@@ -22,15 +22,22 @@
 	<!-- _______________________ TROLL ENGINE CUSTOMIZATION ______________________ -->
 
 	<define name="USE_EPIC_JUDGEMENT" />
+
 	<define name="HSCRIPT_ALLOWED" />
+
 	<!--
 	Compile with `-D DISABLE_VIDEOS` to disable them without having to comment this
 	Example
 		`lime test cpp -D DISABLE_VIDEOS
 	-->
 	<define name="VIDEOS_ALLOWED" if="cpp" unless="DISABLE_VIDEOS" />
+
 	<define name="FILESYSTEM_ALLOWED" if="native || desktop"/>
+
+	<define name="READ_EMBEDDED_ASSETS" unless="FILESYSTEM_ALLOWED" />
+
 	<define name="MODS_ALLOWED" if="desktop FILESYSTEM_ALLOWED" />
+
 	<define name="DISCORD_ALLOWED" if="desktop cpp" unless="display false" />
 	<!--I don't recommend turning on MULTICORE_LOADING until we rewrite it to be less crashy -Neb-->
 	<!-- <define name="MULTICORE_LOADING" if="native" /> -->
@@ -73,6 +80,10 @@
 	<!-- Custom shader error printing :D -->
 	<haxedef name="traceShaderLineNumbers"/>
 
+	<section if="OFFICIAL_BUILD">
+		<echo value="OFFICIAL_BUILD" />
+	</section>
+
 	<!-- _____________________________ Path Settings ____________________________ -->
 
 	<classpath path="source" />
@@ -83,7 +94,7 @@
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
 
 	<assets path="assets" />
-	<assets path='default_content' rename='content' if='OFFICIAL_BUILD' embed='false' exclude="*.mp3" />
+	<assets path='default_content' rename='content' if='false' embed='false' exclude="*.mp3" />
 
 	<icon path="art/iconOG.png" />
 	<icon path="art/icon64.png" size='64' />
@@ -99,7 +110,7 @@
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
-	<haxelib name="flixel" version="5.6.2" /> <!--You can use up to Flixel 6.0.0 but some stuff might be a bit brokey-->
+	<haxelib name="flixel" /> <!--You can use up to Flixel 6.0.0 but some stuff might be a bit brokey--> <!-- (Though using troll fork is recommended !)-->
 	<haxelib name="flixel-ui" version="2.6.1" />
 	<haxelib name="flixel-addons" version="3.2.3" />
 	<haxelib name="flixel-animate" if="USING_FLXANIMATE" version="1.3.1"/>
@@ -119,6 +130,7 @@
 		<haxedef name="hscriptPos"/>
 
 		<haxeflag name="--macro" value="include('funkin')" />
+		<haxeflag name="-dce" value="no" if="OFFICIAL_BUILD"/>
 	</section>
 
 	<section if="MULTICORE_LOADING debug">

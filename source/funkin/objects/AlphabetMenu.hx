@@ -1,5 +1,6 @@
 package funkin.objects;
 
+import flixel.math.FlxPoint;
 import funkin.input.Controls;
 import funkin.objects.Alphabet;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -30,6 +31,8 @@ class AlphabetMenu extends FlxTypedGroup<Alphabet>
 	public var inputsActive:Bool = true;
 
 	public var textSize:Float = 1.0;
+	public var startPosition = FlxPoint.get(90, FlxG.height * 0.48);
+	public var distancePerItem = FlxPoint.get(20, 120 * 1.3);
 
 	private final itemCallbacks:Map<Alphabet, OptionCallbacks> = [];
 	
@@ -124,8 +127,8 @@ class AlphabetMenu extends FlxTypedGroup<Alphabet>
 	}
 
 	private function updateItemPos(item:Alphabet, index:Float) {
-		item.targetX = (index * 20) + 90;
-		item.targetY = (index * 120 * 1.3) + (FlxG.height * 0.48);
+		item.targetX = (index * distancePerItem.x) + startPosition.x;
+		item.targetY = (index * distancePerItem.y) + startPosition.y;
 	}
 
 	function updateInput(elapsed:Float, controls:Controls)
@@ -205,6 +208,8 @@ class AlphabetMenu extends FlxTypedGroup<Alphabet>
 	}
 
 	override function destroy(){
+		startPosition.put();
+		distancePerItem.put();
 		itemCallbacks.clear();
 
 		return super.destroy();

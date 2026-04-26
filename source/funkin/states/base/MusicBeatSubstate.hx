@@ -75,4 +75,8 @@ class MusicBeatSubstate extends FlxSubState
 	{
 		//do literally nothing dumbass
 	}
+
+	override function toString():String {
+		return Type.getClassName(Type.getClass(this));
+	}
 }

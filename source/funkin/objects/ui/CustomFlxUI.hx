@@ -1,5 +1,6 @@
 package funkin.objects.ui;
 
+import openfl.events.KeyboardEvent;
 import flixel.addons.ui.FlxUISlider;
 import flixel.addons.ui.FlxUITabMenu;
 import flixel.addons.ui.FlxUINumericStepper;
@@ -15,6 +16,44 @@ class CustomFlxUITabMenu extends FlxUITabMenu {
 		return 0;
 }
 
+class CustomFlxInputText extends FlxInputText {
+	public function new(X:Float = 0, Y:Float = 0, Width:Int = 150, ?Text:String, size:Int = 8, TextColor:Int = 0xFF000000,
+		BackgroundColor:Int = 0xFFFFFFFF, EmbeddedFont:Bool = true)
+	{
+		super(X, Y, Width, Text, size, TextColor, BackgroundColor, EmbeddedFont);
+		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown, 100); // higher priority than flixel
+	}
+
+	override function onKeyDown(e) {
+		super.onKeyDown(e);
+		if (hasFocus) e.stopImmediatePropagation();
+	}
+
+	override function destroy() {
+		super.destroy();
+	}
+}
+
+class CustomFlxUIInputText extends FlxUIInputText {
+	public function new(X:Float = 0, Y:Float = 0, Width:Int = 150, ?Text:String, size:Int = 8, TextColor:Int = 0xFF000000,
+		BackgroundColor:Int = 0xFFFFFFFF, EmbeddedFont:Bool = true)
+	{
+		super(X, Y, Width, Text, size, TextColor, BackgroundColor, EmbeddedFont);
+		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown, 100); // higher priority than flixel
+	}
+
+	override function onKeyDown(e) {
+		super.onKeyDown(e);
+		if (hasFocus) e.stopImmediatePropagation();
+	}
+
+	override function destroy() {
+		super.destroy();
+	}
+}
+
 /**
 	Allow mouse wheel to change its value.  
 	Prevent value from updating until you press Enter or click out of it.
@@ -27,6 +66,9 @@ class CustomFlxUINumericStepper extends FlxUINumericStepper {
 	public function new(X:Float = 0, Y:Float = 0, StepSize:Float = 1, DefaultValue:Float = 0, Min:Float = -999, Max:Float = 999, Decimals:Int = 0,
 			Stack:Int = FlxUINumericStepper.STACK_HORIZONTAL, ?TextField:FlxText, ?ButtonPlus:FlxUITypedButton<FlxSprite>, ?ButtonMinus:FlxUITypedButton<FlxSprite>,
 			IsPercent:Bool = false) {
+
+		TextField ??= new CustomFlxUIInputText(0, 0, 25);
+
 		super(X, Y, StepSize, DefaultValue, Min, Max, Decimals, Stack, TextField, ButtonPlus, ButtonMinus, IsPercent);
 
 		if ((text_field is FlxUIInputText))

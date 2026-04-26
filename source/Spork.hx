@@ -9,7 +9,12 @@ import haxe.macro.Compiler;
 **/
 class Spork {
 	public static function stuff() {
-		#if !display
+		#if display
+		Spoon.bend("flixel.FlxGame", macro class {
+			var _elapsedMS:Float = 0;
+		});
+
+		#else
 		final DEFINES = haxe.macro.Context.getDefines();
 
 		// FlxColor pisses it's stupid little pants if I don't do this

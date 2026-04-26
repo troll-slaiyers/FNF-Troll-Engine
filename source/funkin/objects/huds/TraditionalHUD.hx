@@ -32,8 +32,13 @@ class TraditionalHUD extends CommonHUD
 	var npsString = Paths.getString("nps") ?? "NPS";
 	var botplayString = Paths.getString("botplayMark") ?? "[BOTPLAY]";
 
+	var clearFlagColor:FlxColor; // don't mind me adding my trademark to the base engine -josh
+
 	var songHighscore:Int;
 	var songWifeHighscore:Float;
+	var songHighRating:Float = 0;
+
+	var allowScoreHighlights:Bool = true; // if you don't fw the hi-score fx
 
 	var showJudgeCounter:Bool;
 	
@@ -46,6 +51,7 @@ class TraditionalHUD extends CommonHUD
 		var songRecord = Highscore.getRecord(this.songName, PlayState.difficultyName);
 		songHighscore = songRecord.score;
 		songWifeHighscore = songRecord.accuracyScore;
+		songHighRating = songRecord.rating;
 
 		showJudgeCounter = ClientPrefs.judgeCounter != "Off";
 		////
@@ -145,7 +151,7 @@ class TraditionalHUD extends CommonHUD
 		}
 	}
 
-	var shownScore:String = "0";	
+	var shownScore:String = "0";
 	var isHighscore:Bool = false;
 
 	function onScoreUpdate(){
@@ -165,22 +171,27 @@ class TraditionalHUD extends CommonHUD
 
 		if (!showJudgeCounter) 
 			text += separator + getComboBreaksText();
-		
+
+		text += separator + '$ratingString: ';
+
+		if (grade != "?")
+			text += getRatingText() + separator + getGradeText() + separator + getClearTypeText();
+		else
+			text += getGradeText();
+
 		if (ClientPrefs.npsDisplay)
 			text += separator + getNPSText();
-
-		if (grade != "?") {
-			text += separator + getRatingText();
-			text += separator + getClearTypeText();
-		}
-		
-		text += separator + getGradeText();
 
 		return text;
 	}
 
 	inline function getScoreText():String
-		return '${isHighscore ? hiscoreString : scoreString}: $shownScore';
+	{
+		var scoreMark = isHighscore && allowScoreHighlights ? '<hi-s>' : '';
+
+		return '${isHighscore ? hiscoreString : scoreString}: $scoreMark$shownScore$scoreMark'; // this code is ugly!
+		// return '${isHighscore ? hiscoreString : scoreString}: $shownScore';
+	}
 
 	inline function getComboBreaksText():String
 		return '$cbString: $comboBreaks';
@@ -188,30 +199,88 @@ class TraditionalHUD extends CommonHUD
 	inline function getNPSText():String
 		return '$npsString: $nps / $npsPeak';
 
+	var isHighRating:Bool = false;
+
 	inline function getRatingText():String
 	{
+		isHighRating = (songWifeHighscore != 0 && stats.totalNotesHit > songWifeHighscore && stats.ratingPercent > songHighRating);
+
+		var ratingMark = isHighRating && allowScoreHighlights ? '<hi-s>' : '';
 		final ratPerc:Float = CoolMath.floorDecimal(ratingPercent * 100, 2);
-		return '$ratingString: $ratPerc%';
+		return '$ratingMark$ratPerc%$ratingMark';
 	}
 
 	inline function getClearTypeText():String
 	{
+		refreshFCColour();
 		var clearType:String = ratingFC;
 
 		if (stats.accuracySystem == WIFE3 && clearType == stats.gfc)
 			clearType = stats.fc;
 		
-		return '[$clearType]';
+		return '[<fc>$clearType<fc>]';
 	}
 
 	inline function getGradeText() {
-		return '$rankString: $grade';
+		return '$grade';
 	}
 
+	function refreshFCColour(){
+		clearFlagColor =
+			{
+				var color:FlxColor = 0xFFA3A3A3;
+
+				if (ratingFC == stats.fail)
+				{
+					color = judgeColours.get("miss");
+				}
+				else if (comboBreaks == 0)
+				{
+					if (stats.judgements.get("bad") > 0 || stats.judgements.get("shit") > 0)
+						color = 0xFFFFFFFF;
+					else if (stats.judgements.get("good") > 0)
+					{
+						color = judgeColours.get("good");
+						if (stats.judgements.get("good") == 1)
+							color.saturation *= 0.75;
+					}
+					else if (stats.judgements.get("sick") > 0)
+					{
+						color = judgeColours.get("sick");
+						if (stats.judgements.get("sick") == 1)
+							color.saturation *= 0.75;
+					}
+					else if (stats.judgements.get("epic") > 0)
+					{
+						color = judgeColours.get("epic");
+					}
+				}
+
+				color;
+			};
+	}
+
+	var formatting:FlxTextFormat;
+	var funnyFormat:FlxTextFormatMarkerPair;
+
+	var scoreFormatting:FlxTextFormat;
+	var lessFunnyFormat:FlxTextFormatMarkerPair;
 	override function update(elapsed:Float)
 	{
 		if (isUpdating)
+		{
+			// fc markup, obv
+			formatting = new FlxTextFormat(clearFlagColor, false, false, 0xFF000000);
+			funnyFormat = new FlxTextFormatMarkerPair(formatting, "<fc>");
+
+			// hi-score markups, obv
+			scoreFormatting = new FlxTextFormat(0xFFF7E92C, false, false, 0xFF000000);
+			lessFunnyFormat = new FlxTextFormatMarkerPair(scoreFormatting, "<hi-s>");
+
 			scoreTxt.text = getStatusText();
+
+			scoreTxt.applyMarkup(scoreTxt.text, [funnyFormat, lessFunnyFormat]);
+		}
 		
 		if (judgeCounters != null) {
 			for (k => v in judgements)

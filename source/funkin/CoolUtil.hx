@@ -339,13 +339,14 @@ class CoolUtil {
 		#if linc_filedialogs
 		return filters ?? [];
 		#else		
+		if (filters == null)
+			return null;
+
 		final goodFilters:Array<String> = [];
-		if (filters != null) {
-			for (f in filters) {
-				var type = new FileFilter(f, f);
-				goodFilters.push(StringTools.replace(StringTools.replace(type.extension, "*.", ""), ";", ","));
-			}
-		}
+
+		for (i in 0...Math.floor(filters.length / 2))
+			goodFilters.push(filters[i*2+1].replace("*.", "").replace(";", ","));
+		
 		return goodFilters.join(";");
 		#end
 	}

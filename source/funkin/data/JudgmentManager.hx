@@ -304,13 +304,8 @@ class JudgmentManager {
 
 		var diff:Float = Math.abs(note.strumTime - hitTime);
 
-		// did you know if you always return UNJUDGED a note won't be hittable?
-		// i thought that was interesting
-		// (aka fake notes when)
-		if (note.noteScript != null) {
-			var judge = note.noteScript.executeFunc("judgeNote", [note, diff], note);
-			if (judge != null) return judge;
-		}
+		var judge = note.judgeNote(diff);
+		if (judge != null) return judge;
 
 		if (note.defaultJudgement != null) {
 			if (diff <= getWindow(note.defaultJudgement))

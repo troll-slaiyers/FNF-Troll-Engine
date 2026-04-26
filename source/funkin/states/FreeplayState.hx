@@ -227,8 +227,34 @@ class FreeplayState extends MusicBeatState
 			proceed = songLoaded == selectedSong && PlayState.SONG != null;
 		
 			if (!proceed) {
-				PlayState.loadPlaylist([selectedSongData], curChartId);
-				proceed = PlayState.SONG != null;
+				try {
+					PlayState.loadPlaylist([selectedSongData], curChartId);
+					proceed = PlayState.SONG != null;
+				}catch(e) {
+					var txt = 'ERROR LOADING SONG';
+					txt += '\n${e.message}';
+
+					// while I COULD use AlphabetPrompt
+					// fuck YOU
+					var ss = new funkin.states.base.Prompt(txt, 0, null, null, "OK", "OK");
+					persistentUpdate = false;
+					openSubState(ss);
+
+					ss.add(new funkin.objects.FlxSignalHolder(FlxG.signals.postUpdate, function() {
+						if (FlxG.mouse.justMoved)
+							FlxG.mouse.visible = true;
+
+						if (controls.ACCEPT)
+							ss.close();
+					}));
+					this.subStateClosed.addOnce(function(ss) {
+						FlxG.mouse.visible = false;
+						persistentUpdate = true;
+					});
+
+					proceed = false;
+					//throw e;
+				}
 			}
 		}
 

@@ -20,7 +20,7 @@ class CreditsState extends MusicBeatState
 	// Maybe we could add it back some day w/ github contributors n shit tho
 
 	var hintBg:FlxSprite;
-	var hintText:FlxText;
+	var descText:FlxText;
 
 	var camFollow = new FlxPoint(FlxG.width * 0.5, FlxG.height * 0.5);
 	var camFollowPos = new FlxObject();
@@ -31,12 +31,8 @@ class CreditsState extends MusicBeatState
 
 	var curSelected:Int = 0;
 
-	public var gotoMenus = () -> MusicBeatState.switchState(new MainMenuState());
-
-	override function startOutro(onOutroFinished:()->Void){
-		persistentUpdate = false;
-		return onOutroFinished();
-	}
+	public dynamic function goBack()
+		MusicBeatState.switchState(new MainMenuState());
 
 	public function new(?options:Array<CreditsOption>) {
 		super();
@@ -111,14 +107,15 @@ class CreditsState extends MusicBeatState
 		hintBg.updateHitbox();
 		hintBg.screenCenter(X);
 		hintBg.color = 0xFF000000;
-		hintBg.alpha = 0.6;
+		hintBg.alpha = 0.0;
 		hintBg.scrollFactor.set();
 		add(hintBg);
 
-		hintText = new FlxText(hintBg.x + 25, hintBg.y + hintBg.height * 0.5 - 16, hintBg.width - 50, "asfgh", 32);
-		hintText.setFormat(Paths.font("calibri.ttf"), 32, 0xFFFFFFFF, CENTER);
-		hintText.scrollFactor.set();
-		add(hintText);
+		descText = new FlxText(hintBg.x + 25, hintBg.y + hintBg.height * 0.5 - 16, hintBg.width - 50, "asfgh", 32);
+		descText.setFormat(Paths.font("calibri.ttf"), 32, 0xFFFFFFFF, CENTER);
+		descText.scrollFactor.set();
+		descText.alpha = 0;
+		add(descText);
 		
 		super.create();
 		curSelected = 0;
@@ -126,14 +123,22 @@ class CreditsState extends MusicBeatState
 	}
 
 	public function changeSelection(val:Int, isAbs:Bool = false) {
+		if (dataArray.length == 0) {
+			val = -1;
+			isAbs = true;
+		}
+
 		curSelected = isAbs ? val : CoolUtil.updateIndex(curSelected, val, dataArray.length);
+
+		if (curSelected < 0)
+			return;
 
 		if (!dataArray[curSelected].selectable) {
 			changeSelection((!isAbs && val < 0) ? -1 : 1);
 			return;
 		}
 
-		if (!isAbs)
+		if (!isAbs && val != 0)
 			FlxG.sound.play(Paths.sound("scrollMenu"), 0.4);
 
 		for (id in 0...titleArray.length)
@@ -202,28 +207,29 @@ class CreditsState extends MusicBeatState
 
 	function setDescriptionText(text:Null<String>) {
 		if (text == null || text.length == 0) {
-			hintText.alpha = 0;
-			hintText.text = "";
+			moveTween?.cancel();
+			descText.alpha = 0;
+			descText.text = "";
 		}else{
-			hintText.text = text;
+			descText.text = text;
 
-			hintBg.scale.y = 30 + hintText.height;
+			hintBg.scale.y = 30 + descText.height;
 			hintBg.updateHitbox();
 			hintBg.y = FlxG.height - hintBg.height - 10;
 
-			hintText.y = hintBg.y + hintBg.height * 0.5 - hintText.height * 0.5;
+			descText.alpha = 1.0;
+			descText.y = hintBg.y + hintBg.height * 0.5 - descText.height * 0.5;
 
 			//// FUCK
 			var sby = hintBg.y + 15;
 			var eby = hintBg.y;
-			var sty = hintText.y + 15;
-			var ety = hintText.y;
+			var sty = descText.y + 15;
+			var ety = descText.y;
 			var sba = hintBg.alpha;
-			if (moveTween != null)
-				moveTween.cancel();
+			moveTween?.cancel();
 			moveTween = FlxTween.num(0, 1, 0.25, {ease: FlxEase.sineOut}, function(v){
 				hintBg.y = FlxMath.lerp(sby, eby, v);
-				hintText.y = FlxMath.lerp(sty, ety, v);
+				descText.y = FlxMath.lerp(sty, ety, v);
 				hintBg.alpha = FlxMath.lerp(sba, 0.6, v);
 			});
 		}
@@ -282,10 +288,10 @@ class CreditsState extends MusicBeatState
 		if (change != 0)
 			changeSelection(change);
 
-		if (controls.BACK && gotoMenus != null) {
+		if (controls.BACK && goBack != null) {
 			controlLock = true;
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			gotoMenus();
+			goBack();
 		}
 
 		if (controls.ACCEPT){

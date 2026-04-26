@@ -10,11 +10,11 @@ Expect bugs, breaking changes and little documentation!!! (You can look at the `
 
 ## Features:
 
- - Quant note skins
  - Lots of hud customization (NPS counter, note hit timing info, colored combos, judgement counters, options for other hud styles too)
+ - Quant note skin
  - An awesome modchart system
- - Custom hscript implementation (scriptable notetypes, events, stages, characters and song scripts)
- - Scriptable states
+ - Custom hscript implementation (scripted notetypes, events, stages, cutscenes, characters and song scripts)
+ - Soft-coded states
  - A lot more!!!
 
 ## Installation / Requirements:
@@ -27,17 +27,17 @@ Expect bugs, breaking changes and little documentation!!! (You can look at the `
 
 ## Engine Credits / Special Thanks
 - [Nebula the Zorua](https://x.com/Nebula_Zorua) - Most engine stuff
-- [4mbr0s3_2](https://www.youtube.com/@4mbr0s3-2) - Modifier system inspiration
-- [SrtHero278](https://github.com/SrtHero278) - Notefield optimizations
+- [4mbr0s3_2](https://www.youtube.com/@4mbr0s3-2) - Inspiration for the modchart system's implementation, created the hold note rendering system + some of the fake 3D rendering
+- [SrtHero278](https://github.com/SrtHero278) - NoteField optimizations and fixes
 - [Vortex](https://github.com/Vortex2Oblivion) - Extra keys implementation and a bunch of other improvements
-- [Shadz](https://github.com/ShadzXD) - Flixel-animate implementation
+- [Shadz](https://github.com/ShadzXD) - Flixel-animate implementation, made the dialogue system and the look of the charting editor tip texts
 - [MAJigsaw77](https://github.com/MAJigsaw77) - Creator of [hxdiscord_rpc](https://github.com/MAJigsaw77/hxdiscord_rpc) and [hxvlc](https://github.com/MAJigsaw77/hxvlc)
 - [MaybeMaru](https://github.com/MaybeMaru) - Creator of [Flixel-animate](https://github.com/MaybeMaru/flixel-animate) and [Moonchart](https://github.com/MaybeMaru/moonchart)
 - [swordcube](https://bsky.app/profile/swordcube.bsky.social) - Pixel note splashes + [linc_filedialogs](https://github.com/swordcube/linc_filedialogs) implementation
 - [crowplexus](https://github.com/crowplexus) - Countdown class + [hxdiscord_rpc](https://github.com/MAJigsaw77/hxdiscord_rpc/) implementation
 - [moxie-coder](https://github.com/moxie-coder) - Mac building and workflow help
 - [Unholywanderer](https://github.com/unholywanderer) - what the [nuts](https://tenor.com/view/stupid-fucking-burping-rat-bleghhhhhhh-blahhhhhhhhh-stupid-burping-rat-gif-15365543192916498953)
-- [Gab](https://github.com/michisock) - We like him!!!
+- [Gab](https://github.com/michisock) - We like him!
 - [Lat](https://x.com/latzephr) - [Original Week 6 health bar and timer concept](https://x.com/latzephr/status/1771139155881234576)
 - [AllyTS](https://x.com/NewTioSans) - Mine Note texture
 - [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) - Dad Engine
