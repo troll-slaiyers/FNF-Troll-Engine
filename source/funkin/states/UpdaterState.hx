@@ -92,11 +92,7 @@ class UpdaterState extends MusicBeatState {
 	var fileBar:FlxBar;
 
 	static final path = Path.join([Native.getTempDirectory(), "TrollEngineUpdate"]);
-	static var OS(get, never):String;
-	
-	inline static function get_OS() {
-		return Sys.systemName().toLowerCase();
-	}
+	static final OS:String = Sys.systemName().toLowerCase();
 
 	var release:Release;
 	var stream:URLLoader;
