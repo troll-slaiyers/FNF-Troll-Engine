@@ -167,6 +167,8 @@
 		<haxedef name="HXCPP_CATCH_SEGV" />
 		<haxedef name="openfl-enable-handle-error" />
 	</section>
+
+	<haxedef name="HXCPP_CPP17" if="cpp" />
 		
 	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />
 

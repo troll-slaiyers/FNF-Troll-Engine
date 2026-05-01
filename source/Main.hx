@@ -1,7 +1,6 @@
 package;
 
 import haxe.io.Path;
-import haxe.CallStack;
 import openfl.display.Bitmap;
 import openfl.display.Sprite;
 import lime.app.Application.current as application;
