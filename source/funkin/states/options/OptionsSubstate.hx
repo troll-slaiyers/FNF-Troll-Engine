@@ -209,7 +209,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			#if DISCORD_ALLOWED
 			["discord", ["discordRPC", "discordRPC_hideDetails"]],
 			#end
-			#if DO_AUTO_UPDATE
+			#if CHECK_FOR_UPDATES
 			[
 				"updating", 
 				[
@@ -395,7 +395,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			case 'globalAntialiasing':
 				Main.game.set_antialiasing(val);
 				
-			#if(DO_AUTO_UPDATE || display)
+			#if(CHECK_FOR_UPDATES || display)
 			case 'downloadBetas' | 'checkForUpdates':
 				Main.downloadBetas = Main.Version.isBeta || ClientPrefs.downloadBetas;
 				if (!Main.Version.isBeta || option == 'checkForUpdates'){

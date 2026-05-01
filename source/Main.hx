@@ -31,9 +31,19 @@ final class Version
 
 	public static final buildDate:String = Sowy.getBuildDate();
 	public static final githubRepo:RepoInfo = Github.getCompiledRepoInfo();
+	public static final branchName:String = Github.getGitBranchName();
+	public static final gitHash:String = Github.getGitCommitHash();
 	
 	public static final semanticVersion:SemanticVersion = isBeta ? '$engineVersion-$betaVersion' : engineVersion;
-	public static final displayedVersion:String = 'v$semanticVersion';
+	public static final displayedVersion:String = {
+		var version = 'v$semanticVersion';
+		
+		#if !OFFICIAL_BUILD
+		if (gitHash.length > 0) version += ' [$branchName:${Github.getGitCommitHash(true)}]';
+		#end
+
+		version;
+	};
 }
 
 class Main extends Sprite
@@ -220,6 +230,16 @@ class Main extends Sprite
 			sprite.__cacheBitmap = null;
 			sprite.__cacheBitmapData = null;
 		}
+	}
+
+	public static inline function printCallStack()
+		print(CrashHandler.callstackToString(haxe.CallStack.callStack()));
+
+	public static inline function showCallStack(...extraInfo:Any) {
+		var css = CrashHandler.callstackToString(haxe.CallStack.callStack());
+		css += "\n" + extraInfo.toString();
+		FlxG.stage.window.alert(css, "showCallStack");
+		print(css);
 	}
 
 	#if sys

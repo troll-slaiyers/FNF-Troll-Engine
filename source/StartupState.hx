@@ -22,7 +22,7 @@ import sys.thread.Thread;
 import sys.thread.Mutex;
 #end
 
-#if (DO_AUTO_UPDATE || display)
+#if (CHECK_FOR_UPDATES || display)
 import funkin.states.UpdaterState;
 #end
 
@@ -65,7 +65,7 @@ class StartupState extends TransitionableState
 		FlxG.keys.preventDefaultKeys = [TAB];
 		FlxG.fixedTimestep = false;
 
-		#if (DO_AUTO_UPDATE || display)
+		#if (CHECK_FOR_UPDATES || display)
 		UpdaterState.getRecentGithubRelease();
 		UpdaterState.checkOutOfDate();
 		UpdaterState.clearTemps("./");
@@ -151,7 +151,7 @@ class StartupState extends TransitionableState
 
 
 			case 50:
-				#if(DO_AUTO_UPDATE || display)
+				#if(CHECK_FOR_UPDATES || display)
 				if (Main.outOfDate)
 					MusicBeatState.switchState(new UpdaterState(Main.recentRelease)); // UPDATE!!
 				else

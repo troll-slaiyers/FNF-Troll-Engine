@@ -97,51 +97,74 @@ class Github {
 			repo: "FNF-Troll-Engine" // default repo
 		}
 		#if !display
-		var process = null; 
-		
-		try{
-			process = new sys.io.Process('git', ['config', '--get', 'remote.origin.url']);
+		var originUrl:Null<String> = runProcess(['config', '--get', 'remote.origin.url']);
+		if (originUrl != null) {
+			var sshRegex = ~/git@github.com:(.+)\/(.+).git/i;
+			var urlRegex = ~/https:\/\/github.com\/(.+)\/(.+).git/i;
+			
+			var regex:EReg = null;
+			
+			if (sshRegex.match(originUrl))
+				regex = sshRegex
+			else if (urlRegex.match(originUrl))
+				regex = urlRegex;
+
+			if (regex != null)
+			{
+				repoInfo.user = regex.matched(1);
+				repoInfo.repo = regex.matched(2);
+			}
 		}
-		catch (message){
-			var pos = haxe.macro.Context.currentPos();
-			haxe.macro.Context.warning("Cannot execute 'git config --get remote.origin.url'. " + 'Exception: "$message".' , pos);
-			return macro $v{repoInfo};
-		}
-
-		if (process.exitCode() != 0)
-		{
-			var message = process.stderr.readAll().toString();
-			var pos = haxe.macro.Context.currentPos();
-			haxe.macro.Context.warning("Cannot execute 'git config --get remote.origin.url' " + message, pos);
-			return macro $v{repoInfo};
-		}
-
-		// read the output of the process
-		var originUrl:String = process.stdout.readLine();
-		var sshRegex = ~/git@github.com:(.+)\/(.+).git/i;
-		var urlRegex = ~/https:\/\/github.com\/(.+)\/(.+).git/i;
-
-		var regex:EReg = null;
-
-		if (sshRegex.match(originUrl))
-			regex = sshRegex
-		else if (urlRegex.match(originUrl))
-			regex = urlRegex;
-
-		if (regex != null)
-		{
-			repoInfo.user = regex.matched(1);
-			repoInfo.repo = regex.matched(2);
-		}
-
-		// Generates a string expression
-		return macro $v{repoInfo};
-		#else
-		// `#if display` is used for code completion. In this case returning an
-		// empty string is good enough; We don't want to call git on every hint.
-		return macro $v{repoInfo};
 		#end
+		return macro $v{repoInfo};
 	}
+
+	public static macro function getGitCommitHash(short:Bool = false):haxe.macro.Expr.ExprOf<String> {
+		#if !display
+		var args = short ? ['rev-parse', '--short', 'HEAD'] : ['rev-parse', 'HEAD'];
+		var ret:String = runProcess(args) ?? "";
+		#else
+		var ret:String = "";
+		#end
+		return macro $v{ret};
+	}
+
+	public static macro function getGitBranchName():haxe.macro.Expr.ExprOf<String> {
+		#if !display
+		var ret:String = runProcess(['rev-parse', '--abbrev-ref', 'HEAD']) ?? "";
+		#else
+		var ret:String = "";
+		#end
+		return macro $v{ret};
+	}
+
+	#if macro
+	private inline static function runProcess(?args:Array<String>):Null<String>
+	{
+		var process:sys.io.Process;
+		var ret:Null<String> = null;
+
+		try{
+			process = new sys.io.Process('git', args);
+			if (process.exitCode() != 0) {
+				var message = process.stderr.readAll().toString();
+				process.close();
+				var pos = haxe.macro.Context.currentPos();
+				haxe.macro.Context.warning("Cannot execute `git " + args.join(' ') + "`. " + message, pos);
+			}else {
+				ret = process.stdout.readLine();
+				process.close();
+			}
+		}
+		catch (message) {
+			process.close();
+			var pos = haxe.macro.Context.currentPos();
+			haxe.macro.Context.warning("Cannot execute '" + args.join(' ') + "'. " + 'Exception: "$message".' , pos);
+		}
+
+		return ret;
+	}
+	#end
 
 	#if !macro
 	static var redirects:Array<Int> = [

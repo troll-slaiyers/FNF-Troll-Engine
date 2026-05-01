@@ -61,9 +61,6 @@
 	<!--If you're using git, set this, because Haxe sucks fuck and cant detect if youre on git or 0.4.0 for some fucking reason welcome to haxe ladies and gentlemen-->
 	<!-- <define name="USING_NEW_MOONCHART" /> -->
 
-	<!--Remove if you dont want the engine to autoupdate -->
-	<define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug" />
-
 	<!--Remove if you don't want to allow deprecated engine features.-->
 	<!--Anything marked as deprecated should be removed after a major or minor version but not after patches. (major.minor.patch)-->
 	<define name="ALLOW_DEPRECATION" unless="final"/>
@@ -79,6 +76,12 @@
 
 	<!-- Custom shader error printing :D -->
 	<haxedef name="traceShaderLineNumbers"/>
+
+	<!-- Allows the engine to checks for updates when the program starts -->
+	<define name="CHECK_FOR_UPDATES" if="native desktop OFFICIAL_BUILD" unless="debug" />
+
+	<!-- Allows the engine to download and install updates (asking the user first ofc) -->
+	<define name="UPDATES_ALLOWED" if="CHECK_FOR_UPDATES windows" unless="debug" />
 
 	<section if="OFFICIAL_BUILD">
 		<echo value="OFFICIAL_BUILD" />
