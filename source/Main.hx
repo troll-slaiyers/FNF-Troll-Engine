@@ -171,8 +171,10 @@ class Main extends Sprite
 		}else 
 			scaleWindow(scaleModifier);
 
-		centerWindow();
-
+		#if windows
+		centerWindow(); // if you have multiple monitors on linux it just goes inbetween the monitors, very annoying
+		#end
+		
 		////		
 		StartupState.nextState = nextState;
 
@@ -233,6 +235,9 @@ class Main extends Sprite
 
 	public static inline function printCallStack()
 		print(CrashHandler.callstackToString(haxe.CallStack.callStack()));
+
+	public static inline function printExceptionStack()
+		print(CrashHandler.callstackToString(haxe.CallStack.exceptionStack()));
 
 	public static inline function showCallStack(...extraInfo:Any) {
 		var css = CrashHandler.callstackToString(haxe.CallStack.callStack());

@@ -219,11 +219,11 @@ class StoryModeState extends MusicBeatState {
 		var levelDir = Paths.getFolderPath(folder) + 'levels/';
 
 		var contentLevelPaths:Array<String> = [];
-		Paths.iterateDirectory(levelDir, function(file:String){
+		for (file in Paths.readDirectory(levelDir)) {
 			var name = Path.withoutExtension(levelDir + file);
 			if(!contentLevelPaths.contains(name))
 				contentLevelPaths.push(name);
-		});
+		}
 
 		var contentLevels:Array<Level> = [];
 		for (filePath in contentLevelPaths) {

@@ -1,5 +1,8 @@
 package funkin.states.options;
 
+import funkin.objects.notes.StrumNote;
+import funkin.objects.notes.Note;
+import flixel.group.FlxSpriteGroup;
 import funkin.objects.huds.BaseHUD;
 import funkin.objects.hud.RatingGroup;
 
@@ -57,9 +60,9 @@ class ComboPositionSubstate extends MusicBeatSubstate
 		var judgeName:Null<String> = null;
 		var judgeColor:Null<FlxColor> = null;
 
-		if (PlayState.instance != null && PlayState.instance.hud != null) // could be cool
+		var hud = PlayState.instance?.hud;
+		if (hud != null)
 		{
-			var hud = PlayState.instance.hud;
 			var highestJudgement = hud.displayedJudges[0];
 			
 			if (highestJudgement != null){
@@ -98,7 +101,36 @@ class ComboPositionSubstate extends MusicBeatSubstate
 		};
 
 		////
-		timing = new FlxText(0, 0, 0, "0 ms");
+		if (PlayState.instance == null) {
+			var totalPlayers:Int = ClientPrefs.centerNotefield ? 1 : 2;
+			
+			var swagOffset = Note.halfWidth + 45;
+			var top = swagOffset;
+			var bot = (FlxG.height - swagOffset);
+			var y:Float;
+			
+			#if FUNNY_ALLOWED
+			if (ClientPrefs.middleScroll)
+				y = (top + bot) * 0.5;
+			else #end
+				y = (ClientPrefs.downScroll ? bot : top);
+
+			for (player in 0...totalPlayers) {
+				var keyCount = 4;
+				for (column in 0...keyCount) {
+					var x = Note.halfWidth + funkin.modchart.ModManager._getBaseX(totalPlayers, player, column, keyCount);
+					var obj = new StrumNote(x, y, column, null);
+					obj.postAddedToGroup();
+					obj.updateHitbox();
+					obj.x -= obj.width / 2;
+					obj.y -= obj.height / 2;
+					add(obj);
+				}
+			}
+		}
+
+		////
+		timing = new FlxText(0, 0, 0, "0ms");
 		timing.setFormat(Paths.font("vcr.ttf"), 28, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 		timing.color = judgeColor;
 		timing.scrollFactor.set();
@@ -108,30 +140,43 @@ class ComboPositionSubstate extends MusicBeatSubstate
 		add(timing);
 
 		////
-		function makeText(i){
+		var textGroup = new FlxSpriteGroup();
+		textGroup.cameras = cameras;
+
+		final alignment:FlxTextAlign = {
+			// If this substate is opened while on PlayState then the offsets are shown on the opposite side to not cover the real judge counters :P
+			final beingShownOutside = (PlayState.instance != null) && (ClientPrefs.judgeCounter != "Off");
+			(ClientPrefs.hudPosition == "Left") != (!beingShownOutside) ? RIGHT : LEFT;
+		};
+
+		function makeText(i, text:String = ' '){
 			var text:FlxText = new FlxText(
 				10, 
-				48 + (i * 30) + 24 * Math.floor(i / 2), 
-				0, 
-				'', 
+				(i * 30) + 24 * Math.floor(i / 2), 
+				FlxG.width - 10 * 2, 
+				text, 
 				24
 			);
 			text.scrollFactor.set();
-			text.setFormat(Paths.font("vcr.ttf"), 24, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
-			text.borderSize = 2;
+			text.setFormat(Paths.font("vcr.ttf"), 24, 0xFFFFFFFF, alignment);
+			text.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2);
 			text.cameras = cameras;
-			add(text);
-
+			
+			textGroup.add(text);
 			return text;
 		}
 
-		makeText(0).text = "Judgement Offset:";
+		makeText(0, "Judgement Offset");
 		txt_rating = makeText(1);
-		makeText(2).text = "Combo Offset:";
+		makeText(2, "Combo Offset");
 		txt_combo = makeText(3);
-		makeText(4).text = "Timing Offset:";
+		makeText(4, "Timing Offset");
 		txt_timing = makeText(5);
 
+		textGroup.screenCenter(Y);
+		add(textGroup);
+
+		////
 		updateJudgePos();
 		updateComboPos();
 		updateTimingPos();

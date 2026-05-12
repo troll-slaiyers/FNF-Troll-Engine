@@ -818,7 +818,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		];
 
 		for (folderPath in Paths.getFolders('notetypes')) {
-			Paths.iterateDirectory(folderPath, function(fileName:String) {
+			for (fileName in Paths.readDirectory(folderPath)) {
 				var fileExtension:Null<String> = null;
 
 				for (ext in extensions) {
@@ -829,14 +829,14 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				}
 
 				if (fileExtension == null)
-					return;
+					continue;
 
 				var name:String = fileName.substr(0, fileName.length - fileExtension.length); // get file name
 				if (noteTypeList.contains(name)) // if it already is on the list
-					return;
+					continue;
 
 				noteTypeList.push(name);
-			});
+			}
 		}
 		#end
 	}
@@ -1847,7 +1847,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			_song.metadata.artist = artistInputText.text;
 			_song.metadata.charter = charterInputText.text;
 			_song.metadata.modcharter = modcharterInputText.text;
-			_song.metadata.extraInfo = extraInfoInputText.text.split(',');
+			_song.metadata.extraInfo = extraInfoInputText.text.length == 0 ? [] : extraInfoInputText.text.split(',');
 
 			var data:String = Json.stringify(_song.metadata, "\t");
 			CoolUtil.showSaveDialog(data, "Save Metadata", getSongPath("metadata.json"), ["JSON file", "*.json"]);
@@ -2409,7 +2409,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				case 'metadata_modcharter':
 					_song.metadata.modcharter = sender.text;
 				case 'metadata_extraInfo':
-					_song.metadata.extraInfo = sender.text.split(',');
+					_song.metadata.extraInfo = sender.text.length == 0 ? [] : sender.text.split(',');
 				
 				case 'tracks_inst':
 					_song.tracks.inst = sender.text.split(',');
@@ -2934,7 +2934,8 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 		var movedDummyY:Bool = false;
 		var onIcons:Bool = FlxG.mouse.overlaps(iconBG);
-		var onGrid:Bool = !onIcons && !FlxG.mouse.overlaps(progressBG)
+		var onTimeBar:Bool = !onIcons && FlxG.mouse.overlaps(progressBG);
+		var onGrid:Bool = !onIcons && !onTimeBar && !FlxG.mouse.overlaps(progressBG)
 			&& FlxG.mouse.x >= gridBG.x
 			&& FlxG.mouse.x < gridBG.x + gridBG.width
 			&& FlxG.mouse.y >= gridBG.y
@@ -3030,6 +3031,10 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			}
 		}
 
+		inline function deselectEverything() {
+			new SelectNotesAction([]);
+		}
+
 		inline function placeGridObject() {
 			var noteTime:Float = sectionStartTime() + getStrumTime(dummyArrow.y * (getSectionBeats(curSection) / 4), false);
 			var column:Int = Math.floor(FlxG.mouse.x / GRID_SIZE) - 1;
@@ -3050,7 +3055,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				if ((overlappedObj = getOverlappedNote()) != null)
 					deleteNote(overlappedObj);
 				else
-					new SelectNotesAction([]);
+					deselectEverything();
 			}
 		}
 
@@ -3066,8 +3071,8 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				}
 				else if (onGrid)
 					placeGridObject();
-				else if (!FlxG.mouse.overlaps(UI_box)) {
-					//new SelectNotesAction([]);
+				else if (!onTimeBar && !FlxG.mouse.overlaps(UI_box)) {
+					//deselectEverything();
 					startSelectionBox = true;
 				}
 			}
@@ -3163,6 +3168,10 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		ss.onSelectChart = function(song:BaseSong, chartId:String) {
 			Song.loadSong(song, chartId);
 			_song = PlayState.SONG;
+			if (this.songId == song.songId) {
+				_session ??= makeSession();
+				_session.songPosition = Conductor.songPosition;
+			}
 			ss.close();
 			onChartLoaded();
 		}

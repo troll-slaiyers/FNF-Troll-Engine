@@ -77,13 +77,15 @@
 	<!-- Custom shader error printing :D -->
 	<haxedef name="traceShaderLineNumbers"/>
 
-	<!-- Allows the engine to checks for updates when the program starts -->
-	<define name="CHECK_FOR_UPDATES" if="native desktop OFFICIAL_BUILD" unless="debug" />
-
-	<!-- Allows the engine to download and install updates (asking the user first ofc) -->
-	<define name="UPDATES_ALLOWED" if="CHECK_FOR_UPDATES windows" unless="debug" />
-
 	<section if="OFFICIAL_BUILD">
+		<!-- Allows the engine to checks for updates when the program starts -->
+		<define name="CHECK_FOR_UPDATES" unless="debug" />
+
+		<!-- Allows the engine to download and install updates (it asks the user first ofc) -->
+		<define name="UPDATES_ALLOWED" if="native desktop" unless="mac"/>
+
+		<define name="DONT_INCLUDE_DEFAULT" />
+
 		<echo value="OFFICIAL_BUILD" />
 	</section>
 
@@ -97,7 +99,7 @@
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
 
 	<assets path="assets" />
-	<assets path='default_content' rename='content' if='false' embed='false' exclude="*.mp3" />
+	<assets path='default_content' rename='content' unless='DONT_INCLUDE_DEFAULT' embed='false' exclude="*.mp3" />
 
 	<icon path="art/iconOG.png" />
 	<icon path="art/icon64.png" size='64' />

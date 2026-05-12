@@ -24,8 +24,8 @@ class VSliceConverter extends MusicBeatState
 		var added:Array<String> = [];
 		menu.addTextOption("Stages");
 		for (folderPath in Paths.getFolders("stages")) {
-			Paths.iterateDirectory(folderPath, (file:String)->{
-				if (added.contains(file))return;
+			for (file in Paths.readDirectory(folderPath)) {
+				if (added.contains(file))continue;
 
 				added.push(file);
 				if(file.endsWith("json")){
@@ -39,14 +39,14 @@ class VSliceConverter extends MusicBeatState
 					}
 				}
 				//menu.addTextOption();
-			});
+			}
 		}
 
 		menu.addTextOption("Characters");
 		for (folderPath in Paths.getFolders("characters")) {
-			Paths.iterateDirectory(folderPath, (file:String) -> {
+			for (file in Paths.readDirectory(folderPath)) {
 				if (added.contains(file))
-					return;
+					continue;
 				added.push(file);
 				if (file.endsWith("json")) {
 					var data:Dynamic = Paths.json('characters/$file');
@@ -62,7 +62,7 @@ class VSliceConverter extends MusicBeatState
 					}
 				}
 				// menu.addTextOption();
-			});
+			}
 		}
 
 		var bg = new funkin.objects.CoolMenuBG(Paths.image('menuDesat', null, false), 0xfffffb00);

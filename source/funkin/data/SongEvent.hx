@@ -77,6 +77,13 @@ class ScriptedSongEvent extends SongEvent implements IScriptedClass {
 }
 
 class DefaultSongEvent extends SongEvent {
+	override function shouldPush(data:EventData):Bool {		
+		return switch(data.event) {
+			case 'Add Camera Zoom': (data.strumTime > Conductor.songPosition);
+			default: super.shouldPush(data);
+		}
+	}
+
 	override function onPush(data:EventData) 
 	{
 		if (data.value1 == null) data.value1 = '';

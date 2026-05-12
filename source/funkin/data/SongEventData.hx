@@ -43,18 +43,18 @@ class SongEventData {
 
 		var eventsLoaded:Map<String, Bool> = new Map();
 		for (directory in Paths.getFolders('events')) {
-			Paths.iterateDirectory(directory, function(file:String) {
+			for (file in Paths.readDirectory(directory)) {
 				var fp = new Path(file);
 				if (fp.ext.toLowerCase() != 'txt')
-					return;
+					continue;
 
 				var eventName:String = fp.file;
 				if (eventsLoaded.exists(eventName))
-					return;
+					continue;
 
 				eventsLoaded.set(eventName, true);
 				eventStuff.push([eventName, Paths.getContent(Path.join([directory, file]))]);			
-			});
+			}
 		}
 
 		return eventStuff;

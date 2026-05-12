@@ -25,6 +25,7 @@ import flixel.util.FlxColor;
 import funkin.api.Github;
 import Main.Version;
 
+import CoolerStringTools;
 using StringTools;
 
 typedef DownloadData = {
@@ -49,26 +50,6 @@ typedef DLProgress = {
 	var done:Bool;
 }
 
-private function formatDecimal(Number:Float, Precision = 2):String {
-	var mult:Float = 1;
-	for (_ in 0...Precision)
-		mult *= 10;
-	
-	var formatted = Std.string(Math.fround(Number * mult) / mult);
-	var sowy = formatted.lastIndexOf('.');
-
-	if (sowy == -1) {
-		formatted += '.';
-		sowy = 0;
-	}else
-		sowy = formatted.length - sowy - 1;
-
-	for (_ in sowy...Precision)
-		formatted += '0';
-
-	return formatted;
-}
-
 private function formatBytes(Bytes:Float, Precision = 2):String {
 	var units:Int = 0;
 	while (Bytes >= 1024) {
@@ -76,7 +57,7 @@ private function formatBytes(Bytes:Float, Precision = 2):String {
 		units++;
 	}
 
-	return formatDecimal(Bytes, Precision) + switch(units) {
+	return CoolerStringTools.formatDecimal(Bytes, Precision) + switch(units) {
 		case 0: " Bytes";
 		case 1: "kB";
 		case 2: "MB";

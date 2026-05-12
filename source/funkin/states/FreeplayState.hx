@@ -4,6 +4,7 @@ import math.CoolMath;
 import funkin.input.InputFormatter;
 import flixel.util.FlxColor;
 import funkin.objects.hud.HealthIcon;
+import funkin.objects.ChangingMenuBG;
 
 import sys.FileSystem;
 import funkin.data.Song;
@@ -34,8 +35,7 @@ class FreeplayState extends MusicBeatState
 	var menu:FreeplayMenu;
 	var songList:Array<BaseSong>;
 
-	var bgGrp = new FlxTypedGroup<FlxSprite>();
-	var bg:FlxSprite;
+	var bgManager:ChangingMenuBG;
 
 	var targetHighscore:Float = 0.0;
 	var lerpHighscore:Float = 0.0;
@@ -68,9 +68,11 @@ class FreeplayState extends MusicBeatState
 
 			inline function sowy(songId:String) {
 				// weird old tgt shit
+				#if ALLOW_DEPRECATION
 				var splitted:Array<String> = songId.split(":");
 				if (splitted.length > 1)
 					songId = splitted[0];
+				#end
 				
 				if (!songIdMap.exists(songId)) {
 					songIdMap.set(songId, true);
@@ -107,12 +109,11 @@ class FreeplayState extends MusicBeatState
 			if (metadata.defaultCategory != null && metadata.defaultCategory.length > 0){
 				var dir = Paths.mods(contentId + "/songs");
 
-				Paths.iterateDirectory(dir, function(file:String) {
+				for (file in Paths.readDirectory(dir)) {
 					if (FileSystem.isDirectory(haxe.io.Path.join([dir, file]))) {
 						sowy(file);
 					}
-					
-				});
+				}
 
 			}
 		}
@@ -145,7 +146,8 @@ class FreeplayState extends MusicBeatState
 		songList ??= getFreeplaySongs();
 
 		////
-		add(bgGrp);
+		bgManager = new ChangingMenuBG();
+		add(bgManager);
 
 		menu = new FreeplayMenu();
 		menu.controls = controls;
@@ -298,6 +300,9 @@ class FreeplayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
+		lerpHighscore = CoolMath.coolLerp(lerpHighscore, targetHighscore, elapsed * 12);
+		lerpRating = CoolMath.coolLerp(lerpRating, targetRating, elapsed * 8);
+		
 		updateInput(elapsed);
 		super.update(elapsed);
 	}
@@ -340,19 +345,14 @@ class FreeplayState extends MusicBeatState
 	function openResetScorePrompt() {
 		var songName:String = selectedSongData.getMetadata(curChartId).songName;
 		var displayName:String = songName;
-		persistentUpdate = false;
 
 		if (selectedSongCharts.length > 1) {
 			var diffName:String = Paths.getString('difficultyName_$curChartId') ?? curChartId;
 			displayName += ' ($diffName)';
 		}
-
-		openSubState(new ResetScoreSubState(
-			selectedSongData.songId, 
-			curChartId, 
-			false, 
-			displayName
-		));
+		
+		persistentUpdate = false;
+		openSubState(new ResetScoreSubState(selectedSongData.songId, curChartId, false, displayName));
 		menu.controls = null;
 		this.subStateClosed.addOnce(function(_) {
 			refreshScore();
@@ -379,10 +379,10 @@ class FreeplayState extends MusicBeatState
 
 		changeDifficulty(CoolUtil.updateDifficultyIndex(curChartIdx, curChartId, selectedSongCharts), true);
 
-		var metadata = data.getMetadata(curChartId);
 		var bgColor:FlxColor; 
 		var bgKey:String; 
 		
+		var metadata = data.getMetadata(curChartId);
 		if (metadata.freeplayBgColor == null && metadata.freeplayBgGraphic == null) {
 			bgColor = 0xFFFFFFFF;
 			bgKey = 'menuBGBlue';
@@ -392,7 +392,7 @@ class FreeplayState extends MusicBeatState
 		}
 
 		reloadFont();
-		fadeToBg(Paths.image(bgKey), bgColor);
+		bgManager.fadeToBg(Paths.image(bgKey), bgColor);
 	}
 
 	function refreshScore()
@@ -401,10 +401,10 @@ class FreeplayState extends MusicBeatState
 		var record = Highscore.getRecord(data.songId, curChartId);
 
 		targetRating = Highscore.getRatingRecord(record) * 100;
-		if(ClientPrefs.showWifeScore)
-			targetHighscore = record.accuracyScore * 100;
+		targetHighscore = if (ClientPrefs.showWifeScore)
+			record.accuracyScore * 100;
 		else
-			targetHighscore = record.score;
+			record.score;
 
 		fcDisplay = switch(record.fcMedal) {
 			case TIER4: 't5fc';
@@ -413,47 +413,8 @@ class FreeplayState extends MusicBeatState
 			case TIER1: 'fc';
 			default: '';
 		}
-		fcDisplay = fcDisplay.length==0 ? fcDisplay : '${Paths.getString(fcDisplay) ?? fcDisplay}';
-	}
-
-	static function makeBgSprite(){
-		var spr = new FlxSprite();
-		spr.active = false;
-		spr.moves = false;
-		return spr;
-	}
-
-	function fadeToBg(graphic, color:FlxColor) {
-		if (bg != null && bg.graphic == graphic && bg.color == color)
-			return;
-
-		// HORRIBLE BUT COOL I HOPE
-
-		var prevBg = bg;
-		
-		if (bgGrp.members.length > 4) {
-			bg = bgGrp.members[0];
-			bg.exists = true;
-			FlxTween.cancelTweensOf(bg);
-
-			var sowy = bgGrp.members[1];
-			sowy.alpha = 1.0;
-			FlxTween.cancelTweensOf(sowy);
-		}else {
-			bg = bgGrp.recycle(FlxSprite, makeBgSprite);
-		}
-		bgGrp.members.remove(bg);
-		bgGrp.members.push(bg);
-		
-		bg.loadGraphic(graphic);
-		bg.screenCenter();
-		bg.color = color;
-		bg.alpha = 1.0;
-
-		if (prevBg != null) {
-			bg.alpha = 0.0;
-			FlxTween.tween(bg, {alpha: 1.0}, 0.4, {ease: FlxEase.sineInOut});
-		}
+		if (fcDisplay.length != 0)
+			fcDisplay = Paths.getString(fcDisplay) ?? fcDisplay;
 	}
 
 	function changeDifficulty(val:Int = 0, ?isAbs:Bool)
@@ -466,25 +427,26 @@ class FreeplayState extends MusicBeatState
 
 			case 1:
 				curChartId = charts[0];
-				diffText.text = (Paths.getString('difficultyName_$curChartId') ?? curChartId).toUpperCase();
+				diffText.text = getDisplayedDifficulty(curChartId);
 
 			default:
-				curChartIdx = isAbs ? val : FlxMath.wrap(curChartIdx + val, 0, charts.length - 1);
+				curChartIdx = isAbs ? val : CoolUtil.updateIndex(curChartIdx, val, charts.length);
 				curChartId = charts[curChartIdx];
-				diffText.text = "< " + (Paths.getString('difficultyName_$curChartId') ?? curChartId).toUpperCase() + " >";
+				diffText.text = "< " + getDisplayedDifficulty(curChartId) + " >";
 		}
 
 		selectedSong = '$selectedSongData-$curChartId';
 		refreshScore();
 	}
 
+	private static inline function getDisplayedDifficulty(chartId:String):String {
+		return (Paths.getString('difficultyName_$chartId') ?? chartId).toUpperCase();	
+	}
+
 	override function draw()
 	{
-		lerpHighscore = CoolMath.coolLerp(lerpHighscore, targetHighscore, FlxG.elapsed * 12);
-		lerpRating = CoolMath.coolLerp(lerpRating, targetRating, FlxG.elapsed * 8);
-
 		final score = Math.round(lerpHighscore);
-		final rating = formatRating(Math.fround(lerpRating * 100.0) / 100.0);
+		final rating = formatRating(Math.ffloor(lerpRating * 100.0) / 100.0);
 		final fcDisplay = (fcDisplay.length==0 ? fcDisplay : ' • [$fcDisplay]');
 
 		scoreText.text = 'PERSONAL BEST • $score • ($rating%)' + fcDisplay;
@@ -493,19 +455,8 @@ class FreeplayState extends MusicBeatState
 		super.draw();
 	}
 
-	private static function formatRating(val:Float):String
-	{
-		var str = Std.string(Math.ffloor(val * 100.0) / 100.0);
-		var dot = str.indexOf('.');
-
-		if (dot == -1)
-			return str + '.00';
-
-		dot += 3;
-		while (str.length < dot)
-			str += '0';
-
-		return str;
+	private static inline function formatRating(val:Float):String {
+		return CoolerStringTools.formatDecimal(val, 2);
 	}
 
 	private function positionHighscore() {
@@ -550,8 +501,11 @@ private class FreeplayMenu extends AlphabetMenu
 		var iconId:Null<String> = metadata.freeplayIcon;
 
 		Paths.currentModDirectory = song.folder;
+		addOption(songName, iconId);
+	}
 
-		var obj:Alphabet = this.addTextOption(songName);
+	public function addOption(label:String, ?iconId:String) {
+		var obj:Alphabet = this.addTextOption(label);
 
 		if (iconId == null)
 			return;

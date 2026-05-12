@@ -197,15 +197,14 @@ class CharacterData {
 
 		var _characters = new Map<String, Bool>();
 
-		function readFileNameAndPush(fileName:String){
-			var dot = fileName.lastIndexOf('.');
-			var name = dot>0 ? fileName.substr(0, dot) : fileName;
-			_characters.set(name, true);
-		}
 		
 		for (folderPath in Paths.getFolders("characters", modsOnly))
 		{
-			Paths.iterateDirectory(folderPath, readFileNameAndPush);
+			for (fileName in Paths.readDirectory(folderPath)) {
+				var dot = fileName.lastIndexOf('.');
+				var name = dot>0 ? fileName.substr(0, dot) : fileName;
+				_characters.set(name, true);
+			}
 		}
 
 		for (name in _characters.keys())

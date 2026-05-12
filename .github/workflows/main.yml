@@ -122,8 +122,8 @@ jobs:
       - name: Publish Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: buildUbuntu${{ matrix.version }}-32-${{ matrix.build }}
-          path: 'export/${{ matrix.build }}/linux/bin'
+          name: linuxBuild
+          path: 'export/release/linux/bin'
   
   buildMac:
     runs-on: macos-latest
@@ -150,5 +150,5 @@ jobs:
       - name: Publish Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: buildMac-${{ matrix.version }}-64-${{ matrix.build }}
-          path: 'export/${{ matrix.build }}/macos/bin'
+          name: macBuild
+          path: 'export/release/macos/bin'
