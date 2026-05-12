@@ -231,22 +231,28 @@ class ChartData
 		// If gfVersion isn't set on the json file, use player3 or default to gf
 		songJson.gfVersion = !Reflect.hasField(songJson, 'gfVersion') ? (songJson.player3 ?? "gf") : songJson.gfVersion;
 		
+		
+		songJson.offset ??= 0.0;
+		
+		songJson.keyCount ??= (Reflect.hasField(songJson, "splashSkin")) ? songJson.mania + 1 : switch (songJson.mania) {
+			case 3:
+				9;
+			case 2:
+				7;
+			case 1:
+				6;
+			default:
+				4;
+		}
+						
 		if (songJson.arrowSkin == null || songJson.arrowSkin.trim().length == 0)
 			songJson.arrowSkin = "NOTE_assets";
-
+				
 		if (songJson.splashSkin == null || songJson.splashSkin.trim().length == 0)
 			songJson.splashSkin = "noteSplashes";
-
+				
 		songJson.hudSkin ??= 'default';
-
-		songJson.offset ??= 0.0;
-		songJson.keyCount ??= switch(songJson.mania) {
-			case 3: 9;
-			case 2: 7;
-			case 1: 6;
-			default: 4;
-		}
-
+		
 		if (songJson.notes == null || songJson.notes.length == 0) {		
 			//// must have at least one section
 			songJson.notes = [{
