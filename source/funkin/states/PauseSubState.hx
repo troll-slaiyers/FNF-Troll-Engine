@@ -149,8 +149,6 @@ class PauseSubState extends MusicBeatSubstate
 		if (_cameras == null || _cameras.length == 0) 
 			camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 
-		@:privateAccess
-		_bgSprite._cameras = this._cameras;
 		_bgSprite.alpha = 0.0;
 		FlxTween.tween(_bgSprite, {alpha: 0.6}, 0.3, {ease: FlxEase.quartInOut});
 
@@ -351,10 +349,10 @@ class PauseSubState extends MusicBeatSubstate
 
 		// lol not making a class for it
 		var ss = new FlxSubState(FlxColor.fromRGBFloat(0.0, 0.0, 0.0, 0.6));
+		ss.cameras = cameras;
 
 		var menu = new AlphabetMenu();
 		menu.controls = controls;
-		menu.cameras = cameras;
 		ss.add(menu);
 
 		for (chartId in charts)
@@ -372,10 +370,6 @@ class PauseSubState extends MusicBeatSubstate
 
 		this.persistentUpdate = this.persistentDraw = false;
 		this.openSubState(ss);
-
-		//// ffffffffuuuuuuuuuuuuu
-		@:privateAccess
-		ss._bgSprite.cameras = cameras;
 
 		menu.inputsActive = false;
 		FlxG.signals.postUpdate.addOnce(() -> menu.inputsActive = true);
