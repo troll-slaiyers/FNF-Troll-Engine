@@ -2,13 +2,17 @@
 	"dependencies": [
 		{
 			"name": "openfl",
-			"type": "haxelib",
-			"version": "9.4.2"
+			"type": "git",
+			"dir": null,
+			"ref": "9313f0689748966e4647f3f7e31cbd6176456210",
+			"url": "https://github.com/FunkinCrew/openfl"
 		},
 		{
 			"name": "lime",
-			"type": "haxelib",
-			"version": "8.2.3"
+			"type": "git",
+			"dir": null,
+			"ref": "6c2fd14ca30f688723d760581b720567bb4ee70c",
+			"url": "https://github.com/FunkinCrew/lime"
 		},
 		{
 			"name": "flixel",

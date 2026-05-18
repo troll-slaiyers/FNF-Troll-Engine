@@ -10,9 +10,6 @@ import openfl.text.TextFormat;
 import openfl.text.TextFormatAlign;
 
 class DebugDisplay extends TextField {
-	/** Allows the FPS counter to lie about your framerate because Lime sucks and framerates goes above whats desired **/
-	public var canLie:Bool = true;
-
 	/** The current frame rate, expressed using frames-per-second **/
 	public var currentFPS(default, null):Int = 0;
 
@@ -48,7 +45,13 @@ class DebugDisplay extends TextField {
 				align = #if mobile CENTER #else LEFT #end;
 		});
 
-		addEventListener(Event.ENTER_FRAME, onEnterFrame);
+		#if flash
+		var _previousTime:Float = FlxG.game.ticks;
+		addEventListener(Event.ENTER_FRAME, (e:Event) -> {
+			__enterFrame(FlxG.game.ticks - _previousTime);
+			_previousTime = FlxG.game.ticks;
+		});
+		#end
 
 		FlxG.signals.gameResized.add(onGameResized);
 
@@ -64,19 +67,17 @@ class DebugDisplay extends TextField {
 	}
 
 	private var _framesPassed:Int = 0;
-	private var _previousTime:Float = 0;
 	private var _updateClock:Float = 999999;
 
-	private function onEnterFrame(e:Event):Void {
+	private #if !flash override #end function __enterFrame(deltaTime:Float):Void
+	{
 		_framesPassed++;
-		final deltaTime:Float = Math.max(Main.getTime() - _previousTime, 0);
 		_updateClock += deltaTime;
 
-		_previousTime = Main.getTime();
 		if (_updateClock >= 1000) {
-			currentFPS = (canLie && FlxG.drawFramerate > 0) ? FlxMath.minInt(_framesPassed, FlxG.drawFramerate) : _framesPassed;
+			currentFPS = (FlxG.drawFramerate > 0) ? FlxMath.minInt(_framesPassed, FlxG.drawFramerate) : _framesPassed;
 
-			if (currentFPS <= FlxG.drawFramerate * 0.5)
+			if (FlxG.drawFramerate > 0 && currentFPS <= FlxG.drawFramerate * 0.5)
 				textColor = 0xFFFF0000;
 			else
 				textColor = 0xFFFFFFFF;
@@ -91,7 +92,9 @@ class DebugDisplay extends TextField {
 
 		this.text = text;
 		
-		_previousTime = Main.getTime();
+		#if !flash
+		super.__enterFrame(deltaTime);
+		#end
 	}
 
 	inline function onGameResized(windowWidth:Int, ?windowHeight:Int) {

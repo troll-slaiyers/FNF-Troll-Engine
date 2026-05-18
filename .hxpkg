@@ -4,11 +4,13 @@
 		"pkgs": [
 			{
 				"name": "openfl",
-				"version": "9.4.2"
+				"link": "https://github.com/FunkinCrew/openfl",
+				"branch": "9313f0689748966e4647f3f7e31cbd6176456210"
 			},
 			{
 				"name": "lime",
-				"version": "8.2.3"
+				"link": "https://github.com/FunkinCrew/lime",
+				"branch": "6c2fd14ca30f688723d760581b720567bb4ee70c"
 			},
 			{
 				"name": "flixel",
