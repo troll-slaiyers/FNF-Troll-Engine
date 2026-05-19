@@ -13,7 +13,7 @@
 			{
 				"name": "flixel",
 				"link": "https://github.com/troll-slaiyers/flixel",
-				"branch": "9de10bdd638ba59fcc704ab9028c5543632e96c6"
+				"branch": "dev"
 			},
 			{
 				"name": "flixel-ui",
