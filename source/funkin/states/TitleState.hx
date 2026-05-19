@@ -484,12 +484,12 @@ class TitleLogo extends FlxSprite
 		var foldersToCheck:Array<String> = Paths.getFolders('images/titles');
 		
 		for (folder in foldersToCheck){
-			Paths.iterateDirectory(folder, function(path:String){
-				var file = new haxe.io.Path(path);
+			for (fileName in Paths.readDirectory(folder)) {
+				var file = new haxe.io.Path(fileName);
 
 				if (!titleNames.contains(file.file) && file.ext == "png")
 					titleNames.push(file.file);
-			});
+			}
 		}
 
 		if (titleNames.length < 1)

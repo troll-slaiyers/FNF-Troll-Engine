@@ -181,18 +181,16 @@ class StageData {
 
 		var _stages = new Map<String, Bool>();
 
-		function readFileNameAndPush(fileName: String){
-			if (fileName==null)return;
-			
-			if (!fileName.endsWith(".json")) return;
-
-			var name = fileName.substr(0, fileName.length - 5);
-			_stages.set(name, true);
-		}
 		
 		for (folderPath in Paths.getFolders("stages", modsOnly))
 		{
-			Paths.iterateDirectory(folderPath, readFileNameAndPush);
+			for (fileName in Paths.readDirectory(folderPath)) {
+				if (fileName==null) continue;
+				if (!fileName.endsWith(".json")) continue;
+	
+				var name = fileName.substr(0, fileName.length - 5);
+				_stages.set(name, true);
+			}
 		}
 
 		for (name in _stages.keys())

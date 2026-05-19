@@ -105,7 +105,7 @@ class Song extends BaseSong
 		final songPath = getSongFile("");
 		final charts:Map<String, Bool> = [];
 
-		function processFileName(fileName:String) {
+		for (fileName in Paths.readDirectory(songPath)) {
 			var woExtension:String = Path.withoutExtension(fileName);
 			if (woExtension == songId) {
 				charts.set("normal", true);
@@ -115,8 +115,6 @@ class Song extends BaseSong
 				charts.set(diff, true);
 			}
 		}
-
-		Paths.iterateDirectory(songPath, processFileName);		
 
 		var chartNames:Array<String> = [for (name in charts.keys()) name];
 		chartNames.sort(sortChartDifficulties);

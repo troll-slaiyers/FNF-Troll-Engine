@@ -11,10 +11,10 @@ Expect bugs, breaking changes and little documentation!!! (You can look at the `
 ## Features:
 
  - Lots of hud customization (NPS counter, note hit timing info, colored combos, judgement counters, options for other hud styles too)
- - Quant note skins
+ - Quant note skin
  - An awesome modchart system
- - Custom hscript implementation (scriptable notetypes, events, stages, cutscenes, characters and song scripts)
- - Scriptable states
+ - Custom hscript implementation (scripted notetypes, events, stages, cutscenes, characters and song scripts)
+ - Soft-coded states
  - A lot more!!!
 
 ## Installation / Requirements:

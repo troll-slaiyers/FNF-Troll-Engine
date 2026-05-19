@@ -136,7 +136,7 @@ class ChartData
 		}catch(e) {
 			print(CrashHandler.callstackToString(haxe.CallStack.exceptionStack(true)));
 			trace('ERROR parsing song JSON: $filePath', e.message);
-			return null;
+			throw e;
 		}
 	}
 
@@ -213,7 +213,7 @@ class ChartData
 				swagSong = songJson;
 			default:
 				swagSong = null;
-				throw 'Unknown chart version: $version | Current ${ChartVersion.CURRENT}';
+				throw 'Unknown chart version: $version';
 		}
 		
 		return swagSong;

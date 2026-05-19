@@ -180,10 +180,17 @@ class OptionsSubstate extends MusicBeatSubstate
 		],
 		"controls" => [
 			[
-				"keyboard", ["customizeKeybinds",]
+				"keyboard",
+				[
+					"customizeKeybinds",
+				]
 			], 
 			[
-				"controller", ["controllerMode",] // TODO customize binds for controllers
+				"controller",
+				[
+					"controllerMode",
+					"customizeButtonBinds",
+				]
 			]
 		],
 		
@@ -202,7 +209,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			#if DISCORD_ALLOWED
 			["discord", ["discordRPC", "discordRPC_hideDetails"]],
 			#end
-			#if DO_AUTO_UPDATE
+			#if CHECK_FOR_UPDATES
 			[
 				"updating", 
 				[
@@ -388,7 +395,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			case 'globalAntialiasing':
 				Main.game.set_antialiasing(val);
 				
-			#if(DO_AUTO_UPDATE || display)
+			#if(CHECK_FOR_UPDATES || display)
 			case 'downloadBetas' | 'checkForUpdates':
 				Main.downloadBetas = Main.Version.isBeta || ClientPrefs.downloadBetas;
 				if (!Main.Version.isBeta || option == 'checkForUpdates'){
@@ -431,9 +438,17 @@ class OptionsSubstate extends MusicBeatSubstate
 						changed.push('customizeColours');
 				});
 
-			case 'customizeKeybinds':
-				var substate:IBindsMenu<Keybind> = ClientPrefs.controllerMode ? new ButtonBindsSubstate() : new KeyBindsSubstate();
-				var bindsMap:Map<String, Array<Int>> = ClientPrefs.controllerMode ? ClientPrefs.buttonBinds : ClientPrefs.keyBinds;
+			case 'customizeKeybinds' | 'customizeButtonBinds':
+				var substate:IBindsMenu<Keybind>;
+				var bindsMap:Map<String, Array<Int>>;
+				
+				if (option == 'customizeButtonBinds') {
+					substate = new ButtonBindsSubstate();
+					bindsMap = ClientPrefs.buttonBinds;
+				}else {
+					substate = new KeyBindsSubstate();
+					bindsMap = ClientPrefs.keyBinds;
+				}
 				
 				var currentBinds:Map<String, Array<Int>> = [];
 				for (key in bindsMap.keys())
@@ -499,7 +514,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		}
 	}
 
-	var forceWidgetUpdate:Bool = false;
+	var forceWidgetUpdate:Bool = true;
 
 	var currentTabIdx:Int = 0;
 	var currentTab:TabInstance;

@@ -2,6 +2,7 @@ package funkin.objects.ui;
 
 import math.CoolMath;
 import funkin.objects.ui.CustomFlxUI.CustomFlxUINumericStepper;
+import funkin.objects.ui.CustomFlxUI.CustomFlxInputText;
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 import flixel.ui.FlxButton;
@@ -76,7 +77,7 @@ class ColorPickerSubstate extends FlxSubState {
 	var gStepper:CustomFlxUINumericStepper;
 	var bStepper:CustomFlxUINumericStepper;
 
-	var hexInput:FlxInputText;
+	var hexInput:CustomFlxInputText;
 
 	var hStepper:CustomFlxUINumericStepper;
 	var sStepper:CustomFlxUINumericStepper;
@@ -180,7 +181,7 @@ class ColorPickerSubstate extends FlxSubState {
 		bStepper.scrollFactor.set();
 
 		////
-		hexInput = new FlxInputText(x, y += 20, 57);
+		hexInput = new CustomFlxInputText(x, y += 20, 57);
 		hexInput.customFilterPattern = ~/[^a-fA-F0-9]*/g; // hex
 		hexInput.filterMode = 4; // CUSTOM_FILTER
 		hexInput.callback = (_, action) -> {
@@ -316,6 +317,7 @@ class ColorPickerSubstate extends FlxSubState {
 		}
 
 		color = CoolUtil.colorFromString(newHex);
+		color.alpha = 255;
 		prevHex = newHex;
 		
 		rStepper.value = color.red;

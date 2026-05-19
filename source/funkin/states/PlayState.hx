@@ -729,12 +729,12 @@ class PlayState extends MusicBeatState
 			}
 
 			//// Create the rest of scripts that weren't on the order list
-			Paths.iterateDirectory(folder, (file:String) -> {
+			for (file in Paths.readDirectory(folder)) {
 				if (Paths.isHScript(file) && !filesPushed.contains(file)) {
 					createHScript(folder + file);
 					filesPushed.push(file);
 				}
-			});
+			}
 		}
 		//trace("Loaded global scripts in order:" + filesPushed);
 
@@ -751,12 +751,12 @@ class PlayState extends MusicBeatState
 		// SONG SPECIFIC SCRIPTS
 		var filesPushed:Array<String> = [];
 		for (folder in Paths.getFolders('songs/$songId')) {
-			Paths.iterateDirectory(folder, (file:String) -> {
+			for (file in Paths.readDirectory(folder)) {
 				if (Paths.isHScript(file) && !filesPushed.contains(file)) {
 					createHScript(folder + file);
 					filesPushed.push(file);
 				}
-			});
+			}
 		}
 
 		//// Asset precaching start
@@ -1347,9 +1347,8 @@ class PlayState extends MusicBeatState
 		signals.onModifierRegisterPost.dispatch();
 		callOnScripts('onModifierRegisterPost');
 
-		#if ALLOW_DEPRECATION
-		callOnScripts("generateModchart");
-		#end
+		if (!disableModcharts)
+			callOnScripts("generateModchart");
 	}
 
 	public function startCountdown():Void

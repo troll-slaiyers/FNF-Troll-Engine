@@ -7,57 +7,19 @@ import flixel.util.FlxTimer;
 import flixel.math.FlxMath;
 import flixel.group.FlxGroup;
 
-// NOTE: only added this as a test, i'll finish the sticker pack shit later maybe... i don't fucking care honestly
-
-class StickerPack {
-	var sounds:Array<Sound> = [];
-	var graphics:Array<FlxGraphic> = [];
-
-	var test:FlxGraphic;
-	
-	public function new() {
-		for (i in 1...10) {
-			var sound = Paths.sound('stickersounds/keys/keyClick$i');
-			if (sound != null) sounds.push(sound);
-		}
-
-		test = Paths.image("trollface");
-		graphics.push(test);
-
-		////
-		for (graphic in graphics) {
-			//Paths.sound
-		}
-
-		for (graphic in graphics) {
-			Paths.graphicDumpExclusions.push(graphic);
-		}
-	}
-
-	public function getSound() {
-		return FlxG.random.getObject(sounds);
-	}
-
-	public function getRandomStickerAsset(isLast:Bool) {
-		return test;
-	}
-
-	public function destroy() {
-
-		for (graphic in graphics) {
-			Paths.graphicDumpExclusions.remove(graphic);
-		}
-	}
-}
-
 class StickerTransition extends Transition {
-	var grpStickers:FlxTypedGroup<StickerSprite>;
-	var stickerData:StickerPack;
+	var grpStickers:FlxTypedGroup<StickerSprite> = null;
+	var stickerData:StickerPack = null;
+
+	public function new(?stickerData:StickerPack) {
+		this.stickerData = stickerData;
+		super();
+	}
 
 	override function create() {
 		super.create();
 
-		stickerData = new StickerPack();
+		stickerData ??= StickerPack.getDefault();
 
 		grpStickers = new FlxTypedGroup<StickerSprite>();
 		add(grpStickers);
@@ -150,8 +112,87 @@ class StickerTransition extends Transition {
 			default:
 		}	
 	}
+
+	override function destroy() {
+		stickerData.destroy();
+		super.destroy();
+	}
 }
 
 class StickerSprite extends FlxSprite {
 	public var timing:Float = 0;
+}
+
+private typedef StringOr<T> = haxe.extern.EitherType<String, T>;
+
+class StickerPack {
+	public var sounds:Array<Sound> = [];
+	public var graphics:Array<FlxGraphic> = [];
+	
+	public function new(graphics:Array<StringOr<FlxGraphic>>, sounds:Array<StringOr<Sound>>) {
+		for (ass in graphics) {
+			var img:FlxGraphic = null;
+
+			if (ass is String)
+				img = Paths.image(cast ass);
+			else if (ass is FlxGraphic)
+				img = cast ass;
+
+			if (img != null)
+				this.graphics.push(img);
+		}
+
+		for (ass in sounds) {
+			var snd:Sound = null;
+
+			if (ass is String)
+				snd = Paths.sound(cast ass);
+			else if (ass is Sound)
+				snd = cast ass;
+
+			if (snd != null)
+				this.sounds.push(snd);
+		}
+
+		lockAssets();
+	}
+
+	public function getSound() {
+		return FlxG.random.getObject(sounds);
+	}
+
+	public function getRandomStickerAsset(isLast:Bool) {
+		return FlxG.random.getObject(graphics);
+	}
+
+	public function destroy() {
+		unlockAssets();
+	}
+
+	private inline function lockAssets() {
+		for (graphic in graphics)
+			Paths.graphicDumpExclusions.push(graphic);
+		for (sound in sounds)
+			Paths.soundDumpExclusions.push(sound);
+	}
+	
+	private inline function unlockAssets() {
+		for (graphic in graphics)
+			Paths.graphicDumpExclusions.remove(graphic);
+		for (sound in sounds)
+			Paths.soundDumpExclusions.remove(sound);
+	}
+
+	public static function getDefault() {
+		var graphics:Array<FlxGraphic> = [];
+		graphics.push(Paths.image("trollface"));
+
+		var sounds:Array<Sound> = [];
+		for (i in 1...10) {
+			var sound = Paths.sound('stickersounds/keys/keyClick$i');
+			if (sound != null) sounds.push(sound);
+		}
+
+		return new StickerPack(graphics, sounds);
+	}
 }

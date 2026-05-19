@@ -394,13 +394,16 @@ class NoteField extends FieldBase
 		var useSpiralHolds = modManager.getValue("spiralHolds", modNumber) != 0;
 
 
-		var strumSub = (crotchet / holdSubdivisions);
+		var strumSubdivs = (crotchet / holdSubdivisions);
 		for (sub in 0...holdSubdivisions)
 		{
 			var prog = sub / (holdSubdivisions + 1);
 			var nextProg = (sub + 1) / (holdSubdivisions + 1);
-			var strumSub = strumSub;
-			var strumOff = strumSub * sub;
+			var strumSub = strumSubdivs;
+			var strumOff = strumSubdivs * sub;
+			
+			strumOff *= sv;
+			strumSub *= sv;
 			
 			if ((hold.wasGoodHit || hold.parent.wasGoodHit) && !hold.tooLate) {
 				var scale:Float = -strumDiff / crotchet;
@@ -408,13 +411,9 @@ class NoteField extends FieldBase
 					strumSub = 0;
 					strumOff = 0;
 				}else if (scale < 1) {
-					scale *= sv;
 					strumSub *= scale;
 					strumOff *= scale;
 				}
-			}else { 
-				strumOff *= sv;
-				strumSub *= sv;
 			}
 
 			var vDiff = visualDiff + (strumOff * Note.pixelsPerMS);

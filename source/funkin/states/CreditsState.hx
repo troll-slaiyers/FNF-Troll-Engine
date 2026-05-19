@@ -31,12 +31,8 @@ class CreditsState extends MusicBeatState
 
 	var curSelected:Int = 0;
 
-	public var gotoMenus = () -> MusicBeatState.switchState(new MainMenuState());
-
-	override function startOutro(onOutroFinished:()->Void){
-		persistentUpdate = false;
-		return onOutroFinished();
-	}
+	public dynamic function goBack()
+		MusicBeatState.switchState(new MainMenuState());
 
 	public function new(?options:Array<CreditsOption>) {
 		super();
@@ -292,10 +288,10 @@ class CreditsState extends MusicBeatState
 		if (change != 0)
 			changeSelection(change);
 
-		if (controls.BACK && gotoMenus != null) {
+		if (controls.BACK && goBack != null) {
 			controlLock = true;
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			gotoMenus();
+			goBack();
 		}
 
 		if (controls.ACCEPT){

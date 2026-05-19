@@ -10,6 +10,10 @@ class Transition extends FlxTypedGroup<FlxBasic>
 	private var _created:Bool = false;
 	private var _parentState:TransitionableState = null;
 
+	public function new() {
+		super();
+	}
+
 	/**
 		Override this function to create objects that will be used in your transition.
 	**/

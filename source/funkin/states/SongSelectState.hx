@@ -33,7 +33,7 @@ class SongSelectState extends MusicBeatSubstate
 	{
 		var songList:Array<BaseSong> = [];
 
-		function pushSong(modDir:Null<String>, folderPath:String, folderName:String) {
+		inline function pushSong(modDir:Null<String>, folderPath:String, folderName:String) {
 			if (Paths.isDirectory(folderPath + folderName)) {
 				// trace(songList.length, folderName);
 				songList.push(new Song(folderName, modDir));
@@ -41,12 +41,14 @@ class SongSelectState extends MusicBeatSubstate
 		}
 
 		var folder = 'assets/songs/';
-		Paths.iterateDirectory(folder, pushSong.bind(null, folder));
+		for (name in Paths.readDirectory(folder))
+			pushSong(null, folder, name);
 
 		#if MODS_ALLOWED
 		for (modDir in Paths.getModDirectories()){
 			var folder = Paths.mods('$modDir/songs/');
-			Paths.iterateDirectory(folder, pushSong.bind(modDir, folder));
+			for (name in Paths.readDirectory(folder))
+				pushSong(modDir, folder, name);
 		}
 		#end
 
@@ -168,7 +170,9 @@ class SongSelectState extends MusicBeatSubstate
 
 		if (FlxG.keys.pressed.CONTROL)
 		{
-			openSubState(new GameplayChangersSubstate());
+			var ss = new GameplayChangersSubstate();
+			ss.cameras = cameras;
+			openSubState(ss);
 		}
 
 		if (FlxG.keys.justPressed.SIX)

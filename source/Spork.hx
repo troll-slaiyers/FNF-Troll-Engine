@@ -10,10 +10,6 @@ import haxe.macro.Compiler;
 class Spork {
 	public static function stuff() {
 		#if display
-		Spoon.bend("flixel.FlxGame", macro class {
-			var _elapsedMS:Float = 0;
-		});
-
 		#else
 		final DEFINES = haxe.macro.Context.getDefines();
 

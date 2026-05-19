@@ -140,12 +140,23 @@ class MusicBeatState extends TransitionableState
 		var curStep:Int = Conductor.roundedStep;
 
 		if (oldStep != curStep) {
+			if (curStep > 0) {
+				stepHit();
+				if (curStep % 4 == 0)
+					beatHit();
+			}
+
+			var prevSection:Int = curSection;
+
 			if (PlayState.SONG != null) {
 				if (oldStep < curStep)
 					updateSection();
 				else
 					rollbackSection();
 			}
+
+			if (curSection > prevSection)
+				sectionHit();
 
 			tryResync();
 		}
@@ -178,16 +189,6 @@ class MusicBeatState extends TransitionableState
 			curSection++;
 			sectionEndStep += getStepsOnSection();
 		}
-
-		////
-		if (curSection > lastSection)
-			_sectionHit();
-	}
-
-	private function _sectionHit() {
-		var sectionData = PlayState.SONG.notes[curSection];
-
-		sectionHit(curSection);
 	}
 
 	function resyncTracks() {

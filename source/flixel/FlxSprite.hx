@@ -22,7 +22,6 @@ import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
-
 using flixel.util.FlxColorTransformUtil;
 
 /**
@@ -132,6 +131,7 @@ class FlxSprite extends FlxObject
 	 * Whether this sprite should use the default antialiasing
 	 */
 	public var useDefaultAntialiasing:Bool = true;
+	
 	/**
 	 * The default value for `antialiasing` across all `FlxSprites`,
 	 * defaults to `false`.
@@ -282,6 +282,7 @@ class FlxSprite extends FlxObject
 	 * Set to `null` to discard graphic frame clipping.
 	 */
 	public var clipRect(default, set):FlxRect;
+	var _lastClipRect = FlxRect.get(Math.NaN);	
 
 	/**
 	 * GLSL shader for this sprite. Avoid changing it frequently as this is a costly operation.
@@ -425,6 +426,7 @@ class FlxSprite extends FlxObject
 		scale = FlxDestroyUtil.put(scale);
 		_halfSize = FlxDestroyUtil.put(_halfSize);
 		_scaledOrigin = FlxDestroyUtil.put(_scaledOrigin);
+		_lastClipRect = FlxDestroyUtil.put(_lastClipRect);
 
 		framePixels = FlxDestroyUtil.dispose(framePixels);
 
@@ -502,7 +504,6 @@ class FlxSprite extends FlxObject
 			var gn = funkin.Paths.image(graphic);
 			if (gn != null) graphic = gn; 
 		}
-
 		var graph:FlxGraphic = FlxG.bitmap.add(graphic, unique, key);
 		if (graph == null)
 			return this;
@@ -580,7 +581,7 @@ class FlxSprite extends FlxObject
 			var bitmap:BitmapData = FlxBitmapDataUtil.generateRotations(brush, Rotations, AntiAliasing, AutoBuffer);
 			tempGraph = FlxGraphic.fromBitmapData(bitmap, false, key);
 		}
-		
+
 		#if FLX_TRACK_GRAPHICS
 		tempGraph.trackingInfo = 'loadRotatedGraphic($ID, $Rotations, $Frame, $AntiAliasing, $AutoBuffer)';
 		#end
@@ -808,10 +809,28 @@ class FlxSprite extends FlxObject
 	}
 
 	/**
+	 * Checks the previous frame's clipRect compared to the current. If there's changes, apply them
+	 */
+	function checkClipRect()
+	{
+		if ((clipRect == null && Math.isNaN(_lastClipRect.x)) || (clipRect != null && clipRect.equals(_lastClipRect)))
+			return;
+			
+		// redraw frame
+		frame = frames.frames[animation.frameIndex];
+		
+		if (clipRect == null)
+			_lastClipRect.set(Math.NaN);
+		else
+			_lastClipRect.copyFrom(clipRect);
+	}
+	
+	/**
 	 * Called by game loop, updates then blits or renders current frame of animation to the screen.
 	 */
 	override public function draw():Void
 	{
+		checkClipRect();
 		checkEmptyFrame();
 
 		if (alpha == 0 || _frame.type == FlxFrameType.EMPTY)
@@ -1239,23 +1258,23 @@ class FlxSprite extends FlxObject
 		dirty = false;
 		return framePixels;
 	}
-	
+
 	/**
 	 * Retrieve the midpoint of this sprite's graphic in world coordinates.
 	 *
 	 * @param   point  The resulting point, if `null` a new one is created
 	 */
-	public function getGraphicMidpoint(?point:FlxPoint):FlxPoint
-	{
+	public function getGraphicMidpoint(?point:FlxPoint):FlxPoint {
 		final rect = getGraphicBounds();
 		#if (flixel < "5.9.0")
-		(point ?? (point=FlxPoint.get())).set(rect.x + 0.5 * rect.width, rect.y + 0.5 * rect.height);
+		(point ?? (point = FlxPoint.get())).set(rect.x + 0.5 * rect.width, rect.y + 0.5 * rect.height);
 		#else
 		point = rect.getMidpoint(point);
 		#end
 		rect.put();
 		return point;
 	}
+	
 	
 	/**
 	 * Retrieves the world bounds of this sprite's graphic
@@ -1269,11 +1288,11 @@ class FlxSprite extends FlxObject
 	{
 		if (rect == null)
 			rect = FlxRect.get();
-		
+			
 		rect.set(x, y);
 		if (pixelPerfectPosition)
 			rect.floor();
-		
+			
 		_scaledOrigin.set(origin.x * scale.x, origin.y * scale.y);
 		rect.x += origin.x - offset.x - _scaledOrigin.x;
 		rect.y += origin.y - offset.y - _scaledOrigin.y;
@@ -1281,10 +1300,10 @@ class FlxSprite extends FlxObject
 		
 		if (angle % 360 != 0)
 			rect.getRotatedBounds(angle, _scaledOrigin, rect);
-		
+			
 		return rect;
 	}
-	
+
 	/**
 	 * Check and see if this object is currently on screen. Differs from `FlxObject`'s implementation
 	 * in that it takes the actual graphic into account, not just the hitbox or bounding box or whatever.
@@ -1480,14 +1499,16 @@ class FlxSprite extends FlxObject
 			_frameGraphic = FlxDestroyUtil.destroy(_frameGraphic);
 		}
 
+		_frame = frame.copyTo(_frame);
 		if (clipRect != null)
 		{
+			#if FLX_TROLL
+			_frame.clip(clipRect);
+			#else
 			_frame = frame.clipTo(clipRect, _frame);
+			#end
 		}
-		else
-		{
-			_frame = frame.copyTo(_frame);
-		}
+
 
 		return frame;
 	}
@@ -1591,8 +1612,6 @@ class FlxSprite extends FlxObject
 		else
 			clipRect = null;
 
-		if (frames != null)
-			frame = frames.frames[animation.frameIndex];
 
 		return rect;
 	}
@@ -1674,12 +1693,12 @@ class FlxSprite extends FlxObject
 		return antialiasing = value;
 	}
 	/*
-	function set_antialiasing(value:Bool):Bool
-	{
-		antialiasing = value;
-		return get_antialiasing();
-	}
-	*/
+		function set_antialiasing(value:Bool):Bool
+		{
+			antialiasing = value;
+			return get_antialiasing();
+		}
+	 */
 
 	@:noCompletion
 	function set_useFramePixels(value:Bool):Bool

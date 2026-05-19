@@ -468,19 +468,6 @@ class ConductorInstance {
 				// Jittery and retarded, but works maybe
 				this.time = inst.time;
 
-			case LEGACY:
-				// Resync Vocals
-				// FUCKING SUCKS DONT USE LMFAO! It's here just incase though
-				this.time += elapsedMS;
-				
-			case PSYCH_1_0:
-				// Psych 1.0 method
-				this.time += elapsedMS;
-				this.time = FlxMath.lerp(inst.time, this.time, Math.exp(-elapsedMS * 0.005));
-				var timeDiff:Float = Math.abs(inst.time - this.time);
-				if (timeDiff > 1000)
-					this.time = this.time + 1000 * FlxMath.signOf(timeDiff);
-
 			case SYSTEM_TIME:
 				this.time = this.getAccPosition();
 			
@@ -496,6 +483,19 @@ class ConductorInstance {
 				
 				this.time = lastMixPos + lastMixTimer;
 
+			case NEVER2X:
+				// It is basically just `songPos += elapsed` until it goes off sync
+				// However that allegedly works better than Last Mix at high framerates
+				if (lastMixPos != inst.time) {
+					if (Math.abs(inst.time - this.time) >= elapsedMS)
+						this.time = inst.time;
+					else
+						this.time += elapsedMS;
+
+					lastMixPos = inst.time;
+				}else {
+					this.time += elapsedMS;
+				}
 		}
 	}
 
@@ -629,18 +629,16 @@ class TimeSegment {
 
 enum abstract SongSyncMode(String) to String {
 	var DIRECT = "Direct";
-	var LEGACY = "Legacy";
-	var PSYCH_1_0 = "Psych 1.0";
 	var LAST_MIX = "Last Mix";
+	var NEVER2X = "Never2x";
 	var SYSTEM_TIME = "System Time";
 	
 	public static function fromString(str:String):SongSyncMode {
 		return switch (str) {
 			case "Direct": DIRECT;
-			case "Legacy": LEGACY;
-			case "Psych 1.0": PSYCH_1_0;
 			case "System Time": SYSTEM_TIME;
-			//case "Last Mix": LAST_MIX;
+			case "Last Mix": LAST_MIX;
+			case "Never2x": NEVER2X;
 			default: LAST_MIX;
 		}
 	} 

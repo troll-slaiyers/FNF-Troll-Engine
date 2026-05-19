@@ -260,7 +260,7 @@ class ClientPrefs {
 				desc: "The method used to sync the music to the game.\nOnly touch this if your game is going off-sync.",
 				type: Dropdown,
 				value: "Last Mix",
-				data: ["options" => ["System Time", "Last Mix", "Psych 1.0", "Direct", "Legacy"]]
+				data: ["options" => ["System Time", "Last Mix", "Never2x", "Direct"]]
 			},
 			// UI
 			"timeBarType" => {
@@ -664,6 +664,12 @@ class ClientPrefs {
 			#end
 			"customizeKeybinds" => {
 				display: "Customize Key Bindings",
+				desc: "Lets you change your controls. Pretty straight forward, huh?",
+				type: Button,
+				data: []
+			},
+			"customizeButtonBinds" => {
+				display: "Customize Button Bindings",
 				desc: "Lets you change your controls. Pretty straight forward, huh?",
 				type: Button,
 				data: []
