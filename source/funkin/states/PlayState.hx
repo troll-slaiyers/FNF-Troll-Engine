@@ -1,5 +1,8 @@
 package funkin.states;
 
+import funkin.input.PreciseInputHandler;
+import haxe.Int64;
+import lime.ui.KeyCode;
 import funkin.objects.notes.NoteAnimations;
 import funkin.objects.cutscenes.Cutscene;
 #if VIDEOS_ALLOWED
@@ -443,8 +446,10 @@ class PlayState extends MusicBeatState
 	private var debugKeysCharacter:Array<FlxKey>;
 
 	// Less laggy controls
+	private var inputHandler:PreciseInputHandler;
 	private var keysArray:Array<Array<FlxKey>>;
 	private var buttonsArray:Array<Array<FlxGamepadInputID>>;
+	public var strumsBlocked:Array<Bool> = [];
 
 	////
 	public var songScore(get, set):Int;
@@ -701,6 +706,7 @@ class PlayState extends MusicBeatState
 		PlayState.keyCount = SONG.keyCount;
 		NoteAnimations.refreshKeyAnimations(keyCount);
 
+		inputHandler = new PreciseInputHandler();
 		updateKeybinds();
 
 		/**
@@ -966,9 +972,6 @@ class PlayState extends MusicBeatState
 		updateSongDiscordPresence();
 		#end
 
-		if (!ClientPrefs.controllerMode)
-			addKeyboardEvents();
-
 		////
 		#if ALLOW_DEPRECATION
 		if(legacyOnCreatePost) // Just incase shit breaks???
@@ -1103,14 +1106,11 @@ class PlayState extends MusicBeatState
 		debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));
 		debugKeysBotplay = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('botplay'));
 
-		keysArray = [
+		inputHandler.keyBinds = keysArray = [
 			for (i in 0...keyCount) {
 				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('${keyCount}_key_${i}'));
 			}
 		];
-
-		// trace(keysArray);
-
 
 		buttonsArray = [
 			ClientPrefs.copyKey(ClientPrefs.buttonBinds.get('note_left')),
@@ -1899,16 +1899,6 @@ class PlayState extends MusicBeatState
 		notetypeScripts.get(type)?.call("onLoad", []);
 	}
 
-	inline function addKeyboardEvents() {
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);
-	}
-
-	inline function removeKeyboardEvents() {
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);
-	}
-
 	public function optionsChanged(options:Array<String>){
 		if (options.length < 1)
 			return;
@@ -1935,12 +1925,6 @@ class PlayState extends MusicBeatState
 /* 			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds; */
 			field.noteField.drawDistMod = ClientPrefs.drawDistanceModifier;
 			field.noteField.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs) + 1;
-		}
-
-		if (ClientPrefs.controllerMode) {
-			removeKeyboardEvents();
-		}else {
-			addKeyboardEvents();
 		}
 
 		var reBind:Bool = false;
@@ -2432,9 +2416,7 @@ class PlayState extends MusicBeatState
 		modManager.update(elapsed, curDecBeat, curDecStep);
 
 		if (generatedMusic && !isDead) {
-			if (ClientPrefs.controllerMode) {
-				keyShit();
-			}
+			handleInputs();
 
 			for (field in playfields) {
 				var holdingField = field.keysPressed.contains(true);
@@ -3095,41 +3077,6 @@ class PlayState extends MusicBeatState
 		hud.noteJudged(judgeData, note, field);
 	}
 
-	public var strumsBlocked:Array<Bool> = [];
-	var pressed:Array<FlxKey> = [];
-
-	private function onKeyDownEvent(event:KeyboardEvent)
-		onKeyPress(event.keyCode);
-
-	private function onKeyUpEvent(event:KeyboardEvent)
-		onKeyRelease(event.keyCode);
-
-	private function onKeyPress(key:FlxKey):Void
-	{
-		if (paused || !startedCountdown || inCutscene || endingSong)
-			return;
-
-		if (pressed.contains(key)) return;
-		pressed.push(key);
-
-		if (callOnScripts("onKeyDown", [key]) == Globals.Function_Stop) // wish this wasnt changed it broke old code of mine lol
-			return;
-
-		var column:Int = getColumnFromKey(key);
-		if (column != -1) strumKeyDown(column);
-	}
-
-	private function onKeyRelease(key:FlxKey):Void
-	{
-		pressed.remove(key);
-
-		if (callOnScripts("onKeyUp", [key]) == Globals.Function_Stop)
-			return;
-
-		var column:Int = getColumnFromKey(key);
-		if (column != -1) strumKeyUp(column);
-	}
-
 	private function strumKeyDown(column:Int, player:Int = -1, ?hitTime:Float) {
 		if (strumsBlocked[column]) return;
 
@@ -3190,26 +3137,22 @@ class PlayState extends MusicBeatState
 		callOnScripts('onKeyRelease', [column, player]);
 	}
 
-	private function getColumnFromKey(key:FlxKey):Int {
-		if (key != -1) {
-			for (i in 0...keysArray.length) {
-				for (j in 0...keysArray[i].length) {
-					if(key == keysArray[i][j])
-						return i;
-				}
-			}
+	private function handleInputs():Void {
+		var songPos:Float = Conductor.getAccPosition();
+		while (inputHandler.pressQueue.length > 0) {
+			var dih = inputHandler.pressQueue.shift();
+			var hitTime:Float = songPos;
+			hitTime -= PreciseInputHandler.getLatency(dih.timestamp);
+			strumKeyDown(dih.column, dih.player, hitTime);
 		}
-		return -1;
-	}
-
-	private function keyShit():Void {
-		// RICO WE ALREADY HAVE EVENT CONTROLS // THAT'S HOW IT WORKED BEFORE
-/* 		for (column => actionBinds in keysArray) {
-			if (FlxG.keys.anyJustPressed(actionBinds)) strumKeyDown(column);
-			if (FlxG.keys.anyJustReleased(actionBinds)) strumKeyUp(column);
-		} */
-
-		////
+		while (inputHandler.releaseQueue.length > 0) {
+			var dih = inputHandler.releaseQueue.shift();
+			var hitTime:Float = songPos;
+			hitTime -= PreciseInputHandler.getLatency(dih.timestamp);
+			strumKeyUp(dih.column, dih.player, hitTime);
+		}
+		
+		//// TODO: proper controller inputs
 		var gamepad = FlxG.gamepads.firstActive;
 		if (gamepad == null) return;
 
@@ -3818,7 +3761,7 @@ class PlayState extends MusicBeatState
 		signals.onDestroy.dispatch();
 
 		////
-		removeKeyboardEvents();
+		inputHandler.destroy();
 
 		FlxG.timeScale = 1.0;
 		ClientPrefs.gameplaySettings.set('botplay', cpuControlled);
