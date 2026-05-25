@@ -1,5 +1,8 @@
 package funkin.objects.hud;
 
+import flixel.math.FlxPoint;
+import flixel.graphics.frames.FlxFramesCollection;
+import funkin.data.CharacterData.AnimArray;
 import funkin.states.editors.ChartingState;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.FlxGraphic;
@@ -7,30 +10,6 @@ import flixel.FlxSprite;
 
 using StringTools;
 
-// Should we incluide this?? Should we just have it as part of base HealthIcon if icon has an xml??
-/* class SparrowHealthIcon extends HealthIcon
-{
-	public static final IDLE_PREFIX = 'idle';
-	public static final LOSING_PREFIX = 'losing';
-	public static final WINNING_PREFIX = 'winning';
-	override function swapOldIcon()
-		trace("TODO");
-
-	// I am just trusting the user on this one that the icon is formatted correctly lol
-	// Maybe the prefix constants should be in the health icon instead???
-	
-	override function changeIcon(char:String){
-		frames = Paths.sparrowAtlas('icons/$char');
-		animation.addByPrefix("idle", IDLE_PREFIX, 24);
-		animation.addByPrefix("losing", LOSING_PREFIX, 24);
-		final animFrames:Array<FlxFrame> = new Array<FlxFrame>();
-		animation.findByPrefix(animFrames, WINNING_PREFIX);
-		if (animFrames.length > 0)
-			animation.addByPrefix("winning", WINNING_PREFIX, 24);
-		else
-			animation.addByPrefix("winning", IDLE_PREFIX, 24);
-	}
-} */
 class HealthIcon extends FlxSprite
 {
 	public var autoUpdatesAnims:Bool = true;
@@ -39,6 +18,8 @@ class HealthIcon extends FlxSprite
 	private var isOldIcon:Bool = false;
 	private var isPlayer:Bool = false;
 	public var char:String = '';
+	public var baseScale:Float = 1.0;
+	public var baseOffset:FlxPoint = FlxPoint.get();
 
 	public var relativePercent(default, set):Float = 0;
 
@@ -67,7 +48,9 @@ class HealthIcon extends FlxSprite
 	}
 	
 	public function updateState(relativePercent:Float){
-		animation.play(getAnimation(relativePercent), true);
+		var animationName = getAnimation(relativePercent);
+		if (animation.name != animationName)
+			animation.play(animationName);
 	}
 
 	public function new(char:String = 'bf', isPlayer:Bool = false)
@@ -88,25 +71,81 @@ class HealthIcon extends FlxSprite
 		super.update(elapsed);
 	}
 
-	function changeIconGraphic(graphic:FlxGraphic)
+	override function draw()
 	{
-		var iSize:Float = Math.round(graphic.width / graphic.height);
-		loadGraphic(graphic, true, Math.floor(graphic.width / iSize), Math.floor(graphic.height));
+		var ox:Float = baseOffset.x * scale.x * (flipX ? -1 : 1);
+		var oy:Float = baseOffset.y * scale.y * (flipY ? -1 : 1);
+		offset.subtract(ox, oy);
+		super.draw();
+		offset.add(ox, oy);
+	}
 
-		animation.add("idle", [0], 0, false, isPlayer);
-		animation.add("losing", [1], 0, false, isPlayer);
-		animation.add("winning", [0], 0, false, isPlayer);
+	override function destroy()
+	{
+		baseOffset.put();
+		super.destroy();
+	}
 
-		animation.play('idle');
+	/** @returns Whether the image was properly set up **/
+	function setupImage(key:String, addDefaultAnims:Bool = true):Bool
+	{
+		var allowGPU:Bool = !(FlxG.state is ChartingState);
+
+		var atlasFrames = Paths.sparrowAtlas(key, null, allowGPU);
+		if (atlasFrames != null) {
+			frames = atlasFrames;
+
+			if (addDefaultAnims) {
+				animation.addByPrefix("idle", "idle", 24, false, isPlayer);
+				animation.addByPrefix("losing", "losing", 24, false, isPlayer);
+				animation.addByPrefix("winning", "winning", 24, false, isPlayer);
+			}
+
+			animation.play('idle');
+			return true;
+		}
+
+		var graphic = Paths.image(key, null, allowGPU);
+		if (graphic != null) {
+			var iSize:Float = Math.round(graphic.width / graphic.height);
+			loadGraphic(graphic, true, Math.floor(graphic.width / iSize), Math.floor(graphic.height));
+			
+			if (addDefaultAnims) {
+				for (i in 0...frames.frames.length) {
+					var anim = switch(i) {
+						case 0: "idle";
+						case 1: "losing";
+						case 2: "winning";
+						default: break;
+					}
+					animation.add(anim, [i], 0, false, isPlayer);
+				}
+			}
+			animation.play('idle');
+			return true;
+		}
+		
+		return false;
+	}
+
+	function setupFromData(data:HealthIconData)
+	{
+		setupImage("icons/" + data.image);
+		antialiasing = !data.no_antialiasing;
+
+		baseScale = data.scale ?? 1.0;
+		scale.set(baseScale, baseScale);
+
+		if (data.offset != null)
+			baseOffset.set(data.offset[0], data.offset[1]);
+		else
+			baseOffset.set();
 	}
 
 	public function swapOldIcon() 
 	{
 		if (!isOldIcon){
-			var allowGPU:Bool = !(FlxG.state is ChartingState);
-			var graphic = Paths.image('icons/$char-old', null, allowGPU);
-			if (graphic != null) {
-				changeIconGraphic(graphic);
+			if (setupImage('icons/$char-old')) {
 				isOldIcon = true;
 			}
 		}else {
@@ -116,23 +155,24 @@ class HealthIcon extends FlxSprite
 	}
 
 	public function changeIcon(char:String) {
-		var allowGPU:Bool = !(FlxG.state is ChartingState);
-		var graphic:Null<FlxGraphic> = Paths.image('icons/$char', null, allowGPU); 
-		graphic ??= Paths.image('icons/face', null, allowGPU);
-
-		if (graphic != null){
-			//// TODO: sparrow atlas icons? would make the implementation of extra behaviour (ex: winning icons) way easier
-			changeIconGraphic(graphic);
-			this.char = char;
-		}
-
-		if (char.endsWith("-pixel")){
-			antialiasing = false;
-			useDefaultAntialiasing = false;
-		}
+		this.char = char;
+		this.isOldIcon = false;
+		setupImage('icons/$char') || setupImage('icons/face');
+		antialiasing = !char.endsWith("-pixel");
+		scale.set(1.0, 1.0);
+		baseOffset.set();
 	}
 
 	public function getCharacter():String {
 		return char;
 	}
+}
+
+typedef HealthIconData = {
+	var image:String;
+	@:optional var no_antialiasing:Bool;
+	@:optional var scale:Float;
+	@:optional var flipX:Bool;
+	@:optional var offset:Array<Float>;
+	//var animations:Array<AnimArray>;
 }
