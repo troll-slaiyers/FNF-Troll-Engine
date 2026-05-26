@@ -73,7 +73,6 @@ class HealthIcon extends FlxSprite
 	public function new(char:String = 'bf', isPlayer:Bool = false)
 	{
 		super();
-
 		this.isPlayer = isPlayer;
 
 		changeIcon(char);
@@ -91,7 +90,8 @@ class HealthIcon extends FlxSprite
 
 	function changeIconGraphic(graphic:FlxGraphic)
 	{
-		loadGraphic(graphic, true, Math.floor(graphic.width * 0.5), Math.floor(graphic.height));
+		var iSize:Float = Math.round(graphic.width / graphic.height);
+		loadGraphic(graphic, true, Math.floor(graphic.width / iSize), Math.floor(graphic.height));
 
 		animation.add("idle", [0], 0, false, isPlayer);
 		animation.add("losing", [1], 0, false, isPlayer);
@@ -104,14 +104,7 @@ class HealthIcon extends FlxSprite
 	{
 		if (!isOldIcon){
 			var allowGPU:Bool = !(FlxG.state is ChartingState);
-
 			var graphic = Paths.image('icons/$char-old', null, allowGPU);
-			
-			#if ALLOW_DEPRECATION
-			// psych / base game compat
-			graphic ??= Paths.image('icons/icon-$char-old', null, allowGPU);
-			#end
-
 			if (graphic != null) {
 				changeIconGraphic(graphic);
 				isOldIcon = true;
@@ -124,15 +117,7 @@ class HealthIcon extends FlxSprite
 
 	public function changeIcon(char:String) {
 		var allowGPU:Bool = !(FlxG.state is ChartingState);
-
 		var graphic:Null<FlxGraphic> = Paths.image('icons/$char', null, allowGPU); 
-
-		#if ALLOW_DEPRECATION
-		// psych / base game compat
-		graphic ??= Paths.image('icons/icon-$char', null, allowGPU);
-		#end
-
-		// Prevents crash from missing icon
 		graphic ??= Paths.image('icons/face', null, allowGPU);
 
 		if (graphic != null){
