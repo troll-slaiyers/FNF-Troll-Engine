@@ -154,7 +154,7 @@ class Hitbar extends FlxSpriteGroup
 		var lerpVal = Math.exp(-elapsed * 12);
 		
 		averageIndicator.x = FlxMath.lerp(
-			(mainBar.x + mainBar.width/2) + (hitbarPxPerMs/2 * -currentAverage), 
+			(mainBar.x + mainBar.width/2) + (hitbarPxPerMs/2 * currentAverage), 
 			averageIndicator.x,
 			lerpVal
 		);

@@ -106,11 +106,13 @@ jobs:
         with:
           haxe-version: 4.3.7
       # Runs a set of commands using the runners shell
-      - name: Install Haxelib
+      - name: Install LibVLC
         run: |
           sudo apt-get install libvlc-dev
           sudo apt-get install libvlccore-dev
           sudo apt install libxrandr-dev
+      - name: Install Haxelib
+        run: |
           haxelib setup ~/haxelib
           haxelib install hxcpp > /dev/null --quiet
           haxelib install hmm --quiet
@@ -126,7 +128,12 @@ jobs:
           path: 'export/release/linux/bin'
   
   buildMac:
-    runs-on: macos-latest
+    runs-on: macos-${{ matrix.version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [release]
+        version: [15]
     timeout-minutes: 45
     
     steps:

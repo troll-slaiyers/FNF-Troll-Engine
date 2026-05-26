@@ -118,7 +118,7 @@
 	<haxelib name="flixel" /> <!--You can use up to Flixel 6.0.0 but some stuff might be a bit brokey--> <!-- (Though using troll fork is recommended !)-->
 	<haxelib name="flixel-ui" version="2.6.1" />
 	<haxelib name="flixel-addons" version="3.2.3" />
-	<haxelib name="flixel-animate" if="USING_FLXANIMATE" version="1.3.1"/>
+	<haxelib name="flixel-animate" if="USING_FLXANIMATE" version="1.5.0"/>
 	<haxelib name="funkin.vis"/>
 	<haxelib name="grig.audio"/>
 
