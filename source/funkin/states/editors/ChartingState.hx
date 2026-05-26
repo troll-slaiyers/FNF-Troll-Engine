@@ -2483,17 +2483,8 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		Conductor.resumeSong();
 
 	override function updateSongPosition(?_:FlxSound) {
-		@:privateAccess
-		var elapsedMS:Float = FlxG.game._elapsedMS * inst.pitch;
-
-		if (inst.playing && lastMixPos != inst.time) {
-			lastMixPos = inst.time;
-			lastMixTimer = 0;
-		}else {
-			lastMixTimer += elapsedMS;
-		}
-				
-		Conductor.songPosition = lastMixPos + lastMixTimer;
+		//Conductor.songSyncMode = LAST_MIX; // fuck it let's see how it behaves
+		Conductor.update();
 	}
 
 	override function updateSteps() {
@@ -2516,8 +2507,6 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 					rollbackSection();
 			}
 			*/
-
-			tryResync();
 		}
 	}
 

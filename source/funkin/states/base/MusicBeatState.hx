@@ -3,6 +3,7 @@ package funkin.states.base;
 import funkin.data.MusicData;
 import flixel.math.FlxMath;
 import funkin.input.Controls;
+import funkin.Conductor;
 import funkin.states.base.TransitionableState;
 import openfl.media.Sound;
 import openfl.ui.MouseCursor;
@@ -13,32 +14,13 @@ import flixel.util.typeLimit.NextState;
 
 #if HSCRIPT_ALLOWED
 import funkin.scripts.FunkinHScript;
-import funkin.states.scripting.*;
+import funkin.states.scripting.HScriptedState;
 #end
 
 #if SCRIPTABLE_STATES
 import funkin.states.scripting.HScriptOverridenState;
 #end
 
-enum abstract SongSyncMode(String) to String {
-	var DIRECT = "Direct";
-	var LEGACY = "Legacy";
-	var PSYCH_1_0 = "Psych 1.0";
-	var LAST_MIX = "Last Mix";
-	var NEVER2X = "Never2x";
-	var SYSTEM_TIME = "System Time";
-	
-	public static function fromString(str:String):SongSyncMode {
-		return switch (str) {
-			case "Direct": DIRECT;
-			case "Legacy": LEGACY;
-			case "Psych 1.0": PSYCH_1_0;
-			case "System Time": SYSTEM_TIME;
-			//case "Last Mix": LAST_MIX;
-			default: LAST_MIX;
-		}
-	} 
-}
 #if SCRIPTABLE_STATES
 @:autoBuild(funkin.macros.ScriptingMacro.addScriptingCallbacks([
 	"create",
@@ -89,9 +71,7 @@ class MusicBeatState extends TransitionableState
 	@:noCompletion inline function set_curDecBeat(v) return Conductor.curDecBeat=v;
 
 	@:noCompletion function set_songSyncMode(v:SongSyncMode):SongSyncMode {
-		songSyncMode = v;
-		Conductor.useAccPosition = songSyncMode == SYSTEM_TIME;
-		return songSyncMode;
+		return Conductor.songSyncMode = v;
 	}
 
 	@:noCompletion inline function get_controls():Controls
@@ -152,68 +132,9 @@ class MusicBeatState extends TransitionableState
 	override function toString():String {
 		return Type.getClassName(Type.getClass(this));
 	}
-	
-	////
-	private var lastMixTimer:Float = 0;
-	private var lastMixPos:Float = 0;
 
-	private function updateSongPosition(?inst:FlxSound):Void {
-		inst ??= Conductor.tracks[0] ?? FlxG.sound.music;
-		if (inst == null) return;
-
-		@:privateAccess
-		var elapsedMS:Float = FlxG.game._elapsedMS * inst.pitch;
-
-		switch (songSyncMode)
-		{
-			case DIRECT:
-				// Ludem Dare sync
-				// Jittery and retarded, but works maybe
-				Conductor.songPosition = inst.time;
-
-			case LEGACY:
-				// Resync Vocals
-				// FUCKING SUCKS DONT USE LMFAO! It's here just incase though
-				Conductor.songPosition += elapsedMS;
-				
-			case PSYCH_1_0:
-				// Psych 1.0 method
-				Conductor.songPosition += elapsedMS;
-				Conductor.songPosition = FlxMath.lerp(inst.time, Conductor.songPosition, Math.exp(-elapsedMS * 0.005));
-				var timeDiff:Float = Math.abs(inst.time - Conductor.songPosition);
-				if (timeDiff > 1000)
-					Conductor.songPosition = Conductor.songPosition + 1000 * FlxMath.signOf(timeDiff);
-
-			case SYSTEM_TIME:
-				Conductor.songPosition = Conductor.getAccPosition();
-			
-			case LAST_MIX:
-				// Stepmania method
-				// Works for most people it seems??
-				if (lastMixPos != inst.time) {
-					lastMixPos = inst.time;
-					lastMixTimer = 0;
-				}else {
-					lastMixTimer += elapsedMS;
-				}
-				
-				Conductor.songPosition = lastMixPos + lastMixTimer;
-
-			case NEVER2X:
-				// It is basically just `songPos += elapsed` until it goes off sync
-				// However that allegedly works better than Last Mix at high framerates
-				if (lastMixPos != inst.time) {
-					if (Math.abs(inst.time - Conductor.songPosition) >= elapsedMS)
-						Conductor.songPosition = inst.time;
-					else
-						Conductor.songPosition += elapsedMS;
-
-					lastMixPos = inst.time;
-				}else {
-					Conductor.songPosition += elapsedMS;
-				}
-		}
-
+	private function updateSongPosition(?_:FlxSound):Void {
+		Conductor.update();
 		updateSteps();
 	}
 
@@ -240,8 +161,6 @@ class MusicBeatState extends TransitionableState
 
 			if (curSection > prevSection)
 				sectionHit();
-
-			tryResync();
 		}
 	}
 
@@ -286,20 +205,6 @@ class MusicBeatState extends TransitionableState
 
 	function resyncTracks() {
 		Conductor.resyncTracks();
-		lastMixPos = Conductor.songPosition;
-	}
-
-	function tryResync() {
-		if (!Conductor.playing)
-			return;
-
-		for (track in Conductor.tracks) {
-			if (track.playing && Math.abs(track.time - Conductor.getAccPosition()) > 30) {
-				trace('sus track resync');
-				resyncTracks();
-				break;
-			}
-		}
 	}
 
 	inline function getStepsOnSection():Int
@@ -347,7 +252,8 @@ class MusicBeatState extends TransitionableState
 			FlxG.sound.playMusic(Paths.music(key));
 		}
 
-		Conductor.songPosition = FlxG.sound.music.time;
+		Conductor.tracks = [FlxG.sound.music];
+		Conductor.startSong(FlxG.sound.music.time);
 		curMusic = key;
 	}
 

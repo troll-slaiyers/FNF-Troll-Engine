@@ -13,7 +13,7 @@
 			{
 				"name": "flixel",
 				"link": "https://github.com/troll-slaiyers/flixel",
-				"branch": "dev"
+				"branch": "9de10bdd638ba59fcc704ab9028c5543632e96c6"
 			},
 			{
 				"name": "flixel-ui",
@@ -43,7 +43,7 @@
 			},
 			{
 				"name": "flixel-animate",
-				"version": "1.3.1"
+				"version": "1.5.0"
 			},
 			{
 				"name": "hxdiscord_rpc",

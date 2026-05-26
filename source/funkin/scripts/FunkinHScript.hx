@@ -225,11 +225,9 @@ class FunkinHScript extends FunkinScript
 				currentState.addTextToDebug(toPrint.join(', '));
 			});
 
-			set("getInstance", getInstance);
 			set("debugPrint", debugPrint);
 
 		}else{
-			set("getInstance", @:privateAccess FlxG.get_state);
 			set("debugPrint", get("trace"));
 			
 		}

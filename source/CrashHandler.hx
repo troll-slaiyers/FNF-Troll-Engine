@@ -1,6 +1,7 @@
 import haxe.CallStack;
 import openfl.events.UncaughtErrorEvent;
 import flixel.FlxG;
+import funkin.util.FileUtil;
 
 using StringTools;
 
@@ -25,38 +26,48 @@ class CrashHandler {
 		openfl.Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onFlashCrash);
 
 		#if cpp
-		untyped __global__.__hxcpp_set_critical_error_handler(onCrash);
+		untyped __global__.__hxcpp_set_critical_error_handler(onHxcppCrash);
 		#end
 	}
 
 	private static function onFlashCrash(event:UncaughtErrorEvent) {
+		onCrash(event.error);
 		// one of these oughta do it
 		event.stopImmediatePropagation();
 		event.stopPropagation();
 		event.preventDefault();
-		onCrash(event.error);
+	}
+
+	private static function onHxcppCrash(errorName:String) {
+		onCrash(errorName);
 	}
 
 	inline private static function getLogFilePath():String {
-		return "crash.txt";
+		return 'logs/' + FileUtil.getDateFileName() + '.txt';
 	}
 
 	private static function onCrash(errorName:String):Void {
 		print("\nCall stack starts below");
 
-		var callstack:String = callstackToString(CallStack.exceptionStack(true));
+		final callstack:String = callstackToString(CallStack.exceptionStack(true));
+		final versionLine:String = 'Version: ${Main.Version.displayedVersion}';
 		print('\n$callstack\n$errorName');
 
 		////
-		var boxMessage:String = '$callstack\n$errorName';
+		var boxMessage:String = callstack;
+		boxMessage += '\n$errorName';
+		boxMessage += '\n$versionLine';
 
 		#if SAVE_CRASH_LOGS
-		final path:String = getLogFilePath();
-		boxMessage += '\nCall stack was saved on $path';
-		sys.io.File.saveContent(path, callstack);
+		var logContent = '$versionLine\nException: $errorName\n$callstack';
+
+		final logPath:String = getLogFilePath();
+		boxMessage += '\nLog file was saved at $logPath';
+		FileUtil.safeSaveFile(logPath, logContent);
 		#end
 
-		switch(showCrashBox(errorName, boxMessage)) {
+		final boxRet = showCrashBox(errorName, boxMessage);
+		switch(boxRet) {
 			// Go back to the main menu
 			case YES: return toMainMenu();
 					

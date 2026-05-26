@@ -1,6 +1,6 @@
-#if SCRIPTABLE_STATES
 package funkin.states.scripting;
 
+#if SCRIPTABLE_STATES
 import funkin.scripts.FunkinHScript;
 
 class HScriptOverridenState extends HScriptedState 

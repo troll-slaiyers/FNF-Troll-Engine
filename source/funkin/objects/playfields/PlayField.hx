@@ -267,22 +267,23 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return spawnedNotes.contains(note) || noteQueue[note.column]!=null && noteQueue[note.column].contains(note);
 	
 	/** Sends an input to the PlayField **/
-	public function input(column:Int, ?hitTime:Float):Null<Note> {
+	public function inputDown(column:Int, ?hitTime:Float):Null<Note> {
 		if (column < 0 || column > keyCount) 
 			return null;
 
 		hitTime ??= Conductor.getAccPosition();
+		keysPressed[column] = true;
 
 		var noteList = getTapNotes(column, (note:Note) -> !note.tooLate);
 		noteList.sort(sortNotesDescend); // so lowPriority actually works (even though i hate it lol!)
 
-		var recentHold:Null<Note> = null;
+		var retNote:Null<Note> = null;
 
 		while (noteList.length > 0)
 		{
 			var note:Note = noteList.pop();
 			if (note.wasGoodHit && note.holdType == HEAD && note.holdingTime < note.sustainLength)
-				recentHold = note; // for the sake of ghost-tapping shit.
+				retNote = note; // recent hold for the sake of ghost-tapping shit.
 				// returned lower so that holds dont interrupt hitting other notes as, even though that'd make sense, it also feels like shit to play on some songs i.e Bopeebo
 			else{
 				if (note.wasGoodHit)
@@ -291,12 +292,30 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				if (judge != UNJUDGED){
 					note.hitResult.fromTimes(judge, note.strumTime, hitTime);
 					noteHitCallback(note, this);
-					return note;
+					retNote = note;
+					break;
 				}
 			}
 		}
 
-		return recentHold;
+		if (retNote == null) {
+			var receptor:StrumNote = strumNotes[column];
+			if (receptor != null) {
+				receptor.playAnim('pressed', true);
+				receptor.resetAnim = 0;
+			}
+		}
+
+		return retNote;
+	}
+
+	public function inputUp(column:Int, ?hitTIme:Float) {
+		keysPressed[column] = false;
+
+		var receptor:StrumNote = strumNotes[column];
+		switch(receptor?.animation.name) {
+			case 'pressed' | 'confirm': receptor.resetAnim = -1;
+		}
 	}
 
 	/** generates the receptors **/

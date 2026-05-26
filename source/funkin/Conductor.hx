@@ -25,6 +25,8 @@ class Conductor
 	public static var tracks:Array<FlxSound> = [];
 	public static var pitch:Float = 1.0;
 
+	public static var songSyncMode:SongSyncMode = LAST_MIX;
+
 	public static var visualPosition:Float = 0;
 
 	/** Whether the song is currently playing. Use startSong and pauseSong to change this **/
@@ -33,6 +35,11 @@ class Conductor
 	private static var songStartTimestamp:Float = 0;
 	/** elapsed playback time before the song was paused **/ 
 	private static var songStartOffset:Float = 0;
+
+	/** Last inst.time value **/
+	private static var lastMixPos:Float = 0;
+	/** Time passed since inst.time changed **/
+	private static var lastMixTimer:Float = 0;
 	
 	public static function startSong(offset:Float = 0)
 	{
@@ -46,11 +53,14 @@ class Conductor
 
 	public static function resyncTracks() {
 		Conductor.songPosition = getAccPosition();
+
 		for (snd in tracks) {
-			snd.stop();
+			snd.pause();
 			snd.pitch = pitch;
-			snd.play(true, getAccPosition());
+			snd.play(true, Conductor.songPosition);
 		}
+
+		Conductor.lastMixPos = Conductor.songPosition;
 	}
 
 	public static function pauseSong() 
@@ -87,12 +97,16 @@ class Conductor
 			Conductor.resumeSong();
 	}
 	
-	public static var useAccPosition:Bool = false;
 	public static function getAccPosition():Float {
-		if (playing && useAccPosition)
-			return songStartOffset + (Main.getTime() - songStartTimestamp) * pitch;
-		else
-			return Conductor.songPosition;
+		return (!playing) ? songPosition : switch (songSyncMode) {
+			case DIRECT:
+				@:privateAccess
+				tracks[0]?._channel?.position ?? songPosition;
+			case SYSTEM_TIME:
+				songStartOffset + (Main.getTime() - songStartTimestamp) * pitch;
+			default:
+				songPosition;
+		}
 	}
 
 	public static function cleanup() {
@@ -237,6 +251,56 @@ class Conductor
 		curBeat = Math.floor(curStep / 4);
 	}
 
+	public static function update() {
+		if (!playing) {
+			return;
+		}
+
+		var inst = tracks[0];
+		if (inst == null) {
+			return;
+		}
+
+		@:privateAccess
+		var elapsedMS:Float = FlxG.game._elapsedMS * inst.pitch;
+
+		switch (songSyncMode)
+		{
+			case DIRECT:
+				// Ludem Dare sync
+				// Jittery and retarded, but works maybe
+				Conductor.songPosition = inst.time;
+
+			case SYSTEM_TIME:
+				Conductor.songPosition = Conductor.getAccPosition();
+			
+			case LAST_MIX:
+				// Stepmania method
+				// Works for most people it seems??
+				if (lastMixPos != inst.time) {
+					lastMixPos = inst.time;
+					lastMixTimer = 0;
+				}else {
+					lastMixTimer += elapsedMS;
+				}
+				
+				Conductor.songPosition = lastMixPos + lastMixTimer;
+
+			case NEVER2X:
+				// Allegedly smoother than Last Mix at higher refresh rates
+				if (lastMixPos != inst.time) {
+					if (Math.abs(inst.time - Conductor.songPosition) >= elapsedMS)
+						Conductor.songPosition = inst.time;
+					else
+						Conductor.songPosition += elapsedMS;
+
+					lastMixPos = inst.time;
+				}else {
+					Conductor.songPosition += elapsedMS;
+				}
+		}
+	}
+
 	public inline static function getStep(time:Float):Float {
 		var lastChange = getBPMFromSeconds(time);
 		return lastChange.stepTime + (time - lastChange.songTime) / lastChange.stepCrochet;
@@ -298,4 +362,21 @@ class Conductor
 	public inline static function sectionSteps(section:SwagSection):Float {
 		return sectionBeats(section) * 4;
 	}
+}
+
+enum abstract SongSyncMode(String) to String {
+	var DIRECT = "Direct";
+	var LAST_MIX = "Last Mix";
+	var NEVER2X = "Never2x";
+	var SYSTEM_TIME = "System Time";
+	
+	public static function fromString(str:String):SongSyncMode {
+		return switch (str) {
+			case "Direct": DIRECT;
+			case "System Time": SYSTEM_TIME;
+			case "Never2x": NEVER2X;
+			case "Last Mix": LAST_MIX;
+			default: LAST_MIX;
+		}
+	} 
 }

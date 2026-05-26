@@ -10,7 +10,7 @@ haxelib --always --quiet install no-spoon 0.2.0
 haxelib --always --quiet  --skip-dependencies install hxvlc 2.2.6
 haxelib --always --quiet install hxdiscord_rpc 1.3.0
 haxelib --always --quiet install moonchart 0.5.1
-haxelib --always --quiet install flixel-animate 1.3.1
+haxelib --always --quiet install flixel-animate 1.5.0
 haxelib --always --quiet git funkin.vis https://github.com/FunkinCrew/funkVis
 haxelib --always --quiet git grig.audio https://github.com/FunkinCrew/grig.audio refactor/fft-cam-version
 haxelib --always --quiet git linc_filedialogs https://github.com/dazKind/linc_filedialogs

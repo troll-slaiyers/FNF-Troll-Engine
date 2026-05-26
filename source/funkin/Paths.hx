@@ -756,7 +756,7 @@ class Paths
 		contentDirectories.clear();
 		contentDirectories.set('', contentFolderName);
 
-		iterateDirectory(contentFolderName, (folderName) -> {
+		for (folderName in readDirectory(contentFolderName)) {
 			var folderPath = '$contentFolderName/$folderName';
 
 			if (isDirectory(folderPath) && !list.contains(folderName))
@@ -772,12 +772,12 @@ class Paths
 					#else
 					contentMetadata.set(folderName, data);
 					#end
-					return;
+					continue;
 				}else {
 					contentMetadata.set(folderName, {});
 				}
 			}
-		});
+		}
 	}
 	
 	inline static function updateContentMetadataStructure(data:Dynamic):ContentMetadata

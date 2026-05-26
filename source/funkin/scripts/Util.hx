@@ -5,7 +5,7 @@ import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.util.FlxColor;
 import funkin.scripts.Globals.*;
 import funkin.states.PlayState;
-import funkin.states.GameOverSubstate;
+import funkin.states.PlayState.instance as game;
 import Type.ValueType;
 
 import openfl.display.BlendMode;
@@ -29,19 +29,19 @@ class Util
 		if (killMe.length > 1)
 			return getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 		else
-			return getVarInArray(getInstance(), variable);
+			return getVarInArray(game, variable);
 	}
 	public static function setProperty(variable:String, value:Dynamic) {
 		var killMe:Array<String> = variable.split('.');
 		if (killMe.length > 1)
 			setVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1], value);
 		else
-			setVarInArray(getInstance(), variable, value);
+			setVarInArray(game, variable, value);
 	}
 
 	public static function getPropertyFromGroup(obj:String, index:Int, variable:Dynamic) {
 		var shitMyPants:Array<String> = obj.split('.');
-		var realObject:Dynamic = Reflect.getProperty(getInstance(), obj);
+		var realObject:Dynamic = Reflect.getProperty(game, obj);
 		if(shitMyPants.length>1)
 			realObject = getPropertyLoopThingWhatever(shitMyPants, false);
 
@@ -60,7 +60,7 @@ class Util
 	}
 	public static function setPropertyFromGroup(obj:String, index:Int, variable:Dynamic, value:Dynamic) {
 		var shitMyPants:Array<String> = obj.split('.');
-		var realObject:Dynamic = Reflect.getProperty(getInstance(), obj);
+		var realObject:Dynamic = Reflect.getProperty(game, obj);
 		if(shitMyPants.length>1)
 			realObject = getPropertyLoopThingWhatever(shitMyPants, false);
 
@@ -79,18 +79,16 @@ class Util
 		}
 	}
 	public static function removeFromGroup(obj:String, index:Int, dontDestroy:Bool = false) {
-		var instance = getInstance();
-
-		if(Std.isOfType(Reflect.getProperty(instance, obj), FlxTypedGroup)) {
-			var sex = Reflect.getProperty(instance, obj).members[index];
+		if(Std.isOfType(Reflect.getProperty(game, obj), FlxTypedGroup)) {
+			var sex = Reflect.getProperty(game, obj).members[index];
 			if(!dontDestroy)
 				sex.kill();
-			Reflect.getProperty(instance, obj).remove(sex, true);
+			Reflect.getProperty(game, obj).remove(sex, true);
 			if(!dontDestroy)
 				sex.destroy();
 			return;
 		}
-		Reflect.getProperty(instance, obj).remove(Reflect.getProperty(instance, obj)[index]);
+		Reflect.getProperty(game, obj).remove(Reflect.getProperty(game, obj)[index]);
 	}
 
 	public static function getPropertyFromClass(classVar:String, variable:String) {
@@ -127,10 +125,10 @@ class Util
 	}
 
 	inline public static function getObjectDirectly(tag:String):Null<Dynamic>
-		return getVarInArray(getInstance(), tag);
+		return getVarInArray(game, tag);
 
 	public static function getObjectSimple(tag:String):Null<Dynamic>
-		return Reflect.getProperty(getInstance(), tag);
+		return Reflect.getProperty(game, tag);
 
 	public static function getObject(tag:String):Null<Dynamic> {
 		var killMe:Array<String> = tag.split('.');
@@ -212,20 +210,20 @@ class Util
 	}
 
 	public static function cancelTween(tag:String) {
-		if (PlayState.instance.modchartTweens.exists(tag)) {
-			var twn = PlayState.instance.modchartTweens.get(tag);
+		if (game.modchartTweens.exists(tag)) {
+			var twn = game.modchartTweens.get(tag);
 			twn.cancel();
 			twn.destroy();
-			PlayState.instance.modchartTweens.remove(tag);
+			game.modchartTweens.remove(tag);
 		}
 	}
 
 	public static function cancelTimer(tag:String) {
-		if (PlayState.instance.modchartTimers.exists(tag)) {
-			var tmr = PlayState.instance.modchartTimers.get(tag);
+		if (game.modchartTimers.exists(tag)) {
+			var tmr = game.modchartTimers.get(tag);
 			tmr.cancel();
 			tmr.destroy();
-			PlayState.instance.modchartTimers.remove(tag);
+			game.modchartTimers.remove(tag);
 		}
 	}
 
@@ -271,22 +269,23 @@ class DebugText extends FlxText
 {
 	private var disableTime:Float = 6;
 	public var parentGroup:FlxTypedGroup<DebugText>;
-	public function new(text:String, parentGroup:FlxTypedGroup<DebugText>) {
+	public function new(parentGroup:FlxTypedGroup<DebugText>) {
 		this.parentGroup = parentGroup;
-		super(10, 10, 0, text, 16);
+		super(0, 0, 0);
 		setFormat(Paths.font("vcr.ttf"), 20, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 		scrollFactor.set();
 		borderSize = 1;
 	}
 
+	override function revive() {
+		super.revive();
+		disableTime = 6;
+	}
+
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 		disableTime -= elapsed;
-		if(disableTime <= 0) {
-			kill();
-			parentGroup.remove(this);
-			destroy();
-		}
-		else if(disableTime < 1) alpha = disableTime;
+		if (disableTime <= 0) kill();
+		else alpha = disableTime;
 	}
 }
