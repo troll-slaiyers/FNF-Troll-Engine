@@ -322,7 +322,7 @@ class CoolUtil {
 		return funkin.util.FileUtil.showOpenDialog(title, defaultPath, filters, onOpen, onSelect, onCancel);
 
 	public static inline function showSaveDialog(content:OneOfTwo<String, Bytes>, title:String = "Save File", ?defaultPath:String, ?filters:Array<String>, ?onSave:(path:String)->Void, ?onCancel:Void->Void):Void
-		return funkin.util.FileUtil.showSaveDialog(title, defaultPath, filters, onSave, onCancel);
+		return funkin.util.FileUtil.showSaveDialog(content, title, defaultPath, filters, onSave, onCancel);
 
 	// https://community.haxe.org/t/clone-a-class-instance/3747/5
 	// shoutout random guy on haxe fourm
