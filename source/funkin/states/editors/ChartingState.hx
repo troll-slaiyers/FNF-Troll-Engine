@@ -2676,7 +2676,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 					if (strum != null) {
 						strum.playAnim('confirm', true, note);
-						strum.resetAnim = (note.sustainLength / 1000) + 0.15;
+						strum.resetAnim = ((note.sustainLength / 1000) + 0.15) / Conductor.pitch;
 					}
 				}
 
