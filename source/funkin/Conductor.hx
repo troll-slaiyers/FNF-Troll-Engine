@@ -277,10 +277,11 @@ class ConductorInstance {
 
 	public function resyncTracks() {
 		this.time = getAccPosition();
+
 		for (snd in tracks) {
-			snd.stop();
+			snd.pause();
 			snd.pitch = pitch;
-			snd.play(true, getAccPosition());
+			snd.play(true, Conductor.songPosition);
 		}
 
 		lastMixPos = this.time;
