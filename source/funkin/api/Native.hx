@@ -2,7 +2,6 @@ package funkin.api;
 
 import cpp.ConstCharStar;
 
-@:buildXml('<include name="../../../../source/funkin/api/build.xml" />')
 @:include("filesystem")
 extern class Native {
 	#if mac

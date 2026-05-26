@@ -3,10 +3,6 @@
     <set name="PROJECT_DIR" value="${this_dir}" />
 
     <files id='haxe'>
-        <section if="windows">
-            <flag value="/std:c++17" />
-            <compilerflag value="/std:c++17" />
-        </section>
         <compilervalue name="-I" value="${PROJECT_DIR}/include/" />
     </files>
 
