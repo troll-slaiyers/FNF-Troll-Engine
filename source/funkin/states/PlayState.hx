@@ -383,9 +383,7 @@ class PlayState extends MusicBeatState
 	public var fish:Fish;
 
 	/** debugPrint text container **/
-	#if(HSCRIPT_ALLOWED)
-	private var luaDebugGroup:FlxTypedGroup<DebugText> = new FlxTypedGroup<DebugText>();
-	#end
+	private var debugPrintGroup:FlxTypedGroup<DebugText> = new FlxTypedGroup<DebugText>();
 
 	////
 	public var songId:String = "";
@@ -569,7 +567,6 @@ class PlayState extends MusicBeatState
 
 		Conductor.cleanup();
 
-		updateSongPos = false;
 		Conductor.songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
 
 		Wife3.timeScale = Wife3.judgeScales.get(ClientPrefs.judgeDiff);
@@ -973,8 +970,8 @@ class PlayState extends MusicBeatState
 		add(notefields);
 		add(timingTxt);
 
-		luaDebugGroup.cameras = [camOther];
-		add(luaDebugGroup);
+		debugPrintGroup.cameras = [camOther];
+		add(debugPrintGroup);
 
 		#if FUNNY_ALLOWED
 		fish = new Fish(this);
@@ -1149,16 +1146,13 @@ class PlayState extends MusicBeatState
 	}
 
 	public function addTextToDebug(text:String, ?color:FlxColor = FlxColor.WHITE) {
-		luaDebugGroup.forEachAlive(function(spr:DebugText) {
+		debugPrintGroup.forEachAlive(function(spr:DebugText) {
 			spr.y += 20;
 		});
 
-		if(luaDebugGroup.members.length > 34) {
-			var blah = luaDebugGroup.members[34];
-			blah.destroy();
-			luaDebugGroup.remove(blah);
-		}
-		luaDebugGroup.insert(0, new DebugText(text, luaDebugGroup));
+		var txt = debugPrintGroup.recycle(DebugText, () -> new DebugText(debugPrintGroup));
+		txt.text = text;
+		txt.setPosition(10, 10);
 	}
 
 	public function reloadHealthBarColors() {
@@ -2221,6 +2215,39 @@ class PlayState extends MusicBeatState
 		FlxG.watch.addQuick("visualPos", Conductor.visualPosition);
 	}
 
+	override function updateSongPosition(?_:FlxSound) {
+		inline function lagSpikesEnded() {
+			return (FlxG.elapsed < 0.3 ? ++goodTicks : goodTicks=0) >= 6;
+		}
+
+		if (!paused) {
+			if (startedSong) {
+				super.updateSongPosition(inst);
+			}
+			else if (!startedCountdown) {
+				if (!inCutscene) {
+					if (lagSpikesEnded())
+						startCountdown();
+				}
+			}
+			else {
+				if (lagSpikesEnded()) {
+					Conductor.songPosition += FlxG.elapsed * 1000;
+					Conductor.updateSteps();
+
+					if (Conductor.songPosition >= PlayState.startOnTime) {
+						startSong(PlayState.startOnTime);
+						PlayState.startOnTime = 0;
+					}
+				}
+			}
+
+			if (Conductor.songPosition >= songLength) {
+				finishSong(false);
+			}
+		}
+	}
+
 	override function updateSteps() {
 		super.updateSteps();
 		setOnScripts('curDecStep', curDecStep);
@@ -2363,38 +2390,6 @@ class PlayState extends MusicBeatState
 
 		if (controls.PAUSE && canPause)
 			doPauseShit();
-
-		if (!paused) {
-			inline function lagSpikesEnded() {
-				return (elapsed < 0.3 ? ++goodTicks : goodTicks=0) >= 6;
-			}
-
-			if (!startedCountdown) {
-				if (!inCutscene) {
-					if (lagSpikesEnded())
-						startCountdown();
-				}
-			}
-			else if (!startedSong) {
-				if (lagSpikesEnded()) {
-					Conductor.songPosition += elapsed * 1000;
-					Conductor.updateSteps();
-
-					if (Conductor.songPosition >= PlayState.startOnTime) {
-						startSong(PlayState.startOnTime);
-						PlayState.startOnTime = 0;
-					}
-				}
-			}
-			else if (Conductor.songPosition >= 0)
-			{
-				updateSongPosition(inst);
-			}
-
-			if (Conductor.songPosition >= songLength) {
-				finishSong(false);
-			}
-		}
 
 		////
 		super.update(elapsed);
@@ -3078,7 +3073,7 @@ class PlayState extends MusicBeatState
 
 	private function onKeyPress(key:FlxKey):Void
 	{
-		if (paused || !startedCountdown || inCutscene)
+		if (paused || !startedCountdown || inCutscene || endingSong)
 			return;
 
 		if (pressed.contains(key)) return;
@@ -3102,13 +3097,13 @@ class PlayState extends MusicBeatState
 		if (column != -1) strumKeyUp(column);
 	}
 
-	private function strumKeyDown(column:Int, player:Int = -1) {
+	private function strumKeyDown(column:Int, player:Int = -1, ?hitTime:Float) {
 		if (strumsBlocked[column]) return;
 
 		if (callOnScripts("onKeyPress", [column]) == Globals.Function_Stop)
 			return;
 
-		var hitTime:Float = Conductor.getAccPosition() + ClientPrefs.ratingOffset;
+		hitTime ??= Conductor.getAccPosition() + ClientPrefs.ratingOffset;
 
 		if(ClientPrefs.hitsoundBehav == 'Key Press' && !cpuControlled)
 			playShithound();
@@ -3117,29 +3112,19 @@ class PlayState extends MusicBeatState
 		var controlledFields:Array<PlayField> = [];
 
 		for (field in playfields.members) {
-			if ((player != -1 && field.playerId != player) || !field.isPlayer || !field.inControl || field.autoPlayed)
+			if ((player >= 0 && field.playerId != player) || !field.isPlayer || !field.inControl || field.autoPlayed)
 				continue;
 
 			controlledFields.push(field);
-			field.keysPressed[column] = true;
-
-			if (endingSong)
-				continue;
 
 			var note:Note = {
 				var ret:Dynamic = callOnScripts("onFieldInput", [field, column, hitNotes]);
 				if (ret == Globals.Function_Stop) null;
 				else if (ret is Note) ret;
-				else field.input(column, hitTime);
+				else field.inputDown(column, hitTime);
 			}
 
-			if (note == null) {
-				var spr:StrumNote = field.strumNotes[column];
-				if (spr != null) {
-					spr.playAnim('pressed', true);
-					spr.resetAnim = 0;
-				}
-			}else {
+			if (note != null) {				
 				hitNotes.push(note);
 			}
 		}
@@ -3156,7 +3141,7 @@ class PlayState extends MusicBeatState
 		//trace('strum down: $column');
 	}
 
-	private function strumKeyUp(column:Int, player:Int = -1) {
+	private function strumKeyUp(column:Int, player:Int = -1, ?hitTime:Float) {
 		// doesnt matter if THIS is done while paused
 		// only worry would be if we implemented Lifts
 		// but afaik we arent doing that
@@ -3166,12 +3151,7 @@ class PlayState extends MusicBeatState
 			if ((player != -1 && field.playerId != player) || !field.isPlayer || !field.inControl || field.autoPlayed)
 				continue;
 
-			field.keysPressed[column] = false;
-
-			var spr:StrumNote = field.strumNotes[column];
-			switch(spr?.animation.name) {
-				case 'pressed' | 'confirm': spr.resetAnim = -1;
-			}
+			field.inputUp(column, hitTime);
 		}
 
 		callOnScripts('onKeyRelease', [column, player]);

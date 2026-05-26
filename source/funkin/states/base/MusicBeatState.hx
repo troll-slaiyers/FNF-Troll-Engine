@@ -13,7 +13,7 @@ import flixel.util.typeLimit.NextState;
 
 #if HSCRIPT_ALLOWED
 import funkin.scripts.FunkinHScript;
-import funkin.states.scripting.*;
+import funkin.states.scripting.HScriptedState;
 #end
 
 #if SCRIPTABLE_STATES
