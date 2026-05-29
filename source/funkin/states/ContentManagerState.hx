@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.objects.shaders.WarmBGShader;
 import funkin.input.Controls;
 import funkin.objects.ui.CustomFlxUI.CustomFlxInputText;
 import funkin.objects.ChangingMenuBG;
@@ -38,6 +39,7 @@ class ContentManagerState extends MusicBeatState {
 	var dragging:Bool = false;
 
 	var bgManager:ChangingMenuBG;
+	var bgShader = new WarmBGShader();
 	
 	var rightCamera:FlxCamera;
 	var packCardBG:FlxSprite;
@@ -55,6 +57,14 @@ class ContentManagerState extends MusicBeatState {
 
 	final displayData = new PackDisplayData();
 
+	inline function stringToHue(str:String):Int {
+		var h = StringTools.fastCodeAt(str, 0);
+		for (i in 1...str.length) {
+			h = (h * 31 + StringTools.fastCodeAt(str, i)) & 0xFFFFFFFF;
+		}
+		return h % 360;
+	}
+
 	inline function getDisplayData(entry:PackEntry) {
 		final pack = PackManager.allPacks.get(entry.id);
 		final data:PackMetadata = pack.metadata ?? {};
@@ -67,7 +77,7 @@ class ContentManagerState extends MusicBeatState {
 		displayData.description = data.description ?? "No description provided";
 		displayData.author = data.author;//?? "Unknown";
 
-		displayData.bgColor = data.bgColor ?? data.accentColor ?? FlxColor.fromHSB(FlxG.random.int(64) * 5.625, 0.15, FlxG.random.float(0.467, 0.512)); //0xFFea71fd;
+		displayData.bgColor = data.bgColor ?? data.accentColor ?? FlxColor.fromHSB(stringToHue(entry.id), 0.75, FlxG.random.float(0.467, 0.512)); //0xFFea71fd;
 		displayData.accentColor = data.accentColor ?? FlxColor.WHITE;
 
 		displayData.bannerAsset = packGraphic(pack, 'packbanner');
@@ -146,7 +156,7 @@ class ContentManagerState extends MusicBeatState {
 
 		////
 		listCamera = new FlxCamera(listX, listY, listWidth, listHeight);
-		listCamera.bgColor = 0;
+		listCamera.bgColor = FlxColor.fromRGBFloat(0, 0, 0, 0.25);
 		//listCamera.targetOffset.y = -26; // what's up with this
 		//okay so it has something to do with using LOCKON target following but i don't wanna add camFollow camFollowPos bs here so suck it
 		listCamera.minScrollX = 0;
@@ -272,7 +282,9 @@ class ContentManagerState extends MusicBeatState {
 		add(packCardTitle);		
 		add(packCardAuthor);		
 
-		var offy = Std.int(packCardBGBorder.height + 16);		
+		var offy = Std.int(packCardBGBorder.height + 16);
+		offy += Std.int((rightCamera.height - offy) - packCardBGBorder.height); // copy pack height lol
+
 		rightCamera.y += offy;
 		rightCamera.height -= offy;
 
@@ -385,6 +397,7 @@ class ContentManagerState extends MusicBeatState {
 		packDescriptionText.text = descStr;
 
 		bgManager.fadeToBg(displayData.bgAsset, displayData.bgColor);
+		@:privateAccess bgManager.curBG.shader = bgShader;
 	}
 
 	function changeHovered(index:Int) {
@@ -913,7 +926,7 @@ private class EntryBox extends FlxSpriteGroup {
 		super();
 		
 		bg = new FlxSprite();
-		bg.color = FlxColor.BLACK;
+		bg.color = FlxColor.WHITE;
 		bg.makeGraphic(1, 1);
 		bg.scale.set(width, height);
 		bg.updateHitbox();
@@ -922,6 +935,11 @@ private class EntryBox extends FlxSpriteGroup {
 		dragSprite = new FlxSprite();
 		dragSprite.loadGraphic("contentmenu/item_draggable");
 		dragSprite.x = bg.x;
+		#if lime_funkin
+		dragSprite.blend = INVERT;
+		#else
+		dragSprite.color = FlxColor.BLACK;
+		#end
 		SpriteTools.objectCenter(dragSprite, bg, Y);
 		add(dragSprite);
 
@@ -929,7 +947,7 @@ private class EntryBox extends FlxSpriteGroup {
 		add(icon);
 
 		text = new FlxText(0, 0, 0, "unknown", 18);
-		text.setFormat(Paths.font("quanticob.ttf"), 18, 0xFFFFFFFF, LEFT);
+		text.setFormat(Paths.font("quanticob.ttf"), 18, 0xFF000000, LEFT);
 		text.alignment = LEFT;
 		//text.setFormat();
 		//text.color = 0xFF000000;
@@ -949,7 +967,9 @@ private class EntryBox extends FlxSpriteGroup {
 		SpriteTools.objectCenter(toggleSprite, bg, Y);
 
 		selectionHighlight = new FlxSprite();
-		selectionHighlight.loadGraphic(CoolUtil.makeOutlinedGraphic(Std.int(width), Std.int(height), FlxColor.TRANSPARENT, 4, FlxColor.WHITE));
+		selectionHighlight.color = FlxColor.BLACK;
+		selectionHighlight.alpha = 0.3;
+		selectionHighlight.makeGraphic(1, 1);
 		selectionHighlight.setGraphicSize(width, height);
 		selectionHighlight.updateHitbox();
 		add(selectionHighlight);
@@ -984,17 +1004,17 @@ private class EntryBox extends FlxSpriteGroup {
 	}
 
 	public function onSelected() {
-		selectionHighlight.visible = true;
-		bg.alpha = 0.64;
-		remove(bg, true);
-		insert(0, bg);
+		selectionHighlight.visible = false;
+		bg.alpha = 0.75;
+		bg.blend = NORMAL;
+		text.alpha = 1.0;
 	}
 	
 	public function unSelected() {
-		selectionHighlight.visible = false;
-		bg.alpha = 0.64;// * 0.6;
-		remove(bg, true);
-		add(bg);
+		selectionHighlight.visible = true;
+		bg.alpha = 0.67;
+		bg.blend = OVERLAY;
+		text.alpha = 0.8;
 	}
 }
 
