@@ -26,7 +26,7 @@ using CoolerStringTools;
 	"changeDifficulty",
 	"positionHighscore"
 ])
-class FreeplayState extends MusicBeatState
+class FreeplayState extends MusicBeatSubstate
 {
 	public static var comingFromPlayState:Bool = false;
 
@@ -155,6 +155,13 @@ class FreeplayState extends MusicBeatState
 		diffText.font = scoreText.font;
 	}
 
+	override function close() {
+		if (this._parentState != null)
+			super.close();
+		else
+			MusicBeatState.switchState(new funkin.states.MainMenuState());
+	}
+
 	var songLoaded:String = null;
 	var selectedSong:String = null;
 	function onAccept() {
@@ -270,7 +277,7 @@ class FreeplayState extends MusicBeatState
 		}else if (controls.BACK){
 			menu.controls = null;
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			MusicBeatState.switchState(new funkin.states.MainMenuState());	
+			close();
 			
 		}else if (FlxG.keys.justPressed.R){
 			openResetScorePrompt();

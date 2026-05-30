@@ -36,10 +36,10 @@ class ChangingMenuBG extends FlxTypedGroup<FlxSprite> {
 		curBG.color = color;
 		curBG.alpha = 1.0;
 
-		if (prevBG != null) {
+		//if (prevBG != null) {
 			curBG.alpha = 0.0;
 			FlxTween.tween(curBG, {alpha: 1.0}, 0.4, {ease: FlxEase.sineInOut});
-		}
+		//}
 	}
 
 	static function makeBgSprite(){

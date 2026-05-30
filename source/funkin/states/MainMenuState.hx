@@ -42,11 +42,14 @@ class MainMenuState extends MusicBeatState
 	var menuItems:FlxTypedGroup<FlxSprite>;
 	var bg:FlxSprite;
 	var magenta:FlxSprite;
+	var bgTweenFunction:Float -> Void;
 	var camFollow:FlxObject;
 	var camFollowPos:FlxObject;
 	var debugKeys:Array<FlxKey>;
 
 	var selectedSomethin:Bool = false;
+
+	public var stateFreeplayTransition:Bool = false;
 
 	override function create()
 	{
@@ -67,20 +70,36 @@ class MainMenuState extends MusicBeatState
 
 		////
 		var yScroll:Float = Math.max(0.1, 0.25 - (0.05 * (optionShit.length - 4)));
+		var bgScale = 1.175;
 		
 		bg = new FlxSprite(0, 0, Paths.image('menuBG'));
 		bg.scrollFactor.set(0, yScroll);
 		bg.screenCenter();
-		bg.scale.x = bg.scale.y = 1.175;
+		bg.scale.set(bgScale, bgScale);
 		add(bg);
 
 		magenta = new FlxSprite(0, 0, Paths.image('menuBGMagenta'));
 		magenta.scrollFactor.set(0, yScroll);
 		magenta.screenCenter();
-		magenta.scale.x = magenta.scale.y = bg.scale.x;
+		magenta.scale.set(bgScale, bgScale);
 		magenta.visible = false;
 		add(magenta);
 
+		var bgScale = bg.scale.x;
+		var bgTargetScale = 1.0;//Math.max(FlxG.width / bg.frameWidth, FlxG.height / bg.frameHeight);
+		var bgScroll = bg.scrollFactor.y;
+
+		bgTweenFunction = function(progress:Float) {
+			//var progress = progress / 1.125;
+
+			var scale = FlxMath.lerp(bgScale, bgTargetScale, progress);
+			magenta.scale.x = magenta.scale.y = bg.scale.x = bg.scale.y = scale;
+
+			var scroll = FlxMath.lerp(bgScroll, 0.0, progress);
+			bg.scrollFactor.y = magenta.scrollFactor.y = scroll;
+		}
+
+		////
 		menuItems = new FlxTypedGroup<FlxSprite>();
 		add(menuItems);
 
@@ -151,7 +170,23 @@ class MainMenuState extends MusicBeatState
 			case 'storymode':
 				switchState.bind(new StoryModeState());
 			case 'freeplay':
-				switchState.bind(new FreeplayState());
+				if (stateFreeplayTransition)
+					switchState.bind(new FreeplayState());
+				else function() {
+					var cam = new FlxCamera();
+					FlxG.cameras.add(cam);
+					
+					var ss = new FreeplayState();
+					ss.camera = cam;
+
+					this.persistentUpdate = false;
+					openSubState(ss);
+
+					this.subStateClosed.addOnce(_ -> {
+						FlxG.cameras.remove(cam);
+						undoSelectionTransition();
+					});
+				}
 			case 'donate':
 				return CoolUtil.browserLoad('https://ninja-muffin24.itch.io/funkin');
 			case 'credits':
@@ -172,19 +207,7 @@ class MainMenuState extends MusicBeatState
 		selectedSomethin = true;
 
 		////
-		var bgScale = bg.scale.x;
-		var bgTargetScale = Math.max(FlxG.width / bg.frameWidth, FlxG.height / bg.frameHeight);
-		var bgScroll = bg.scrollFactor.y;
-		FlxTween.num(0.0, 1.0, 0.264, {ease: FlxEase.backOut}, (progress:Float) ->
-		{
-			var progress = progress / 1.125;
-
-			var scale = FlxMath.lerp(bgScale, bgTargetScale, progress);
-			magenta.scale.x = magenta.scale.y = bg.scale.x = bg.scale.y = scale;
-
-			var scroll = FlxMath.lerp(bgScroll, 0.0, progress);
-			bg.scrollFactor.y = magenta.scrollFactor.y = scroll;
-		});
+		FlxTween.num(0.0, 1.0, 0.2, {ease: FlxEase.circOut}, bgTweenFunction);
 
 		bgFlicker();
 
@@ -195,6 +218,22 @@ class MainMenuState extends MusicBeatState
 			else {
 				transTwn = FlxTween.flicker(spr, 1, 0.12, {endVisibility: false, onComplete: _ -> shitToDo()});
 			}
+		});
+	}
+
+	function undoSelectionTransition() {
+		selectedSomethin = false;
+
+		FlxTween.num(1.0, 0.0, 0.264, {ease: FlxEase.circOut}, bgTweenFunction);
+
+		magenta.alpha = 0.0;
+		magenta.visible = false;
+		
+		menuItems.forEach((spr:FlxSprite)->{
+			spr.revive();
+			spr.alpha = 0.0;
+			spr.visible = true;
+			FlxTween.tween(spr, {alpha: 1.0}, 0.25, {ease: FlxEase.quadOut});
 		});
 	}
 
