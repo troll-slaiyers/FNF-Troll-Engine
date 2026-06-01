@@ -7,7 +7,7 @@ import funkin.states.options.BindsBullshit.BindButton;
 import funkin.CoolUtil.overlapsMouse as overlaps;
 import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxMath;
-import flixel.addons.ui.FlxUI9SliceSprite;
+import trollui.SlicedSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
@@ -50,7 +50,7 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 	var bindID:Int = 0;
 	var bindButtons:Array<Array<BindButtonK>> = []; // the actual bind buttons. used for input etc lol
 	var internals:Array<String> = [];
-	var resetBinds:FlxUI9SliceSprite;
+	var resetBinds:SlicedSprite;
 	var cancelKey:FlxKey;
 
 	//// Keyboard navigation
@@ -180,25 +180,27 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 				text.setFormat(Paths.font("quantico.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
 				text.updateHitbox();
 
-				var height = Math.min(45, text.height + 12);
-				var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(text.x - 12, text.y, backdropGraphic,
-					new Rectangle(0, 0, optionMenu.width - text.x - 8, height), [22, 22, 89, 89]);
+				var bindPadding = 0;
+				var height = Math.min(42 + bindPadding * 2, text.height + 12);
+				var drop = new SlicedSprite(text.x - 12, text.y, 
+					optionMenu.width - text.x - 8, height, 
+					backdropGraphic, [20, 20, 20, 20]
+				);
 				drop.cameras = [scrollableCam];
 				text.y += (height - text.height) / 2;
 
-				var rect = new Rectangle(0, 0, 200, height - 10);
 				var currentBinds = clientBinded.get(internal);
 
-				var prButt = new BindButtonK(drop.x + drop.width - 40, drop.y, rect, currentBinds[0]);
+				var prButt = new BindButtonK(drop.x + drop.width - 40, drop.y, 200, height - bindPadding * 2, currentBinds[0]);
 				prButt.x -= prButt.width * 2;
-				prButt.y += 5;
+				prButt.y += bindPadding;
 				prButt.ID = idx;
 				prButt.cameras = [scrollableCam];
 				buttArray.push(prButt);
 
-				var secButt = new BindButtonK(drop.x + drop.width - 20, drop.y, rect, currentBinds[1]);
+				var secButt = new BindButtonK(drop.x + drop.width - 20, drop.y, 200, height - bindPadding * 2, currentBinds[1]);
 				secButt.x -= secButt.width;
-				secButt.y += 5;
+				secButt.y += bindPadding;
 				secButt.ID = idx;
 				secButt.cameras = [scrollableCam];
 				buttArray.push(secButt);
@@ -226,7 +228,11 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 		if (height < 45)
 			height = 45;
 
-		resetBinds = new FlxUI9SliceSprite(text.x - 12, text.y, backdropGraphic, new Rectangle(0, 0, optionMenu.width - text.x - 8, height), [22, 22, 89, 89]);
+		resetBinds = new SlicedSprite(
+			text.x - 12, text.y, 
+			optionMenu.width - text.x - 8, height, 
+			backdropGraphic, [20, 20, 20, 20]
+		);
 		resetBinds.cameras = [scrollableCam];
 		text.y += (height - text.height) / 2;
 		daY += height + 3;
@@ -250,7 +256,12 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 		add(selectionArrow);
 
 		////
-		var popupDrop:FlxUI9SliceSprite = new FlxUI9SliceSprite(0, 0, backdropGraphic, new Rectangle(0, 0, 880, 225), [22, 22, 89, 89]);
+		var popupDrop = new SlicedSprite(
+			0, 0, 
+			880, 225, 
+			backdropGraphic, 
+			[20, 20, 20, 20]
+		);
 		popupDrop.cameras = [overCam];
 		popupDrop.screenCenter(XY);
 

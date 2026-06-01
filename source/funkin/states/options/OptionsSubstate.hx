@@ -16,7 +16,7 @@ import flixel.math.FlxPoint;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import flixel.addons.ui.FlxUI9SliceSprite;
+import trollui.SlicedSprite;
 import openfl.geom.Rectangle;
 
 using funkin.data.FlxTextFormatData;
@@ -722,8 +722,8 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		tab.created = true;
 
-		final backdropGraphic = Paths.image("optionsMenu/backdrop", null, false);
-		final backdropSlice = [22, 22, 89, 89];
+		final backdropGraphic = Paths.image("optionsMenu/backdrop");
+		final backdropSlice = [20, 20, 20, 20];
 
 		var group = tab.group;
 		group.camera = optionCamera;
@@ -756,15 +756,18 @@ class OptionsSubstate extends MusicBeatSubstate
 			text.applyFormat(TextFormats.OPT_NAME);
 
 			var height = Math.max(45, text.height + 12);
-			var rect = new Rectangle(text.x - 12, text.y, optionMenu.width - text.x - 8, height);
+			var rx = text.x - 12;
+			var ry = text.y;
+			var rw = optionMenu.width - text.x - 8;
+			var rh = height;
 
 			text.y += (height - text.height) / 2;
 			
-			var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, backdropGraphic, rect, backdropSlice);
+			var drop = new SlicedSprite(rx, ry, rw, rh, backdropGraphic, backdropSlice);
 			drop.alpha = 0.95;
 			group.add(drop);
 			
-			var lock:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, backdropGraphic, rect, backdropSlice);
+			var lock = new SlicedSprite(rx, ry, rw, rh, backdropGraphic, backdropSlice);
 			lock.alpha = 0.75;
 
 			var widget:Widget = createWidget(opt, drop, text, data);
@@ -1653,16 +1656,16 @@ class Dropdown extends FlxTypedGroup<FlxBasic>
 	var camFollow = new FlxPoint();
 	var camFollowPos = new FlxObject();
 
-	private final boxGrp = new FlxTypedGroup<FlxUI9SliceSprite>();
+	private final boxGrp = new FlxTypedGroup<SlicedSprite>();
 	private final labelGrp = new FlxTypedGroup<FlxText>();
 
-	var boxes(get, never):Array<FlxUI9SliceSprite>;
+	var boxes(get, never):Array<SlicedSprite>;
 	function get_boxes() return boxGrp.members;
 	var labels(get, never):Array<FlxText>;
 	function get_labels() return labelGrp.members;
 
-	private var backdropGraphic = Paths.image("optionsMenu/backdrop", null, false);
-	private var backdropSlice = [22, 22, 89, 89];
+	private var backdropGraphic = Paths.image("optionsMenu/backdrop");
+	private var backdropSlice = [20, 20, 20, 20];
 
 	public function new() {
 		super();
@@ -1779,14 +1782,10 @@ class Dropdown extends FlxTypedGroup<FlxBasic>
 	}
 
 	private function makeBackdrop() {
-		var backdrop = new FlxUI9SliceSprite(
+		var backdrop = new SlicedSprite(
 			0, 0,
-			backdropGraphic.bitmap,
-			backdropGraphic.bitmap.rect,
-			backdropSlice,
-			0x00, // TILE_NONE,
-			true,
-			"optionsDropdownBackdrop"
+			backdropGraphic.width, backdropGraphic.height, 
+			backdropGraphic, backdropSlice
 		);
 		// TODO: fix the backdrops turning completely white 
 		// It's a flixel-ui issue ffs, fuck this stupid flixel life
@@ -1810,7 +1809,7 @@ class Dropdown extends FlxTypedGroup<FlxBasic>
 		}
 
 		final boxWidth:Float = Math.max(50, maxTextWidth + 24);
-		final boxHeight:Float = 35;
+		final boxHeight:Float = 40;
 		final boxPadding:Float = 2;
 
 		final sowY = boxHeight + boxPadding;
@@ -1821,7 +1820,7 @@ class Dropdown extends FlxTypedGroup<FlxBasic>
 			box.exists = true;
 			box.x = 0;
 			box.y = idx * sowY;
-			box.resize(boxWidth, boxHeight);
+			box.setSize(boxWidth, boxHeight);
 
 			var label = labels[idx];
 			label.exists = true;
@@ -2003,30 +2002,28 @@ class TextFormats {
 	
 	public static final OPT_LABEL:FlxTextFormatData = {
 		font: "vcr.ttf",
-		pixelPerfectRender: true,	
-		
-		size: 32,
+		size: 28,
 		color: 0xFFFFFFFF,
 		alignment: LEFT
 	};
 	
 	public static final OPT_NAME:FlxTextFormatData = {
 		font: "quantico.ttf",	
-		size: 25,
+		size: 22,
 		color: 0xFFFFFFFF,
 		alignment: LEFT
 	};
 
 	public static final OPT_VALUE_TEXT:FlxTextFormatData = {
 		font: "quantico.ttf",
-		size: 22,
+		size: 18,
 		color: 0xFFFFFFFF,
 		alignment: LEFT
 	};
 	
 	public static final OPT_DROPDOWN_OPTION_TEXT:FlxTextFormatData = {
 		font: "quantico.ttf",
-		size: 22,
+		size: 18,
 		color: 0xFFFFFFFF,
 	};
 

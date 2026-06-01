@@ -6,9 +6,9 @@ import funkin.objects.notes.NoteAnimations;
 import funkin.objects.notes.Note;
 import funkin.states.options.BindsBullshit.KeyboardNavHelper;
 import funkin.states.options.BindsBullshit.BindButton;
+import trollui.SlicedSprite;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.math.FlxMath;
-import flixel.addons.ui.FlxUI9SliceSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
@@ -50,7 +50,7 @@ class ButtonBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxGam
 	var bindID:Int = 0;
 	var bindButtons:Array<Array<BindButtonC>> = []; // the actual bind buttons. used for input etc lol
 	var internals:Array<String> = [];
-	var resetBinds:FlxUI9SliceSprite;
+	var resetBinds:SlicedSprite;
 	var cancelKey:Int;
 
 	//// Keyboard navigation
@@ -124,7 +124,7 @@ class ButtonBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxGam
 		overCam.alpha = 0;
 
 		var backdropGraphic = Paths.image("optionsMenu/backdrop");
-		var backdropSlice = [22, 22, 89, 89];
+		var backdropSlice = [20, 20, 20, 20];
 
 		var optionMenu = new FlxSprite(84, 80, CoolUtil.makeOutlinedGraphic(920, 570, FlxColor.fromRGB(82, 82, 82), 2, FlxColor.fromRGB(70, 70, 70)));
 		optionMenu.alpha = 0.8;
@@ -137,6 +137,7 @@ class ButtonBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxGam
 		scrollableCam.x = optionMenu.x;
 		scrollableCam.y = optionMenu.y;
 
+		scrollableCam.pixelPerfectRender = true;
 		scrollableCam.targetOffset.x = scrollableCam.width / 2;
 		scrollableCam.targetOffset.y = scrollableCam.height / 2;
 
@@ -168,26 +169,29 @@ class ButtonBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxGam
 				text.cameras = [scrollableCam];
 				text.updateHitbox();
 
-				var height = Math.min(45, text.height + 12);
-				var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(text.x - 12, text.y, backdropGraphic,
-					new Rectangle(0, 0, optionMenu.width - text.x - 8, height), backdropSlice);
+				var bindPadding = 0;
+				var height = Math.min(40 + bindPadding * 2, text.height + 12);
+				var drop = new SlicedSprite(
+					text.x - 12, text.y,
+					optionMenu.width - text.x - 8, height, 
+					backdropGraphic, backdropSlice
+				);
 				drop.cameras = [scrollableCam];
 				text.y += (height - text.height) / 2;
 
-				var rect = new Rectangle(0, 0, 200, height - 10);
 				var binded = clientBinded.get(internal);
 				trace(internal, binded);
 
-				var prButt = new BindButtonC(drop.x + drop.width - 40, drop.y, rect, binded[0]);
+				var prButt = new BindButtonC(drop.x + drop.width - 40, drop.y, 200, height - bindPadding * 2, binded[0]);
 				prButt.x -= prButt.width * 2;
-				prButt.y += 5;
+				prButt.y += bindPadding;
 				prButt.ID = idx;
 				prButt.cameras = [scrollableCam];
 				buttArray.push(prButt);
 
-				var secButt = new BindButtonC(drop.x + drop.width - 20, drop.y, rect, binded[1]);
+				var secButt = new BindButtonC(drop.x + drop.width - 20, drop.y, 200, height - bindPadding * 2, binded[1]);
 				secButt.x -= secButt.width;
-				secButt.y += 5;
+				secButt.y += bindPadding;
 				secButt.ID = idx;
 				secButt.cameras = [scrollableCam];
 				buttArray.push(secButt);
@@ -216,7 +220,11 @@ class ButtonBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxGam
 		if (height < 45)
 			height = 45;
 
-		resetBinds = new FlxUI9SliceSprite(text.x - 12, text.y, backdropGraphic, new Rectangle(0, 0, optionMenu.width - text.x - 8, height), backdropSlice);
+		resetBinds = new SlicedSprite(
+			text.x - 12, text.y, 
+			optionMenu.width - text.x - 8, height, 
+			backdropGraphic, backdropSlice
+		);
 		resetBinds.cameras = [scrollableCam];
 		text.y += (height - text.height) / 2;
 		daY += height + 3;
@@ -240,7 +248,7 @@ class ButtonBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxGam
 		add(selectionArrow);
 
 		////
-		var popupDrop:FlxUI9SliceSprite = new FlxUI9SliceSprite(0, 0, backdropGraphic, new Rectangle(0, 0, 880, 225), backdropSlice);
+		var popupDrop = new SlicedSprite(0, 0, 880, 225, backdropGraphic, backdropSlice);
 		popupDrop.cameras = [overCam];
 		popupDrop.screenCenter(XY);
 
