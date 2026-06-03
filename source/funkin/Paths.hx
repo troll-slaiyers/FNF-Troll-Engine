@@ -217,6 +217,8 @@ class Paths
 			'${pack.path}/$dir/'
 		];
 
+	//public static function packFolderIterator(dir:String)
+
 	/*
 	inline static public function txt(key:String):String
 		return 'data/$key.txt';

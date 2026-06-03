@@ -2,7 +2,7 @@ package funkin.data;
 
 import haxe.io.Path;
 
-private var defaultEventStuff = [ 
+private var psychEventStuff = [ 
 	['Hey!', "Plays the \"Hey!\" animation from Bopeebo,\nValue 1: BF = Only Boyfriend, GF = Only Girlfriend,\nSomething else = Both.\nValue 2: Custom animation duration,\nleave it blank for 0.6s"],
 	['Set GF Speed', "Sets GF head bopping speed,\nValue 1: 1 = Normal speed,\n2 = 1/2 speed, 4 = 1/4 speed etc.\nUsed on Fresh during the beatbox parts.\n\nWarning: Value must be integer!"],
 	['Add Camera Zoom', "Used on MILF on that one \"hard\" part\nValue 1: Camera zoom add (Default: 0.015)\nValue 2: UI zoom add (Default: 0.03)\nLeave the values blank if you want to use Default."],
@@ -39,7 +39,7 @@ private var defaultEventStuff = [
 
 class SongEventData {
 	public static function getEventStuff():Array<Array<String>> {
-		var eventStuff = defaultEventStuff.copy();
+		var eventStuff = psychEventStuff.copy();
 
 		var eventsLoaded:Map<String, Bool> = new Map();
 		for (directory in Paths.getFolders('events')) {
@@ -58,5 +58,212 @@ class SongEventData {
 		}
 
 		return eventStuff;
+	}
+
+	public static function getEventStuffV2():Array<EventDataJSON> {
+		var eventStuff:Array<EventDataJSON> = [];
+		var eventsLoaded:Map<String, Bool> = [];
+
+		for (stuff in psychEventStuff) {
+			eventsLoaded.set(stuff[0], true);
+			eventStuff.push({
+				id: stuff[0],
+				description: stuff[1],
+				fields: EventFieldDefUtil.getPsychFieldDefs()
+			});
+		}
+
+		for (directory in Paths.getFolders('events')) {
+			for (file in Paths.readDirectory(directory)) {
+				var eventId = Path.withoutExtension(file);
+				if (eventsLoaded.exists(eventId))
+					continue;
+
+				inline function push(data:Dynamic) {
+					data.id = eventId;
+					eventStuff.push(data);
+					eventsLoaded.set(eventId, true);
+				}
+				
+				var basePath:String = Path.join([directory, eventId]);
+				
+				var json:EventDataJSON = Paths.getJson('$basePath.json');
+				if (json != null) {
+					trace('Found json: $basePath.json');
+					json.fields = EventFieldDefUtil.validateFields(json.fields);
+					push(json);
+					continue;
+				}
+
+				var description:Null<String> = Paths.getContent('$basePath.txt');
+				if (description != null || Paths.isHScript(file)) {
+					push({
+						description: description, 
+						fields: EventFieldDefUtil.getPsychFieldDefs()
+					});
+					continue;
+				}
+			}
+		}
+
+		return eventStuff;
+	}
+}
+
+// AHHHHHHHHHHHHHHHHH
+/*
+class PsychSongEvent extends ScriptedSongEvent {
+	public var description:String;
+
+	public function new(name:String, description:String = "", ?script:FunkinHScript) {
+		this.description = description;
+		super(name, script);
+	}
+
+	override function toString():String
+		return 'PsychSongEvent($id)';
+}
+*/
+
+typedef EventInstanceData = {
+	/** Which event will handle this data **/
+	var id:String;
+	/** Song timestamp, in milliseconds, at which this data will be executed **/
+	var strumTime:Float;
+}
+
+typedef EventDataJSON = {
+	@:optional var id:String;
+
+	/** Name of this event to be shown in the chart editor  **/
+	@:optional var displayName:String;
+
+	/** A description of this event to be shown in the chart editor **/
+	var description:String;
+
+	/** Field definitions to be used in the chart editor events tab **/
+	var fields:Array<EventFieldDef>;
+
+	///** Whether the field definition is dynamic and should be handled by the event script **/
+	//@:optional var dynamicFields:Bool;
+} 
+
+enum abstract UIElementType(String) from String to String {
+	var TEXT_INPUT;
+	var DROPDOWN;
+	var NUM_STEPPER;
+	var SLIDER;
+	var CHECKBOX;
+	var COLOR_PICKER;
+
+	//// specialized dropdowns
+	var EASING_PICKER;
+	var CHARACTER_PICKER;
+	var STAGE_PICKER;
+}
+
+typedef EventFieldDef<T = Dynamic> = {
+	/** Name used to store the value of this field in the event's instance data **/
+	var fieldName:String;
+
+	/** UI element used to modify the value of this field in the chart editor **/
+	var uiElement:UIElementType;
+
+	/** Default value of this field **/
+	@:optional var defaultValue:T;
+
+	/** Display name used for this field in the chart editor **/
+	@:optional var displayName:String;
+
+	/** Tooltip message shown when hovering over this field's UI element in the chart editor. **/
+	@:optional var tooltip:String;
+}
+
+typedef InputTextDef = {
+	> EventFieldDef<String>,
+}
+
+typedef SliderDef = {
+	> EventFieldDef<Float>,
+	var min:Float; 
+	var max:Float;
+	@:optional var decimals:Int;
+}
+
+typedef CheckBoxDef = {
+	> EventFieldDef<Bool>,
+}
+
+typedef DropDownDef = {
+	> EventFieldDef<String>,
+	var optionsList:Array<String>;
+	@:optional var allowCustom:Bool;
+}
+
+typedef NumStepperDef = {
+	> EventFieldDef<Float>,
+	var stepSize:Float;
+	@:optional var min:Float;
+	@:optional var max:Float;
+	@:optional var decimals:Int;
+}
+
+class EventFieldDefUtil {
+	/**
+		Validates an event field definition.  
+		Adds default values whereever possible.  
+		@param data An `EventFieldDef` data structure
+		@returns `data` if valid or `null` if not.
+	**/
+	public static function validate(data:Dynamic):Null<Dynamic>
+	{
+		if (!Reflect.hasField(data, "fieldName"))
+			return null;
+
+		if (!Reflect.hasField(data, "uiElement"))
+			return null;
+
+		data.displayName ??= data.fieldName;
+
+		return switch((data.uiElement:UIElementType)) {
+			case TEXT_INPUT:
+				data.defaultValue ??= "";
+				data;
+
+			case NUM_STEPPER:
+				data.stepSize ??= 1.0;
+				data.defaultValue ??= 0.0;
+				data.min ??= -999.0;
+				data.max ??= 999.0;
+				data.decimals ??= 0;
+				data;
+			
+			case SLIDER: 
+				data.decimals ??= 1;
+				data;
+
+			default: data;
+		}
+	}
+
+	public static function validateFields(fields:Array<Dynamic>) {
+		if (fields == null || !(fields is Array))
+			return [];
+
+		var offi = 0;
+		for (i => fieldDef in fields) {
+			fields[i - offi] = validate(fieldDef);
+			if (fields[i] == null) offi++;
+		}
+		fields.resize(fields.length - offi);
+
+		return fields;
+	}
+
+	public static function getPsychFieldDefs():Array<InputTextDef> {
+		return [
+			{fieldName: "value1", displayName: "Value 1", uiElement: TEXT_INPUT, defaultValue: ""},
+			{fieldName: "value2", displayName: "Value 2", uiElement: TEXT_INPUT, defaultValue: ""},
+		];
 	}
 }
