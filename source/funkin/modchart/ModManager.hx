@@ -101,32 +101,47 @@ class ModManager {
 	
 	public function registerDefaultModifiers()
 	{
-		var quickRegs:Array<Class<Modifier>> = [
-			ReverseModifier,
-			SwapModifier,
-			DrunkModifier,
-			BeatModifier,
-			AlphaModifier,
-			ScaleModifier, 
-			ConfusionModifier, 
-			OpponentModifier, 
-			TransformModifier, 
-			//InfinitePathModifier,
-			PathModifier,
-			AccelModifier,
-			PerspectiveModifier,
-			ZoomModifier,
-			SnapModifier,
-			SpiralModifier,
-			SchmovinDrunkModifier,
-			SkewModifier
-		];
-		for (mod in quickRegs)
-			quickRegister(Type.createInstance(mod, [this]));
+		inline function registerModClasses(quickRegs:Array<Class<Modifier>>) {
+			for (mod in quickRegs)
+				quickRegister(Type.createInstance(mod, [this]));
+		}
 
-		quickRegister(new RotateModifier(this));
-		quickRegister(new RotateModifier(this, 'center', Vector3.get(FlxG.width* 0.5, FlxG.height* 0.5)));
-		quickRegister(new LocalRotateModifier(this, 'local'));
+		if (state.disableModcharts) {
+			registerModClasses([
+				ReverseModifier,
+				AlphaModifier,
+				ScaleModifier, 
+				ConfusionModifier, 
+				OpponentModifier, 
+				TransformModifier, 
+				PerspectiveModifier,
+				ZoomModifier,
+			]);
+		}else {
+			registerModClasses([
+				SwapModifier,
+				DrunkModifier,
+				BeatModifier,
+				AlphaModifier,
+				ScaleModifier, 
+				ConfusionModifier, 
+				OpponentModifier, 
+				TransformModifier, 
+				//InfinitePathModifier,
+				PathModifier,
+				AccelModifier,
+				PerspectiveModifier,
+				ZoomModifier,
+				SnapModifier,
+				SpiralModifier,
+				SchmovinDrunkModifier,
+				SkewModifier
+			]);
+
+			quickRegister(new RotateModifier(this));
+			quickRegister(new RotateModifier(this, 'center', Vector3.get(FlxG.width* 0.5, FlxG.height* 0.5)));
+			quickRegister(new LocalRotateModifier(this, 'local'));
+		}
 
 		registerAux("alwaysDraw");
 		registerAux("spiralHolds");
