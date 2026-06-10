@@ -22,10 +22,18 @@ typedef CharacterFile = {
 	var healthbar_colors:Array<Int>;
 	var healthicon:String;
 
+	@:optional var gameover:GameOverData;
+
 	@:optional var x_facing:Float;
 	@:optional var death_name:String;
 	@:optional var script_names:Array<String>;
 	@:optional var script_name:String;
+}
+
+typedef GameOverData = {
+	var deathSoundName:String;
+	var loopSoundName:String;
+	var endSoundName:String;
 }
 
 typedef AnimArray = {
