@@ -102,8 +102,20 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 
 		grp.add(convertFilesButt);
 
-		grp.x = Std.int((FlxG.width - grp.width) / 2);
-		grp.y = Std.int((FlxG.height - (fromFormatDD.y + fromFormatDD.height)) / 2);
+		var grpWidth = grp.width;
+		var grpHeight = (fromFormatDD.y + fromFormatDD.header.height);
+		grp.x = Std.int((FlxG.width - grpWidth) / 2);
+		grp.y = Std.int((FlxG.height - grpHeight) / 2);
+
+		var minY = grp.findMinY();
+		var maxY = selectChartsButt.y + selectChartsButt.height + 15;//grp.findMaxY();
+
+		var bd = new trollui.SlicedSprite(0, 0, grpWidth + 16, (maxY - minY) + 16, "flixel/flixel-ui/img/chrome.png", [3, 3, 3, 3]);
+		grp.insert(0, bd);
+		bd.x = grp.x - 8;
+		bd.y = minY - 8;
+		grp.y = Std.int((FlxG.height - bd.height) / 2);
+
 		this.add(grp);
 	}
 
