@@ -119,7 +119,7 @@ class StageData {
 		return json;
 	}
 	/**
-		Return an array with the names in the stageList file(s).
+		Returns an array with references to stages defined in the `titleStageList.txt` files.
 	**/ 
 	public static function getTitleStages():Array<StageReference>
 	{

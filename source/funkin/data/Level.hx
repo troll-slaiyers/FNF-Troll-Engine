@@ -49,7 +49,6 @@ class Level {
 		level.asset = json?.asset ?? "storymenu/titles/week1";
 		level.props = json?.props ?? level.props;
 		level.appearsInStory = json?.appearsInStory ?? true;
-		level.index = json?.index ?? index;
 		level.bgColor = CoolUtil.colorFromString(json?.bgColor ?? "#F9CF51");
 
 		if (scriptedLevel != null) {
@@ -67,7 +66,6 @@ class Level {
 	public var id:String = 'broken';
 	public var folder:String = '';
 	public var bgColor:FlxColor = 0xFFF9CF51;
-	public var index:Int = 0;
 	public var name:String = "PLACEHOLDER";
 	public var asset:String = "storymenu/titles/week1";
 	public var songList:Array<String> = [];
@@ -82,14 +80,6 @@ class Level {
 	public function getAsset():String
 	{
 		return asset;
-	}
-
-	/**
-	 * Returns an integer to decide placement of the level
-	**/
-	public function getIndex():Int
-	{
-		return index;
 	}
 
 	/**

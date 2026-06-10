@@ -82,6 +82,18 @@ class Pack {
 }
 
 typedef PackMetadata = {
+	/**
+		This mod will always run, regardless of whether it's currently being played or not.
+		(Custom HUDs, etc, will find this useful, as you can have stuff run across every song without adding to the global folder)
+	**/
+	@:optional var runsGlobally:Bool;
+	
+	/** Content that will load before this content. **/
+	@:optional var dependencies:Array<String>;
+	
+	/** API Version **/
+	@:optional var trollEngine:String;
+
 	@:optional var title:String;
 	@:optional var description:String;
 	@:optional var author:String;

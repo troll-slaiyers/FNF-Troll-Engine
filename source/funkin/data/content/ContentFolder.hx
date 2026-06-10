@@ -5,60 +5,18 @@ import funkin.Paths;
 import funkin.data.content.Pack;
 
 class ContentFolder extends Pack {
-	public var jsonData:ContentMetadata = {};
-
 	override function load() {
 		var metaJson:PackMetadata = Paths.getJson('$path/pack.json');
-		if (metaJson != null) {
-			if (metaJson.bgColor is String)
-				metaJson.bgColor = CoolUtil.colorFromString(cast metaJson.bgColor);
-			this.metadata = metaJson;
-		}
-		
-		////
-		var metaJson:ContentMetadata = Paths.getJson('$path/metadata.json');
-		
 		if (metaJson == null) {
-			trace('No metadata file found for $id, $path');
+			trace('No pack file found for $id, $path');
 			return;
 		}
 
-		this.jsonData = metaJson;
-		this.runsGlobally = metaJson.runsGlobally;
+		this.metadata = metaJson;
+		this.runsGlobally = metaJson.runsGlobally ?? false;
 		this.dependencies = metaJson.dependencies ?? [];
-	}
-
-	inline static function updateContentMetadataStructure(data:Dynamic):ContentMetadata
-	{
-		#if ALLOW_DEPRECATION
-		inline function getFreeplaySongs():Array<String> {
-			var list:Array<String> = [];
-			
-			var fs:Dynamic = Reflect.field(data, "freeplaySongs");
-			if (fs is Array) {
-				var fs:Array<Dynamic> = cast fs;
-				
-				if (fs.length == 0) {
-					// none
-				}else if (fs[0] is String) {
-					for (s in fs) list.push(Std.string(s));
-				}
-				else if (Reflect.isObject(fs[0])) {
-					for (s in fs) {
-						var v = Reflect.field(s, "name");
-						if (v != null) list.push(Std.string(v));
-					}
-				}
-			}
-			
-			return list;
-		}
-
-		if (Reflect.hasField(data, "freeplaySongs"))
-			Reflect.setField(data, "freeplaySongs", getFreeplaySongs());
-		#end
-
-		return data;
+		if (metaJson.bgColor is String)
+			metaJson.bgColor = CoolUtil.colorFromString(cast metaJson.bgColor);
 	}
 
 	override function getSongs():Array<BaseSong> {
@@ -79,13 +37,6 @@ class ContentFolder extends Pack {
 		var list:Array<BaseSong> = [];
 		var songIdMap:Map<String, Bool> = [];
 
-		inline function sowy(songId:String) {
-			if (!songIdMap.exists(songId)) {
-				songIdMap.set(songId, true);
-				list.push(new Song(songId, this.id));
-			}
-		}
-
 		//// level songs
 		for (level in this.getStoryModeLevels()) {
 			if (!level.isUnlocked())
@@ -97,34 +48,21 @@ class ContentFolder extends Pack {
 			}
 		}
 
-		// metadata file freeplay songs
-		if (jsonData.freeplaySongs != null) {
-			for (songId in jsonData.freeplaySongs)
-				sowy(songId);
-		}
-
-		// freeplaySonglist.txt
-		var rawList:Null<String> = Paths.getContent('$path/data/freeplaySonglist.txt');
+		var rawList:Null<String> = Paths.getContent('$path/data/freeplaySongList.txt');
 		if (rawList != null) {
+			// If `data/freeplaySongList.txt` only add songs within the list.
 			for (songId in CoolUtil.listFromString(rawList)) {
-				#if ALLOW_DEPRECATION
-				// old tgt shit '$id:$category'
-				var split:Array<String> = songId.split(":");
-				sowy(split.length > 1 ? split[0] : songId);
-				#else
-				sowy(songId);
-				#end
+				if (!songIdMap.exists(songId)) {
+					songIdMap.set(songId, true);
+					list.push(new Song(songId, this.id));
+				}
 			}
-		}
-		
-		// default category shit
-		// should prob just make a autoAddToFreeplay bool or sum shit idk lol
-		if (jsonData.defaultCategory != null && jsonData.defaultCategory.length > 0){
-			var dir = '$path/songs';
-
-			for (file in Paths.readDirectory(dir)) {
-				if (sys.FileSystem.isDirectory('$dir/$file')) {
-					sowy(file);
+		}else {
+			// Otherwise, add every song belonging to the mod.
+			for (song in this.getSongs()) {
+				if (!songIdMap.exists(song.songId)) {
+					songIdMap.set(song.songId, true);
+					list.push(song);
 				}
 			}
 		}
@@ -133,7 +71,7 @@ class ContentFolder extends Pack {
 	}
 
 	override function getStoryModeLevels():Array<Level> {
-		var levelDir = this.path + '/levels/';
+		var levelDir = '$path/levels/';
 
 		var contentLevelPaths:Array<String> = [];
 		for (file in Paths.readDirectory(levelDir)) {
@@ -149,73 +87,31 @@ class ContentFolder extends Pack {
 			contentLevels.push(Level.fromFile(filePath, levelId, this.id, index));
 		}
 
-		contentLevels.sort((a,b)-> return a.getIndex() - b.getIndex());
+		var rawList:Null<String> = Paths.getContent('$path/data/storyLevelList.txt');
+		if (rawList != null) {
+			// If `data/storyLevelList.txt` file exists, sort levels by their order on the list
+			// If a level isn't present in the list, it will be added at the end of it
+
+			var order:Map<String, Int> = [];
+			var splitList = CoolUtil.listFromString(rawList);
+			for (i => levelId in splitList)
+				order.set(levelId, -(splitList.length - i));
+
+			contentLevels.sort((a, b) -> (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+		}
+
 		return contentLevels;
 	}
 
 	override function getTitleStages():Array<String> {
-		return jsonData.titleStages ?? {
-			var daList:Array<String> = [];
+		var daList:Array<String> = [];
+		
+		var rawList = Paths.getContent('$path/data/titleStageList.txt');
+		if (rawList != null && StringTools.trim(rawList).length > 0) {
+			for (shit in rawList.split("\n"))
+				daList.push(StringTools.replace(StringTools.trim(shit), "\n", ""));
+		}
 			
-			var rawList = Paths.getContent('$path/data/stageList.txt');
-			if (rawList != null && StringTools.trim(rawList).length > 0) {
-				for (shit in rawList.split("\n"))
-					daList.push(StringTools.replace(StringTools.trim(shit), "\n", ""));
-			}
-			
-			daList;
-		};
+		return daList;
 	}
-}
-
-typedef ContentMetadata = {
-	/** API Version **/
-	@:optional var trollEngine:String;
-	
-	/**
-		This mod will always run, regardless of whether it's currently being played or not.
-		(Custom HUDs, etc, will find this useful, as you can have stuff run across every song without adding to the global folder)
-	**/
-	@:optional var runsGlobally:Bool;
-	
-	/**
-		Content that will load before this content.
-	**/
-	@:optional var dependencies:Array<String>;
-
-	/**
-		Stages that can appear in the title menu
-	**/
-	@:optional var titleStages:Array<String>;
-
-	/**
-		Songs to be placed into the freeplay menu
-	**/
-	@:optional var freeplaySongs:Array<String>;
-
-	/**
-		Categories to be placed into the freeplay menu
-	**/
-	@:optional var freeplayCategories:Array<FreeplayCategoryMetadata>;
-	
-	/**
-		If this is specified, then songs don't have to be added to freeplaySongs to have them appear
-		As anything in the songs folder will appear in this category instead
-	**/
-	@:optional var defaultCategory:String;
-}
-
-typedef FreeplayCategoryMetadata = {
-	/**
-		Displayed Name of the category
-		This is used to show the category in the freeplay list
-	**/
-	var name:String;
-
-	/**
-		ID of the category
-		This gets used when adding songs to the category
-		(Defaults are main, side and remix)
-	**/
-	var id:String;
 }
