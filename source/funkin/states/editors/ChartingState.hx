@@ -610,6 +610,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		add(tipGroup);
 		add(progressBG);
 		add(progressBar);
+		add(new TopBarOptions());
 
 		////
 		FlxG.mouse.visible = true;
@@ -4470,6 +4471,92 @@ private abstract NoteSelection(Array<ChartObject>) to Array<ChartObject> {
 	////
 	function _sort(a:ChartObject, b:ChartObject):Int
 		return FlxSort.byValues(FlxSort.ASCENDING, a.strumTime, b.strumTime);
+}
+
+private class TBOptionData {
+	public final label:String;
+	public final func:Void -> Void;
+	inline public function new(label:String, ?func:Void -> Void) {
+		this.label = label;
+		this.func = func;
+	}
+}
+
+private class TopBarOptions extends FlxTypedGroup<FlxBasic> {
+	var mainButtons = new FlxTypedGroup<FlxButton>();
+	var buttonGroups = new FlxTypedGroup<FlxTypedGroup<FlxButton>>();
+
+	var curOpen:Int = -1;
+
+	public function new() {
+		super();
+
+		var btnData:Array<{label:String, options:Array<TBOptionData>}> = [
+			{label: 'File', options: [
+				new TBOptionData('Open Song', editor.openSongSelect), 
+				//new TBOptionData('Autosaves'), 
+				new TBOptionData('Load Autosave', editor.loadAutosave), 
+				new TBOptionData('Reload JSON', editor.reloadSongJSON), 
+				new TBOptionData('Save Chart', editor.saveChartFile), 
+				new TBOptionData('Export as ZIP', editor.saveSongZIP), 
+				new TBOptionData('Open Events', editor.openEventsJSON), 
+				new TBOptionData('Save Events', editor.saveEventsFile), 
+				new TBOptionData('Exit Editor')
+			]},
+			{label: 'Edit', options: [
+				new TBOptionData('Preferences'), 
+				new TBOptionData('Fix Notes'), 
+				new TBOptionData('Clear Notes'), 
+				new TBOptionData('Clear Events')
+			]},
+		];
+
+		add(mainButtons);
+		add(buttonGroups);
+
+		for (i => data in btnData) {
+			var mainButton = new FlxButton(data.label);
+			mainButton.setPosition(5 + (80 + 5) * i, 5);
+			mainButton.onUp.callback = openGroup.bind(i); 
+			mainButton.ID = i;
+			mainButton.scrollFactor.set();
+			mainButtons.add(mainButton);
+			
+			var grp = new FlxTypedGroup<FlxButton>();
+			grp.exists = false;
+			buttonGroups.add(grp);
+			
+			for (i => optionData in data.options) {
+				var button = new FlxButton(optionData.label);
+				button.setPosition(mainButton.x, mainButton.y + (i + 1) * 20);
+				//button.onUp.callback = onSelect.bind(data.label, label);
+				button.onUp.callback = optionData.func;
+				button.ID = i;
+				button.scrollFactor.set();
+				grp.add(button);	
+			}
+		}
+	}
+
+	var _ignoreClosing = false;
+	override function update(elapsed:Float) {
+		super.update(elapsed);
+		if (FlxG.mouse.justReleased && curOpen != -1 && !_ignoreClosing)
+			openGroup(-1);
+		_ignoreClosing = false;
+	}
+
+	public function openGroup(index:Int = -1) {
+		for (i => grp in buttonGroups) {
+			grp.exists = i == index && i != curOpen;
+		}
+		curOpen = (curOpen != index) ? index : -1;
+		_ignoreClosing = true;
+	}
+
+	public function onSelect(group:String, option:String) {
+		trace(group, option);
+	}
 }
 
 private class HistoryDisplay extends FlxSpriteGroup {
