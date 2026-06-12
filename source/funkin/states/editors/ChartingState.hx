@@ -955,31 +955,16 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 	function addSongUI():Void
 	{
-		var selectSongButton = newFlxUIButton(10, 20, "Select Song", openSongSelect);
-		var saveButton = newFlxUIButton(110, 20, "Save Chart", saveChartFile);
-		var saveEventJson = newFlxUIButton(110, saveButton.y + 30, 'Save Events', saveEventsFile);
-		var saveZipButton = newFlxUIButton(110, saveEventJson.y + 30, 'Save as ZIP', saveSongZIP);
-
-		///
-		var reloadSongJson:FlxUIButton = newFlxUIButton(saveButton.x + 90, saveButton.y, "Reload JSON", reloadSongJSON);
-		reloadSongJson.color = 0xFFFF0000;
-
-		var loadAutosaveBtn:FlxUIButton = newFlxUIButton(reloadSongJson.x, reloadSongJson.y + 30, 'Load Autosave', loadAutosave);
-
-		////
-		var loadEventJson:FlxUIButton = newFlxUIButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Open Events', openEventsJSON);
-
-		////
-		var editTracksButton:FlxUIButton = newFlxUIButton(loadAutosaveBtn.x, loadEventJson.y + 40, 'Edit Tracks', function() {
+		var editTracksButton:FlxUIButton = newFlxUIButton(10, 20, 'Edit Tracks', function() {
 			UI_box.selected_tab_id = "Tracks";
 		});
 
 		////
-		var fix_oob_notes:FlxUIButton = newFlxUIButton(loadAutosaveBtn.x, 300 - 40, 'Fix Notes', showWarning.bind('This action will fix notes that are outside of their corresponding section.\n\nProceed?', fixOOBNotes));
+		var fix_oob_notes:FlxUIButton = newFlxUIButton(200, 300 - 40, 'Fix Notes', showWarning.bind('This action will fix notes that are outside of their corresponding section.\n\nProceed?', fixOOBNotes));
 		fix_oob_notes.color = FlxColor.PINK;
 		fix_oob_notes.label.color = FlxColor.WHITE;
 
-		var clear_events:FlxUIButton = newFlxUIButton(loadAutosaveBtn.x, 300, 'Clear events', showWarning.bind('Clear events?\n\nThis action cannot be undone.', clearEvents));
+		var clear_events:FlxUIButton = newFlxUIButton(200, 300, 'Clear events', showWarning.bind('Clear events?\n\nThis action cannot be undone.', clearEvents));
 		clear_events.color = FlxColor.RED;
 		clear_events.label.color = FlxColor.WHITE;
 
@@ -987,17 +972,18 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		clear_notes.color = FlxColor.RED;
 		clear_notes.label.color = FlxColor.WHITE;
 
-		var stepperSpeed = newFlxUINumericStepper(10, selectSongButton.y + 35, 0.1, 1, 0.1, 10, 1);
+		////
+		var stepperSpeed = newFlxUINumericStepper(10, 60, 0.1, 1, 0.1, 10, 1);
 		stepperSpeed.value = _song.speed;
 		stepperSpeed.name = 'song_speed';
 		blockPressWhileTypingOnStepper.push(stepperSpeed);
 
-		var stepperBPM = newFlxUINumericStepper(10, stepperSpeed.y + 35, 1, 1, 1, 9000, 3);
+		var stepperBPM = newFlxUINumericStepper(110, stepperSpeed.y, 1, 1, 1, 9000, 3);
 		stepperBPM.value = Conductor.bpm;
 		stepperBPM.name = 'song_bpm';
 		blockPressWhileTypingOnStepper.push(stepperBPM);
 
-		var stepperKeyCount = newFlxUINumericStepper(10, stepperBPM.y + 35, 1, 4, Note.minKeyCount, Note.maxKeyCount, 0);
+		var stepperKeyCount = newFlxUINumericStepper(210, stepperBPM.y, 1, 4, Note.minKeyCount, Note.maxKeyCount, 0);
 		stepperKeyCount.value = _song.keyCount;
 		stepperKeyCount.name = 'song_keyCount';
 		blockPressWhileTypingOnStepper.push(stepperKeyCount);
@@ -1076,26 +1062,19 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
-		tab_group_song.add(selectSongButton);
 
 		tab_group_song.add(fix_oob_notes);
 		tab_group_song.add(clear_events);
 		tab_group_song.add(clear_notes);
-		tab_group_song.add(saveButton);
-		tab_group_song.add(saveEventJson);
-		tab_group_song.add(saveZipButton);
 		tab_group_song.add(editTracksButton);
 
-		tab_group_song.add(reloadSongJson);
-		tab_group_song.add(loadAutosaveBtn);
-		tab_group_song.add(loadEventJson);
 		tab_group_song.add(stepperSpeed);
 		tab_group_song.add(stepperBPM);
 		tab_group_song.add(stepperKeyCount);
 		tab_group_song.add(noteSkinInputText);
 		tab_group_song.add(noteSplashesInputText);
 
-		tab_group_song.add(new FlxText(selectSongButton.x, selectSongButton.y - 15, 0, Std.string(PlayState.song)));
+		tab_group_song.add(new FlxText(editTracksButton.x, editTracksButton.y - 15, 0, Std.string(PlayState.song)));
 
 		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Note Speed:'));
 		tab_group_song.add(new FlxText(stepperBPM.x, stepperBPM.y - 15, 0, 'Song BPM:'));
