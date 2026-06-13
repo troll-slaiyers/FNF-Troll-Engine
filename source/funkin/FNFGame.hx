@@ -27,6 +27,10 @@ class FNFGame extends FlxGame
 		@:privateAccess FlxG.initSave();
 		startFullscreen = startFullscreen ?? FlxG.save.data.fullscreen;
 
+		#if FLX_TROLL
+		this.getTimer = Main.getTime;
+		#end
+
 		super(gameWidth, gameHeight, initialState, updateFramerate, drawFramerate, skipSplash, startFullscreen);
 
 		FlxG.sound.volume = FlxG.save.data.volume;
@@ -87,85 +91,6 @@ class FNFGame extends FlxGame
 		}
 	}
 
-	/*
-	public var f_ticks:Float = 0;
-	var f_startTime:Float = 0;
-	var f_total:Float = 0;
-
-	inline function f_getTicks():Float
-		return Main.getTime() - f_startTime;
-
-	override function create(_) {
-		f_startTime = Main.getTime();
-		f_total = f_getTicks();
-		return super.create(_);
-	}
-
-	override function onEnterFrame(_):Void
-	{
-		ticks = Math.floor(f_ticks = f_getTicks());
-		_elapsedMS = f_ticks - f_total;
-		_total = Math.floor(f_total = f_ticks);
-
-		#if FLX_SOUND_TRAY
-		if (soundTray != null && soundTray.active)
-			soundTray.update(_elapsedMS);
-		#end
-
-		if (!_lostFocus || !FlxG.autoPause)
-		{
-			if (FlxG.vcr.paused)
-			{
-				if (FlxG.vcr.stepRequested)
-				{
-					FlxG.vcr.stepRequested = false;
-				}
-				else if (_nextState == null) // don't pause a state switch request
-				{
-					#if FLX_DEBUG
-					debugger.update();
-					// If the interactive debug is active, the screen must
-					// be rendered because the user might be doing changes
-					// to game objects (e.g. moving things around).
-					if (debugger.interaction.isActive())
-					{
-						draw();
-					}
-					#end
-					return;
-				}
-			}
-
-			if (FlxG.fixedTimestep)
-			{
-				_accumulator += _elapsedMS;
-				_accumulator = (_accumulator > _maxAccumulation) ? _maxAccumulation : _accumulator;
-
-				while (_accumulator >= _stepMS)
-				{
-					step();
-					_accumulator -= _stepMS;
-				}
-			}
-			else
-			{
-				step();
-			}
-
-			#if FLX_DEBUG
-			FlxBasic.visibleCount = 0;
-			#end
-
-			draw();
-
-			#if FLX_DEBUG
-			debugger.stats.visibleObjects(FlxBasic.visibleCount);
-			debugger.update();
-			#end
-		}
-	}
-	*/
-
 	override function switchState():Void
 	{
 		#if SCRIPTABLE_STATES
@@ -208,6 +133,16 @@ class FNFGame extends FlxGame
 			FlxG.updateFramerate = Math.ceil(v);
 		}
 	}
+
+	#if VSYNC_ALLOWED
+	public function set_vsyncMode(v:String) {
+		FlxG.stage.window.setVSyncMode(switch(v) {
+			case "Adaptive": ADAPTIVE;
+			case "On": ON;
+			default: OFF;
+		});
+	}
+	#end
 
 	@:noCompletion inline public static function set_specialKeysEnabled(val)
 	{

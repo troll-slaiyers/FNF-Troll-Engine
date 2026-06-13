@@ -84,7 +84,15 @@ class CrashHandler {
 	}
 
 	inline private static function showCrashBox(errorName:String, boxMessage:String):HandlerChoice {
-		#if WINDOWS_CRASH_HANDLER
+		#if lime_funkin
+		final ret = FlxG.stage.window.alert(lime.ui.MessageBoxType.ERROR, boxMessage, errorName, ["Main Menu", "Close Program", "Continue"]);
+		return switch(ret) {
+			case 0: YES;
+			case 1: NO;
+			case 2: CANCEL;
+			default: NO;
+		}
+		#elseif WINDOWS_CRASH_HANDLER
 		boxMessage += "\nWould you like to go to the main menu?";
 		final ret:MessageBoxReturnValue = Windows.msgBox(boxMessage, errorName, MessageBoxIcon.ERROR | MessageBoxOptions.YESNOCANCEL | MessageBoxDefaultButton.BUTTON3);
 		return switch(ret) {
