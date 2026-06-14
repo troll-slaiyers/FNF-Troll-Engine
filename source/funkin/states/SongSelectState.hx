@@ -90,8 +90,6 @@ class SongSelectState extends MusicBeatSubstate
 			cam.bgColor = 0;
 			FlxG.cameras.add(cam, false);
 			this.camera = cam;
-			if (this._bgSprite != null)
-				this._bgSprite._cameras = this._cameras;
 		}
 
 		songs ??= getEverySong();
