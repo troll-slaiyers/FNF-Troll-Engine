@@ -21,14 +21,14 @@ jobs:
     
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.3
 
-      - uses: krdlab/setup-haxe@master
+      - uses: krdlab/setup-haxe@v2.1.0
         with:
           haxe-version: 4.3.7
       # Runs a set of commands using the runners shell
       - name: Restore existing build cache for faster compilation
-        uses: actions/cache@v3
+        uses: actions/cache@v4.2.3
         with:
           # not caching the bin folder to prevent asset duplication and stuff like that
           key: cache-build-windows
@@ -50,7 +50,7 @@ jobs:
       - name: Compile
         run: haxelib run lime build windows -Dartifact
       - name: Publish Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: windowsBuild
           path: export/release/windows/bin
@@ -76,7 +76,7 @@ jobs:
               }
             }
       - name: Uploading new cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4.2.3
         if: ${{github.ref == 'refs/heads/main'}}
         with:
           # caching again since for some reason it doesnt work with the first post cache shit
@@ -95,23 +95,30 @@ jobs:
       fail-fast: false
       matrix:
         build: [release]
-        version: [22.04]
+        version: [24.04]
     timeout-minutes: 45
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.3
 
-      - uses: krdlab/setup-haxe@master
+      - uses: krdlab/setup-haxe@v2.1.0
         with:
           haxe-version: 4.3.7
       # Runs a set of commands using the runners shell
-      - name: Install LibVLC
+      - name: Install system dependencies
         run: |
-          sudo apt-get install libvlc-dev
-          sudo apt-get install libvlccore-dev
-          sudo apt install libxrandr-dev
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential gcc-13 g++-13 vlc libvlc-dev libvlccore-dev vlc-bin \
+            libwayland-dev libwayland-bin wayland-protocols libasound2-dev \
+            libpulse-dev libjack-jackd2-dev libpipewire-0.3-dev libgl1-mesa-dev \
+            libegl1-mesa-dev libglu1-mesa-dev libdbus-1-dev libudev-dev \
+            libxkbcommon-dev libx11-dev libxext-dev libx11-xcb-dev libxfixes-dev \
+            libxss-dev libxrender-dev libxrandr-dev libxcursor-dev libxi-dev \
+            libxinerama-dev libxxf86vm-dev libgbm-dev libdrm-dev libdecor-0-dev \
+            libvulkan-dev pkg-config
       - name: Install Haxelib
         run: |
           haxelib setup ~/haxelib
@@ -123,10 +130,10 @@ jobs:
       - name: Compile
         run: haxelib run lime build Project.xml linux -Dartifact --app-version="4.0.0-${{ github.run_id}}"
       - name: Publish Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: linuxBuild
-          path: 'export/release/linux/bin'
+          path: export/release/linux/bin
   
   buildMac:
     runs-on: macos-${{ matrix.version }}
@@ -139,9 +146,9 @@ jobs:
     
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.3
 
-      - uses: krdlab/setup-haxe@master
+      - uses: krdlab/setup-haxe@v2.1.0
         with:
           haxe-version: 4.3.7
       # Runs a set of commands using the runners shell
@@ -156,7 +163,7 @@ jobs:
       - name: Compile
         run: haxelib run lime build mac -Dartifact --app-version="4.0.0-${{ github.run_id}}"
       - name: Publish Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: macBuild
           path: 'export/release/macos/bin'
