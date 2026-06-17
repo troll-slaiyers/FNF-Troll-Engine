@@ -22,7 +22,7 @@ class ContentFolder extends Pack {
 	override function getSongs():Array<BaseSong> {
 		var songList:Array<BaseSong> = [];
 
-		var songsPath = this.path + '/songs/';
+		var songsPath = '$path/songs/';
 		for (folderName in Paths.readDirectory(songsPath)) {
 			if (Paths.isDirectory(songsPath + folderName)) {
 				// trace(songList.length, folderName);

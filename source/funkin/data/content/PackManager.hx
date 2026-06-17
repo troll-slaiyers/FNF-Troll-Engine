@@ -92,15 +92,42 @@ class PackManager {
 		//// Load packs
 		for (pack in loadList) {
 			try {
+				pack.loadException = '';
 				pack.load();
-				if (pack.runsGlobally) 
-					globalPacks.push(pack);
-				packList.push(pack.id);
+				pack.active = pack.loadException.length == 0;
 			}catch(e) {
-				Main.printExceptionStack();
-				print('Error loading ${pack.id}: $e');
+				var e = Std.string(e);
+				var cs = CrashHandler.callstackToString(haxe.CallStack.exceptionStack());
+				pack.loadException = '$e\n$cs';
+				pack.active = false;
+				print('Error loading ${pack.id}: ${pack.loadException}');
 			}
 		}
+
+		for (pack in loadList) {
+			if (!pack.active)
+				continue;
+			
+			for (dependencyId in pack.dependencies) {
+				if (!allPacks.exists(dependencyId))
+					pack.loadException = 'Dependency "$dependencyId" is not present!';
+				else if (!packMap.exists(dependencyId))
+					pack.loadException = 'Dependency "$dependencyId" is not active!';
+				else // you're good
+					continue;
+				break; // missing dependency!
+			}
+
+			if (pack.loadException.length != 0) {
+				pack.active = false;
+				continue;
+			}
+
+			if (pack.runsGlobally) 
+				globalPacks.push(pack);
+			packList.push(pack.id);
+		}
+
 		trace('packList $packList');
 		trace('globalPacks: $globalPacks');
 	}

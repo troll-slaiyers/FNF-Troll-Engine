@@ -13,14 +13,25 @@ class Pack {
 	/** Whether assets from this folder can be loaded regardless of it being the currently played mod **/
 	public var runsGlobally:Bool = false;
 
+	/** 
+		List of pack id's that this pack depends on.  
+		Will throw an error if any of the dependencies aren't loaded when this pack is loaded.
+	**/
 	public var dependencies:Array<String> = [];
 
 	public var metadata:PackMetadata = {};
 
 	public final extraData = new Map<String, Dynamic>();
 
-	@:access(funkin.data.content.PackManager)
-	private var active(default, default):Bool = false;
+	/** 
+		Whether this pack has been successfully loaded by `PackManager`.  
+		If an error occured, this will be false and the error will be stored in `loadException`.
+	**/
+	@:allow(funkin.data.content)
+	private var active:Bool = false;
+
+	/** If this pack threw an exception during loading, it will be stored here. **/
+	public var loadException:String = '';
 
 	public function new(id:String, path:String) {
 		this.id = id;

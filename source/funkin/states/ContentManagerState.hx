@@ -82,6 +82,12 @@ class ContentManagerState extends MusicBeatState {
 
 		displayData.bannerAsset = packGraphic(pack, 'packbanner');
 		displayData.bgAsset = packGraphic(pack, 'images/menuDesat') ?? packGraphic(PackManager.engineAssets, 'images/contentmenu/menuDesat') ?? FlxGraphic.fromRectangle(FlxG.width, FlxG.height, 0xFFE1E1E1, false, 'contentmanager_nobg');
+	
+		////
+		@:privateAccess
+		if (pack.loadException.length > 0) {
+			displayData.description = 'An error occurred when loading this pack:\n' + pack.loadException;
+		}
 	}
 
 	override function create() {
@@ -541,8 +547,32 @@ class ContentManagerState extends MusicBeatState {
 			toggleEntry(listSelectedIndex);
 
 		if (controls.BACK) {
-			if (didChanges) {
+			handleBack();
+		}
+	}
+
+	function handleBack() {
+		if (didChanges) {
+			PackManager.entries = entries;
+			PackManager.flushEntryList();
+			PackManager.reloadPackList();
+		}
+
+		var packsWithErrors = [];
+		for (pack in PackManager.packMap) {
+			if (pack.loadException.length > 0) {
+				packsWithErrors.push(pack);
 			}
+		}
+
+		if (packsWithErrors.length != 0) {
+			var errorMsg = 'The following packs had errors and were disabled:\n\n';
+			for (pack in packsWithErrors) {
+				errorMsg += '- "${pack.id}"\n${pack.loadException}\n\n';
+			}
+			trace(errorMsg);
+			updateListBoxes();
+		}else {
 			MusicBeatState.switchState(new funkin.states.MainMenuState());
 		}
 	}
@@ -689,10 +719,6 @@ class ContentManagerState extends MusicBeatState {
 		super.destroy();
 
 		if (didChanges) {
-			PackManager.entries = entries;
-			PackManager.flushEntryList();
-			PackManager.reloadPackList();
-
 			FlxG.sound.destroy(true);
 			Paths.clearStoredMemory();
 			Paths.clearUnusedMemory();
@@ -984,6 +1010,9 @@ private class EntryBox extends FlxSpriteGroup {
 		
 		@:privateAccess {
 			final pack = PackManager.allPacks.get(entry.id);
+
+			bg.color = pack.loadException.length > 0 ? FlxColor.RED : FlxColor.WHITE;
+
 			var graphic:FlxGraphic = packGraphic(pack, 'packicon');
 			graphic ??= Paths.image("contentmenu/pack");
 			icon.loadGraphic(graphic);
