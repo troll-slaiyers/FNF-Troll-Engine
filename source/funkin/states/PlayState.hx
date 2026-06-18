@@ -2407,6 +2407,12 @@ class PlayState extends MusicBeatState
 			stats.npsPeak = nps;
 
 		////
+		super.update(elapsed);
+		updateVisualPosition();
+		danceCharacters(); // Update characters dancing
+		checkEventNote();
+		modManager.update(elapsed, curDecBeat, curDecStep);
+
 		if (!endingSong){
 			//// time travel
 			if (startedSong #if !debug && chartingMode #end){
@@ -2444,13 +2450,6 @@ class PlayState extends MusicBeatState
 
 		if (controls.PAUSE && canPause)
 			doPauseShit();
-
-		////
-		super.update(elapsed);
-		updateVisualPosition();
-		danceCharacters(); // Update characters dancing
-		checkEventNote();
-		modManager.update(elapsed, curDecBeat, curDecStep);
 
 		if (generatedMusic && !isDead) {
 			if (ClientPrefs.controllerMode) {
