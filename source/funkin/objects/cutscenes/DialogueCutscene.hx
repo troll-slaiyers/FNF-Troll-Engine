@@ -1,5 +1,7 @@
 package funkin.objects.cutscenes;
 
+import funkin.objects.cutscenes.components.DialogueBox;
+import funkin.objects.cutscenes.components.DialogueCharacter;
 import funkin.input.Controls.firstActive as controls;
 import flixel.addons.text.FlxTypeText;
 import flixel.util.FlxColor;

@@ -1,12 +1,14 @@
-package funkin.objects.cutscenes;
+package funkin.states.editors;
 
+#if false
 import funkin.states.CutscenePauseSubstate;
-import flixel.tweens.FlxEase;
+import funkin.objects.cutscenes.Cutscene;
+import funkin.objects.cutscenes.TimelineCutscene;
 import funkin.states.base.MusicBeatState;
 
 class CutsceneTestState extends MusicBeatState
 {
-	var cutscene: Cutscene;
+	var cutscene:Cutscene;
 	var camGame:FlxCamera;
 	var camOther:FlxCamera;
 
@@ -42,3 +44,4 @@ class CutsceneTestState extends MusicBeatState
 		}
 	}
 }
+#end

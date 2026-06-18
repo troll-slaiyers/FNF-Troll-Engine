@@ -1,4 +1,4 @@
-package funkin.objects.cutscenes;
+package funkin.objects.cutscenes.components;
 
 import funkin.scripts.*;
 
