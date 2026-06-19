@@ -184,7 +184,7 @@ class CharacterData {
 	#if !sys
 	@:noCompletion private static var _listCache:Null<Array<String>> = null;
 	#end
-	public static function getAllCharacters(modsOnly = false):Array<String>
+	public static function getAllCharacters():Array<String>
 	{
 		#if !sys
 		if (_listCache != null)
@@ -198,7 +198,7 @@ class CharacterData {
 		var _characters = new Map<String, Bool>();
 
 		
-		for (folderPath in Paths.getFolders("characters", modsOnly))
+		for (folderPath in Paths.getFolders("characters"))
 		{
 			for (fileName in Paths.readDirectory(folderPath)) {
 				var dot = fileName.lastIndexOf('.');

@@ -60,72 +60,11 @@ class FreeplayState extends MusicBeatState
 
 	public static function getFreeplaySongs():Array<BaseSong> {
 		var list:Array<BaseSong> = [];
-		for (contentId => metadata in Paths.getContentMetadata())
-		{
-			var songIdMap:Map<String, Bool> = [];
-
-			inline function sowy(songId:String) {
-				// weird old tgt shit
-				#if ALLOW_DEPRECATION
-				var splitted:Array<String> = songId.split(":");
-				if (splitted.length > 1)
-					songId = splitted[0];
-				#end
-				
-				if (!songIdMap.exists(songId)) {
-					songIdMap.set(songId, true);
-					list.push(new Song(songId, contentId));
-				}
-			}
-
-			//// level songs
-			for (level in StoryModeState.scanContentLevels(contentId)) {
-				if (!level.isUnlocked())
-					continue;
-				
-				for (song in level.getFreeplaySongs()) {
-					songIdMap.set(song.songId, true);
-					list.push(song);
-				}
-			}
-
-			// metadata file freeplay songs
-			if (metadata.freeplaySongs != null) {
-				for (songId in metadata.freeplaySongs)
-					sowy(songId);
-			}
-
-			// freeplaySonglist.txt
-			var rawList:Null<String> = Paths.getContent(Paths._modPath('data/freeplaySonglist.txt', contentId));
-			if (rawList != null) {
-				for (songId in CoolUtil.listFromString(rawList))
-					sowy(songId);
-			}
-			
-			// default category shit
-			// should prob just make a autoAddToFreeplay bool or sum shit idk lol
-			if (metadata.defaultCategory != null && metadata.defaultCategory.length > 0){
-				var dir = Paths.mods(contentId + "/songs");
-
-				for (file in Paths.readDirectory(dir)) {
-					if (FileSystem.isDirectory(haxe.io.Path.join([dir, file]))) {
-						sowy(file);
-					}
-				}
-
-			}
+		for (contentId in Paths.packList) {
+			var folder = Paths.packMap.get(contentId);
+			for (song in folder.getFreeplaySongs())
+				list.push(song);
 		}
-
-		#if USING_MOONCHART
-		var time = Sys.time();
-		funkin.data.Moonchart.MoonchartContent.scanSongs();
-		time = Sys.time() - time;
-		var moonchartSongs = funkin.data.Moonchart.MoonchartContent.freeplaySongs;
-		print('Moonchart song scan took $time seconds, found ${moonchartSongs.length}');
-		for (song in moonchartSongs) {
-			list.push(song);
-		}
-		#end
 
 		return list;
 	} 
@@ -371,7 +310,7 @@ class FreeplayState extends MusicBeatState
 
 	function onSelectSong(data:BaseSong)
 	{	
-		Paths.currentModDirectory = data.folder;
+		Paths.currentPackId = data.folder;
 
 		selectedSongData = data;
 		selectedSongCharts = data.getCharts();
@@ -501,7 +440,7 @@ private class FreeplayMenu extends AlphabetMenu
 		var songName:String = metadata.songName;
 		var iconId:Null<String> = metadata.freeplayIcon;
 
-		Paths.currentModDirectory = song.folder;
+		Paths.currentPackId = song.folder;
 		addOption(songName, iconId);
 	}
 

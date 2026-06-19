@@ -122,11 +122,11 @@ class Stage extends FlxGroup
 	inline function get_curStage() return stageId;
 	
 	@:deprecated("Stage.getTitleStages is deprecated. Use StageData.getTitleStages instead.")
-	inline public static function getTitleStages(modsOnly = false):Array<String>
-		return StageData.getTitleStages(modsOnly);
+	inline public static function getTitleStages(_:Bool):Array<String>
+		return [for (r in StageData.getTitleStages()) r.id];
 
 	@:deprecated("Stage.getAllStages is deprecated. Use StageData.getAllStages instead.")
-	inline public static function getAllStages(modsOnly = false):Array<String>
-		return StageData.getAllStages(modsOnly);
+	inline public static function getAllStages(_:Bool):Array<String>
+		return StageData.getAllStages();
 	#end
 }

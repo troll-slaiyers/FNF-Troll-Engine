@@ -24,6 +24,11 @@
 				"version": "3.2.3"
 			},
 			{
+				"name": "troll-ui",
+				"link": "https://github.com/troll-slaiyers/Troll-UI",
+				"branch": "7a96093017a0964ddd3c0cd8d6a5c9d6b70b41e6"
+			},
+			{
 				"name": "hxcpp",
 				"link": "https://github.com/moxie-coder/hxcpp-funkin",
 				"branch": "troll-engine"

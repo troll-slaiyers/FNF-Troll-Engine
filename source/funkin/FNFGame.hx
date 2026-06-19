@@ -86,6 +86,7 @@ class FNFGame extends FlxGame
 				if (e.shiftKey) {
 					funkin.Paths.clearStoredMemory();
 					funkin.Paths.clearUnusedMemory();
+					funkin.data.content.PackManager.reloadPackList();
 
 					if (_state != null) _state.visible = false;
 					TransitionableState.skipNextTransIn = true;

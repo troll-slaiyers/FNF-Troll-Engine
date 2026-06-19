@@ -106,6 +106,8 @@ typedef StageFile =
 	@:optional var preload:Array<funkin.data.Cache.AssetPreload>; // incase you would like to add more information, though you shouldnt really need to
 }
 
+typedef StageReference = {id:String, folder:String};
+
 class StageData {
 	public static function getStageFile(stageId:String):Null<StageFile> 
 	{
@@ -119,46 +121,16 @@ class StageData {
 	/**
 		Return an array with the names in the stageList file(s).
 	**/ 
-	public static function getTitleStages(modsOnly = false):Array<String>{
-	
-		var daList:Array<String> = [];
-		#if MODS_ALLOWED
-		if (modsOnly){
-			var modPath:String = Paths.modFolders('data/stageList.txt');
-			if (Paths.exists(modPath))
-			{
-				var modsList = Paths.getContent(modPath);
-				if (modsList != null && modsList.trim().length > 0)
-					for (shit in modsList.split("\n"))
-						daList.push(shit.trim().replace("\n", ""));
-			}
+	public static function getTitleStages():Array<StageReference>
+	{
+		var daList:Array<StageReference> = [];
 
-		}else{
-			var modsList = Paths.text('data/stageList.txt');
-			if (modsList != null && modsList.trim().length > 0)
-				for (shit in modsList.split("\n"))
-					daList.push(shit.trim().replace("\n", ""));
+		for (cid in Paths.packList) {
+			var cunt = Paths.packMap.get(cid);
+			for (stageId in cunt.getTitleStages())
+				daList.push({id: stageId, folder: cid});
 		}
 
-
-		 
-		var path = Paths.modFolders("metadata.json");
-		var rawJson:Null<String> = Paths.getContent(path);
-
-		if (rawJson != null && rawJson.length > 0)
-		{
-			var daJson:Dynamic = Json.parse(rawJson);
-			if (Reflect.field(daJson, "titleStages") != null)
-			{
-				var data:ContentMetadata = cast daJson;
-				for (stage in data.titleStages)
-				{
-					daList.push(stage.trim().replace("\n",""));
-				}
-			}
-		}
-
-		#end
 		return daList;
 	}
 
@@ -168,7 +140,7 @@ class StageData {
 	#if !sys
 	@:noCompletion private static var _listCache:Null<Array<String>> = null;
 	#end
-	public static function getAllStages(modsOnly = false):Array<String>
+	public static function getAllStages():Array<String>
 	{
 		#if !sys
 		if (_listCache != null)
@@ -182,7 +154,7 @@ class StageData {
 		var _stages = new Map<String, Bool>();
 
 		
-		for (folderPath in Paths.getFolders("stages", modsOnly))
+		for (folderPath in Paths.getFolders("stages"))
 		{
 			for (fileName in Paths.readDirectory(folderPath)) {
 				if (fileName==null) continue;

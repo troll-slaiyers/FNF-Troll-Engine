@@ -11,7 +11,7 @@ class CutsceneTestState extends MusicBeatState
 	var camOther:FlxCamera;
 
 	override function create(){
-		Paths.currentModDirectory = 'base-game';
+		Paths.currentPackId = 'base-game';
 
 		camGame = new FlxCamera();
 		camOther = new FlxCamera();

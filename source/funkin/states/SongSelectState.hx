@@ -26,24 +26,11 @@ class SongSelectState extends funkin.states.base.DebugListState
 	{
 		var songList:Array<BaseSong> = [];
 
-		inline function pushSong(modDir:Null<String>, folderPath:String, folderName:String) {
-			if (Paths.isDirectory(folderPath + folderName)) {
-				// trace(songList.length, folderName);
-				songList.push(new Song(folderName, modDir));
-			}
+		for (contentId in Paths.packList){
+			var folder = Paths.packMap.get(contentId);
+			for (song in folder.getSongs())
+				songList.push(song);
 		}
-
-		var folder = 'assets/songs/';
-		for (name in Paths.readDirectory(folder))
-			pushSong(null, folder, name);
-
-		#if MODS_ALLOWED
-		for (modDir in Paths.getModDirectories()){
-			var folder = Paths.mods('$modDir/songs/');
-			for (name in Paths.readDirectory(folder))
-				pushSong(modDir, folder, name);
-		}
-		#end
 
 		return songList;
 	}

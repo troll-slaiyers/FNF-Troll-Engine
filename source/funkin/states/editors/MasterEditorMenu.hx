@@ -35,10 +35,10 @@ class MasterEditorMenu extends MusicBeatState
 		#end
 	];
 	private var menu:AlphabetMenu;
-	private var directories:Array<String> = [null];
+	private var packs:Array<String> = [null];
 
-	private var curDirectory = 0;
-	private var directoryTxt:FlxText;
+	private var selectedPackIndex = 0;
+	private var packTxt:FlxText;
 
 	override function create()
 	{
@@ -85,35 +85,31 @@ class MasterEditorMenu extends MusicBeatState
 		add(menu);
 		
 		
-		#if MODS_ALLOWED
 		var textBG:FlxSprite = new FlxSprite(0, FlxG.height - 42).makeGraphic(FlxG.width, 42, 0xFF000000);
 		textBG.alpha = 0.6;
 		add(textBG);
 
-		directoryTxt = new FlxText(textBG.x, textBG.y + 4, FlxG.width, '', 32);
-		directoryTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER);
-		directoryTxt.scrollFactor.set();
-		add(directoryTxt);
+		packTxt = new FlxText(textBG.x, textBG.y + 4, FlxG.width, '', 32);
+		packTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER);
+		packTxt.scrollFactor.set();
+		add(packTxt);
 		
-		for (folder in Paths.getModDirectories())
+		for (folder in Paths.packList)
 		{
-			directories.push(folder);
+			packs.push(folder);
 		}
 
-		var found:Int = directories.indexOf(Paths.currentModDirectory);
-		if(found > -1) curDirectory = found;
+		var found:Int = packs.indexOf(Paths.currentPackId);
+		if(found > -1) selectedPackIndex = found;
 		changeDirectory();
-		#end
 	}
 
 	override function update(elapsed:Float)
 	{
-		#if MODS_ALLOWED
 		if(controls.UI_LEFT_P)
 			changeDirectory(-1);
 		if(controls.UI_RIGHT_P)
 			changeDirectory(1);
-		#end
 
 		if (controls.BACK) {
 			menu.controls = null;
@@ -124,27 +120,26 @@ class MasterEditorMenu extends MusicBeatState
 		super.update(elapsed);
 	}
 
-	#if MODS_ALLOWED
 	function changeDirectory(change:Int = 0)
 	{
 		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4 );
 
-		curDirectory += change;
+		selectedPackIndex += change;
 
-		if(curDirectory < 0)
-			curDirectory = directories.length - 1;
-		if(curDirectory >= directories.length)
-			curDirectory = 0;
+		if(selectedPackIndex < 0)
+			selectedPackIndex = packs.length - 1;
+		if(selectedPackIndex >= packs.length)
+			selectedPackIndex = 0;
 	
-		Paths.currentModDirectory = '';
-		if(directories[curDirectory] == null || directories[curDirectory].length < 1)
-			directoryTxt.text = '< No Mod Directory Loaded >';
+		if (packs[selectedPackIndex] == null || packs[selectedPackIndex].length < 1) {
+			Paths.currentPackId = '';
+			packTxt.text = '< Main Active Pack: <None> >';
+		}
 		else
 		{
-			Paths.currentModDirectory = directories[curDirectory];
-			directoryTxt.text = '< Loaded Mod Directory: ' + Paths.currentModDirectory + ' >';
+			Paths.currentPackId = packs[selectedPackIndex];
+			packTxt.text = '< Main Active Pack: ' + Paths.currentPackId + ' >';
 		}
-		directoryTxt.text = directoryTxt.text.toUpperCase();
+		packTxt.text = packTxt.text.toUpperCase();
 	}
-	#end
 }

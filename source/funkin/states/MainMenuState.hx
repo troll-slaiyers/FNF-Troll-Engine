@@ -33,6 +33,9 @@ class MainMenuState extends MusicBeatState
 		'freeplay',
 		//'credits',
 		//'donate',
+		#if MODS_ALLOWED
+		'content',
+		#end
 		'options',
 	];
 
@@ -155,6 +158,8 @@ class MainMenuState extends MusicBeatState
 				switchState.bind(new CreditsState());
 			case 'options':
 				switchState.bind(new funkin.states.options.OptionsState());
+			case 'content':
+				switchState.bind(new ContentManagerState());
 			default:
 				MusicBeatState.resetState.bind();
 		}
@@ -170,7 +175,7 @@ class MainMenuState extends MusicBeatState
 		var bgScale = bg.scale.x;
 		var bgTargetScale = Math.max(FlxG.width / bg.frameWidth, FlxG.height / bg.frameHeight);
 		var bgScroll = bg.scrollFactor.y;
-		FlxTween.num(0.0, 1.0, 0.25, {ease: FlxEase.backOut}, (progress:Float) ->
+		FlxTween.num(0.0, 1.0, 0.264, {ease: FlxEase.backOut}, (progress:Float) ->
 		{
 			var progress = progress / 1.125;
 

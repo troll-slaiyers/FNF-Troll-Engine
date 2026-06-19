@@ -10,6 +10,7 @@ haxelib --always --quiet install openfl 9.3.4
 haxelib --always --quiet git flixel https://github.com/troll-slaiyers/flixel dev
 haxelib --always --quiet install flixel-ui 2.6.1
 haxelib --always --quiet install flixel-addons 3.2.3
+haxelib --always --quiet git troll-ui https://github.com/troll-slaiyers/Troll-UI 7a96093017a0964ddd3c0cd8d6a5c9d6b70b41e6
 haxelib --always --quiet git hxcpp https://github.com/moxie-coder/hxcpp-funkin troll-engine
 haxelib --always --quiet git hscript https://github.com/troll-slaiyers/t-hscript
 haxelib --always --quiet install no-spoon 0.2.0
