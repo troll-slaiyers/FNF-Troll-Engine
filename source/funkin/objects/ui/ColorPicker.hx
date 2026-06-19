@@ -112,10 +112,6 @@ class ColorPickerSubstate extends FlxSubState {
 			camera = ccamera;
 		}
 
-		// suck my dick
-		if (_bgSprite != null)
-			_bgSprite.camera = camera;
-		
 		var bmpHueSat = new BitmapData(360, 255);
 		for (hue in 0...bmpHueSat.width) {
 			for (sat in 0...bmpHueSat.height) {
