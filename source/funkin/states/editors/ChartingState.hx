@@ -2658,17 +2658,17 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}
 
 		////
-		var sineColor:Float = 0.7 - 0.3 * Math.cos(Math.PI * colorSine);
-		var sineColor:Int = Math.round(sineColor * 255);
-		var sineColor = FlxColor.fromRGB(sineColor, sineColor, sineColor);
+		var sineCol:FlxColor = 0xFF87BDD9;
+		var sineBrt:Float = 255 * 0.15 * Math.cos(Math.PI * colorSine);
 		colorSine += elapsed;
 
 		playedSound.resize(0);
 		curRenderedNotes.forEachAlive(function(note:Note) {
-			if (selectedNotes.contains(note.chartData) /*|| note.chartData == curSelectedEvent*/)
-				note.color = sineColor;
+			if (selectedNotes.contains(note.chartData) /*|| note.chartData == curSelectedEvent*/) {
+				note.setColorTransform(sineCol.redFloat, sineCol.greenFloat, sineCol.blueFloat, 1.0, sineBrt, sineBrt, sineBrt, 0);
+			}
 			else
-				note.color = 0xFFFFFFFF;
+				note.setColorTransform(1.0, 1.0, 1.0, 1.0, 0, 0, 0, 0);
 			
 			if (note.strumTime <= Conductor.songPosition) {
 				if (inst.playing && !note.wasGoodHit) {
