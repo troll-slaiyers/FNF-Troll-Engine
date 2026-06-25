@@ -150,12 +150,16 @@ class Character extends FlxSprite
 	/**BLAMMED LIGHTS!! idk not used anymore**/
 	public var colorTween:FlxTween;
 
+	/** 
+		`flipX` value from CharacterData
+	**/
+	public var originalFlipX:Bool = false;
+
 	//Used on Character Editor
 	public var animationsArray:Array<AnimArray> = [];
 	public var imageFile:String = '';
 	public var baseScale:Float = 1;
 	public var noAntialiasing:Bool = false;
-	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
 
 	#if ALLOW_DEPRECATION
@@ -574,7 +578,13 @@ class Character extends FlxSprite
 		if (note.noAnimation || animTimer > 0.0 || voicelining)
 			return;
 
-		var animToPlay:String = getNoteHitAnimation(note, field);
+		var animToPlay:String = getNoteHitAnimation(note, field);		
+		if (flipX) {
+			if (animToPlay.startsWith('singLEFT'))
+				animToPlay = 'singRIGHT' + animToPlay.substring('singLEFT'.length, animToPlay.length);
+			else if (animToPlay.startsWith('singRIGHT'))
+				animToPlay = 'singLEFT' + animToPlay.substring('singRIGHT'.length, animToPlay.length);
+		}
 
 		if (note.noteType == 'Hey!' && animOffsets.exists(animToPlay)) {
 			playAnim(animToPlay, true);
