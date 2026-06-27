@@ -43,23 +43,10 @@ class EventEditorState extends CustomFlxUIState {
 		eventStuff = SongEventData.getEventStuffV2();
 		eventList = [for (stuff in eventStuff) stuff.id];
 
-		/*
-		for (stuff in eventStuff) {
-			var bro:DropDownDef = {
-				fieldName: "TEST_LOL",
-				uiElement: DROPDOWN,
-				optionsList: ["Real", "Dropdown", "Trust"],
-			};
-			bro = EventFieldDefUtil.validate(bro);
-			stuff.fields.push(bro);
-		}
-		*/
-
 		var snla = [for (stuff in eventStuff) new StrNameLabel(stuff.id, stuff.displayName ?? stuff.id)];
 		var dd = new CustomFlxUIDropDownMenu(0, 0, snla);
 		dd.callback = (id:String) -> {
-			var data = eventStuff[eventList.indexOf(id)];
-			setCurrentEvent(data);
+			setCurrentDefinition(id);
 		}
 		add(dd);
 		add(eventUIGrp);
@@ -67,17 +54,8 @@ class EventEditorState extends CustomFlxUIState {
 		//lime.system.System.exit(0);
 	}
 
-	function setCurrentEvent(data:EventDataJSON) {
-		trace(data);
-		
-		if (!eventUIMap.exists(data.id))
-			generateEventUIBullshit(data);
-		
-		eventUIGrp.remove(selectedEventUI);
-		curEventDef = data;
-		
-		selectedEventUI = eventUIMap.get(data.id).uiGrp;
-		eventUIGrp.add(selectedEventUI);
+	inline function getDefinitionJSON(id:String):EventDataJSON {
+		return eventStuff[eventList.indexOf(id)];
 	}
 
 	function generateEventUIBullshit(data:EventDataJSON) {
@@ -208,15 +186,46 @@ class EventEditorState extends CustomFlxUIState {
 		return bullshit;
 	}
 
-	function onEventFieldChanged(fieldName:String, value:Dynamic, uiObject:IFlxUIWidget, eventType:String) {
+	function setCurrentDefinition(id:String) {
+		var data = getDefinitionJSON(id);
+		trace(data);
+		
+		if (!eventUIMap.exists(data.id))
+			generateEventUIBullshit(data);
+		
+		eventUIGrp.remove(selectedEventUI);
+		curEventDef = data;
+		
+		selectedEventUI = eventUIMap.get(data.id).uiGrp;
+		eventUIGrp.add(selectedEventUI);
+	}
+
+	public function setEventInstance(data:EventInstanceData) {
+		setCurrentDefinition(data.eventId);
+
+
+
+
+
+
+		var data:{time:Float} = {time: 1000, value1: "test"};
+	}
+
+	public function onDataFieldChanged(fieldName:String, value:Dynamic, uiObject:IFlxUIWidget, eventType:String) {
 		trace(fieldName, value);
 	}
 
-	override function getEvent(name:String, sender:IFlxUIWidget, data:Dynamic, ?params:Array<Dynamic>) {
+	public function handleFlixelUIEvent(name:String, sender:IFlxUIWidget, data:Dynamic, ?params:Array<Dynamic>):Bool {
 		if (sender.name.startsWith(EVENT_FIELD_UI_PREFIX)) {
-			onEventFieldChanged(sender.name.substring(EVENT_FIELD_UI_PREFIX.length), data, sender, name);
-			return;
+			onDataFieldChanged(sender.name.substring(EVENT_FIELD_UI_PREFIX.length), data, sender, name);
+			return true;
 		}
+		return false;
+	}
+
+	override function getEvent(name:String, sender:IFlxUIWidget, data:Dynamic, ?params:Array<Dynamic>) {
+		if (handleFlixelUIEvent(name, sender, data, params))
+			return;
 		
 		super.getEvent(name, sender, data, params);
 	}

@@ -125,9 +125,17 @@ class PsychSongEvent extends ScriptedSongEvent {
 }
 */
 
+/** Event data structure used by ChartingState **/
+typedef EventGroupData = {
+	var strumTime:Float;
+	var eventData:Array<Dynamic>;
+	var layer:Int;
+}
+
+/** Event data structure used by PlayState **/
 typedef EventInstanceData = {
 	/** Which event will handle this data **/
-	var id:String;
+	var eventId:String;
 	/** Song timestamp, in milliseconds, at which this data will be executed **/
 	var strumTime:Float;
 }
@@ -222,6 +230,12 @@ class EventFieldDefUtil {
 
 		if (!Reflect.hasField(data, "uiElement"))
 			return null;
+
+		switch((data.fieldName:Null<String>)) {
+			case "strumTime": return null;
+			case "id": return null;
+			case null: return null;
+		}
 
 		data.displayName ??= data.fieldName;
 
