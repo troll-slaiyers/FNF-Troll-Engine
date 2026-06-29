@@ -294,6 +294,8 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		192
 	];
 
+	var eventUI:funkin.states.editors.charting.EventUI = null;
+
 	var noteTypeList:Array<String>;
 	var songNoteTypeList:Array<String> = [];
 	var eventStuff:Array<Array<String>>;
@@ -688,6 +690,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			{name: "Editor", label: 'Editor'},
 			{name: "Note", label: 'Note'},
 			{name: "Event", label: 'Event'},
+			{name: "Event v2", label: 'Event (v2)'},
 			{name: "Section", label: 'Section'},
 			{name: "Song", label: 'Song'},
 			{name: "Metadata", label: 'Metadata'},
@@ -703,6 +706,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		addSectionUI();
 		addNoteUI();
 		addEventsUI();
+		addEventsUIv2();
 		addChartingUI();
 		addPreferencesUI();
 		addTracksUI();
@@ -1765,6 +1769,24 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		tab_group_event.add(moveLeftButton);
 		tab_group_event.add(moveRightButton);
 		tab_group_event.add(selectedEventText);
+
+		UI_box.addGroup(tab_group_event);
+	}
+
+	function addEventsUIv2():Void
+	{
+		var tab_group_event = new FlxUI(null, UI_box);
+		tab_group_event.name = 'Event v2';
+
+		eventUI = new funkin.states.editors.charting.EventUI(10, 10);
+		var dd = eventUI.makeEventListDropdown();
+		dd.setPosition(eventUI.x, eventUI.y);
+		eventUI.y += dd.header.height + 20;
+
+		blockPressWhileScrolling.push(dd);
+		
+		tab_group_event.add(eventUI);
+		tab_group_event.add(dd);
 
 		UI_box.addGroup(tab_group_event);
 	}

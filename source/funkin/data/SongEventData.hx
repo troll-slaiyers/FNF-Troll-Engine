@@ -60,8 +60,8 @@ class SongEventData {
 		return eventStuff;
 	}
 
-	public static function getEventStuffV2():Array<EventDataJSON> {
-		var eventStuff:Array<EventDataJSON> = [];
+	public static function getEventStuffV2():Array<EventDefinitionJSON> {
+		var eventStuff:Array<EventDefinitionJSON> = [];
 		var eventsLoaded:Map<String, Bool> = [];
 
 		for (stuff in psychEventStuff) {
@@ -87,7 +87,7 @@ class SongEventData {
 				
 				var basePath:String = Path.join([directory, eventId]);
 				
-				var json:EventDataJSON = Paths.getJson('$basePath.json');
+				var json:EventDefinitionJSON = Paths.getJson('$basePath.json');
 				if (json != null) {
 					trace('Found json: $basePath.json');
 					json.fields = EventFieldDefUtil.validateFields(json.fields);
@@ -125,14 +125,58 @@ class PsychSongEvent extends ScriptedSongEvent {
 }
 */
 
-/** Event data structure used by ChartingState **/
-typedef EventGroupData = {
+
+
+/** 
+	Event data structure used by `ChartingState` and the event chart format.
+**/
+typedef EventBunch = {
 	var strumTime:Float;
-	var eventData:Array<Dynamic>;
-	var layer:Int;
+	var eventData:Array<EventChildData>;
+	/** Layer in which this event is placed in the editor **/
+	// @:optional var layer:Int;
 }
 
-/** Event data structure used by PlayState **/
+/*
+@:forward
+abstract EventBunch(_EventBunch) from _EventBunch to _EventBunch {
+	public function new(strumTime:Float = 0, eventData:Array<EventChildData>) {
+		this = {strumTime: strumTime, eventData: eventData}
+	}
+}
+*/
+
+/** 
+	Dynamic structure containing field values for a specific event.
+	Meant to be part of an `EventBunch`'s `eventData` array.  
+**/
+@:forward
+abstract EventChildData(Dynamic) from {eventId:String} {
+	public var eventId(get, set):String;
+	inline function get_eventId() return this.eventId;
+	inline function set_eventId(v) return this.eventId = v;
+
+	public inline function getValue(field:String):Null<Dynamic>
+		return Reflect.field(this, field);
+
+	public inline function setValue(field:String, value:Dynamic):Void
+		return Reflect.setField(this, field, value);
+
+	/** 
+		Deletes every field from this structure, except for `eventId` 
+	**/
+	public function wipe():Void {
+		for (fieldName in Reflect.fields(this)) {
+			if (fieldName != 'eventId')
+				Reflect.deleteField(this, fieldName);
+		}
+	}
+}
+
+/** 
+	Event data structure used by `PlayState`.  
+	Generated from an `EventBunch` structure.
+**/
 typedef EventInstanceData = {
 	/** Which event will handle this data **/
 	var eventId:String;
@@ -140,7 +184,7 @@ typedef EventInstanceData = {
 	var strumTime:Float;
 }
 
-typedef EventDataJSON = {
+typedef EventDefinitionJSON = {
 	@:optional var id:String;
 
 	/** Name of this event to be shown in the chart editor  **/
