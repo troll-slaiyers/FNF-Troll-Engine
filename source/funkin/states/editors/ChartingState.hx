@@ -1701,6 +1701,33 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		value2InputText.name = 'event_value2';
 
 		////
+		tab_group_event.add(eventLabelStrumTime = new FlxText(eventStepperStrumTime.x, eventStepperStrumTime.y - 15, 0, 'Strum time:'));
+		tab_group_event.add(eventStepperStrumTime);
+		tab_group_event.add(separateButton);
+
+		tab_group_event.add(new FlxText(value1InputText.x, value1InputText.y - 20, 0, "Value 1:"));	
+		tab_group_event.add(value1InputText);
+		tab_group_event.add(new FlxText(value2InputText.x, value2InputText.y - 20, 0, "Value 2:"));
+		tab_group_event.add(value2InputText);
+		tab_group_event.add(new FlxText(eventDropDown.x, eventDropDown.y - 20, 0, "Event:"));
+		tab_group_event.add(eventDropDown);
+
+
+		UI_box.addGroup(tab_group_event);
+	}
+
+	function addEventsUIv2():Void
+	{
+		var tab_group_event = new FlxUI(null, UI_box);
+		tab_group_event.name = 'Event v2';
+
+		eventUI = new funkin.states.editors.charting.EventUI(10, 80);
+		var eventDropDown = eventUI.makeEventListDropdown();
+		eventDropDown.setPosition(eventUI.x, eventUI.y);
+		eventUI.y += eventDropDown.header.height + 20;
+
+		blockPressWhileScrolling.push(eventDropDown);
+
 		var removeButton = newFlxUIButton(eventDropDown.x + eventDropDown.width + 20, eventDropDown.y, '-', removeSubEvent, false);
 		removeButton.name = 'event_removeSub';
 		removeButton.color = FlxColor.RED;
@@ -1738,47 +1765,22 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		td.style.bodyWidth = 172;
 		tooltips.add(moveRightButton, td);
 
-		tooltips.add(separateButton, simpleTip("Separate", "Separate the selected Sub-Event into its own event note"));
+		//tooltips.add(separateButton, simpleTip("Separate", "Separate the selected Sub-Event into its own event note"));
 
 		/* wow thanks for the tip i would have never guessed otherwise */
 		tooltips.add(addButton, oneLineTip("Add event", 100));
 		tooltips.add(removeButton, oneLineTip("Remove event", 100));
 
 		////
-		tab_group_event.add(eventLabelStrumTime = new FlxText(eventStepperStrumTime.x, eventStepperStrumTime.y - 15, 0, 'Strum time:'));
-		tab_group_event.add(eventStepperStrumTime);
-		tab_group_event.add(separateButton);
-
-		tab_group_event.add(new FlxText(value1InputText.x, value1InputText.y - 20, 0, "Value 1:"));	
-		tab_group_event.add(value1InputText);
-		tab_group_event.add(new FlxText(value2InputText.x, value2InputText.y - 20, 0, "Value 2:"));
-		tab_group_event.add(value2InputText);
-		tab_group_event.add(new FlxText(eventDropDown.x, eventDropDown.y - 20, 0, "Event:"));
+		tab_group_event.add(eventUI);
 		tab_group_event.add(eventDropDown);
 
 		tab_group_event.add(removeButton);
 		tab_group_event.add(addButton);
 		tab_group_event.add(moveLeftButton);
 		tab_group_event.add(moveRightButton);
+
 		tab_group_event.add(selectedEventText);
-
-		UI_box.addGroup(tab_group_event);
-	}
-
-	function addEventsUIv2():Void
-	{
-		var tab_group_event = new FlxUI(null, UI_box);
-		tab_group_event.name = 'Event v2';
-
-		eventUI = new funkin.states.editors.charting.EventUI(10, 10);
-		var dd = eventUI.makeEventListDropdown();
-		dd.setPosition(eventUI.x, eventUI.y);
-		eventUI.y += dd.header.height + 20;
-
-		blockPressWhileScrolling.push(dd);
-		
-		tab_group_event.add(eventUI);
-		tab_group_event.add(dd);
 
 		UI_box.addGroup(tab_group_event);
 	}

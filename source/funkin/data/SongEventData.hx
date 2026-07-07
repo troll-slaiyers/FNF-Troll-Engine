@@ -162,6 +162,10 @@ abstract EventChildData(Dynamic) from {eventId:String} {
 	public inline function setValue(field:String, value:Dynamic):Void
 		return Reflect.setField(this, field, value);
 
+	public inline function clone():EventChildData {
+		return Reflect.copy(this);
+	}
+
 	/** 
 		Deletes every field from this structure, except for `eventId` 
 	**/

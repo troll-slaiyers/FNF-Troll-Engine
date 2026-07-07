@@ -18,6 +18,10 @@ using StringTools;
 /** Prefix used for FlxUI object names **/
 private inline final EVENT_FIELD_UI_PREFIX = 'eventField:';
 
+/**
+	Handles the event UI elements and actions.  
+	TODO: undo/redo support for actions
+**/
 class EventUI extends FlxSpriteGroup {
 	var eventStuff:Array<EventDefinitionJSON>;
 	var eventList:Array<String>;
@@ -32,6 +36,10 @@ class EventUI extends FlxSpriteGroup {
 	// Chart editor
 	public var currentBunch:EventBunch = null;
 	public var currentChildIndex:Int = 0;
+	public var currentChild(get, never):EventChildData;
+
+	inline function get_currentChild()
+		return currentBunch?.eventData[currentChildIndex];
 
 	inline public function new(x:Float = 0, y:Float = 0) {
 		super(x, y);
@@ -70,8 +78,8 @@ class EventUI extends FlxSpriteGroup {
 	}
 
 	/**
-		Call this to select an event bunch (event note) or for changing the selected child event.  
-		Shows the appropiate UI elements and values from the selected event.
+		Shows the appropiate UI elements and values from the selected event.  
+		Called when selecting an event bunch or when pressing the < > buttons.
 	**/
 	public function selectEventBunch(bunch:EventBunch, childIndex:Int = 0) {		
 		if (bunch == null) {
@@ -87,25 +95,47 @@ class EventUI extends FlxSpriteGroup {
 		currentBunch = bunch;
 		currentChildIndex = childIndex;
 
-		setCurrentDefinition(child.eventId);
-		for (fieldDef in currentEventDefinition.fields) {
-			var fieldName:String = fieldDef.fieldName;
-			currentEventBullshit.setValue(fieldName, child.getValue(fieldName));
-		}
+		onChildSelected(child);
 	}
 
 	/**
-		Call this to change the selected child event.  
-		Shows the appropiate UI elements and values from the selected event.
+		Shows the appropiate UI elements and values from the selected event.  
+		Called when pressing the < > buttons.
 	**/
 	public function changeSelectedChild(value:Int, isAbs:Bool = false) {
 		selectEventBunch(currentBunch, isAbs ? value : CoolUtil.updateIndex(currentChildIndex, value, currentBunch.eventData.length));
 	}
 
+	/**
+		Duplicates the current selected child.  
+		Called when pressing the + button.
+	**/
+	public function duplicateChild() {
+		if (currentBunch == null || currentChild == null)
+			return;
+
+		var clone = currentChild.clone();
+		currentBunch.eventData.insert(currentChildIndex + 1, clone);
+		currentChildIndex++;
+		onChildSelected(clone);
+	}
+
+	/**
+		Removes the current selected child.  
+		Called when pressing the `-` button.
+	**/
+	public function removeChild() {
+		if (currentBunch == null || currentChild == null)
+			return;
+		
+		currentBunch.eventData.remove(currentChild);
+		selectEventBunch(currentBunch, currentChildIndex - 1);
+	}
+
 	/** 
 		@returns A new `EventBunch` generated from the currently selected event and its values 
 	**/
-	public function generateEventGroup():EventBunch {
+	public function generateEventBunch():EventBunch {
 		return currentEventBullshit?.generateBunch() ?? {strumTime: 0, eventData: [{eventId: ''}]};
 	}
 
@@ -115,7 +145,7 @@ class EventUI extends FlxSpriteGroup {
 	**/
 	public function onDataFieldChanged(fieldName:String, value:Dynamic, uiObject:IFlxUIWidget, eventType:String):Void {
 		trace(fieldName, value);
-		currentBunch?.eventData[currentChildIndex]?.setValue(fieldName, value);
+		currentChild?.setValue(fieldName, value);
 	}
 
 	/**
@@ -135,6 +165,14 @@ class EventUI extends FlxSpriteGroup {
 			return true;
 		}
 		return false;
+	}
+
+	private function onChildSelected(child:EventChildData) {
+		setCurrentDefinition(child.eventId);
+		for (fieldDef in currentEventDefinition.fields) {
+			var fieldName:String = fieldDef.fieldName;
+			currentEventBullshit.setValue(fieldName, child.getValue(fieldName));
+		}
 	}
 
 	inline function getDefinitionJSON(id:String):EventDefinitionJSON {
