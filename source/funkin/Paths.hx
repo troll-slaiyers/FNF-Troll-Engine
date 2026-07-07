@@ -153,8 +153,7 @@ class Paths
 	inline static function destroyGraphic(graphic:FlxGraphic)
 	{
 		// free some gpu memory
-		if (graphic != null && graphic.bitmap != null && graphic.bitmap.__texture != null)
-			graphic.bitmap.__texture.dispose();
+		graphic?.bitmap?.__texture?.dispose();
 		FlxG.bitmap.remove(graphic);
 	}
 
