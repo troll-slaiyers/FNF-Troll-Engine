@@ -248,6 +248,14 @@ class ClientPrefs {
 					"type" => "percent" // saved value is value / 100
 				]
 			},
+			"fieldFramerate" => {
+				display:"Notefield Framerate",
+				desc:"How many times per-second the notefield is rendered.",
+				type:Number,
+				value:#if !macro FlxG.stage != null ? FlxG.stage.application.window.displayMode.refreshRate : #end
+				60,
+				data:["suffix" => " FPS", "min" => 5, "max" => 360, "step" => 1,]
+			},
 			"countUnpause" => {
 				display: "Countdown on Resume",
 				desc: "Counts down whenever you select \"RESUME\" on the Pause Menu.",
