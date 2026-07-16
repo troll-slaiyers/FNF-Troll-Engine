@@ -22,10 +22,21 @@ class FNFGame extends FlxGame
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
 	public static var specialKeysEnabled(default, set):Bool;
 
+	public static var antialiasing(default, set):Bool;
+	public static var framerate(default, set):Float;
+	public static var uncappedFramerate(default, set):Bool;
+	#if VSYNC_ALLOWED
+	public static var vSyncMode(default, set):String;
+	#end
+
 	public function new(gameWidth = 0, gameHeight = 0, ?initialState:InitialState, updateFramerate = 60, drawFramerate = 60, skipSplash = false, ?startFullscreen:Bool)
 	{
 		@:privateAccess FlxG.initSave();
 		startFullscreen = startFullscreen ?? FlxG.save.data.fullscreen;
+
+		#if FLX_TROLL
+		this.getTimer = Main.getTime;
+		#end
 
 		super(gameWidth, gameHeight, initialState, updateFramerate, drawFramerate, skipSplash, startFullscreen);
 
@@ -87,85 +98,6 @@ class FNFGame extends FlxGame
 		}
 	}
 
-	/*
-	public var f_ticks:Float = 0;
-	var f_startTime:Float = 0;
-	var f_total:Float = 0;
-
-	inline function f_getTicks():Float
-		return Main.getTime() - f_startTime;
-
-	override function create(_) {
-		f_startTime = Main.getTime();
-		f_total = f_getTicks();
-		return super.create(_);
-	}
-
-	override function onEnterFrame(_):Void
-	{
-		ticks = Math.floor(f_ticks = f_getTicks());
-		_elapsedMS = f_ticks - f_total;
-		_total = Math.floor(f_total = f_ticks);
-
-		#if FLX_SOUND_TRAY
-		if (soundTray != null && soundTray.active)
-			soundTray.update(_elapsedMS);
-		#end
-
-		if (!_lostFocus || !FlxG.autoPause)
-		{
-			if (FlxG.vcr.paused)
-			{
-				if (FlxG.vcr.stepRequested)
-				{
-					FlxG.vcr.stepRequested = false;
-				}
-				else if (_nextState == null) // don't pause a state switch request
-				{
-					#if FLX_DEBUG
-					debugger.update();
-					// If the interactive debug is active, the screen must
-					// be rendered because the user might be doing changes
-					// to game objects (e.g. moving things around).
-					if (debugger.interaction.isActive())
-					{
-						draw();
-					}
-					#end
-					return;
-				}
-			}
-
-			if (FlxG.fixedTimestep)
-			{
-				_accumulator += _elapsedMS;
-				_accumulator = (_accumulator > _maxAccumulation) ? _maxAccumulation : _accumulator;
-
-				while (_accumulator >= _stepMS)
-				{
-					step();
-					_accumulator -= _stepMS;
-				}
-			}
-			else
-			{
-				step();
-			}
-
-			#if FLX_DEBUG
-			FlxBasic.visibleCount = 0;
-			#end
-
-			draw();
-
-			#if FLX_DEBUG
-			debugger.stats.visibleObjects(FlxBasic.visibleCount);
-			debugger.update();
-			#end
-		}
-	}
-	*/
-
 	override function switchState():Void
 	{
 		#if SCRIPTABLE_STATES
@@ -194,20 +126,50 @@ class FNFGame extends FlxGame
 		Main.resetSpriteCache(this);
 	}
 
-	public function set_antialiasing(v:Bool) {
-		FlxG.stage.quality = v ? BEST : LOW; // This affects ShaderFilter quality :o
-		FlxSprite.defaultAntialiasing = v;
+	public static function updateFramerateValues() {
+		inline function nocap():Bool return #if VSYNC_ALLOWED (vsyncMode == "On") || #end uncappedFramerate;
+		inline function ongod():Int return #if lime_funkin 0 #else 9000 #end;
+
+		var v = nocap() ? ongod() : Math.ceil(framerate);
+		if (v > FlxG.drawFramerate) {
+			FlxG.updateFramerate = v;
+			FlxG.drawFramerate = v;
+		} else {
+			FlxG.drawFramerate = v;
+			FlxG.updateFramerate = v;
+		}
+		return v;
 	}
 
-	public function set_framerate(v:Float) {
-		if (v > FlxG.drawFramerate) {
-			FlxG.updateFramerate = Math.ceil(v);
-			FlxG.drawFramerate = Math.ceil(v);
-		} else {
-			FlxG.drawFramerate = Math.ceil(v);
-			FlxG.updateFramerate = Math.ceil(v);
-		}
+	@:noCompletion inline static function set_antialiasing(v:Bool) {
+		FlxG.stage.quality = v ? BEST : LOW; // This affects ShaderFilter quality :o
+		FlxSprite.defaultAntialiasing = v;
+		return v;
 	}
+
+	@:noCompletion inline static function set_framerate(v:Float) {
+		framerate = v;
+		updateFramerateValues();
+		return v;
+	}
+
+	@:noCompletion inline static function set_uncappedFramerate(v:Bool) {
+		uncappedFramerate = v;
+		updateFramerateValues();
+		return v;
+	}
+
+	#if VSYNC_ALLOWED
+	@:noCompletion inline static function set_vsyncMode(v:String) {
+		FlxG.stage.window.setVSyncMode(switch(vsyncMode = v) {
+			case "Adaptive": ADAPTIVE;
+			case "On": ON;
+			default: OFF;
+		});
+		updateFramerateValues();
+		return v;
+	}
+	#end
 
 	@:noCompletion inline public static function set_specialKeysEnabled(val)
 	{

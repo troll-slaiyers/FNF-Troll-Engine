@@ -156,6 +156,8 @@ class OptionsSubstate extends MusicBeatSubstate
 				[
 					"framerate",
 					"fieldFramerate",
+					"uncappedFramerate",
+					"vsyncMode",
 					"fullscreen", 
 				]
 			],
@@ -360,6 +362,11 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		switch (option)
 		{
+			#if VSYNC_ALLOWED
+			case 'vsyncMode':
+				FNFGame.vsyncMode = newVal;
+			#end
+
 			case 'judgePreset':
 				if (windowPresets.exists(newVal))
 				{
@@ -398,8 +405,11 @@ class OptionsSubstate extends MusicBeatSubstate
 					Main.bread.visible = val;
 			#end
 			case 'globalAntialiasing':
-				Main.game.set_antialiasing(val);
+				FNFGame.antialiasing = val;
 				
+			case 'uncappedFramerate':
+				FNFGame.uncappedFramerate = val;
+
 			#if(CHECK_FOR_UPDATES || display)
 			case 'downloadBetas' | 'checkForUpdates':
 				Main.downloadBetas = Main.Version.isBeta || ClientPrefs.downloadBetas;
@@ -489,7 +499,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		switch (option)
 		{
 			case 'framerate':
-				Main.game.set_framerate(newVal);
+				FNFGame.framerate = newVal;
 
 			case 'epicWindow' | 'sickWindow' | 'goodWindow' | 'badWindow' | 'hitWindow':
 				checkWindows();
