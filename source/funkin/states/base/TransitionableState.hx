@@ -11,7 +11,7 @@ package funkin.states.base;
 import flixel.FlxState;
 import funkin.transitions.Transition;
 import funkin.transitions.Transition.Transition as TransitionInstance;
-import funkin.transitions.ScriptedTransition;
+import funkin.transitions.ScriptedTransition.TransitionReference;
 
 class TransitionableState extends FlxState
 {
@@ -227,49 +227,5 @@ class TransitionableState extends FlxState
 		{
 			_onExit();
 		}
-	}
-}
-
-abstract TransitionReference(Dynamic) from Class<TransitionInstance> from TransitionInstance from String {
-	public function createInstance():Null<TransitionInstance> {
-		return if (this is Class) {
-			Type.createInstance(this, []);
-		}
-		else if (this is TransitionInstance) {
-			this;
-		}
-		else if (this is String) {
-			fromString(this);
-		}
-		else {
-			null;
-		}
-	}
-
-	public function toString():String {
-		if (this is String)
-			return this;
-		else if (this is Class)
-			return Type.getClassName(this);
-		else if (this is ScriptedTransition)
-			return @:privateAccess this.name;
-		else if (this is TransitionInstance)
-			return Type.getClassName(Type.getClass(this));
-		else
-			return 'null';
-	}
-
-	private static function fromString(str:String):Null<TransitionInstance> {
-		var instance:Null<TransitionInstance> = null;
-		
-		instance = ScriptedTransition.fromName(str);
-		
-		if (instance == null) {
-			var cl = Type.resolveClass(str);
-			if (cl != null)
-				instance = Type.createInstance(cl, []);
-		}
-
-		return instance;
 	}
 }
