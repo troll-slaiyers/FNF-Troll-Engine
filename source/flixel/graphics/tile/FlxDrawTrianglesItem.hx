@@ -16,7 +16,7 @@ import openfl.geom.ColorTransform;
 
 import funkin.objects.shaders.NoteColorSwap;
 
-typedef DrawData<T> = #if (flash || openfl >= "4.0.0") openfl.Vector<T> #else Array<T> #end;
+typedef DrawData<T> = openfl.Vector<T>;
 
 /**
  * @author Zaphod
@@ -96,10 +96,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		setParameterValue(shader.hasTransform, true);
 		setParameterValue(shader.hasColorTransform, colored || hasColorOffsets);
 
-		#if (openfl > "8.7.0")
 		sprite.graphics.overrideBlendMode(blend);
-		#end
-
 		sprite.graphics.beginShaderFill(shader);
 		#else
 		sprite.graphics.beginBitmapFill(graphics.bitmap, null, true, (antialiasing || this.antialiasing));
@@ -123,17 +120,10 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 	override public function reset():Void
 	{
 		super.reset();
-		#if (flash || openfl >= "4.0.0")
 		vertices.length = 0;
 		indices.length = 0;
 		uvtData.length = 0;
 		colors.length = 0;
-		#else
-		vertices.resize(0);
-		indices.resize(0);
-		uvtData.resize(0);
-		colors.resize(0);
-		#end
 
 		verticesPosition = 0;
 		indicesPosition = 0;

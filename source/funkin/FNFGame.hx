@@ -75,10 +75,11 @@ class FNFGame extends FlxGame
 				if (e.shiftKey) {
 					funkin.Paths.clearStoredMemory();
 					funkin.Paths.clearUnusedMemory();
+
+					if (_state != null) _state.visible = false;
 					TransitionableState.skipNextTransIn = true;
 					TransitionableState.skipNextTransOut = true;
-					if (_state != null) _state.visible = false;
-					MusicBeatState.switchState(new funkin.states.MainMenuState());
+					MusicBeatState.switchState(() -> new funkin.states.MainMenuState());
 				}else {
 					MusicBeatState.resetState();
 				}

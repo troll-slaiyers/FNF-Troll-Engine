@@ -376,7 +376,7 @@ class ChartData
 	}
 }
 
-abstract NoteData(Array<Dynamic>)// from Array<Dynamic> to Array<Dynamic>
+abstract NoteData(Array<Dynamic>) to Array<Dynamic>
 {
 	public var strumTime(get, set):Float;
 	public var column(get, set):Int;
@@ -424,7 +424,7 @@ abstract NoteData(Array<Dynamic>)// from Array<Dynamic> to Array<Dynamic>
 	}
 
 	public static function isNoteData(data:Array<Dynamic>):Bool
-		return data != null && Std.isOfType(data[0], Float) && Std.isOfType(data[1], Int) && data[1] > 0;
+		return data != null && Std.isOfType(data[0], Float) && Std.isOfType(data[1], Int) && data[1] >= 0;
 }
 
 abstract PsychEventNote(Array<Dynamic>)// from Array<Dynamic> to Array<Dynamic>

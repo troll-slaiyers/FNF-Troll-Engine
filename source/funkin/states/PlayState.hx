@@ -1060,14 +1060,13 @@ class PlayState extends MusicBeatState
 		startCutscenes.onSceneFinished.add((scene: Cutscene) -> {
 			remove(scene);
 
-
 			// vv idk if we need this default behaviour since scripts can just cutscene = new VideoCutscene() cutscene.onEnd.addOnce((_:Bool)->game.camOther.flash(FlxColor.BLACK, 2))
 			// While if a video doesnt need to fade in after ending, this'd make it fade ANYWAY
 			// Uncomment if you think this default behaviour is fine tho
-
-
-/* 			if(scene is VideoCutscene)
-				camOther.flash(FlxColor.BLACK, 2); // easy fade from black lol */
+			#if (VIDEOS_ALLOWED && false)
+			if (scene is VideoCutscene)
+				camOther.flash(FlxColor.BLACK, 2); // easy fade from black lol
+			#end
 
 			songIntroCutscene();
 		});
@@ -1075,9 +1074,10 @@ class PlayState extends MusicBeatState
 		endCutscenes.onSequenceEnd.addOnce(endSong);
 		endCutscenes.onSceneFinished.add((scene: Cutscene) -> {
 			remove(scene);
-/* 			if(scene is VideoCutscene && endCutscenes.scenes.length > 0)
+			#if (VIDEOS_ALLOWED && false)
+			if (scene is VideoCutscene && endCutscenes.scenes.length > 0)
 				camOther.flash(FlxColor.BLACK, 2); // easy fade from black lol
-			 */
+			#end
 			endSongCutscenes();
 		});
 
@@ -1103,21 +1103,8 @@ class PlayState extends MusicBeatState
 		debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));
 		debugKeysBotplay = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('botplay'));
 
-		keysArray = [
-			for (i in 0...keyCount) {
-				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('${keyCount}_key_${i}'));
-			}
-		];
-
-		// trace(keysArray);
-
-
-		buttonsArray = [
-			ClientPrefs.copyKey(ClientPrefs.buttonBinds.get('note_left')),
-			ClientPrefs.copyKey(ClientPrefs.buttonBinds.get('note_down')),
-			ClientPrefs.copyKey(ClientPrefs.buttonBinds.get('note_up')),
-			ClientPrefs.copyKey(ClientPrefs.buttonBinds.get('note_right'))
-		];
+		keysArray = ClientPrefs.getNoteKeys(keyCount);
+		buttonsArray = ClientPrefs.getNoteButtons(keyCount);
 	}
 
 	function setStageData(stageData:StageFile)
@@ -2376,7 +2363,7 @@ class PlayState extends MusicBeatState
 
 		////
 		if (noteHits.length > 0){
-			while (noteHits.length > 0 && (noteHits[0] + 2000) < Conductor.songPosition)
+			while (noteHits.length > 0 && (noteHits[0] + 2000 * Conductor.pitch) < Conductor.songPosition)
 				noteHits.shift();
 		}
 
@@ -2872,7 +2859,10 @@ class PlayState extends MusicBeatState
 		if(callOnScripts("onDisplayJudgment", [image]) == Globals.Function_Stop || r)
 			return;
 		
-		if (ClientPrefs.simpleJudge)
+		final fadeCombos = ClientPrefs.comboFading;
+		final stackCombos = fadeCombos && (ClientPrefs.comboStacking && !ClientPrefs.simpleJudge);
+
+		if (!stackCombos)
 			lastJudge.kill();
 
 		var spr:RatingSprite = if (worldCombos)
@@ -2936,11 +2926,14 @@ class PlayState extends MusicBeatState
 		if (callOnScripts("onDisplayCombo", [combo]) == Globals.Function_Stop || r)
 			return;
 
-		if (ClientPrefs.simpleJudge) {
+		final fadeCombos = ClientPrefs.comboFading;
+		final stackCombos = fadeCombos && (ClientPrefs.comboStacking && !ClientPrefs.simpleJudge);
+
+		if (!stackCombos) {
 			ratingGroup.killLastCombo();
 			if (combo == 0)
 				return;
-		}else{
+		}else if (!ClientPrefs.simpleJudge) {
 			if (combo > 0 && combo < 10)
 				return;
 		}
@@ -2961,7 +2954,7 @@ class PlayState extends MusicBeatState
 			{
 				numSpr.moves = false;
 
-				function onComplete(_) {
+				final onBumpComplete = !fadeCombos ? null : function(_:FlxTween):Void {
 					if (!numSpr.alive)
 						return;
 
@@ -2973,18 +2966,37 @@ class PlayState extends MusicBeatState
 				}
 
 				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
-				numSpr.tween = FlxTween.tween(numSpr.scale, {x: numSpr.scale.x, y: numSpr.scale.y}, 0.2, {ease: FlxEase.circOut, onComplete: onComplete});
+				numSpr.tween = FlxTween.tween(numSpr.scale, {x: numSpr.scale.x, y: numSpr.scale.y}, 0.2, {
+					ease: FlxEase.circOut, 
+					onComplete: onBumpComplete
+				});
 
 				numSpr.scale.x *= 1.25;
 				numSpr.updateHitbox();
 				numSpr.scale.y *= 0.75;
 			}
+			else if (!fadeCombos)
+			{
+				numSpr.moves = false;
+				
+				final startY = numSpr.y;
+				final vel = FlxG.random.int(140, 160);
+				final acc = FlxG.random.int(200, 300); // the y function ends up doubling the acceleration but i prefer it this way tbh
+				final dur = vel / acc; // how long till it hits 0 and falls below the start point
+
+				numSpr.alpha = 1.0;
+				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
+				numSpr.updateHitbox();
+
+				numSpr.tween = FlxTween.num(0, dur, dur, null, t -> numSpr.y = startY + (acc * t - vel) * t);
+			}
 			else
 			{
 				numSpr.moves = true;
-				numSpr.acceleration.y = FlxG.random.int(200, 300);
 				numSpr.velocity.y = -FlxG.random.int(140, 160);
+				numSpr.acceleration.y = FlxG.random.int(200, 300);
 
+				numSpr.alpha = 1.0;
 				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
 				numSpr.updateHitbox();
 
@@ -3030,22 +3042,9 @@ class PlayState extends MusicBeatState
 			stats.judgements.set(judgeData.internalName, 0);
 
 		stats.judgements.set(judgeData.internalName, stats.judgements.get(judgeData.internalName) + 1);
-
 		stats.judged.push(hitData);
 
 		RecalculateRating();
-
-		if (ClientPrefs.coloredCombos)
-		{
-			if (stats.judgements.get("bad") > 0 || stats.judgements.get("shit") > 0 || stats.comboBreaks > 0)
-				comboColor = 0xFFFFFFFF;
-			else if (stats.judgements.get("good") > 0)
-				comboColor = hud.judgeColours.get("good");
-			else if (stats.judgements.get("sick") > 0)
-				comboColor = hud.judgeColours.get("sick");
-			else if (stats.judgements.get("epic") > 0)
-				comboColor = hud.judgeColours.get("epic");
-		}
 
 		hudSkinScript?.call("onApplyJudgmentDataPost", [judgeData, hitData, show]);
 		callOnScripts("onApplyJudgmentDataPost", [judgeData, hitData, show]);
@@ -3219,8 +3218,16 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	inline function playMissSound() {
+		if (ClientPrefs.missVolume > 0)
+			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume  * FlxG.random.float(0.9, 1));
+	}
+
 	function breakCombo() {
-		ratingGroup.killLastCombo();
+		if (ClientPrefs.simpleJudge || !ClientPrefs.comboFading)
+			ratingGroup.killLastCombo();
+
+		playMissSound();
 
 		if (stats.combo > 10 && gf != null && gf.animOffsets.exists('sad')){
 			gf.playAnim('sad');
@@ -3298,8 +3305,10 @@ class PlayState extends MusicBeatState
 		for(track in field.tracks)
 			track.volume = 0;
 
-		if (!daNote.isSustainNote && ClientPrefs.missVolume > 0)
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1));
+		/*
+		if (!daNote.isSustainNote)
+			playMissSound();
+		*/
 
 		if (!daNote.noMissAnimation) {
 			for (char in getNoteCharacters(daNote, field)) {
@@ -3333,15 +3342,11 @@ class PlayState extends MusicBeatState
 		if(!practiceMode) stats.score -= 10;
 		if(!endingSong) songMisses++;
 
-		breakCombo();
-		displayCombo(-stats.cbCombo);
-
 		// i dont think this should reduce acc lol
 		//totalPlayed++;
-		//RecalculateRating();
 
-		if (ClientPrefs.missVolume > 0)
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume  * FlxG.random.float(0.9, 1));
+		breakCombo();
+		displayCombo(-stats.cbCombo);
 
 		if (field != null) {
 			for (track in field.tracks)
@@ -3672,8 +3677,17 @@ class PlayState extends MusicBeatState
 	public function RecalculateRating() {
 		callOnScripts('onRecalculateRating');
 
+		if (ClientPrefs.coloredCombos) {
+			if (stats.bads > 0 || stats.shits > 0 || stats.comboBreaks > 0)
+				comboColor = 0xFFFFFFFF;
+			else if (stats.goods > 0)
+				comboColor = hud.judgeColours.get("good");
+			else if (stats.sicks > 0)
+				comboColor = hud.judgeColours.get("sick");
+			else if (stats.epics > 0)
+				comboColor = hud.judgeColours.get("epic");
+		}
 		stats.updateVariables();
-
 		hud.recalculateRating();
 		#if ALLOW_DEPRECATION
 		callOnScripts('postRecalculateRating'); // deprecated
@@ -3686,7 +3700,13 @@ class PlayState extends MusicBeatState
 
 	public function openCutscenePauseMenu(scene: Cutscene)
 	{
-		if (!scene.canPause)return;
+		if (!scene.canPause)
+			return;
+
+		// W hack to prevent pausing if ACCEPT and PAUSE have the same bind
+		if (scene is DialogueCutscene && controls.ACCEPT) 
+			return;
+
 		if (callOnScripts('onPause') == Globals.Function_Stop) 
 			return;
 

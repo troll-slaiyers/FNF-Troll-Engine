@@ -3,7 +3,6 @@ package funkin.objects.cutscenes;
 // idc to do hxcodec etc lmao!
 #if hxvlc
 import hxvlc.flixel.FlxVideoSprite;
-import hxvlc.util.Location;
 #else
 typedef FlxVideoSprite = Dynamic;
 #end

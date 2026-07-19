@@ -5,22 +5,59 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.tweens.FlxTween;
 
+/**
+	Base cutscene class
+**/
 class Cutscene extends FlxTypedGroup<FlxBasic> {
-	public var onEnd:FlxTypedSignal<Bool->Void> = new FlxTypedSignal<Bool->Void>(); // (wasSkipped:Bool)->{}
-	public var sounds: Array<FlxSound> = [];
+	public var onEnd:FlxTypedSignal<(wasSkipped:Bool) -> Void> = new FlxTypedSignal();
+	public var sounds:Array<FlxSound> = [];
 	public var music:FlxSound;
 
 	// TODO: could use bit-shift bullshit and enums or sum shit lmao
 	// though thats overcomplicating it so 3 bools it is
+	//// yea don't do that '_'
 
+	/** Whether the pause menu can be opened during this cutscene **/
 	public var canPause:Bool = true;
+	/** Whether this cutscene can be skipped through the cutscene pause menu  **/
 	public var canSkip:Bool = true;
+	/** Whether this cutscene can be restarted through the cutscene pause menu **/
 	public var canRestart:Bool = true;
 
-	public function newSound(path:String, obeysBitch:Bool = true){
+	public function new() {
+		super();
+		onEnd.addOnce((_:Bool) -> {
+			clearSounds();
+		});
+	}
+
+	/** 
+	 * Called by the state before this Cutscene gets played.  
+	 * Override this function, NOT the constructor, to initialize or set up your Cutscene.
+	**/
+	public function createCutscene():Void {
+		return;
+	}
+
+	public function pause():Void {
+		for (s in sounds)
+			s.pause();
+	}
+
+	public function resume():Void {
+		for (s in sounds)
+			s.resume();
+	}
+
+	public function restart():Void {
+		clearSounds();
+	}
+
+	////
+	public function newSound(path:String, obeysPitch:Bool = true):FlxSound {
 		var newSound = new FlxSound().loadEmbedded(Paths.sound(path));
 		newSound.exists = true;
-		if(obeysBitch)
+		if (obeysPitch)
 			newSound.pitch = FlxG.timeScale;
 
 		FlxG.sound.list.add(newSound);
@@ -28,9 +65,8 @@ class Cutscene extends FlxTypedGroup<FlxBasic> {
 		return newSound;
 	}
 
-	public function playMusic(path:FlxSoundAsset, volume:Float = 1, fadeIn:Float = 0, fadeOut:Float = 0.25){
-	
-		if(music != null){
+	public function playMusic(path:FlxSoundAsset, volume:Float = 1, fadeIn:Float = 0, fadeOut:Float = 0.25):FlxSound {
+		if (music != null) {
 			if (fadeOut > 0) {
 				var oldMusic:FlxSound = music;
 				music.fadeOut(fadeOut, 0, (twn:FlxTween)->{
@@ -42,7 +78,7 @@ class Cutscene extends FlxTypedGroup<FlxBasic> {
 				});
 				music = new FlxSound();
 			}
-		}else{
+		}else {
 			music = new FlxSound();
 		}
 
@@ -59,42 +95,14 @@ class Cutscene extends FlxTypedGroup<FlxBasic> {
 			music.fadeIn(fadeIn, 0, volume);
 
 		return music;
-		
 	}
 
-	public function pause() {
-		for (s in sounds)
-			s.pause();
-	}
-
-	public function resume() {
-		for(s in sounds)
-			s.resume();
-
-	}
-
-	public function restart() 
-		clearSounds();
-
-	function clearSounds()
+	function clearSounds():Void
 	{
 		for (s in sounds) {
 			FlxG.sound.list.remove(s);
 			s.destroy();
 		}
 		sounds.resize(0);
-	}
-	
-
-	public function createCutscene() // gets called by state or w/e
-	{
-		
-	}
-
-	public function new(){
-		super();
-		onEnd.addOnce((_:Bool) -> {
-			clearSounds();
-		});
 	}
 }

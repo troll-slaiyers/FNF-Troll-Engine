@@ -2,7 +2,7 @@ package funkin.states.base;
 
 #if (VIDEOS_ALLOWED && hxvlc)
 import hxvlc.flixel.FlxVideo;
-import hxvlc.util.Location;
+import #if (hxvlc >= "2.3.0") hxvlc.openfl.Location #else hxvlc.util.Location #end;
 #else
 typedef Location = String;
 #end

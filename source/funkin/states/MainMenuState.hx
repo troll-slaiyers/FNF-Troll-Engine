@@ -71,12 +71,11 @@ class MainMenuState extends MusicBeatState
 		bg.scale.x = bg.scale.y = 1.175;
 		add(bg);
 
-		magenta = new FlxSprite(0, 0, Paths.image('menuDesat'));
+		magenta = new FlxSprite(0, 0, Paths.image('menuBGMagenta'));
 		magenta.scrollFactor.set(0, yScroll);
 		magenta.screenCenter();
 		magenta.scale.x = magenta.scale.y = bg.scale.x;
 		magenta.visible = false;
-		magenta.color = 0xFFfd719b;
 		add(magenta);
 
 		menuItems = new FlxTypedGroup<FlxSprite>();

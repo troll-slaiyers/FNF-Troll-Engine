@@ -271,82 +271,60 @@ class Stats {
 	@:noCompletion inline function set_misses(val:Int):Int return judgements["miss"] = val;
 
 	@:noCompletion function set_score(val:Int) {
-		if (score != val) {
-			changedCallback("score", val);
-			return score = val;
-		}
+		if (score != val)
+			changedCallback("score", score = val);
 		return val;
 	}
 	@:noCompletion function set_nps(val:Int) {
-		if (nps != val) {
-			changedCallback("nps", val);
-			return nps = val;
-		}
+		if (nps != val)
+			changedCallback("nps", nps = val);
 		return val;
 	}
 	@:noCompletion function set_npsPeak(val:Int) {
-		if (npsPeak != val) {
-			changedCallback("npsPeak", val);
-			return npsPeak = val;
-		}
+		if (npsPeak != val)
+			changedCallback("npsPeak", npsPeak = val);
 		return val;
 	}
 	@:noCompletion function set_totalPlayed(val:Float) {
-		if (totalPlayed != val) {
-			changedCallback("totalPlayed", val);
-			return totalPlayed = val;
-		}
+		if (totalPlayed != val)
+			changedCallback("totalPlayed", totalPlayed = val);
 		return val;
 	}
 	@:noCompletion function set_totalNotesHit(val:Float) {
-		if (totalNotesHit != val) {
-			changedCallback("totalNotesHit", val);
-			return totalNotesHit = val;
-		}
+		if (totalNotesHit != val)
+			changedCallback("totalNotesHit", totalNotesHit = val);
 		return val;
 	}
 	@:noCompletion function set_clearType(val:String) {
-		if (clearType != val) {
-			changedCallback("clearType", val);
-			return clearType = val;
-		}
+		if (clearType != val)
+			changedCallback("clearType", clearType = val);
 		return val;
 	}
 	@:noCompletion function set_grade(val:String) {
-		if (grade != val) {
-			changedCallback("grade", val);
-			return grade = val;
-		}
+		if (grade != val)
+			changedCallback("grade", grade = val);
 		return val;
 	}
 	@:noCompletion function set_combo(val:Int) {
 		if (combo != val) {
-			changedCallback("combo", val);
-			combo = val;
+			changedCallback("combo", combo = val);
 			if (val > maxCombo) maxCombo = val;
-			return val;
 		}
 		return val;
 	}
 	@:noCompletion function set_maxCombo(val:Int) {
-		if (maxCombo != val) {
-			changedCallback("maxCombo", val);
-			return maxCombo = val;
-		}
+		if (maxCombo != val)
+			changedCallback("maxCombo", maxCombo = val);
 		return val;
 	}
 	@:noCompletion function set_cbCombo(val:Int) {
-		if (cbCombo != val) {
-			changedCallback("cbCombo", val);
-			return cbCombo = val;
-		}
+		if (cbCombo != val)
+			changedCallback("cbCombo", cbCombo = val);
 		return val;
 	}
 	@:noCompletion function set_ratingPercent(val:Float) {
-		if (ratingPercent != val) {
-			changedCallback("ratingPercent", val);
-			return ratingPercent = val;
-		}
+		if (ratingPercent != val)
+			changedCallback("ratingPercent", ratingPercent = val);
 		return val;
 	}
 }

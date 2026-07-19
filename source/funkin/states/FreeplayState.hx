@@ -285,9 +285,12 @@ class FreeplayState extends MusicBeatState
 			PlayState.loadPlaylist([selectedSongData], curChartId);
 			
 			if (PlayState.SONG != null){
-				Conductor.changeBPM(PlayState.SONG.bpm);
 				var instAsset = selectedSongData.getTrackSound(PlayState.SONG.tracks.inst[0]);
 				FlxG.sound.playMusic(instAsset, 0.6);
+				Conductor.tracks = [];
+				Conductor.startSong();
+				Conductor.changeBPM(PlayState.SONG.bpm);
+				Conductor.tracks.push(FlxG.sound.music);
 			}
 		}
 	}

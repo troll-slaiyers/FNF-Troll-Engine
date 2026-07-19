@@ -312,7 +312,10 @@ class NoteField extends FieldBase
 			// less accurate, but higher FPS
 			quad0.scaleBy(scale);
 			quad1.scaleBy(scale);
-			return [p1.add(quad0, quad0), p1.add(quad1, quad1), p1];
+			quad0.incrementBy(p1);
+			quad1.incrementBy(p1);
+			p1.putWeak();
+			return [quad0, quad1];
 		}
 
 		var p2 = modManager.getPos(-(vDiff + lookAhead) * speed, diff + lookAhead, curDecBeat, hold.column, modNumber, hold, this, []);
@@ -323,12 +326,19 @@ class NoteField extends FieldBase
 		var unit = p2;
 
 		var w = (quad0.subtract(quad1, quad0).length / 2) * scale;
-		quad0.put();
-		quad1.put();
-		var off1 = Vector3.weak(unit.y * w, 	-unit.x * w,	0.0);
-		var off2 = Vector3.weak(-off1.x, 	-off1.y,		0.0);
+		quad0.putWeak();
+		quad1.putWeak();
 
-		return [p1.add(off1, off1), p1.add(off2, off2), p1];
+		var off1 = Vector3.get(unit.y * w, 	-unit.x * w,	0.0);
+		var off2 = Vector3.get(-off1.x, 		-off1.y,		0.0);
+		var off3 = Vector3.get(p1.x, p1.y, p1.z);
+
+		off1.incrementBy(p1);
+		off2.incrementBy(p1);
+		p1.putWeak();
+		p2.putWeak();
+
+		return [off1, off2, off3];
 	}
 
 	var crotchet:Float = Conductor.getCrotchetAtTime(0.0) / 4.0;
@@ -495,7 +505,10 @@ class NoteField extends FieldBase
 			vertices[subIndex + 7] = bot[1].y;
 
 			appendUV(hold, uvData, false, sub);
+
+			for (vec in top) vec.put();
 		}
+		for (vec in lastMe) vec.put();
 
 		var shader = hold.shader != null ? hold.shader : defaultShader;
 		if (shader != hold.shader)

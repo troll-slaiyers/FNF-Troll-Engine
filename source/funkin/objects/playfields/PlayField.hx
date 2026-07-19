@@ -314,7 +314,15 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 		var receptor:StrumNote = strumNotes[column];
 		switch(receptor?.animation.name) {
-			case 'pressed' | 'confirm': receptor.resetAnim = -1;
+			case 'pressed' | 'confirm':
+				if (ClientPrefs.cancelReceptorAnims) {
+					if (!isHolding[column]) {
+						receptor.playAnim('static');
+						receptor.resetAnim = 0;
+					}
+				}else {
+					receptor.resetAnim = -1;
+				}
 		}
 	}
 

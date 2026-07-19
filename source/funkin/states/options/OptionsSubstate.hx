@@ -121,8 +121,11 @@ class OptionsSubstate extends MusicBeatSubstate
 					"judgeOpacity",
 					"stageOpacity", 
 					"scoreZoom", 
+					"cancelReceptorAnims",
 					"coloredCombos",
 					"simpleJudge",
+					"comboFading",
+					"comboStacking",
 					'hudPosition', 
 					"customizeHUD",
 				]
@@ -151,6 +154,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				"display",
 				[
 					"framerate",
+					"fieldFramerate",
 					"fullscreen", 
 				]
 			],

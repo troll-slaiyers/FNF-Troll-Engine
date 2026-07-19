@@ -19,15 +19,9 @@ using StringTools;
 	Barebones menu that shows a list of every available song and chart
 	Not meant to be a Freeplay menu!!! Just here as a placeholder and song select menu for quick testing
 **/
-class SongSelectState extends MusicBeatSubstate
+class SongSelectState extends funkin.states.base.DebugListState
 {	
 	public var songs:Array<BaseSong> = null;
-	
-	var songTexts:Array<FlxText> = [];
-	var folderTexts:Array<FlxText> = [];
-
-	public var curSelected(default, set):Int = 0;
-	var curTextIdx:Int = -1;
 
 	public static function getEverySong():Array<BaseSong>
 	{
@@ -55,7 +49,9 @@ class SongSelectState extends MusicBeatSubstate
 		return songList;
 	}
 
-	var cam:FlxCamera = null;
+	public function new() {
+		super(null);
+	}
 
 	override public function create() 
 	{
@@ -63,20 +59,6 @@ class SongSelectState extends MusicBeatSubstate
 		TransitionableState.skipNextTransOut = true;
 		this.persistentDraw = false;
 		this.persistentUpdate = false;
-		super.create();
-
-		#if DISCORD_ALLOWED
-		DiscordClient.changePresence({details: "In the Menus"});
-		#end
-		////
-		
-		/*
-		var bg = new FlxSprite(Paths.image("menuDesat"));
-		bg.blend = INVERT;
-		bg.setColorTransform(-1.75, -1.75, -1.75, 0.4, Std.int(255 + bg.color.red / 3), Std.int(255 + bg.color.green / 3), Std.int(255 + bg.color.blue / 3), 0);
-		bg.screenCenter();
-		add(bg);
-		*/
 
 		////
 		if (_parentState == null) {
@@ -85,165 +67,39 @@ class SongSelectState extends MusicBeatSubstate
 			}else{
 				FlxG.sound.music.fadeIn(1.0, FlxG.sound.music.volume);
 			}
-		}else {
-			cam = new FlxCamera();
-			cam.bgColor = 0;
-			FlxG.cameras.add(cam, false);
-			this.camera = cam;
-			if (this._bgSprite != null)
-				this._bgSprite._cameras = this._cameras;
 		}
 
 		songs ??= getEverySong();
+		this.textStrings = [for (song in songs) song.songId];
+		this.textStrings2 = [for (song in songs) song.folder];
 
-		var hPadding = 64;
-		var vPadding = 64;
-		var spacing = 4; // space between texts
-		var width = (FlxG.width - hPadding - hPadding);
-		var height = (FlxG.height - vPadding - vPadding);
-		var textSize = 16;
-
-		var ySpace = (textSize+spacing);
-		var width = Math.ceil(width / 2);
-		var txts = Math.floor(height / ySpace);
-
-		for (i in 0...txts)
-		{
-			var text = new FlxText(
-				hPadding, 
-				vPadding + (ySpace * i), 
-				width, 
-				"" + i,
-				textSize
-			);
-			text.wordWrap = false;
-			text.antialiasing = false;
-			songTexts.push(text);
-			add(text);
-
-			var text = new FlxText(
-				hPadding + width, 
-				vPadding + (ySpace * i), 
-				width, 
-				"" + i,
-				textSize
-			);
-			text.wordWrap = false;
-			text.antialiasing = false;
-			folderTexts.push(text);
-			add(text);
-		}
-
-		curSelected = curSelected;
+		super.create();
 
 		var versionTxt = new FlxText(0, 0, 0, Main.Version.displayedVersion, 12);
 		versionTxt.setPosition(FlxG.width - 2 - versionTxt.width, FlxG.height - 2 - versionTxt.height);
 		versionTxt.alpha = 0.6;
 		versionTxt.antialiasing = false;
 		add(versionTxt);
-	}
-
-	var xSecsHolding = 0.0;
-	var ySecsHolding = 0.0; 
+	} 
 
 	override public function update(e)
 	{
-		var speed = 1;
-
-		if (controls.UI_UP || controls.UI_DOWN){
-			if (controls.UI_DOWN_P){
-				curSelected += speed;
-				ySecsHolding = 0;
-			}
-			if (controls.UI_UP_P){
-				curSelected -= speed;
-				ySecsHolding = 0;
-			}
-
-			var checkLastHold:Int = Math.floor((ySecsHolding - 0.5) * 10);
-			ySecsHolding += e;
-			var checkNewHold:Int = Math.floor((ySecsHolding - 0.5) * 10);
-
-			if(ySecsHolding > 0.35 && checkNewHold - checkLastHold > 0)
-				curSelected += (checkNewHold - checkLastHold) * (controls.UI_UP ? -1 : 1) * speed;
-		}
-
 		if (FlxG.keys.pressed.CONTROL)
 		{
 			var ss = new GameplayChangersSubstate();
 			ss.cameras = cameras;
 			openSubState(ss);
+			return;
 		}
 
 		if (FlxG.keys.justPressed.SIX)
 		{
 			var ss = new OptionsSubstate();
 			openSubState(ss);
-		}
-
-		if (controls.ACCEPT) 
-		{
-			var charts = songs[curSelected].getCharts();
-			if (charts.length > 0) {
-				trace(charts);
-				var ss = new ChartSelectSubstate(songs[curSelected], charts, onSelectChart);
-				ss.cameras = cameras;
-				openSubState(ss);
-			}else {
-				trace("no charts!");
-				songTexts[curTextIdx].color = 0xFFFF0000;
-			}
-		}
-
-		if (controls.BACK) 
-		{
-			goBack();
+			return;
 		}
 
 		super.update(e);
-	}
-
-	function set_curSelected(newIdx:Int){
-		if (songs.length == 0)
-			return curSelected = 0;
-
-		if (newIdx < 0 || newIdx >= songs.length)
-			newIdx = newIdx % songs.length;
-		if (newIdx < 0)
-			newIdx = songs.length + newIdx;
-
-		////
-		var listEndIdx = Math.round(newIdx + songTexts.length / 2);
-		if (listEndIdx > songs.length) listEndIdx = songs.length;
-		
-		var listStartIdx = listEndIdx - songTexts.length;
-		if (listStartIdx < 0) listStartIdx = 0;
-
-		//trace(listStartIdx, newIdx, listEndIdx, songTexts.length);
-
-		for (i in 0...songTexts.length) {
-			var songIdx = listStartIdx + i;
-			var song = songs[songIdx];
-			var songText = songTexts[i];
-			var folderText = folderTexts[i];
-			
-			if (song == null) {
-				songText.exists = false;
-				folderText.exists = false;
-				continue;
-			}
-
-			songText.exists = true;
-			folderText.exists = true;
-			songText.text = song.songId;
-			folderText.text = song.folder;
-			songText.color = folderText.color = (songIdx == newIdx) ? 0xFFFFFF00 : 0xFFFFFFFF;
-			if (songIdx == newIdx) curTextIdx = i;
-		}
-
-		////
-		curSelected = newIdx;
-		return curSelected;
 	}
 	
 	dynamic public function onSelectChart(song:BaseSong, chart:String) {
@@ -256,7 +112,20 @@ class SongSelectState extends MusicBeatSubstate
 			LoadingState.loadAndSwitchState(new PlayState());
 	}
 
-	dynamic public function goBack() {
+	override public function onSelect(i:Int) {
+		var charts = songs[i].getCharts();
+		if (charts.length > 0) {
+			trace(charts);
+			var ss = new ChartSelectSubstate(songs[i], charts, onSelectChart);
+			ss.cameras = cameras;
+			openSubState(ss);
+		}else {
+			trace("no charts!");
+			textObjects[curTextIdx].color = 0xFFFF0000;
+		}
+	}
+
+	override dynamic public function goBack() {
 		if (_parentState == null)
 			MusicBeatState.switchState(new MasterEditorMenu());
 		else

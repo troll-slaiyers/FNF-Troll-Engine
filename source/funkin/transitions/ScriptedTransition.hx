@@ -5,7 +5,7 @@ import funkin.scripts.ScriptedClassShit;
 import funkin.scripts.FunkinHScript;
 import hscript.Expr;
 
-final SCRIPT_CONSTANTS:Map<String, Dynamic> = [
+private final SCRIPT_CONSTANTS:Map<String, Dynamic> = [
 	"TransitionStatus" => {
 		IN: TransitionStatus.IN,
 		OUT: TransitionStatus.OUT,
@@ -15,7 +15,9 @@ final SCRIPT_CONSTANTS:Map<String, Dynamic> = [
 	"OUT" => TransitionStatus.OUT,
 ];
 
-class ScriptedTransition extends Transition implements IScriptedClass {
+@:build(funkin.macros.ScriptingMacro.setupScriptedClass())
+class ScriptedTransition extends Transition /*implements IScriptedClass*/
+{
 	final script:FunkinHScript;
 
 	private function new(name:String, expr:Expr) {

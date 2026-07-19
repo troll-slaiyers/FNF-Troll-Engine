@@ -1,8 +1,9 @@
 package funkin;
 
 import funkin.data.BaseSong;
+
+import funkin.util.FileUtil;
 import haxe.io.Bytes;
-import haxe.io.Path;
 
 import math.CoolMath;
 
@@ -11,16 +12,13 @@ import flixel.util.FlxColor;
 import flixel.tweens.FlxEase;
 import flixel.util.typeLimit.OneOfTwo;
 
-#if sys
-import sys.io.File;
-import sys.FileSystem;
-#end
-
 using StringTools;
 
 /**
 	Class for various util functions.  
-	Math function shall go to `CoolMath`
+
+	Math functions shall go to `CoolMath`  
+	File functions shall go to `FileUtil`  
 **/
 class CoolUtil {
 	public static function makeSound(asset:flixel.system.FlxAssets.FlxSoundAsset) {
@@ -140,9 +138,10 @@ class CoolUtil {
 	}
 
 	////
-	inline public static function blankSprite(width, height, color=0xFFFFFFFF) {
-		var spr = new FlxSprite().makeGraphic(1, 1);
-		spr.scale.set(width, height);
+	inline public static function blankSprite(width:Float, height:Float, color=0xFFFFFFFF) {
+		var spr = new FlxSprite();
+		spr.frame = FlxG.bitmap.whitePixel;
+		spr.scale.set(width / spr.frameWidth, height / spr.frameHeight);
 		spr.updateHitbox();
 		spr.color = color;
 		return spr;
@@ -178,6 +177,8 @@ class CoolUtil {
 	}
 
 	@:noCompletion static var _point:FlxPoint = new FlxPoint();
+
+	/** @returns Whether if the mouse is hovering over an object, respecting the camera view bounds **/
 	public static function overlapsMouse(object:FlxObject, ?camera:FlxCamera):Bool
 	{
 		camera ??= FlxG.camera;
@@ -189,6 +190,12 @@ class CoolUtil {
 		}
 
 		return false;
+	}
+
+	/** @returns Whether the mouse is hovering over a camera's view bounds **/
+	public static function mouseOverlapsCamera(camera:FlxCamera):Bool {
+		FlxG.mouse.getPositionInCameraView(camera, _point);
+		return camera.containsPoint(_point);
 	}
 
 	public static function centerOnObject(obj1:FlxObject, obj2:FlxObject) {
@@ -213,10 +220,7 @@ class CoolUtil {
 	public static function coolTextFile(path:String):Array<String>
 	{
 		var rawList = Paths.getContent(path);
-		if (rawList == null)
-			return [];
-
-		return listFromString(rawList);
+		return (rawList == null) ? [] : listFromString(rawList);
 	}
 
 	public static function dominantColor(sprite:flixel.FlxSprite):FlxColor {
@@ -248,14 +252,14 @@ class CoolUtil {
 	}
 
 	////
-	public static function colorFromString(color:String):FlxColor
+	public static function colorFromString(str:String):FlxColor
 	{
-		return FlxColor.fromRGB(
-			Std.parseInt("0x"+color.substr(-6, 2)),
-			Std.parseInt("0x"+color.substr(-4, 2)),
-			Std.parseInt("0x"+color.substr(-2, 2)),
-			Std.parseInt("0x"+color.substr(-8, 2))
-		);
+		var r = Std.parseInt("0x"+str.substr(-6, 2));
+		var g = Std.parseInt("0x"+str.substr(-4, 2));
+		var b = Std.parseInt("0x"+str.substr(-2, 2));
+		var a = (str.length < 6) ? 255 : Std.parseInt("0x"+str.substr(-8, 2));
+
+		return FlxColor.fromRGB(r, g, b, a);
 	}
 
 	// could probably use a macro
@@ -309,21 +313,6 @@ class CoolUtil {
 		flixel.FlxG.openURL(site);
 	}
 
-	public static inline function safeSaveFile(path:String, content:OneOfTwo<String, Bytes>):Bool
-		return funkin.util.FileUtil.safeSaveFile(path, content);
-
-	public static inline function getSystemPath(?path:String):String
-		return funkin.util.FileUtil.getSystemPath(path);
-
-	public static inline function showOpenMultipleDialog(title:String = "Open Files", ?defaultPath:String, ?filters:Array<String>, ?onSelect:(paths:Array<String>)->Void, ?onCancel:Void->Void):Void
-		return funkin.util.FileUtil.showOpenMultipleDialog(title, defaultPath, filters, onSelect, onCancel);
-	
-	public static inline function showOpenDialog(title:String = "Open File", ?defaultPath:String, ?filters:Array<String>, ?onOpen:(bytes:Bytes)->Void, ?onSelect:(path:String)->Void, ?onCancel:Void->Void):Void
-		return funkin.util.FileUtil.showOpenDialog(title, defaultPath, filters, onOpen, onSelect, onCancel);
-
-	public static inline function showSaveDialog(content:OneOfTwo<String, Bytes>, title:String = "Save File", ?defaultPath:String, ?filters:Array<String>, ?onSave:(path:String)->Void, ?onCancel:Void->Void):Void
-		return funkin.util.FileUtil.showSaveDialog(title, defaultPath, filters, onSave, onCancel);
-
 	// https://community.haxe.org/t/clone-a-class-instance/3747/5
 	// shoutout random guy on haxe fourm
     public static function copyClass<T>(c:T):T {
@@ -362,6 +351,21 @@ class CoolUtil {
 
 	////
 	#if ALLOW_DEPRECATION
+	@:deprecated @:noCompletion inline public static function safeSaveFile(path:String, content:OneOfTwo<String, Bytes>):Bool
+		return FileUtil.safeSaveFile(path, content);
+
+	@:deprecated @:noCompletion inline public static function getSystemPath(?path:String):String
+		return FileUtil.getSystemPath(path);
+
+	@:deprecated @:noCompletion inline public static function showOpenMultipleDialog(title:String = "Open Files", ?defaultPath:String, ?filters:Array<String>, ?onSelect:(paths:Array<String>)->Void, ?onCancel:Void->Void):Void
+		return FileUtil.showOpenMultipleDialog(title, defaultPath, filters, onSelect, onCancel);
+	
+	@:deprecated @:noCompletion inline public static function showOpenDialog(title:String = "Open File", ?defaultPath:String, ?filters:Array<String>, ?onOpen:(bytes:Bytes)->Void, ?onSelect:(path:String)->Void, ?onCancel:Void->Void):Void
+		return FileUtil.showOpenDialog(title, defaultPath, filters, onOpen, onSelect, onCancel);
+
+	@:deprecated @:noCompletion inline public static function showSaveDialog(content:OneOfTwo<String, Bytes>, title:String = "Save File", ?defaultPath:String, ?filters:Array<String>, ?onSave:(path:String)->Void, ?onCancel:Void->Void):Void
+		return FileUtil.showSaveDialog(content, title, defaultPath, filters, onSave, onCancel);
+
 	@:deprecated @:noCompletion inline public static function coolLerp(current:Float, target:Float, elapsed:Float):Float
 		return CoolMath.coolLerp(current, target, elapsed);
 

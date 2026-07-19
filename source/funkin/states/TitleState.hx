@@ -19,7 +19,7 @@ using StringTools;
 import funkin.api.Discord.DiscordClient;
 #end
 
-@:injectMoreFunctions(["generateSequence"])
+@:injectMoreFunctions(["generateSequence", "skipIntro", "onAccept"])
 class TitleState extends MusicBeatState
 {
 	public static var initialized:Bool = false;
@@ -102,7 +102,7 @@ class TitleState extends MusicBeatState
 			if (bg.stageData.bg_color != null)
 				bgColor = FlxColor.fromString(bg.stageData.bg_color);
 
-			camGame.bgColor = (bgColor != null) ? bgColor : 0xFF000000;
+			camGame.bgColor = bgColor ?? 0xFF000000;
 
 			var camPos = bg.stageData.camera_stage;
 			if (camPos == null) camPos = [640, 360];
@@ -167,8 +167,120 @@ class TitleState extends MusicBeatState
 		}
 	}
 
+	override function update(elapsed:Float)
+	{
+		if (bg != null && bg.stageScript != null) {
+			bg.stageScript.set("curDecBeat", curDecBeat);
+			bg.stageScript.set("curDecStep", curDecStep);
+			bg.stageScript.call('update', [elapsed]);
+		}
+
+		var lerpVal:Float = Math.exp(-elapsed * 2.4);
+		camFollowPos.setPosition(
+			FlxMath.lerp(camFollow.x,  camFollowPos.x, lerpVal), 
+			FlxMath.lerp(camFollow.y,  camFollowPos.y, lerpVal)
+		);
+
+		if (swagShader != null)
+		{
+			if(controls.UI_LEFT) swagShader.hue -= elapsed * 0.1;
+			if(controls.UI_RIGHT) swagShader.hue += elapsed * 0.1;
+		}
+
+		titleTimer = (titleTimer + elapsed) % 2;
+
+		if (!skippedIntro) {
+			if (getPressedEnter())
+				skipIntro();
+		}
+		else if (transitioning) {
+			if (!leavingState && getPressedEnter()) {
+				MusicBeatState.switchState(new MainMenuState());
+				leavingState = true;
+			}
+		}
+		else if (getPressedEnter()) {
+			if (FlxG.keys.pressed.SHIFT && cheatProgress == cheatCode.length) {
+				var ss = new funkin.states.SongSelectState();
+				ss.bgColor = FlxColor.fromRGB(0,0,0,240);
+				ss.goBack = () -> {};
+				this.persistentUpdate = false;
+				this.openSubState(ss);
+				return;
+			}
+
+			onAccept();
+		}
+		else {
+			handleCheatCode();
+
+			var timer:Float = titleTimer;
+			if (timer >= 1)
+				timer = 2 - timer;
+
+			timer = FlxEase.quadInOut(timer);
+			
+			titleText.color = FlxColor.interpolate(titleTextColors[0], titleTextColors[1], timer);
+			titleText.alpha = FlxMath.lerp(titleTextAlphas[0], titleTextAlphas[1], timer);
+		}
+
+		if (bg != null && bg.stageScript != null)
+			bg.stageScript.call('onUpdate', [elapsed]);
+
+		super.update(elapsed);
+
+		if (bg != null && bg.stageScript != null)
+			bg.stageScript.call('onUpdatePost', [elapsed]);
+
+	}
+
+	override function stepHit()
+	{
+		super.stepHit();
+
+		if (skippedIntro) {
+			if (bg != null && bg.stageScript != null) {
+				bg.stageScript.set("curStep", curStep);
+				bg.stageScript.call('onStepHit', []);
+			}
+		}
+	}
+
+	override function beatHit()
+	{
+		super.beatHit();
+
+		if (skippedIntro) {
+			if (bg != null && bg.stageScript != null) {
+				bg.stageScript.set("curBeat", curBeat);
+				bg.stageScript.call('onBeatHit', []);
+			}
+		}
+
+		if (logoBl != null)
+			logoBl.time = 0;
+	}
+
+	override function sectionHit()
+	{
+		super.sectionHit();
+
+		if (skippedIntro) {
+			if (bg != null && bg.stageScript != null) {
+				bg.stageScript.set("curSection", section);
+				bg.stageScript.call('onSectionHit', []);
+			}
+		}
+	}
+
 	function generateSequence() {
 		// this could prob be replaced with a json, yaml or even a whole "TitleSequence" script?? :shrug:
+		// > State extension scripts can override this function to make their own intro stuff ^.^
+
+		FlxTween.tween(intro.bg, {alpha: 0.86}, Conductor.crochet * 0.005, {
+			ease: FlxEase.quadInOut,
+			songBased: true,
+		});
 
 		var ngSpr = new FlxSprite(0, FlxG.height * 0.52, Paths.image('newgrounds_logo'));
 		ngSpr.exists = false;
@@ -186,7 +298,7 @@ class TitleState extends MusicBeatState
 		intro.queueNewLineOnBeat(0, 'riconuts', -8);
 		intro.queueNewLineOnBeat(0, 'nebula_zorua', -8);
 
-		intro.queueNewLineOnBeat(3, 'and more', -8);
+		intro.queueNewLineOnBeat(3, 'and many more', -8);
 		intro.queueOnBeat(4, intro.clearLines);
 
 		intro.queueNewLineOnBeat(5, 'Without any', 40);
@@ -229,46 +341,43 @@ class TitleState extends MusicBeatState
 		titleText.exists = true;
 		logoBl.exists = true;
 
-		camHUD.flash(FlxColor.WHITE, 4);
+		camHUD.flash(FlxColor.WHITE, 3.6);
 		
 		skippedIntro = true;
 	}
 
-	override function stepHit()
-	{
-		super.stepHit();
+	public function onAccept() {
+		titleText.color = 0xFFFFFFFF;
+		titleText.alpha = 1;
+		titleText.animation.play('press');
 
-		if (skippedIntro) {
-			if (bg != null && bg.stageScript != null) {
-				bg.stageScript.set("curStep", curStep);
-				bg.stageScript.call('onStepHit', []);
+		darkness.exists = false;
+		camHUD.flash(ClientPrefs.flashing ? 0xFFFFFFFF : 0x4CFFFFFF, 1, null, true);
+		FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
+
+		transitioning = true;
+
+		new FlxTimer().start(0.9, function(tmr:FlxTimer) {
+			if (!leavingState) {
+				MusicBeatState.switchState(new MainMenuState());
+				leavingState = true;
 			}
-		}
+		});
 	}
 
-	override function beatHit()
-	{
-		super.beatHit();
-
-		if (skippedIntro) {
-			if (bg != null && bg.stageScript != null) {
-				bg.stageScript.set("curBeat", curBeat);
-				bg.stageScript.call('onBeatHit', []);
+	private function handleCheatCode() {
+		var keyPressed:FlxKey = FlxG.keys.firstJustPressed();
+		if (keyPressed != -1 && cheatProgress < cheatCode.length) {
+			if (keyPressed == cheatCode[cheatProgress]) {
+				cheatProgress++;
+				//trace(cheatProgress);
+			}else {
+				cheatProgress = 0;
+				//trace("RESET");
 			}
-		}
 
-		if (logoBl != null)
-			logoBl.time = 0;
-	}
-
-	override function sectionHit()
-	{
-		super.sectionHit();
-
-		if (skippedIntro) {
-			if (bg != null && bg.stageScript != null) {
-				bg.stageScript.set("curSection", section);
-				bg.stageScript.call('onSectionHit', []);
+			if (cheatProgress == cheatCode.length) {
+				FlxG.sound.play(Paths.sound('mineExplode'));
 			}
 		}
 	}
@@ -309,107 +418,6 @@ class TitleState extends MusicBeatState
 		#end
 
 		return false;
-	}
-
-	private function handleCheatCode() {
-		var keyPressed:FlxKey = FlxG.keys.firstJustPressed();
-		if (keyPressed != -1 && cheatProgress < cheatCode.length) {
-			if (keyPressed == cheatCode[cheatProgress]) {
-				cheatProgress++;
-				//trace(cheatProgress);
-			}else {
-				cheatProgress = 0;
-				//trace("RESET");
-			}
-
-			if (cheatProgress == cheatCode.length) {
-				FlxG.sound.play(Paths.sound('mineExplode'));
-			}
-		}
-	}
-
-	override function update(elapsed:Float)
-	{
-		if (bg != null && bg.stageScript != null) {
-			bg.stageScript.set("curDecBeat", curDecBeat);
-			bg.stageScript.set("curDecStep", curDecStep);
-			bg.stageScript.call('update', [elapsed]);
-		}
-
-		var lerpVal:Float = Math.exp(-elapsed * 2.4);
-		camFollowPos.setPosition(
-			FlxMath.lerp(camFollow.x,  camFollowPos.x, lerpVal), 
-			FlxMath.lerp(camFollow.y,  camFollowPos.y, lerpVal)
-		);
-
-		if (swagShader != null)
-		{
-			if(controls.UI_LEFT) swagShader.hue -= elapsed * 0.1;
-			if(controls.UI_RIGHT) swagShader.hue += elapsed * 0.1;
-		}
-
-		titleTimer = (titleTimer + elapsed) % 2;
-
-		if (!skippedIntro) {
-			if (getPressedEnter())
-				skipIntro();
-		}
-		else {
-			if (transitioning) {
-				if (!leavingState && getPressedEnter()) {
-					MusicBeatState.switchState(new MainMenuState());
-					leavingState = true;
-				}
-			}
-			else if (getPressedEnter())
-			{
-				if (FlxG.keys.pressed.SHIFT && cheatProgress == cheatCode.length) {
-					var ss = new funkin.states.SongSelectState(FlxColor.fromRGB(0,0,0,240));
-					ss.goBack = () -> {};//MusicBeatState.switchState(new funkin.states.editors.MasterEditorMenu());
-					this.persistentUpdate = false;
-					this.openSubState(ss);
-					return;
-				}
-
-				titleText.color = FlxColor.WHITE;
-				titleText.alpha = 1;
-				titleText.animation.play('press');
-
-				darkness.exists = false;
-				camHUD.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1, null, true);
-				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
-
-				transitioning = true;
-
-				new FlxTimer().start(0.9, function(tmr:FlxTimer) {
-					if (!leavingState) {
-						MusicBeatState.switchState(new MainMenuState());
-						leavingState = true;
-					}
-				});
-			}
-			else {
-				handleCheatCode();
-
-				var timer:Float = titleTimer;
-				if (timer >= 1)
-					timer = 2 - timer;
-
-				timer = FlxEase.quadInOut(timer);
-				
-				titleText.color = FlxColor.interpolate(titleTextColors[0], titleTextColors[1], timer);
-				titleText.alpha = FlxMath.lerp(titleTextAlphas[0], titleTextAlphas[1], timer);
-			}
-		}
-
-		if (bg != null && bg.stageScript != null)
-			bg.stageScript.call('onUpdate', [elapsed]);
-
-		super.update(elapsed);
-
-		if (bg != null && bg.stageScript != null)
-			bg.stageScript.call('onUpdatePost', [elapsed]);
-
 	}
 
 	public static function getIntroText():Array<Array<String>>
@@ -505,22 +513,15 @@ class TitleSequence extends FlxBasic {
 }
 
 class IntroSequence extends FlxTypedGroup<FlxBasic> {
-	var bg:FlxSprite;
-	var textGroup:FlxTypedGroup<Alphabet>;
+	public var bg:FlxSprite;
+	public var textGroup:FlxTypedGroup<Alphabet>;
 
 	public function new() {
 		super();
 
 		//
-		bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
-		bg.scale.set(FlxG.width, FlxG.height);
-		bg.updateHitbox();
+		bg = CoolUtil.blankSprite(FlxG.width, FlxG.height, FlxColor.BLACK);
 		add(bg);
-		
-		FlxTween.tween(bg, {alpha: 0.86}, Conductor.crochet * 0.005, {
-			ease: FlxEase.quadInOut,
-			songBased: true,
-		});
 
 		//
 		textGroup = new FlxTypedGroup<Alphabet>();

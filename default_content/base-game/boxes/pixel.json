@@ -18,8 +18,8 @@
 		}
 	],
 	"text": {
-		"font":"Pixel Arial 11 Bold",
-		"size": 35,
+		"font":"pixel.otf",
+		"size": 32,
 		"offsets": [180,470],
 		"color": "#3F2021",
 		"shadow_color": "#D89494",

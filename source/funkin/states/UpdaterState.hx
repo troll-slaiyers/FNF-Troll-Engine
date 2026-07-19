@@ -2,6 +2,7 @@ package funkin.states;
 
 import funkin.api.Native;
 import flixel.group.FlxGroup;
+import funkin.objects.ui.ScrollText;
 import math.CoolMath;
 import flixel.math.FlxRect;
 import flixel.tweens.FlxEase;
@@ -273,7 +274,7 @@ class UpdaterState extends MusicBeatState {
 		titleText.text = release.name;
 		group.add(titleText);
 		
-		var releaseText = new ScrollingText(0, 0, width);
+		var releaseText = new ScrollText(0, 0, width);
 		releaseText.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, LEFT);
 		//releaseText.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 4);
 		group.add(releaseText);
@@ -740,122 +741,4 @@ class UpdaterState extends MusicBeatState {
 	public static function checkOutOfDate():Bool
 		return Main.outOfDate = false;
 	#end
-}
-
-// Making a new camera would've been a trillion times easier but oh well
-class ScrollingText extends FlxText {
-	public var minY:Float = 32;
-	public var maxY:Float = FlxG.height - 32;
-	public var viewHeight(get, never):Float;
-
-	public var bg:FlxSprite;
-	public var bar:FlxSprite;
-
-	override public function new(x:Float, y:Float, fw:Float) {
-		bg = new FlxSprite().makeGraphic(1, 1);
-		bg.exists = false;
-
-		bar = new FlxSprite().makeGraphic(1, 1);
-		bar.scale.x = 12;
-
-		super(x, y, fw);
-	}
-
-	override function graphicLoaded() {
-		super.graphicLoaded();
-	}
-	
-	override function update(elapsed:Float) {
-		bg.update(elapsed);
-		super.update(elapsed);
-		bar.update(elapsed);
-		
-		final viewHeight = viewHeight;
-		final canScroll = viewHeight < (this.frameHeight * this.scale.y);
-
-		if (canScroll && FlxG.mouse.wheel != 0) {
-			this.y += FlxG.mouse.wheel * this.size;
-		}
-		
-		bar.exists = canScroll;
-		if (bar.exists) {
-			bar.scale.y = viewHeight * (viewHeight / this.height);
-			bar.updateHitbox();
-			
-			var hovering = FlxG.mouse.overlaps(bar);
-			if (hovering && FlxG.mouse.justPressed)
-				bar.active = true;
-
-			bar.color = (hovering || bar.active) ? 0xFFFFFFFF : 0xFF999999;
-			
-			if (bar.active) {
-				if (FlxG.mouse.pressed) {
-					#if false
-					this.y -= FlxG.mouse.deltaY;
-					#else
-					bar.y += FlxG.mouse.deltaY;
-					final maxSprY = maxY - this.height;
-					final minSprY = minY;		
-					final minBarY = minY;
-					final maxBarY = maxY - bar.height;
-					this.y = CoolMath.scale(bar.y, minBarY, maxBarY, minSprY, maxSprY);
-					#end
-				}else {
-					bar.active = false;
-				}
-			}
-		}
-		
-		if (canScroll)
-			this.y = CoolMath.boundTo(this.y, maxY - this.height, minY);
-		else
-			this.y = minY;
-	}
-	
-	override function draw() {
-		if (bg.exists && bg.visible) {
-			bg.setPosition(this.x, minY);
-			bg.setGraphicSize(this.width, viewHeight);
-			bg.updateHitbox();
-			bg.scrollFactor.copyFrom(this.scrollFactor);
-			bg.draw();
-		}
-
-		{
-			var rect = this.clipRect ?? new FlxRect();
-			var bottom = this.y + this.height;
-			
-			rect.set(0, 0, this.width, this.height);
-			rect.y = Math.max(0.0, minY - this.y);
-			rect.height = this.height - (bottom - maxY) - rect.y;
-			
-			this.clipRect = rect;
-			super.draw();
-		}
-		
-		if (bar.exists && bar.visible) {
-			// this.y when you reach the bottom
-			final maxSprY = maxY - this.height;
-			// this.y when you're at the beggining
-			final minSprY = minY;
-		
-			// bar.y when you're at the beggining
-			final minBarY = minY;
-			// bar.y when you reach the bottom
-			final maxBarY = maxY - bar.height;
-		
-			bar.x = this.x + this.width + 2;
-			bar.y = CoolMath.scale(this.y, minSprY, maxSprY, minBarY, maxBarY);
-			bar.y = CoolMath.boundTo(bar.y, minBarY, maxBarY);
-			bar.draw();
-		}
-	}
-
-	override function destroy() {
-		super.destroy();
-		bg.destroy();
-		bar.destroy();
-	}
-
-	inline function get_viewHeight() return maxY - minY;
 }
