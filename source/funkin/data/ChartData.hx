@@ -376,7 +376,13 @@ class ChartData
 	}
 }
 
-abstract NoteData(Array<Dynamic>) to Array<Dynamic>
+abstract ChartObject(Array<Dynamic>) to Array<Dynamic> from Array<Dynamic> {
+	public var strumTime(get, set):Float;
+	inline function get_strumTime() return this[0];
+	inline function set_strumTime(value:Float) return this[0] = value;
+}
+
+abstract NoteData(Array<Dynamic>) to Array<Dynamic> to ChartObject
 {
 	public var strumTime(get, set):Float;
 	public var column(get, set):Int;
@@ -427,7 +433,7 @@ abstract NoteData(Array<Dynamic>) to Array<Dynamic>
 		return data != null && Std.isOfType(data[0], Float) && Std.isOfType(data[1], Int) && data[1] >= 0;
 }
 
-abstract PsychEventNote(Array<Dynamic>)// from Array<Dynamic> to Array<Dynamic>
+abstract PsychEventNote(Array<Dynamic>) to ChartObject// from Array<Dynamic> to Array<Dynamic>
 {
 	public var strumTime(get, set):Float;
 	public var subEventsData(get, set):Array<PsychSubEventData>;

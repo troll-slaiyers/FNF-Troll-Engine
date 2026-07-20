@@ -68,55 +68,63 @@ class NotefieldRenderer extends FlxBasic {
 	inline function getFlashComponent(field:NoteField, component:String, column:Int)
 		return field.modManager.getValue('flash$component', field.modNumber) * field.modManager.getValue('flash$column$component', field.modNumber);
 	
+	var finalDrawQueue:Array<FinalRenderObject> = [];
+	var fieldTimer:Float = 0.0;
+	
 
 	override function draw(){
-		var finalDrawQueue:Array<FinalRenderObject> = [];
+		@:privateAccess
+		fieldTimer -= FlxG.game._elapsedMS;
 
-		// Get all the drawing stuff from the fields
-		for(field in members){
-			if ((!field.exists || !field.visible) && !field.forcePreDraw) // maybe rename forcePreDraw to something that makes more sense (i.e forceDrawQueuing or some shit)
-				continue; // Ignore it
-
-			field.preDraw(); // Collects all the drawing information
-		}
-		
-		// Now that the main draw queues should have been populated, it's time to push them into the final draw queue for sorting
-		
-		
-		for (field in members){
-			field.draw(); // Just incase they want to do something before gathering happens (i.e ProxyFields grabbing their host's draw queue) 
-
-			if (!field.exists || !field.visible)
-				continue;
-			
-			var realField:NoteField = field.getNotefield();
-
-			var queue:Array<RenderObject> = field.drawQueue;
-			for (object in queue){
-				var glowColour = realField.modManager == null ? FlxColor.WHITE : FlxColor.fromRGBFloat(getFlashComponent(realField, 'R', object.column),
-					getFlashComponent(realField, 'G', object.column), getFlashComponent(realField, 'B', object.column));
-					
-				finalDrawQueue.push({
-					graphic: object.graphic,
-					shader: object.shader,
-					column: object.column,
-					alphas: object.alphas,
-					glows: object.glows,
-					uvData: object.uvData,
-					vertices: object.vertices,
-					indices: object.indices,
-					zIndex: object.zIndex + field.zIndexMod,
-					colorSwap: object.colorSwap,
-					objectType: object.objectType,
-					antialiasing: object.antialiasing,
-					sourceField: field,
-					glowColour: glowColour,  // Maybe this should be part of the regular RenderObject?
-					cameras: field.cameras
-				});
+		if (fieldTimer <= 0 || (ClientPrefs.fieldFramerate >= FlxG.stage.frameRate)) {
+			finalDrawQueue.resize(0);
+			fieldTimer = 1.0 / ClientPrefs.fieldFramerate;
+			// Get all the drawing stuff from the fields
+			for(field in members){
+				if ((!field.exists || !field.visible) && !field.forcePreDraw) // maybe rename forcePreDraw to something that makes more sense (i.e forceDrawQueuing or some shit)
+					continue; // Ignore it
+	
+				field.preDraw(); // Collects all the drawing information
 			}
-		}
+			
+			// Now that the main draw queues should have been populated, it's time to push them into the final draw queue for sorting
+			
+			
+			for (field in members){
+				field.draw(); // Just incase they want to do something before gathering happens (i.e ProxyFields grabbing their host's draw queue) 
+	
+				if (!field.exists || !field.visible)
+					continue;
+				
+				var realField:NoteField = field.getNotefield();
+	
+				var queue:Array<RenderObject> = field.drawQueue;
+				for (object in queue){
+					var glowColour = realField.modManager == null ? FlxColor.WHITE : FlxColor.fromRGBFloat(getFlashComponent(realField, 'R', object.column),
+						getFlashComponent(realField, 'G', object.column), getFlashComponent(realField, 'B', object.column));
+						
+					finalDrawQueue.push({
+						graphic: object.graphic,
+						shader: object.shader,
+						column: object.column,
+						alphas: object.alphas,
+						glows: object.glows,
+						uvData: object.uvData,
+						vertices: object.vertices,
+						indices: object.indices,
+						zIndex: object.zIndex + field.zIndexMod,
+						colorSwap: object.colorSwap,
+						objectType: object.objectType,
+						antialiasing: object.antialiasing,
+						sourceField: field,
+						glowColour: glowColour,  // Maybe this should be part of the regular RenderObject?
+						cameras: field.cameras
+					});
+				}
+			}
 
-		finalDrawQueue.sort(drawQueueSort); // TODO: Sort the *individual vertices* for better looking z-sorting
+			finalDrawQueue.sort(drawQueueSort); // TODO: Sort the *individual vertices* for better looking z-sorting
+		}
 
 		// Now that it's all sorted, it's rendering time!
 

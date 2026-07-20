@@ -2,6 +2,7 @@ package funkin.transitions;
 
 import flixel.FlxBasic;
 import flixel.group.FlxGroup;
+import funkin.states.base.TransitionableState;
 
 class Transition extends FlxTypedGroup<FlxBasic>
 {

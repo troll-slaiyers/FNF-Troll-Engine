@@ -85,6 +85,8 @@ class Paths
 	public static var graphicDumpExclusions:Array<FlxGraphic> = [];
 	public static var soundDumpExclusions:Array<Sound> = [];
 
+	public static var whitePixel:flixel.graphics.frames.FlxFrame;
+
 	public static function excludeAsset(key:String)
 	{
 		if (!dumpExclusions.contains(key))
@@ -92,6 +94,15 @@ class Paths
 	}
 
 	public static function init() {
+		{ //ACTUAL white pixel, instead of 10x10 white pixels fuck flixel piece of shit good for nothing
+			var bd = new BitmapData(1, 1, true, 0xFFFFFFFF);
+			var graphic:FlxGraphic = FlxG.bitmap.add(bd, true, "whitePixel");
+			graphic.persist = true;
+			whitePixel = graphic.imageFrame.frame;
+			graphicDumpExclusions.push(graphic);
+		}
+		graphicDumpExclusions.push(FlxG.bitmap.whitePixel.parent);
+
 		#if READ_EMBEDDED_ASSETS
 		AltFilePaths.initPaths();
 		#end
@@ -409,12 +420,12 @@ class Paths
 		);
 	}
 
-	inline static public function packerAtlas(key:String, ?library:String):FlxAtlasFrames
+	inline static public function packerAtlas(key:String, ?library:String, allowGPU:Bool = true):FlxAtlasFrames
 	{
-		var txtPath:String = getPath('images/$key.txt');
-		return FlxAtlasFrames.fromSpriteSheetPacker(
-			image(key, library),
-			exists(txtPath) ? getContent(txtPath) : txtPath
+		var rawTxt:String = Paths.getContent(getPath('images/$key.txt'));
+		return rawTxt == null ? null : FlxAtlasFrames.fromSpriteSheetPacker(
+			image(key, library, allowGPU),
+			rawTxt
 		);
 	}
 
@@ -430,15 +441,15 @@ class Paths
 
 	#if ALLOW_DEPRECATION
 	@:deprecated("getSparrowAtlas is deprecated, use sparrowAtlas instead.")
-	inline static public function getSparrowAtlas(key:String, ?library:String):FlxAtlasFrames
+	inline static public function getSparrowAtlas(key:String, ?library:String, allowGPU:Bool = true):FlxAtlasFrames
 	{
-		return sparrowAtlas(key, library);
+		return sparrowAtlas(key, library, allowGPU);
 	}
 
 	@:deprecated("getPackerAtlas is deprecated, use packerAtlas instead.")
-	inline static public function getPackerAtlas(key:String, ?library:String):FlxAtlasFrames
+	inline static public function getPackerAtlas(key:String, ?library:String, allowGPU:Bool = true):FlxAtlasFrames
 	{
-		return packerAtlas(key, library);
+		return packerAtlas(key, library, allowGPU);
 	}
 
 	@:deprecated("getTextureAtlas is deprecated, use animateAtlas instead.")

@@ -154,6 +154,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				"display",
 				[
 					"framerate",
+					"fieldFramerate",
 					"fullscreen", 
 				]
 			],

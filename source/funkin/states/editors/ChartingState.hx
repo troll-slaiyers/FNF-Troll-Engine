@@ -20,6 +20,7 @@ import funkin.objects.notes.*;
 import funkin.objects.ui.CustomFlxUI;
 import funkin.objects.CoolMenuBG;
 
+import funkin.util.FileUtil;
 import math.CoolMath;
 import math.CoolMath.floorDecimal;
 
@@ -1194,12 +1195,13 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			doUpdateGridObjects = true;
 	}
 
-	function swapNoteSides(notes:Array<NoteData>) {
+	function swapNoteSides(notes:Array<ChartObject>) {
 		var shitToDo:Array<ChartingAction> = [];
 
 		for (note in notes) {
 			if (!NoteData.isNoteData(note))
 				continue;
+			var note:NoteData = cast note;
 
 			var ogCol = note.column;
 			var nuCol = (note.column + _song.keyCount) % (_song.keyCount * 2);
@@ -1214,12 +1216,12 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}
 	}
 
-	function duetNotes(toCopy:Array<NoteData>) {
+	function duetNotes(toCopy:Array<ChartObject>) {
 		if (toCopy.length == 0)
 			return;
 
 		//var copiedNotes:Array<NoteData> = [for (note in toCopy) note.clone()];
-		var copiedNotes:Array<NoteData> = [for (note in toCopy) if (NoteData.isNoteData(note)) note.clone()];
+		var copiedNotes:Array<NoteData> = [for (note in toCopy) if (NoteData.isNoteData(note)) (cast note:NoteData).clone()];
 		
 		for (note in copiedNotes) {
 			if (Math.floor(note.column / _song.keyCount) % 2 == 1)
@@ -1252,12 +1254,13 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		note.column += fieldIndex * _song.keyCount;
 	}
 
-	function mirrorNotes(notes:Array<NoteData>) {
+	function mirrorNotes(notes:Array<ChartObject>) {
 		var shitToDo:Array<ChartingAction> = [];
 		for (note in notes) {
 			if (!NoteData.isNoteData(note))
 				continue;
 
+			var note:NoteData = cast note;
 			var f = _mirrorNote.bind(note);
 			shitToDo.push(new DynamicAction(f, f));
 		}
@@ -1836,7 +1839,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}
 
 		var loadButton = newFlxUIButton(10, extraInfoInputText.y + 30, "Load Metadata", function() {			
-			CoolUtil.showOpenDialog("Load Metadata", getSongPath("metadata.json"), ["JSON file", "*.json"], onOpenMetadata);
+			FileUtil.showOpenDialog("Load Metadata", getSongPath("metadata.json"), ["JSON file", "*.json"], onOpenMetadata);
 		});
 
 		////
@@ -1849,7 +1852,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			_song.metadata.extraInfo = extraInfoInputText.text.length == 0 ? [] : extraInfoInputText.text.split(',');
 
 			var data:String = Json.stringify(_song.metadata, "\t");
-			CoolUtil.showSaveDialog(data, "Save Metadata", getSongPath("metadata.json"), ["JSON file", "*.json"]);
+			FileUtil.showSaveDialog(data, "Save Metadata", getSongPath("metadata.json"), ["JSON file", "*.json"]);
 		});
 
 		////
@@ -2648,7 +2651,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 		playedSound.resize(0);
 		curRenderedNotes.forEachAlive(function(note:Note) {
-			if (selectedNotes.contains(note.chartData) || note.chartData == curSelectedEvent)
+			if (selectedNotes.contains(note.chartData) /*|| note.chartData == curSelectedEvent*/)
 				note.color = sineColor;
 			else
 				note.color = 0xFFFFFFFF;
@@ -2745,7 +2748,12 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			if (FlxG.keys.justPressed.DELETE) {
 				new GroupAction(
 					"Remove Notes",
-					[for (note in selectedNotes.copy()) new RemoveNoteAction(curSection, note)]
+					[for (obj in selectedNotes.copy()) {
+						if (NoteData.isNoteData(obj))
+							new RemoveNoteAction(curSection, cast obj);
+						else
+							new RemoveEventNoteAction(cast obj);
+					}]
 				);
 			}
 		}
@@ -3116,7 +3124,10 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				if (FlxG.keys.pressed.CONTROL) {
 					// Add
 					list = selectedNotes.copy();
-					for (data in overlapped) list.add(data);
+					for (data in overlapped) {
+						if (!list.contains(data))
+							list.add(data);
+					}
 				}
 				else if (FlxG.keys.pressed.ALT) {
 					// Subtract
@@ -3549,7 +3560,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		if (selectedNotes.length > 0) {
 			var endTime = selectedNotes.endTime;
 			if (endTime != strumTime) {
-				endStep = Conductor.getSegmentFromTime(selectedNotes.endTime).getStep(selectedNotes.endTime);
+				endStep = Conductor.getSegmentFromTime(endTime).getStep(endTime);
 				sustainSteps = endStep - strumStep;
 			}
 		}
@@ -3561,10 +3572,9 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	function updateNoteUI():Void
 	{
 		labelSelectedNotes.text = '${selectedNotes.length == 0 ? 'No' : Std.string(selectedNotes.length)} notes selected';
+		updateNoteSteps();
 
 		if (selectedNotes.length > 0) {
-			updateNoteSteps();
-
 			stepperStrumTime.value = selectedNotes.strumTime;
 			if (selectedNotes.commonSustainLength != null)
 				stepperSusLength.value = selectedNotes.commonSustainLength;
@@ -3934,7 +3944,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			var currentSection = _song.notes[curSection];
 			for (i in currentSection.sectionNotes) {
 				if (i != note.chartData) continue;
-				new RemoveNoteAction(curSection, i);
+				new RemoveNoteAction(curSection, cast i);
 				break;
 			}
 		}else {
@@ -4127,7 +4137,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	}
 
 	function openEventsJSON() {
-		final openEvents:Void->Void = CoolUtil.showOpenDialog.bind('Open Events', getSongPath('events.json'), ['*.json'], onOpenEventsFile);
+		final openEvents:Void->Void = FileUtil.showOpenDialog.bind('Open Events', getSongPath('events.json'), ['*.json'], onOpenEventsFile);
 		showWarning('This action will clear the current events.\n\nProceed?', openEvents);
 	}
 
@@ -4162,7 +4172,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		var fileName:String = getChartFileName();
 		var data:String = encodeChartJson();
 		if (data != null && data.length > 0) {
-			CoolUtil.showSaveDialog(data.trim(), "Save Chart", getSongPath(fileName), ["JSON file", "*.json"], onSaveComplete, onSaveCancel);
+			FileUtil.showSaveDialog(data.trim(), "Save Chart", getSongPath(fileName), ["JSON file", "*.json"], onSaveComplete, onSaveCancel);
 		}
 	}
 
@@ -4172,7 +4182,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 		var json = {"song": {"events": _song.events}}
 		var data:String = Json.stringify(json, "\t");
-		CoolUtil.showSaveDialog(data, 'Save Events', getSongPath('events.json'), ["JSON file", '*.json']);
+		FileUtil.showSaveDialog(data, 'Save Events', getSongPath('events.json'), ["JSON file", '*.json']);
 	}
 
 	function saveSongZIP() {
@@ -4187,7 +4197,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			if (b != null) zip.addBytes(b, name);
 		}
 
-		CoolUtil.showSaveDialog(zip.finalize(), "Save File", getSongPath(_song.song + ".zip"), ["ZIP File", "*.zip"]);
+		FileUtil.showSaveDialog(zip.finalize(), "Save File", getSongPath(_song.song + ".zip"), ["ZIP File", "*.zip"]);
 	}
 
 	function onSaveComplete(_):Void
@@ -4236,8 +4246,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	}
 
 	//// 
-	// TODO: move this stuff somewhere else
-	static var textBgColor = 0xFF383A46;
+	// TODO: get rid of all this lollll	
 
 	static inline function newFlxUIButton(X:Float = 0, Y:Float = 0, ?Label:String, ?OnClick:Void->Void, ?LoadDefaultGraphics:Bool = true, ?LoadBlank:Bool = false, ?Color:FlxColor = FlxColor.WHITE)
 	{
@@ -4255,35 +4264,18 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	) 
 	@:privateAccess {
 		var stepper = new CustomFlxUINumericStepper(X, Y, StepSize, DefaultValue, Min, Max, Decimals, Stack, TextField, ButtonPlus, ButtonMinus, IsPercent);
-		
-		var fit = stepper.text_field;
-		if (fit is FlxInputText)
-			setupInputText(cast fit);
-
-		stepper.button_plus.label.color = FlxColor.WHITE;
-		stepper.button_minus.label.color = FlxColor.WHITE;
-
 		return stepper;
 	}
 
 	static inline function newFlxUIInputText(X:Float = 0, Y:Float = 0, Width:Int = 150, ?Text:String, size:Int = 8, TextColor:Int = FlxColor.BLACK,
 			BackgroundColor:Int = FlxColor.WHITE, EmbeddedFont:Bool = true) {
 		var fit = new CustomFlxUIInputText(X, Y, Width, Text, size, TextColor, BackgroundColor, EmbeddedFont);
-		setupInputText(fit);
 		return fit;
-	}
-
-	static inline function setupInputText(fit:FlxInputText) {
-		fit.backgroundColor = textBgColor;
-		fit.color = FlxColor.WHITE;
-		fit.caretColor = FlxColor.WHITE;
 	}
 
 	static inline function newFlxUIDropDownMenu(X:Float = 0, Y:Float = 0, DataList:Array<StrNameLabel>, ?Callback:String->Void, ?Header:FlxUIDropDownHeader,
 			?DropPanel:FlxUI9SliceSprite, ?ButtonList:Array<FlxUIButton>, ?UIControlCallback:Bool->FlxUIDropDownMenu->Void) {
 		var ddm = new CustomFlxUIDropDownMenu(X, Y, DataList, Callback, Header, DropPanel, ButtonList, UIControlCallback);
-		ddm.header.background.color = textBgColor;
-		ddm.header.text.color = FlxColor.WHITE;
 		return ddm;
 	}
 
@@ -4294,8 +4286,8 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	}
 }
 
-private abstract NoteSelection(Array<NoteData>) to Array<NoteData> {
-	public var array(get, never):Array<NoteData>;
+private abstract NoteSelection(Array<ChartObject>) to Array<ChartObject> {
+	public var array(get, never):Array<ChartObject>;
 	
 	public var length(get, never):Int;
 
@@ -4306,10 +4298,14 @@ private abstract NoteSelection(Array<NoteData>) to Array<NoteData> {
 	public var strumTime(get, set):Float;
 
 	/**
-		`lastNote.strumTime + lastNote.sustainLength`
+		Latest strum time between selected notes.
 	**/
-	public var endTime(get, never):Float;
+	public var lastStrumTime(get, set):Float;
 
+	/** 
+		Sustain length shared by all selected notes.  
+		If the selected notes don't have the same sustain length, this will be null.
+	**/
 	public var commonSustainLength(get, never):Null<Float>;
 
 	/** 
@@ -4319,21 +4315,25 @@ private abstract NoteSelection(Array<NoteData>) to Array<NoteData> {
 	public var noteType(get, never):Null<String>;
 
 	#if true
-	public function new(?arr:Array<NoteData>) {
+	public function new(?arr:Array<ChartObject>) {
 		this = arr ?? [];
 		sort();
 	}
 
-	public inline function add(note:NoteData) {
+	public inline function add(note:ChartObject) {
 		var i:Int = 0;
 		while (i < this.length && this[i].strumTime < note.strumTime) i++;
 		this.insert(i, note);
 	}
 
-	public inline function remove(note:NoteData)
+	public inline function applyOffset(timeOffset:Float)
+		for (note in this)
+			note.strumTime += timeOffset;
+
+	public inline function remove(note:ChartObject)
 		this.remove(note);
 
-	public inline function contains(note:NoteData):Bool
+	public inline function contains(note:ChartObject):Bool
 		return this.indexOf(note) >= 0;
 
 	public inline function copy():NoteSelection
@@ -4347,7 +4347,7 @@ private abstract NoteSelection(Array<NoteData>) to Array<NoteData> {
 	#end
 
 	#if true
-	inline function get_array():Array<NoteData>
+	inline function get_array():Array<ChartObject>
 		return this;
 
 	inline function get_length():Int
@@ -4357,37 +4357,64 @@ private abstract NoteSelection(Array<NoteData>) to Array<NoteData> {
 		return this[0].strumTime; // ARRAY SHOULD BE SORTED BY TIME
 
 	inline function set_strumTime(v:Float):Float {
-		var delta:Float = v - this[0].strumTime;
-		for (note in this)
-			note.strumTime += delta;
+		applyOffset(v - strumTime);
 		return v;
 	}
 
-	inline function get_commonSustainLength():Null<Float> {
-		var common:Null<Float> = this[0]?.sustainLength;
+	inline function get_lastStrumTime():Float
+		return this[this.length - 1].strumTime; // ARRAY SHOULD BE SORTED BY TIME
 
-		for (note in this) {
-			if (note.sustainLength != common) {
-				common = null;
-				break;
+	inline function set_lastStrumTime(v:Float):Float {
+		applyOffset(v - lastStrumTime);
+		return v;	
+	}
+
+	inline function get_commonSustainLength():Null<Float> {
+		var startIdx = -1;
+		var common:Null<Float> = null;
+
+		for (i => obj in this) {
+			if (NoteData.isNoteData(obj)) {
+				var obj:NoteData = cast obj;
+				startIdx = i;
+				common = obj.sustainLength;
+				break;	
+			}
+		}
+
+		if (startIdx != -1) {
+			for (i in startIdx...this.length) {
+				var note:NoteData = cast this[i];
+				if (NoteData.isNoteData(note) && note.sustainLength != common) {
+					common = null;
+					break;
+				}
 			}
 		}
 
 		return common;
 	}
 
-	inline function get_endTime():Float {
-		var lastNote = this[this.length - 1];
-		return lastNote.strumTime + lastNote.sustainLength;
-	}
-
 	inline function get_noteType():Null<String> {
-		var common:Null<String> = this[0]?.noteType;
+		var startIdx = -1;
+		var common:Null<String> = null;
 
-		for (note in this) {
-			if (note.noteType != common) {
-				common = null;
-				break;
+		for (i => obj in this) {
+			if (NoteData.isNoteData(obj)) {
+				var obj:NoteData = cast obj;
+				startIdx = i;
+				common = obj.noteType;
+				break;	
+			}
+		}
+
+		if (startIdx != -1) {
+			for (i in startIdx...this.length) {
+				var note:NoteData = cast this[i];
+				if (NoteData.isNoteData(note) && note.noteType != common) {
+					common = null;
+					break;
+				}
 			}
 		}
 
@@ -4396,7 +4423,7 @@ private abstract NoteSelection(Array<NoteData>) to Array<NoteData> {
 	#end
 
 	////
-	function _sort(a:NoteData, b:NoteData):Int
+	function _sort(a:ChartObject, b:ChartObject):Int
 		return FlxSort.byValues(FlxSort.ASCENDING, a.strumTime, b.strumTime);
 }
 
@@ -4577,10 +4604,11 @@ private class ChangeMustHitSectionAction extends ChartingAction {
 private class ChangeSustainAction extends NoteAction {
 	public var change:Float;
 
-	public function new(noteData:NoteData, value:Float, isAbs:Bool = false) {
+	public function new(noteData:ChartObject, value:Float, isAbs:Bool = false) {
 		if (!NoteData.isNoteData(noteData))
 			return;
 
+		var noteData:NoteData = cast noteData;
 		this.noteData = noteData;
 		this.change = isAbs ? value - noteData.sustainLength : value;
 		if (this.change < 0)
@@ -4789,8 +4817,16 @@ private class RemoveEventNoteAction extends ChartingAction {
 private class AddEventNoteAction extends ChartingAction {
 	var eventData:PsychEventNote;
 
+	////
+	var previousSelected:NoteSelection;
+	var newSelected:NoteSelection;
+
 	public function new(eventData:PsychEventNote) {
 		this.eventData = eventData;
+		////
+		this.newSelected = new NoteSelection(cast [eventData]);
+		this.previousSelected = instance.selectedNotes;
+		////
 		super();
 	}
 
@@ -4801,6 +4837,11 @@ private class AddEventNoteAction extends ChartingAction {
 		instance.subEventIdx = 0;
 		instance.curSelectedEvent = eventData;
 		instance.changeEventSelected();
+
+		////
+		instance.selectedNotes = newSelected;
+		instance.colorSine = 0.0;
+		instance.doUpdateNoteUI = true;
 	}
 
 	public function undo() {
@@ -4812,6 +4853,11 @@ private class AddEventNoteAction extends ChartingAction {
 			instance.curSelectedEvent = null;
 			instance.changeEventSelected();
 		}
+
+		////
+		instance.selectedNotes = previousSelected;
+		instance.colorSine = 0.0;
+		instance.doUpdateNoteUI = true;
 	}
 
 	public function toString() {
@@ -4855,7 +4901,7 @@ private class SelectNotesAction extends ChartingAction {
 	public var prevSelected:NoteSelection;
 	public var prevNoteType:String;
 
-	public function new(list:Array<NoteData>) {
+	public function new(list:Array<ChartObject>) {
 		// if selecting notes, or deselecting notes
 		if (list.length > 0 || instance.selectedNotes.length > 0) {
 			this.list = new NoteSelection(list);
@@ -4962,7 +5008,11 @@ private class ChangeNoteTypeAction extends NoteAction {
 	public var newType:String;
 	public var prevType:String;
 
-	public function new(noteData:NoteData, newType:String) {
+	public function new(noteData:ChartObject, newType:String) {
+		if (!NoteData.isNoteData(noteData))
+			return;
+
+		var noteData:NoteData = cast noteData;
 		this.noteData = noteData;
 		this.newType = newType;
 		this.prevType = noteData.noteType;
@@ -5044,12 +5094,10 @@ private class GroupAction extends ChartingAction {
 	final name:String;
 	
 	public function new(name:String, actions:Array<ChartingAction>) {
-		if (actions.length > 0) {
-			if (actions.length > 1) {
-				this.name = name;
-				for (action in actions)
-					action.silent = true;
-			}
+		if (actions.length > 1) {
+			this.name = name;
+			for (action in actions)
+				action.silent = true;
 			super();
 		}
 	}

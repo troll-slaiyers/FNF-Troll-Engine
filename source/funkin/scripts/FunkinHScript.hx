@@ -81,7 +81,7 @@ class FunkinHScript extends FunkinScript
 			print(e.message);
 
 			#if desktop
-			var title = "Error on haxe script!";
+			var title = "Error parsing haxe script!";
 
 			#if (cpp && windows)
 			if (Windows.msgBox(msg, title, RETRYCANCEL | ERROR) == RETRY)
@@ -186,6 +186,8 @@ class FunkinHScript extends FunkinScript
 		set("print", print);
 		
 		set("script", this);
+		set("funkinScript", this);
+
 		set("global", Globals.variables);
 		set("FunkinHScript", FunkinHScript);
 

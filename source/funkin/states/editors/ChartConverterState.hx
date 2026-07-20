@@ -3,11 +3,9 @@ package funkin.states.editors;
 #if USING_MOONCHART
 import funkin.states.base.Prompt;
 
-import lime.ui.FileDialog;
-import lime.utils.Resource;
-import lime.system.System;
 import sys.FileSystem;
 import haxe.io.Path;
+import funkin.util.FileUtil;
 
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
@@ -155,9 +153,9 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 			case FlxUITypedButton.CLICK_EVENT:
 				switch(sender.name) {
 					case 'selectMetaButt':
-						CoolUtil.showOpenMultipleDialog(onSelectMetaFiles);
+						FileUtil.showOpenMultipleDialog(onSelectMetaFiles);
 					case 'selectChartsButt':
-						CoolUtil.showOpenMultipleDialog(onSelectChartFiles);
+						FileUtil.showOpenMultipleDialog(onSelectChartFiles);
 					case 'convertFilesButt':
 						convert();
 				}
@@ -291,7 +289,7 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 		openSubState(new Prompt(
 			'Files have been saved to the "moonchartConverted/" folder', 
 			0,
-			lime.system.System.openFile.bind(CoolUtil.getSystemPath("moonchartConverted/")),
+			lime.system.System.openFile.bind(FileUtil.getSystemPath("moonchartConverted/")),
 			null,
 			'Open Folder',
 			'OK'

@@ -142,8 +142,13 @@ class TransitionableState extends FlxState
 				transition = null;
 		}
 
-		_lastTransition.finishCallback = onComplete;
-		startTransition(_lastTransition, status);
+		if (_lastTransition != null) {
+			_lastTransition.finishCallback = onComplete;
+			startTransition(_lastTransition, status);
+		}else {
+			trace("WARNING: Attempted to start a null transition, skipping.");
+			onComplete();
+		}
 	}
 
 	public function startTransition(requestedTrans:TransitionInstance, status:TransitionStatus)

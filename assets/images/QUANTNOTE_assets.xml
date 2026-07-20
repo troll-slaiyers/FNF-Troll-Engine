@@ -7,7 +7,7 @@
 	<SubTexture name="arrowRIGHT0000" x="699" y="505" width="154" height="157" frameX="0" frameY="0" frameWidth="154" frameHeight="157"/>
 	<SubTexture name="arrowSQUARE0000" x="701" y="0" width="169" height="162" frameX="0" frameY="0" frameWidth="169" frameHeight="162"/>
 	<SubTexture name="blue hold end0000" x="878" y="299" width="50" height="64" frameX="0" frameY="0" frameWidth="50" frameHeight="64"/>
-	<SubTexture name="blue hold piece0000" x="936" y="299" width="50" height="44" frameX="0" frameY="0" frameWidth="50" frameHeight="44"/>
+	<SubTexture name="blue hold piece0000" x="936" y="300" width="50" height="42" frameX="0" frameY="0" frameWidth="50" frameHeight="44"/>
 	<SubTexture name="blue0000" x="0" y="704" width="154" height="157" rotated="true" frameX="0" frameY="0" frameWidth="154" frameHeight="157"/>
 	<SubTexture name="down confirm0000" x="247" y="0" width="221" height="223" rotated="true" frameX="-3" frameY="-4" frameWidth="228" frameHeight="231"/>
 	<SubTexture name="down confirm0001" x="225" y="478" width="212" height="214" rotated="true" frameX="-8" frameY="-9" frameWidth="228" frameHeight="231"/>
@@ -18,7 +18,7 @@
 	<SubTexture name="down press0002" x="0" y="869" width="149" height="146" frameX="0" frameY="0" frameWidth="149" frameHeight="146"/>
 	<SubTexture name="down press0003" x="0" y="869" width="149" height="146" frameX="0" frameY="0" frameWidth="149" frameHeight="146"/>
 	<SubTexture name="green hold end0000" x="878" y="299" width="50" height="64" frameX="0" frameY="0" frameWidth="50" frameHeight="64"/>
-	<SubTexture name="green hold piece0000" x="936" y="299" width="50" height="44" frameX="0" frameY="0" frameWidth="50" frameHeight="44"/>
+	<SubTexture name="green hold piece0000" x="936" y="300" width="50" height="42" frameX="0" frameY="0" frameWidth="50" frameHeight="44"/>
 	<SubTexture name="green0000" x="162" y="704" width="154" height="157" rotated="true" frameX="0" frameY="0" frameWidth="154" frameHeight="157"/>
 	<SubTexture name="up confirm0000" x="476" y="226" width="217" height="218" rotated="true" frameX="-3" frameY="-5" frameWidth="226" frameHeight="230"/>
 	<SubTexture name="up confirm0001" x="0" y="478" width="217" height="218" rotated="true" frameX="-3" frameY="-5" frameWidth="226" frameHeight="230"/>
@@ -33,10 +33,10 @@
 	<SubTexture name="left press0002" x="324" y="859" width="146" height="149" frameX="0" frameY="0" frameWidth="146" frameHeight="149"/>
 	<SubTexture name="left press0003" x="324" y="859" width="146" height="149" frameX="0" frameY="0" frameWidth="146" frameHeight="149"/>
 	<SubTexture name="pruple end hold0000" x="878" y="299" width="50" height="64" frameX="0" frameY="0" frameWidth="50" frameHeight="64"/>
-	<SubTexture name="purple hold piece0000" x="936" y="299" width="50" height="44" frameX="0" frameY="0" frameWidth="50" frameHeight="44"/>
+	<SubTexture name="purple hold piece0000" x="936" y="300" width="50" height="42" frameX="0" frameY="0" frameWidth="50" frameHeight="44"/>
 	<SubTexture name="purple0000" x="0" y="704" width="154" height="157" frameX="0" frameY="0" frameWidth="154" frameHeight="157"/>
 	<SubTexture name="red hold end0000" x="878" y="299" width="50" height="64" frameX="0" frameY="0" frameWidth="50" frameHeight="64"/>
-	<SubTexture name="red hold piece0000" x="936" y="299" width="50" height="44" frameX="0" frameY="0" frameWidth="50" frameHeight="44"/>
+	<SubTexture name="red hold piece0000" x="936" y="300" width="50" height="42" frameX="0" frameY="0" frameWidth="50" frameHeight="44"/>
 	<SubTexture name="red0000" x="162" y="704" width="154" height="157" frameX="0" frameY="0" frameWidth="154" frameHeight="157"/>
 	<SubTexture name="right confirm0000" x="476" y="226" width="217" height="218" frameX="-3" frameY="-5" frameWidth="226" frameHeight="230"/>
 	<SubTexture name="right confirm0001" x="0" y="478" width="217" height="218" frameX="-3" frameY="-5" frameWidth="226" frameHeight="230"/>
@@ -51,7 +51,7 @@
 	<SubTexture name="square confirm0002" x="474" y="452" width="217" height="209" frameX="-15" frameY="-15" frameWidth="251" frameHeight="242"/>
 	<SubTexture name="square confirm0003" x="474" y="452" width="217" height="209" frameX="-15" frameY="-15" frameWidth="251" frameHeight="242"/>
 	<SubTexture name="square hold end0000" x="878" y="299" width="50" height="64" frameX="0" frameY="0" frameWidth="50" frameHeight="64"/>
-	<SubTexture name="square hold piece0000" x="936" y="299" width="50" height="44" frameX="0" frameY="0" frameWidth="50" frameHeight="44"/>
+	<SubTexture name="square hold piece0000" x="936" y="300" width="50" height="42" frameX="0" frameY="0" frameWidth="50" frameHeight="44"/>
 	<SubTexture name="square press0000" x="157" y="869" width="149" height="143" frameX="-4" frameY="-4" frameWidth="157" frameHeight="151"/>
 	<SubTexture name="square press0001" x="157" y="869" width="149" height="143" frameX="-4" frameY="-4" frameWidth="157" frameHeight="151"/>
 	<SubTexture name="square press0002" x="324" y="700" width="157" height="151" frameX="0" frameY="0" frameWidth="157" frameHeight="151"/>

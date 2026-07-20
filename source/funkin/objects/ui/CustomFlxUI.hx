@@ -1,5 +1,10 @@
 package funkin.objects.ui;
 
+import flixel.util.FlxColor;
+import flixel.addons.ui.FlxUI9SliceSprite;
+import flixel.addons.ui.FlxUIButton;
+import flixel.addons.ui.StrNameLabel;
+import flixel.addons.ui.FlxUIDropDownMenu;
 import openfl.events.KeyboardEvent;
 import flixel.addons.ui.FlxUISlider;
 import flixel.addons.ui.FlxUITabMenu;
@@ -9,6 +14,13 @@ import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxInputText;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
+
+private inline final textBgColor = 0xFF383A46;
+private inline function setupInputText(fit:FlxInputText) {
+	fit.backgroundColor = textBgColor;
+	fit.color = FlxColor.WHITE;
+	fit.caretColor = FlxColor.WHITE;
+}
 
 /** dont sort my shit **/
 class CustomFlxUITabMenu extends FlxUITabMenu {
@@ -21,6 +33,7 @@ class CustomFlxInputText extends FlxInputText {
 		BackgroundColor:Int = 0xFFFFFFFF, EmbeddedFont:Bool = true)
 	{
 		super(X, Y, Width, Text, size, TextColor, BackgroundColor, EmbeddedFont);
+		setupInputText(this);
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown, 100); // higher priority than flixel
 	}
@@ -40,6 +53,7 @@ class CustomFlxUIInputText extends FlxUIInputText {
 		BackgroundColor:Int = 0xFFFFFFFF, EmbeddedFont:Bool = true)
 	{
 		super(X, Y, Width, Text, size, TextColor, BackgroundColor, EmbeddedFont);
+		setupInputText(this);
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown, 100); // higher priority than flixel
 	}
@@ -70,6 +84,13 @@ class CustomFlxUINumericStepper extends FlxUINumericStepper {
 		TextField ??= new CustomFlxUIInputText(0, 0, 25);
 
 		super(X, Y, StepSize, DefaultValue, Min, Max, Decimals, Stack, TextField, ButtonPlus, ButtonMinus, IsPercent);
+
+		if (TextField == null) // && text_field is FlxInputText
+			setupInputText(cast text_field);
+		if (ButtonPlus == null)
+			button_plus.label.color = FlxColor.WHITE;
+		if (ButtonMinus == null)
+			button_minus.label.color = FlxColor.WHITE;
 
 		if ((text_field is FlxUIInputText))
 		{
@@ -108,7 +129,14 @@ class CustomFlxUINumericStepper extends FlxUINumericStepper {
 /**
 	Allow quick mouse wheel option scrolling without having to open the dropdown
 **/
-class CustomFlxUIDropDownMenu extends flixel.addons.ui.FlxUIDropDownMenu.FlxUIDropDownMenu {
+class CustomFlxUIDropDownMenu extends FlxUIDropDownMenu {
+	public function new(X:Float = 0, Y:Float = 0, DataList:Array<StrNameLabel>, ?Callback:String->Void, ?Header:FlxUIDropDownHeader,
+			?DropPanel:FlxUI9SliceSprite, ?ButtonList:Array<FlxUIButton>, ?UIControlCallback:Bool->FlxUIDropDownMenu->Void) {
+		super(X, Y, DataList, Callback, Header, DropPanel, ButtonList, UIControlCallback);
+		header.background.color = textBgColor;
+		header.text.color = FlxColor.WHITE;
+	}
+
 	override function checkClickOff() {
 		if (!dropPanel.visible && header.button.status == FlxButton.HIGHLIGHT)
 		{
