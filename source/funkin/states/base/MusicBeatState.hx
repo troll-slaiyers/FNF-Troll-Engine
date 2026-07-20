@@ -219,7 +219,7 @@ class MusicBeatState extends TransitionableState
 	}
 
 	public static inline function isPlayingMusic(?key:String):Bool
-		return (key != null && key == curMusic) && FlxG.sound.music?.playing;
+		return (key == null || key == curMusic) && FlxG.sound.music?.playing;
 
 	public static function playMusic(key:String, force:Bool = false) {
 		if (!force && isPlayingMusic(key))

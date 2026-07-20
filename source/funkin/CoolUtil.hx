@@ -178,6 +178,8 @@ class CoolUtil {
 	}
 
 	@:noCompletion static var _point:FlxPoint = new FlxPoint();
+
+	/** @returns Whether if the mouse is hovering over an object, respecting the camera view bounds **/
 	public static function overlapsMouse(object:FlxObject, ?camera:FlxCamera):Bool
 	{
 		camera ??= FlxG.camera;
@@ -189,6 +191,12 @@ class CoolUtil {
 		}
 
 		return false;
+	}
+
+	/** @returns Whether the mouse is hovering over a camera's view bounds **/
+	public static function mouseOverlapsCamera(camera:FlxCamera):Bool {
+		FlxG.mouse.getPositionInCameraView(camera, _point);
+		return camera.containsPoint(_point);
 	}
 
 	public static function centerOnObject(obj1:FlxObject, obj2:FlxObject) {
@@ -248,14 +256,14 @@ class CoolUtil {
 	}
 
 	////
-	public static function colorFromString(color:String):FlxColor
+	public static function colorFromString(str:String):FlxColor
 	{
-		return FlxColor.fromRGB(
-			Std.parseInt("0x"+color.substr(-6, 2)),
-			Std.parseInt("0x"+color.substr(-4, 2)),
-			Std.parseInt("0x"+color.substr(-2, 2)),
-			Std.parseInt("0x"+color.substr(-8, 2))
-		);
+		var r = Std.parseInt("0x"+str.substr(-6, 2));
+		var g = Std.parseInt("0x"+str.substr(-4, 2));
+		var b = Std.parseInt("0x"+str.substr(-2, 2));
+		var a = (str.length < 6) ? 255 : Std.parseInt("0x"+str.substr(-8, 2));
+
+		return FlxColor.fromRGB(r, g, b, a);
 	}
 
 	// could probably use a macro

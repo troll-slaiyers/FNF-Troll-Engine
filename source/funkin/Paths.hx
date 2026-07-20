@@ -400,11 +400,11 @@ class Paths
 		return parsed;
 	}
 
-	inline static public function sparrowAtlas(key:String, ?library:String):FlxAtlasFrames
+	inline static public function sparrowAtlas(key:String, ?library:String, allowGPU:Bool = true):FlxAtlasFrames
 	{
 		var rawXml = Paths.getContent(getPath('images/$key.xml'));
 		return rawXml == null ? null : FlxAtlasFrames.fromSparrow(
-			image(key, library),
+			image(key, library, allowGPU),
 			Xml.parse(rawXml)
 		);
 	}

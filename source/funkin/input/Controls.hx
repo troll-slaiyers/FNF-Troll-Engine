@@ -139,7 +139,17 @@ class Controls {
 	}
 
 	public function getFirstBind(id:String):Int {
-		return true ? keyBinds.get(id)[0] : buttonBinds.get(id)[0];
+		var bindId:Int = -1;
+
+		var bound:Array<Int> = true ? keyBinds.get(id) : buttonBinds.get(id);
+		for (code in bound) {
+			if (code >= 0) {
+				bindId = code;
+				break;
+			}
+		}
+
+		return bindId;
 	}
 
 	public function checkKey(id:String, state:FlxInputState):Bool {

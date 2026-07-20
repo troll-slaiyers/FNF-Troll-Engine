@@ -93,10 +93,16 @@
 
 	<classpath path="source" />
 
-	<setenv name="HAXEPATH" value="./" />
 	<set name="BUILD_DIR" value="export/release" />
 	<set name="BUILD_DIR" value="export/debug" if="debug" />
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
+
+	<setenv name="HAXEPATH" value="./" />
+
+	<section if="desktop">
+		<assets path="alsoft.txt" rename="alsoft.ini" if="windows" />
+		<assets path="alsoft.txt" rename="alsoft.conf" unless="windows" />
+	</section>	
 
 	<assets path="assets" />
 	<assets path='default_content' rename='content' unless='DONT_INCLUDE_DEFAULT' embed='false' exclude="*.mp3" />
@@ -107,11 +113,6 @@
 	<icon path="art/icon16.png" size='16' />
 
 	<assets path="art/iconOG.png" rename="icon.png" if="linux" />
-
-	<section if="desktop">
-		<assets path="alsoft.txt" rename="alsoft.ini" if="windows" />
-		<assets path="alsoft.txt" rename="alsoft.conf" unless="windows" />
-	</section>
 
 	<!-- _______________________________ Libraries ______________________________ -->
 

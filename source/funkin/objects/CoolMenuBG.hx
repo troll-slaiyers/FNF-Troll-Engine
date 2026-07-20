@@ -17,7 +17,7 @@ class CoolMenuBG extends FlxSprite {
 
 	private var iTime:Array<Float> = [0.0];
 
-	public function new(simpleGraphic:FlxGraphicAsset, color:FlxColor = 0xFFFFFFFF) {
+	public function new(?simpleGraphic:FlxGraphicAsset, color:FlxColor = 0xFFFFFFFF) {
 		super(0, 0, simpleGraphic);
 		this.color = color;
 

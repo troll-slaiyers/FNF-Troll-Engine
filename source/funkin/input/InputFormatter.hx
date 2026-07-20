@@ -1,10 +1,16 @@
 package funkin.input;
+
 import flixel.input.keyboard.FlxKey;
+import funkin.input.Controls;
 
 using StringTools;
 
 class InputFormatter 
 {
+	public static inline function getBindString(controlId:String, playerId:Int = 0):String {
+		return getKeyName(Controls.instances[playerId].getFirstBind(controlId));
+	}
+
 	public static function getKeyName(key:FlxKey):String 
 	{
 		if (null==key) key = NONE;
