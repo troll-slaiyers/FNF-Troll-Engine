@@ -2871,7 +2871,10 @@ class PlayState extends MusicBeatState
 		if(callOnScripts("onDisplayJudgment", [image]) == Globals.Function_Stop || r)
 			return;
 		
-		if (ClientPrefs.simpleJudge)
+		final fadeCombos = ClientPrefs.comboFading;
+		final stackCombos = fadeCombos && (ClientPrefs.comboStacking && !ClientPrefs.simpleJudge);
+
+		if (!stackCombos)
 			lastJudge.kill();
 
 		var spr:RatingSprite = if (worldCombos)
@@ -2900,6 +2903,24 @@ class PlayState extends MusicBeatState
 			spr.scale.scale(1.1, 1.1);
 
 		}
+		/*
+		else if (true) {
+			var startY = spr.y;
+			static final velocity = 140;
+			static final acceleration = 275;
+			static final dur = 140 / 275; // how long till it hits 0 and falls below the start point
+			function yOffset(t:Float)
+				return acceleration * Math.pow(t, 2) - velocity * t;
+
+			spr.scale.copyFrom(ratingGroup.judgeTemplate.scale);
+			
+			var twnDur = Math.max(dur, 0.1 + Conductor.beatLength + 0.2);
+			spr.tween = FlxTween.num(0, twnDur, twnDur, {onComplete: _ -> spr.kill()}, function(t:Float) {
+				spr.alpha = 1.0 - (t - 0.1 - Conductor.beatLength) / 0.2;
+				spr.y = startY + yOffset(Math.min(dur, t));
+			});
+		}
+		*/
 		else {
 			spr.moves = true;
 			spr.acceleration.y = 550;
@@ -2935,11 +2956,14 @@ class PlayState extends MusicBeatState
 		if (callOnScripts("onDisplayCombo", [combo]) == Globals.Function_Stop || r)
 			return;
 
-		if (ClientPrefs.simpleJudge) {
+		final fadeCombos = ClientPrefs.comboFading;
+		final stackCombos = fadeCombos && (ClientPrefs.comboStacking && !ClientPrefs.simpleJudge);
+
+		if (!stackCombos) {
 			ratingGroup.killLastCombo();
 			if (combo == 0)
 				return;
-		}else{
+		}else if (!ClientPrefs.simpleJudge) {
 			if (combo > 0 && combo < 10)
 				return;
 		}
@@ -2972,11 +2996,31 @@ class PlayState extends MusicBeatState
 				}
 
 				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
-				numSpr.tween = FlxTween.tween(numSpr.scale, {x: numSpr.scale.x, y: numSpr.scale.y}, 0.2, {ease: FlxEase.circOut, onComplete: onComplete});
+				numSpr.tween = FlxTween.tween(numSpr.scale, {x: numSpr.scale.x, y: numSpr.scale.y}, 0.2, {ease: FlxEase.circOut, onComplete: fadeCombos ? onComplete : null});
 
 				numSpr.scale.x *= 1.25;
 				numSpr.updateHitbox();
 				numSpr.scale.y *= 0.75;
+			}
+			else if (!fadeCombos)
+			{
+				numSpr.moves = false;
+				
+				var startY = numSpr.y;
+				final velocity = FlxG.random.int(140, 160);
+				final acceleration = FlxG.random.int(200, 300);
+				final dur = velocity / acceleration; // how long till it hits 0 and falls below the start point
+				function yOffset(t:Float)
+					return acceleration * Math.pow(t, 2) - velocity * t;
+
+				numSpr.alpha = 1.0;
+				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
+				numSpr.updateHitbox();
+
+				var twnDur = Math.max(dur, Conductor.beatLength * 2 + 0.2);
+				numSpr.tween = FlxTween.num(0, twnDur, twnDur, null, function(t) {
+					numSpr.y = startY + yOffset(Math.min(dur, t));					
+				});
 			}
 			else
 			{
@@ -2984,6 +3028,7 @@ class PlayState extends MusicBeatState
 				numSpr.acceleration.y = FlxG.random.int(200, 300);
 				numSpr.velocity.y = -FlxG.random.int(140, 160);
 
+				numSpr.alpha = 1.0;
 				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
 				numSpr.updateHitbox();
 

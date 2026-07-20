@@ -14,7 +14,7 @@ import funkin.objects.shaders.NoteColorSwap;
 
 class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 {
-	static inline var VERTICES_PER_QUAD = #if (openfl >= "8.5.0") 4 #else 6 #end;
+	static inline var VERTICES_PER_QUAD = 4;
 
 	public var shader:FlxShader;
 
@@ -184,12 +184,10 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		setParameterValue(shader.hasTransform, true);
 		setParameterValue(shader.hasColorTransform, colored || hasColorOffsets);
 
-		#if (openfl > "8.7.0")
 		sprite.graphics.overrideBlendMode(blend);
-		#end
 		sprite.graphics.beginShaderFill(shader);
 		sprite.graphics.drawQuads(rects, null, transforms);
-
+		sprite.graphics.endFill();
 		super.render(sprite, antialiasing, debugLayer);
 	}
 

@@ -11,6 +11,7 @@ import haxe.io.Path;
 
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
+import flixel.group.FlxSpriteGroup;
 import flixel.addons.ui.FlxUIText;
 import flixel.addons.ui.FlxUITypedButton;
 import flixel.addons.ui.FlxUIButton;
@@ -49,10 +50,10 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 		bg.screenCenter();
 		add(bg);
 
-		var x = FlxG.width / 3 - 200;
-		var y = FlxG.height / 2;
+		var x = 0;
+		var y = 0;
 		
-		var x2 = x + x;
+		var x2 = 226;
 		
 		formatList = FormatDetector.getList();
 		var formatList2 = FlxUIDropDownMenu.makeStrIdLabelArray(formatList, true);
@@ -63,9 +64,11 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 
 		var selectMetaButt = new FlxUIButton(fromFormatDD.x + fromFormatDD.width + 15, fromFormatDD.y, "Browse Metadata");
 		selectMetaButt.name = "selectMetaButt";
+		selectMetaButt.label.color = 0xFFFFFFFF;
 
 		var selectChartsButt = new FlxUIButton(selectMetaButt.x, selectMetaButt.y + 40, "Browse Charts");
 		selectChartsButt.name = "selectChartsButt";
+		selectChartsButt.label.color = 0xFFFFFFFF;
 
 		////
 		var goalFormatDD = new FlxUIDropDownMenu(x2, y, formatList2);
@@ -74,6 +77,7 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 
 		var convertFilesButt = new FlxUIButton(goalFormatDD.x + goalFormatDD.width + 15, goalFormatDD.y, "Convert");
 		convertFilesButt.name = "convertFilesButt";
+		convertFilesButt.label.color = 0xFFFFFFFF;
 
 		////
 		infoText = new FlxText(15, 15);
@@ -85,18 +89,24 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 		this.add(moonchartVer); 
 
 		////
-		this.add(new FlxText(fromFormatDD.x, fromFormatDD.y - 15, 0, 'Input Format'));
-		this.add(fromFormatDD);
+		var grp = new FlxSpriteGroup();
 
-		this.add(selectMetaButt);
+		grp.add(new FlxText(fromFormatDD.x, fromFormatDD.y - 15, 0, 'Input Format'));
+		grp.add(fromFormatDD);
+
+		grp.add(selectMetaButt);
 		
-		this.add(selectChartsButt);
+		grp.add(selectChartsButt);
 
 		////
-		this.add(new FlxText(goalFormatDD.x, goalFormatDD.y - 15, 0, 'Output Format'));
-		this.add(goalFormatDD);
+		grp.add(new FlxText(goalFormatDD.x, goalFormatDD.y - 15, 0, 'Output Format'));
+		grp.add(goalFormatDD);
 
-		this.add(convertFilesButt);
+		grp.add(convertFilesButt);
+
+		grp.x = Std.int((FlxG.width - grp.width) / 2);
+		grp.y = Std.int((FlxG.height - (fromFormatDD.y + fromFormatDD.height)) / 2);
+		this.add(grp);
 	}
 
 	function updateInfoText() {

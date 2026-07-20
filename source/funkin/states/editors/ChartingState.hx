@@ -89,6 +89,10 @@ typedef ChartingStateSession = {
 	var trackVolumes:Map<String, Float>;
 }
 
+private var editor(get, never):ChartingState;
+private inline function get_editor()
+	return ChartingState.instance;
+
 @:access(flixel.sound.FlxSound._sound)
 @:access(openfl.media.Sound.__buffer)
 @:allow(funkin.states.editors.ChartingState)
@@ -617,7 +621,8 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 	function onChartLoaded() {
 		if (_song == null) {
-			var ss = new SongSelectState(FlxColor.fromRGB(0,0,0,240));
+			var ss = new SongSelectState();
+			ss.bgColor = FlxColor.fromRGB(0,0,0,240);
 			ss.onSelectChart = function(song:BaseSong, chartId:String) {
 				Song.loadSong(song, chartId);
 				_song = PlayState.SONG;
@@ -947,51 +952,13 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		var saveZipButton = newFlxUIButton(110, saveEventJson.y + 30, 'Save as ZIP', saveSongZIP);
 
 		///
-		var reloadSongJson:FlxUIButton = newFlxUIButton(saveButton.x + 90, saveButton.y, "Reload JSON", function()
-		{
-			showWarning('This action will clear current progress.\n\nProceed?', loadJson.bind(_song.song));
-		});
+		var reloadSongJson:FlxUIButton = newFlxUIButton(saveButton.x + 90, saveButton.y, "Reload JSON", reloadSongJSON);
 		reloadSongJson.color = 0xFFFF0000;
 
-		var loadAutosaveBtn:FlxUIButton = newFlxUIButton(reloadSongJson.x, reloadSongJson.y + 30, 'Load Autosave', function()
-		{
-			var autosaved:Dynamic = options.autosave;
-			if (autosaved == null) {
-				showPopup("There is no autosaved data");
-			}else if (!Std.isOfType(autosaved, String)) {
-				showPopup("Invalid autosaved data");
-			}else{
-				var _song:Dynamic = Json.parse(autosaved);
-				
-				// Ugh
-				var _session:ChartingStateSession = Reflect.field(_song, "_chartEditor");
-				if (_session.trackVolumes != null && !Std.isOfType(_session.trackVolumes, haxe.ds.StringMap) && Reflect.isObject(_session.trackVolumes))
-					_session.trackVolumes = cast CoolUtil.structureToMap(_session.trackVolumes);
-
-				MusicBeatState.switchState(new ChartingState(_song));
-			}
-		});
+		var loadAutosaveBtn:FlxUIButton = newFlxUIButton(reloadSongJson.x, reloadSongJson.y + 30, 'Load Autosave', loadAutosave);
 
 		////
-		function onOpenEvents(resource) {
-			var data:Dynamic = Json.parse((resource:Bytes).toString());
-
-			var song:SwagSong = Reflect.field(data, "song"); 
-			if (song == null)
-				return;
-		
-			var events = ChartData.onLoadEvents(data.song).events;
-			if (events == null)
-				return;
-
-			_song.events = events;
-			doUpdateGridObjects = true;
-		}
-
-		var loadEventJson:FlxUIButton = newFlxUIButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Open Events', function() {
-			final openEvents:Void->Void = CoolUtil.showOpenDialog.bind('Open Events', getSongPath('events.json'), ['*.json'], onOpenEvents);
-			showWarning('This action will clear the current events.\n\nProceed?', openEvents);
-		});
+		var loadEventJson:FlxUIButton = newFlxUIButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Open Events', openEventsJSON);
 
 		////
 		var editTracksButton:FlxUIButton = newFlxUIButton(loadAutosaveBtn.x, loadEventJson.y + 40, 'Edit Tracks', function() {
@@ -3174,7 +3141,8 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	}
 
 	function openSongSelect() {
-		var ss = new SongSelectState(FlxColor.fromRGB(0,0,0,240));
+		var ss = new SongSelectState();
+		ss.bgColor = FlxColor.fromRGB(0,0,0,240);
 		ss.songs = SongSelectState.getEverySong();
 		ss.curSelected = CoolUtil.indexOfSong(ss.songs, PlayState.song);
 		if (ss.curSelected == -1) ss.curSelected = 0;
@@ -4122,6 +4090,51 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			PlayState.difficultyName = chartId;
 			MusicBeatState.resetState();
 		}
+	}
+
+	function onOpenEventsFile(resource:Bytes) {
+		var data:Dynamic = Json.parse(resource.toString());
+
+		var song:SwagSong = Reflect.field(data, "song"); 
+		if (song == null)
+			return;
+	
+		var events = ChartData.onLoadEvents(data.song).events;
+		if (events == null)
+			return;
+
+		_song.events = events;
+		doUpdateGridObjects = true;
+	}
+
+	function reloadSongJSON()
+	{
+		showWarning('This action will clear current progress.\n\nProceed?', loadJson.bind(_song.song));
+	}
+
+	function loadAutosave()
+	{
+		var autosaved:Dynamic = options.autosave;
+		if (autosaved == null) {
+			showPopup("There is no autosaved data");
+		}else if (!Std.isOfType(autosaved, String)) {
+			showPopup("Invalid autosaved data");
+		}else{
+			var _song:Dynamic = Json.parse(autosaved);
+			showPopup('Load autosave?\n\nThis will clear the current progress.', function() {
+				// Ugh
+				var _session:ChartingStateSession = Reflect.field(_song, "_chartEditor");
+				if (_session.trackVolumes != null && !Std.isOfType(_session.trackVolumes, haxe.ds.StringMap) && Reflect.isObject(_session.trackVolumes))
+					_session.trackVolumes = cast CoolUtil.structureToMap(_session.trackVolumes);
+	
+				MusicBeatState.switchState(new ChartingState(_song));
+			});
+		}
+	}
+
+	function openEventsJSON() {
+		final openEvents:Void->Void = CoolUtil.showOpenDialog.bind('Open Events', getSongPath('events.json'), ['*.json'], onOpenEventsFile);
+		showWarning('This action will clear the current events.\n\nProceed?', openEvents);
 	}
 
 	function sortNotesByTime(Obj1:NoteData, Obj2:NoteData):Int

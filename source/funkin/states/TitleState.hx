@@ -364,7 +364,8 @@ class TitleState extends MusicBeatState
 			else if (getPressedEnter())
 			{
 				if (FlxG.keys.pressed.SHIFT && cheatProgress == cheatCode.length) {
-					var ss = new funkin.states.SongSelectState(FlxColor.fromRGB(0,0,0,240));
+					var ss = new funkin.states.SongSelectState();
+					ss.bgColor = FlxColor.fromRGB(0,0,0,240);
 					ss.goBack = () -> {};//MusicBeatState.switchState(new funkin.states.editors.MasterEditorMenu());
 					this.persistentUpdate = false;
 					this.openSubState(ss);

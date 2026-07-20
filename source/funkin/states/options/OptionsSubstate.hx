@@ -123,6 +123,8 @@ class OptionsSubstate extends MusicBeatSubstate
 					"scoreZoom", 
 					"coloredCombos",
 					"simpleJudge",
+					"comboFading",
+					"comboStacking",
 					'hudPosition', 
 					"customizeHUD",
 				]

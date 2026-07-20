@@ -332,11 +332,25 @@ class ClientPrefs {
 				]
 			},
 			"simpleJudge" => {
-				display: "Alt Judgements",
-				desc: "Makes judgements pop in alot simpler and displays only one at a time.",
+				display: "Simple Judgements",
+				desc: "Judgements and combo pop in with a simple animation and only one judgement is displayed at a time",
 				value: false,
 				type: Toggle,
 				data: []
+			},
+			"comboStacking" => {
+				display: "Stack combos",
+				desc: "Whether combo sprites should stack.\nThis doesn't affect Simple Judgements.",
+				value: true,
+				type: Toggle,
+				data: [],
+			},
+			"comboFading" => {
+				display: "Fade combos",
+				desc: "Whether combo sprites should fade out, or stay on screen.\nDisabling this also disables combo stacking.",
+				value: true,
+				type: Toggle,
+				data: [],
 			},
 			"scoreZoom" => {
 				display: "Zoom On Hit",

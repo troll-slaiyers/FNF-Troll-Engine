@@ -29,7 +29,7 @@ class DialogueCutscene extends Cutscene
 	/** Whether the player is able to progress the dialogue. **/
 	public var canProgressDialogue:Bool = false;
 	
-	/** Variable that allows you to keep all characters on screen if you want too. **/
+	/** Variable that allows you to keep all characters on screen if needed. **/
 	public var keepAllCharactersOnScreen:Bool = false;
 
 	/** Array that will be filled with all the dialogue characters. **/
@@ -48,7 +48,7 @@ class DialogueCutscene extends Cutscene
 	{
 		super();
 		onEnd.addOnce(endDialogue);
-		dialogueFile = Paths.json('$dialoguePath');
+		dialogueFile = Paths.json(dialoguePath);
 	}
 
 	public override function createCutscene() 
@@ -99,7 +99,7 @@ class DialogueCutscene extends Cutscene
 			var char:DialogueCharacter = new DialogueCharacter(curCharacter);
 			char.updateHitbox();
 			char.scrollFactor.set();
-			char.alpha = 0.00001;
+			char.alpha = 0;
 			add(char);
 			characters.push(char);
 		}
@@ -107,6 +107,7 @@ class DialogueCutscene extends Cutscene
 
 	override function update(elapsed:Float)
 	{
+		//controls.accept wasnt working so i jst gave up ngl
 	   	if (FlxG.keys.justPressed.SPACE && canProgressDialogue)
 		{
 			if(finishedLine)
@@ -121,7 +122,6 @@ class DialogueCutscene extends Cutscene
 
 		}
 		//todo: maybe have a proper log book for dialogue.
-		
 		super.update(elapsed);
 	}
 
@@ -199,7 +199,8 @@ class DialogueCutscene extends Cutscene
 	inline function getTextSize(_lineTextSize:Int):Int 
 		return _lineTextSize > 0 ? _lineTextSize : box.textSize;
 
-	override public function restart(){
+	override public function restart()
+	{
 		curLine = 0;
 		createNewLine();
 	}
@@ -207,7 +208,7 @@ class DialogueCutscene extends Cutscene
 	/**
 	 * Function thats called to retrieve text sound.
 	 * Leaving all fields empty, will not play a sound.
-	 */
+	*/
 	private function getTextSound()
 	{
 		var dialogueTalkSound:Array<String> = null;
@@ -219,13 +220,13 @@ class DialogueCutscene extends Cutscene
 			dialogueTalkSound = box.dialogueTalkSound;
 
 		if(dialogueTalkSound != null)
-		dialogueText.sounds = [for (dialogueSound in dialogueTalkSound) FlxG.sound.load(Paths.sound(dialogueSound), 0.6)];
+			dialogueText.sounds = [for (dialogueSound in dialogueTalkSound) FlxG.sound.load(Paths.sound(dialogueSound), 0.6)];
 	}
 
 	/**
 	 * Play dialogue box animation
 	 * @param _anim 
-	 */
+	*/
 	function playBoxAnimation(_anim:String)
 	{
 		if(_anim == null) return;

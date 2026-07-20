@@ -43,6 +43,20 @@ class Controls {
 	public var PAUSE(get, never):Bool; inline function get_PAUSE() return get("pause", JUST_PRESSED);
 	public var RESET(get, never):Bool; inline function get_RESET() return get("reset", JUST_PRESSED);
 
+	public var UI_VERTICAL(get, never):Int; inline function get_UI_VERTICAL() {
+		var change:Int = 0;
+		if (UI_UP) change--;
+		if (UI_DOWN) change++;
+		return change;
+	}
+	
+	public var UI_HORIZONTAL(get, never):Int; inline function get_UI_HORIZONTAL() {
+		var change:Int = 0;
+		if (UI_LEFT) change--;
+		if (UI_RIGHT) change++;
+		return change;
+	}
+
 	public var UI_VERTICAL_P(get, never):Int; inline function get_UI_VERTICAL_P() {
 		var change:Int = 0;
 		if (UI_UP_P) change--;
