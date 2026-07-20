@@ -3554,19 +3554,35 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 		var strumTime = selectedNotes.strumTime;
 		var strumStep:Float = Conductor.getSegmentFromTime(strumTime).getStep(strumTime);
-		var endStep:Float = strumStep;
-		var sustainSteps:Float = 0;
+		var commonSustainLength:Null<Float> = selectedNotes.commonSustainLength;
 
-		if (selectedNotes.length > 0) {
-			var endTime = selectedNotes.endTime;
-			if (endTime != strumTime) {
-				endStep = Conductor.getSegmentFromTime(endTime).getStep(endTime);
-				sustainSteps = endStep - strumStep;
+		////
+		var endStep:Float = {
+			var endTime:Float = strumTime;
+			for (note in selectedNotes) {
+				var noteEnd = note.strumTime;
+				if (NoteData.isNoteData(note))
+					noteEnd += (cast note:NoteData).sustainLength;
+				if (noteEnd > endTime)
+					endTime = noteEnd;
 			}
-		}
+			(endTime == strumTime) ? strumStep : Conductor.getSegmentFromTime(endTime).getStep(endTime);
+		};
 
-		labelSusLength.text = 'Sustain Length: (${Math.round(sustainSteps)} Steps)';
-		labelStrumTime.text = 'Strum Time: (Step ${sustainSteps > 0 ? '$strumStep - $endStep' : '$strumStep'})';
+		labelStrumTime.text = 'Strum Time: (Step ${endStep != strumStep ? '$strumStep - $endStep' : '$strumStep'})';
+
+		////
+		if (commonSustainLength == 0) {
+			labelSusLength.text = 'Sustain Length: (0 Steps)';
+		}
+		else if (commonSustainLength == null || strumStep != endStep) {
+			labelSusLength.text = 'Sustain Length: (---)';
+		}
+		else {
+			var endStep:Float = strumTime + commonSustainLength;
+			endStep = Conductor.getSegmentFromTime(endStep).getStep(endStep);
+			labelSusLength.text = 'Sustain Length: (${Math.round(endStep - strumStep)} Steps)';
+		}
 	}
 
 	function updateNoteUI():Void
