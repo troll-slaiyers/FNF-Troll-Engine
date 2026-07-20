@@ -457,6 +457,15 @@ class ClientPrefs {
 				value: false,
 				data: []
 			},
+			"cancelReceptorAnims" => {
+				// TODO: Receptor animation behaviour, adding v-slice behavior-
+				// of playing the ghost tap animation when holding for too long (though you could maybe bake that into the spritesheet?)
+				display: "Cancel Receptor Animations",
+				desc: "When toggled, receptor animations will be cancelled when releasing a key instead of fully playing out.",
+				type: Toggle,
+				value: false, // suck it nerdssss
+				data: []
+			},
 			"hitbar" => {
 				display: "Show Error Bar",
 				desc: "When toggled, a bar will be shown that marks note hit timings.", // TODO rewrite this desc

@@ -121,6 +121,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					"judgeOpacity",
 					"stageOpacity", 
 					"scoreZoom", 
+					"cancelReceptorAnims",
 					"coloredCombos",
 					"simpleJudge",
 					"comboFading",

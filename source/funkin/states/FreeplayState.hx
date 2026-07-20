@@ -288,8 +288,10 @@ class FreeplayState extends MusicBeatState
 				Conductor.mapTimeSegments(PlayState.SONG); // fuck you include the bpm changes pussy
 				var instAsset = selectedSongData.getTrackSound(PlayState.SONG.tracks.inst[0]);
 				FlxG.sound.playMusic(instAsset, 0.6);
+				Conductor.tracks = [];
+				Conductor.startSong();
 				Conductor.changeBPM(PlayState.SONG.bpm);
-				Conductor.tracks = [FlxG.sound.music];
+				Conductor.tracks.push(FlxG.sound.music);
 			}
 		}
 	}

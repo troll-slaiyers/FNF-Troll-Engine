@@ -24,6 +24,12 @@ class StrumNote extends NoteObject {
 	public var downScroll:Bool = false;
 	public var isQuant:Bool = false;
 	public var canQuant:Bool = true;
+
+	/**
+		Reset animation timer.  
+		If higher than 0, the animation will reset to 'static' once it reaches 0.  
+		If lower than 0, the animation will reset to 'static' once the current animation finishes.
+	**/
 	public var resetAnim:Float = 0;
 
 	public var field:PlayField;

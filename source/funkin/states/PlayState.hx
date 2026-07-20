@@ -3269,7 +3269,10 @@ class PlayState extends MusicBeatState
 	}
 
 	function breakCombo() {
-		ratingGroup.killLastCombo();
+		if (ClientPrefs.simpleJudge || !ClientPrefs.comboFading)
+			ratingGroup.killLastCombo();
+
+		playMissSound();
 
 		if (stats.combo > 10 && gf != null && gf.animOffsets.exists('sad')){
 			gf.playAnim('sad');
@@ -3347,8 +3350,10 @@ class PlayState extends MusicBeatState
 		for(track in field.tracks)
 			track.volume = 0;
 
+		/*
 		if (!daNote.isSustainNote)
 			playMissSound();
+		*/
 
 		if (!daNote.noMissAnimation) {
 			for (char in getNoteCharacters(daNote, field)) {
@@ -3388,8 +3393,6 @@ class PlayState extends MusicBeatState
 		// i dont think this should reduce acc lol
 		//totalPlayed++;
 		//RecalculateRating();
-
-		playMissSound();
 
 		if (field != null) {
 			for (track in field.tracks)
@@ -3734,7 +3737,13 @@ class PlayState extends MusicBeatState
 
 	public function openCutscenePauseMenu(scene: Cutscene)
 	{
-		if (!scene.canPause)return;
+		if (!scene.canPause)
+			return;
+
+		// W hack to prevent pausing if ACCEPT and PAUSE have the same bind
+		if (scene is DialogueCutscene && controls.ACCEPT) 
+			return;
+
 		if (callOnScripts('onPause') == Globals.Function_Stop) 
 			return;
 

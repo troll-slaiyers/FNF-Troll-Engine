@@ -1,5 +1,6 @@
 package funkin.objects.cutscenes;
 
+import funkin.input.Controls.firstActive as controls;
 import flixel.addons.text.FlxTypeText;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
@@ -108,7 +109,8 @@ class DialogueCutscene extends Cutscene
 	override function update(elapsed:Float)
 	{
 		//controls.accept wasnt working so i jst gave up ngl
-	   	if (FlxG.keys.justPressed.SPACE && canProgressDialogue)
+		// i got u homie
+		if (controls.ACCEPT && canProgressDialogue)
 		{
 			if(finishedLine)
 			{
@@ -119,8 +121,8 @@ class DialogueCutscene extends Cutscene
 			{
 				skipCurLine();
 			}
-
 		}
+
 		//todo: maybe have a proper log book for dialogue.
 		super.update(elapsed);
 	}

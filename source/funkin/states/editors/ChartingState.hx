@@ -61,6 +61,7 @@ using Lambda;
 typedef ChartingStateOptions = {
 	var ?autosave:String;
 	var ignoreWarnings:Bool;
+	var showHistoryDisplay:Bool;
 	var vortex:Bool;
 	var mouseScrollingQuant:Bool;
 	var noAutoScroll:Bool;
@@ -110,6 +111,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	public static function getDefaultOptions():ChartingStateOptions return {
 		autosave: null,
 		ignoreWarnings: false,
+		showHistoryDisplay: true,
 		vortex: false,
 		mouseScrollingQuant: false,
 		noAutoScroll: false,
@@ -668,7 +670,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		progressBar.maxValue = songLength;
 		progressBar.maxLabel.text = formatTime(songLength);
 
-		//historyDisplay.exists = true;
+		historyDisplay.exists = options.showHistoryDisplay;
 
 		if (UI_box != null) {
 			UI_box.destroy();
@@ -970,11 +972,11 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		fix_oob_notes.color = FlxColor.PINK;
 		fix_oob_notes.label.color = FlxColor.WHITE;
 
-		var clear_events:FlxUIButton = newFlxUIButton(loadAutosaveBtn.x, 300, 'Clear events', showWarning.bind('Clear notes?\n\nThis action cannot be undone.', clearEvents));
+		var clear_events:FlxUIButton = newFlxUIButton(loadAutosaveBtn.x, 300, 'Clear events', showWarning.bind('Clear events?\n\nThis action cannot be undone.', clearEvents));
 		clear_events.color = FlxColor.RED;
 		clear_events.label.color = FlxColor.WHITE;
 
-		var clear_notes:FlxUIButton = newFlxUIButton(clear_events.x, clear_events.y + 30, 'Clear notes', showWarning.bind('Clear events?\n\nThis action cannot be undone.', clearNotes));
+		var clear_notes:FlxUIButton = newFlxUIButton(clear_events.x, clear_events.y + 30, 'Clear notes', showWarning.bind('Clear notes?\n\nThis action cannot be undone.', clearNotes));
 		clear_notes.color = FlxColor.RED;
 		clear_notes.label.color = FlxColor.WHITE;
 
@@ -2520,6 +2522,9 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	}
 
 	function checkCanMouseScroll():Bool {
+		if (historyDisplay.exists && FlxG.mouse.overlaps(historyDisplay))
+			return false;
+
 		for (dropDownMenu in blockPressWhileScrolling) {
 			if (dropDownMenu.header.button.status == FlxButton.HIGHLIGHT)
 				return false;
@@ -2885,6 +2890,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		
 		if (FlxG.keys.justPressed.F6) {
 			historyDisplay.exists = !historyDisplay.exists;
+			options.showHistoryDisplay = historyDisplay.exists;
 		}
 
 		if (FlxG.keys.justPressed.ENTER) {
@@ -3287,94 +3293,88 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	}
 
 	var wavData:Array<Array<Array<Float>>> = [[[0], [0]], [[0], [0]]];
+	var bitchRect:Rectangle = new Rectangle();
 	function updateWaveform() 
 	{
 		#if desktop
-		var gSize:Int = Std.int(GRID_SIZE * _song.keyCount * 2);
-		var hSize:Int = Std.int(gSize* 0.5);
-
 		if (waveformTrack == null) {
 			waveformSprite.visible = false;
 			return;
 		}
 
-		waveformSprite.visible = true;
-		waveformSprite.makeGraphic(gSize, Std.int(gridBG.height), 0x00FFFFFF);
-		waveformSprite.pixels.fillRect(new Rectangle(0, 0, gridBG.width, gridBG.height), 0x00FFFFFF);
-		waveformSprite.x = GRID_SIZE + GRID_SIZE * _song.keyCount - hSize;
-
-		wavData[0][0] = [];
-		wavData[0][1] = [];
-		wavData[1][0] = [];
-		wavData[1][1] = [];
+		var gSize:Int = Std.int(GRID_SIZE * _song.keyCount * 2);
+		var hSize:Int = Std.int(gSize * 0.5);
 
 		var steps:Int = Math.round(currentSectionBeats * 4);
 		var st:Float = currentSectionStart;
 		var et:Float = st + (Conductor.stepCrochet * steps);
 
-		var sound:FlxSound = waveformTrack;
-		if (sound._sound != null && sound._sound.__buffer != null) {
-			var bytes:Bytes = sound._sound.__buffer.data.toBytes();
+		waveformSprite.visible = true;
+		waveformSprite.x = GRID_SIZE + GRID_SIZE * _song.keyCount - hSize;
+		waveformSprite.makeGraphic(gSize, Std.int(gridBG.height), 0, false, 'waveformSprite');
 
-			wavData = waveformData(
-				sound._sound.__buffer,
-				bytes,
-				st,
-				et,
-				1,
-				wavData,
-				Std.int(gridBG.height)
-			);
-		}
+		bitchRect.setTo(0, 0, waveformSprite.pixels.width, waveformSprite.pixels.height);
+		waveformSprite.pixels.fillRect(bitchRect, 0);
+
+		wavData[0][0].resize(0);
+		wavData[0][1].resize(0);
+		wavData[1][0].resize(0);
+		wavData[1][1].resize(0);
+		wavData = waveformData(
+			waveformTrack._sound.__buffer,
+			st,
+			et,
+			1,
+			wavData,
+			waveformSprite.frameHeight
+		);
 
 		// Draws
-		var lmin:Float = 0;
-		var lmax:Float = 0;
+		var leftLength:Int = FlxMath.maxInt(wavData[0][0].length, wavData[0][1].length);
+		var rightLength:Int = FlxMath.maxInt(wavData[1][0].length, wavData[1][1].length);
+		var length:Int = FlxMath.maxInt(leftLength, rightLength);
 
-		var rmin:Float = 0;
-		var rmax:Float = 0;
-
-		var size:Float = 1;
-
-		var leftLength:Int = (
-			wavData[0][0].length > wavData[0][1].length ? wavData[0][0].length : wavData[0][1].length
-		);
-
-		var rightLength:Int = (
-			wavData[1][0].length > wavData[1][1].length ? wavData[1][0].length : wavData[1][1].length
-		);
-
-		var length:Int = leftLength > rightLength ? leftLength : rightLength;
-
-		var index:Int;
 		for (i in 0...length) {
-			index = i;
+			var lmin = FlxMath.bound((i < wavData[0][0].length ? wavData[0][0][i] : 0) * (gSize / 1.12), -hSize, hSize) * 0.5;
+			var lmax = FlxMath.bound((i < wavData[0][1].length ? wavData[0][1][i] : 0) * (gSize / 1.12), -hSize, hSize) * 0.5;
 
-			lmin = FlxMath.bound(((index < wavData[0][0].length && index >= 0) ? wavData[0][0][index] : 0) * (gSize / 1.12), -hSize, hSize)* 0.5;
-			lmax = FlxMath.bound(((index < wavData[0][1].length && index >= 0) ? wavData[0][1][index] : 0) * (gSize / 1.12), -hSize, hSize)* 0.5;
+			var rmin = FlxMath.bound((i < wavData[1][0].length ? wavData[1][0][i] : 0) * (gSize / 1.12), -hSize, hSize) * 0.5;
+			var rmax = FlxMath.bound((i < wavData[1][1].length ? wavData[1][1][i] : 0) * (gSize / 1.12), -hSize, hSize) * 0.5;
 
-			rmin = FlxMath.bound(((index < wavData[1][0].length && index >= 0) ? wavData[1][0][index] : 0) * (gSize / 1.12), -hSize, hSize)* 0.5;
-			rmax = FlxMath.bound(((index < wavData[1][1].length && index >= 0) ? wavData[1][1][index] : 0) * (gSize / 1.12), -hSize, hSize)* 0.5;
-
-			waveformSprite.pixels.fillRect(new Rectangle(hSize - (lmin + rmin), i * size, (lmin + rmin) + (lmax + rmax), size), FlxColor.BLUE);
+			final scale:Float = 1;
+			bitchRect.setTo(
+				hSize - (lmin + rmin), 
+				i * scale, 
+				(lmin + rmin) + (lmax + rmax), 
+				scale
+			);
+			waveformSprite.pixels.fillRect(bitchRect, FlxColor.BLUE);
 		}
 		#end
 	}
 
-	function waveformData(buffer:AudioBuffer, bytes:Bytes, time:Float, endTime:Float, multiply:Float = 1, ?array:Array<Array<Array<Float>>>, ?steps:Float):Array<Array<Array<Float>>>
+	function waveformData(buffer:AudioBuffer, startTime:Float, endTime:Float, multiply:Float = 1, ?array:Array<Array<Array<Float>>>, steps:Float = 1280):Array<Array<Array<Float>>>
 	{
+		if (array == null) {
+			array = [[[0], [0]], [[0], [0]]];
+		}
+		else {
+			array[0][0].resize(1);
+			array[0][1].resize(1);
+		}
+
 		#if (lime_cffi && !macro)
-		if (buffer == null || buffer.data == null) return [[[0], [0]], [[0], [0]]];
+		if (buffer?.data == null)
+			return array;
+
+		var bytes:Bytes = buffer.data.toBytes();
 
 		var khz:Float = (buffer.sampleRate / 1000);
 		var channels:Int = buffer.channels;
 
-		var index:Int = Std.int(time * khz);
+		var index:Int = Std.int(startTime * khz);
 
-		var samples:Float = ((endTime - time) * khz);
-
-		if (steps == null) steps = 1280;
-
+		var samples:Float = (endTime - startTime) * khz;
 		var samplesPerRow:Float = samples / steps;
 		var samplesPerRowI:Int = Std.int(samplesPerRow);
 
@@ -3390,8 +3390,6 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 		var simpleSample:Bool = true;//samples > 17200;
 		var v1:Bool = false;
-
-		if (array == null) array = [[[0], [0]], [[0], [0]]];
 
 		while (index < (bytes.length - 1)) {
 			if (index >= 0) {
@@ -3435,25 +3433,23 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				var rRMin:Float = Math.abs(rmin) * multiply;
 				var rRMax:Float = rmax * multiply;
 
-				if (gotIndex > array[0][0].length) array[0][0].push(lRMin);
-					else array[0][0][gotIndex - 1] = array[0][0][gotIndex - 1] + lRMin;
+				inline function push(array:Array<Float>, v:Float):Void {
+					if (gotIndex > array.length)
+						array.push(v);
+					else
+						array[gotIndex - 1] += v;
+				}
 
-				if (gotIndex > array[0][1].length) array[0][1].push(lRMax);
-					else array[0][1][gotIndex - 1] = array[0][1][gotIndex - 1] + lRMax;
+				push(array[0][0], lRMin);
+				push(array[0][1], lRMax);
 
 				if (channels >= 2) {
-					if (gotIndex > array[1][0].length) array[1][0].push(rRMin);
-						else array[1][0][gotIndex - 1] = array[1][0][gotIndex - 1] + rRMin;
-
-					if (gotIndex > array[1][1].length) array[1][1].push(rRMax);
-						else array[1][1][gotIndex - 1] = array[1][1][gotIndex - 1] + rRMax;
+					push(array[1][0], rRMin);
+					push(array[1][1], rRMax);
 				}
 				else {
-					if (gotIndex > array[1][0].length) array[1][0].push(lRMin);
-						else array[1][0][gotIndex - 1] = array[1][0][gotIndex - 1] + lRMin;
-
-					if (gotIndex > array[1][1].length) array[1][1].push(lRMax);
-						else array[1][1][gotIndex - 1] = array[1][1][gotIndex - 1] + lRMax;
+					push(array[1][0], lRMin);
+					push(array[1][1], lRMax);
 				}
 
 				lmin = 0;
@@ -3467,11 +3463,9 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			rows++;
 			if(gotIndex > steps) break;
 		}
+		#end
 
 		return array;
-		#else
-		return [[[0], [0]], [[0], [0]]];
-		#end
 	}
 
 	function changeSection(sec:Int = 0, ?updateMusic:Bool = true):Void
@@ -4468,6 +4462,7 @@ private class HistoryDisplay extends FlxSpriteGroup {
 				action = utRay[actionIdx];
 			}else {
 				action = null;
+				actionIdx = -1;
 			}
 
 			var txtIdx = txts.length - i;
@@ -4484,16 +4479,21 @@ private class HistoryDisplay extends FlxSpriteGroup {
 
 			txt.color = action_reverted ? 0xFF000000 : 0xFFFFFFFF;
 			txt.text = (action == null) ? " " : Std.string(action);
+			txt.ID = actionIdx;
 		}
 	}
 
 	override function update(elapsed:Float) {
-		if (FlxG.keys.justPressed.V) {
-			scrollIdx--;
-			updateDisplay();
-		}
-		if (FlxG.keys.justPressed.N) {
-			scrollIdx++;
+		var scrollChange:Int = FlxG.mouse.overlaps(this) ? -FlxG.mouse.wheel : 0;
+
+		if (FlxG.keys.justPressed.V)
+			scrollChange--;
+		
+		if (FlxG.keys.justPressed.N)
+			scrollChange++;
+		
+		if (scrollChange != 0) {
+			scrollIdx += scrollChange;
 			updateDisplay();
 		}
 
@@ -4501,6 +4501,23 @@ private class HistoryDisplay extends FlxSpriteGroup {
 			curIdx = ChartingState.instance.utIdx;
 			scrollIdx = 0;
 			updateDisplay();
+		}
+
+		if (FlxG.mouse.justPressed) {
+			for (txt in txts) {
+				if (!FlxG.mouse.overlaps(txt))
+					continue;
+				var actionIdx = txt.ID;
+				if (actionIdx == -1 || actionIdx == curIdx)
+					break;
+				else if (actionIdx < curIdx)
+					while (ChartingState.instance.utIdx != actionIdx)
+						ChartingState.instance.undo();
+				else
+					while (ChartingState.instance.utIdx != actionIdx)
+						ChartingState.instance.redo();
+				break;
+			}
 		}
 
 		for (obj in bgs) obj.update(elapsed);
