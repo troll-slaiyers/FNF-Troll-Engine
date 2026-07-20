@@ -238,6 +238,7 @@ class MusicBeatState extends TransitionableState
 			FlxG.sound.playMusic(Paths.music(key));
 		}
 
+		Conductor.pitch = 1.0;
 		Conductor.tracks = [FlxG.sound.music];
 		Conductor.startSong(FlxG.sound.music.time);
 		curMusic = key;

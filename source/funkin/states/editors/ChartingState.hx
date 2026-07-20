@@ -1225,10 +1225,13 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			doUpdateGridObjects = true;
 	}
 
-	function section_swapSides() {
+	function swapNoteSides(notes:Array<NoteData>) {
 		var shitToDo:Array<ChartingAction> = [];
 
-		for (note in _song.notes[curSection].sectionNotes) {
+		for (note in notes) {
+			if (!NoteData.isNoteData(note))
+				continue;
+
 			var ogCol = note.column;
 			var nuCol = (note.column + _song.keyCount) % (_song.keyCount * 2);
 			function set_column(v) note.column = v;
@@ -1238,15 +1241,17 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		if (shitToDo.length > 0) {
 			final f = () -> doUpdateGridObjects = true;
 			shitToDo.push(new DynamicAction(f, f));
-			new GroupAction("Swap Section Note Sides", shitToDo);
+			new GroupAction("Swap Note Sides", shitToDo);
 		}
 	}
-	function section_duetNotes() {
-		var toCopy:Array<NoteData> = _song.notes[curSection].sectionNotes;
+
+	function duetNotes(toCopy:Array<NoteData>) {
 		if (toCopy.length == 0)
 			return;
 
-		var copiedNotes:Array<NoteData> = [for (note in toCopy) note.clone()];
+		//var copiedNotes:Array<NoteData> = [for (note in toCopy) note.clone()];
+		var copiedNotes:Array<NoteData> = [for (note in toCopy) if (NoteData.isNoteData(note)) note.clone()];
+		
 		for (note in copiedNotes) {
 			if (Math.floor(note.column / _song.keyCount) % 2 == 1)
 				note.column -= _song.keyCount;
@@ -1278,9 +1283,12 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		note.column += fieldIndex * _song.keyCount;
 	}
 
-	function section_mirrorNotes() {
+	function mirrorNotes(notes:Array<NoteData>) {
 		var shitToDo:Array<ChartingAction> = [];
-		for (note in _song.notes[curSection].sectionNotes) {
+		for (note in notes) {
+			if (!NoteData.isNoteData(note))
+				continue;
+
 			var f = _mirrorNote.bind(note);
 			shitToDo.push(new DynamicAction(f, f));
 		}
@@ -1290,6 +1298,16 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			shitToDo.push(new DynamicAction(f, f));
 			new GroupAction("Mirror Section Notes", shitToDo);
 		}
+	}
+
+	function section_swapSides() {
+		swapNoteSides(_song.notes[curSection].sectionNotes);
+	}	
+	function section_duetNotes() {
+		duetNotes(_song.notes[curSection].sectionNotes);
+	}
+	function section_mirrorNotes() {
+		mirrorNotes(_song.notes[curSection].sectionNotes);
 	}
 
 	function addSectionUI():Void
@@ -1428,6 +1446,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		UI_box.addGroup(tab_group_section);
 	}
 
+	var labelSelectedNotes:FlxText;
 	var labelSusLength:FlxText;
 	var labelStrumTime:FlxText;
 	var stepperSusLength:CustomFlxUINumericStepper;
@@ -1443,11 +1462,13 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 		final DECIMALS:Int = 4;
 
-		stepperSusLength = newFlxUINumericStepper(10, 25, 1, 0, 0, Math.POSITIVE_INFINITY, DECIMALS, 1, newFlxUIInputText(0, 0, 120));
+		labelSelectedNotes = new FlxText(10, 10, 0, "No notes selected");
+
+		stepperSusLength = newFlxUINumericStepper(10, labelSelectedNotes.y + 35, 1, 0, 0, Math.POSITIVE_INFINITY, DECIMALS, 1, newFlxUIInputText(0, 0, 120));
 		stepperSusLength.name = 'note_susLength';
 		blockPressWhileTypingOnStepper.push(stepperSusLength);
 
-		stepperStrumTime = newFlxUINumericStepper(10, 65, 1, 0, 0, Math.POSITIVE_INFINITY, DECIMALS, 1, newFlxUIInputText(0, 0, 120));
+		stepperStrumTime = newFlxUINumericStepper(10, stepperSusLength.y + 40, 1, 0, 0, Math.POSITIVE_INFINITY, DECIMALS, 1, newFlxUIInputText(0, 0, 120));
 		stepperStrumTime.name = 'note_strumTime';
 		blockPressWhileTypingOnStepper.push(stepperStrumTime);
 
@@ -1463,7 +1484,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			noteTypeSnlArray.push(snl); 
 		}
 
-		noteTypeDropDown = newFlxUIDropDownMenu(10, 105, noteTypeSnlArray, function(character:String)
+		noteTypeDropDown = newFlxUIDropDownMenu(10, stepperStrumTime.y + 40, noteTypeSnlArray, function(character:String)
 		{
 			var typeIdx = Std.parseInt(character);
 			currentNoteType = noteTypeList[typeIdx];
@@ -1520,12 +1541,26 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}
 		noteTypeInput.focusLost = () -> onEnterNoteType(noteTypeInput.text);
 
-		tab_group_note.add(labelSusLength = new FlxText(10, 10, 0, 'Sustain length:'));
+		////
+		var buttX = stepperSusLength.x + stepperSusLength.width + 24;
+		var buttY = stepperSusLength.y;
+		var buttYD = 40;
+
+		var swapSidesButton = newFlxUIButton(buttX, buttY, "Swap sides", () -> swapNoteSides(selectedNotes));
+		var duetButton = newFlxUIButton(buttX, buttY + buttYD, "Duet Notes", () -> duetNotes(selectedNotes));
+		var mirrorButton = newFlxUIButton(buttX, buttY + buttYD * 2, "Mirror Notes", () -> mirrorNotes(selectedNotes));
+
+		////
+		tab_group_note.add(labelSelectedNotes);
+		tab_group_note.add(labelSusLength = new FlxText(10, stepperSusLength.y - 15, 0, 'Sustain length:'));
 		tab_group_note.add(stepperSusLength);
-		tab_group_note.add(labelStrumTime = new FlxText(10, 50, 0, 'Strum time:'));
+		tab_group_note.add(labelStrumTime = new FlxText(10, stepperStrumTime.y - 15, 0, 'Strum time:'));
 		tab_group_note.add(stepperStrumTime);
-		tab_group_note.add(new FlxText(10, 90, 0, 'Note type:'));
+		tab_group_note.add(new FlxText(10, noteTypeDropDown.y - 15, 0, 'Note type:'));
 		tab_group_note.add(noteTypeDropDown);
+		tab_group_note.add(swapSidesButton);
+		tab_group_note.add(duetButton);
+		tab_group_note.add(mirrorButton);
 
 		UI_box.addGroup(tab_group_note);
 	}
@@ -3563,6 +3598,8 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 	function updateNoteUI():Void
 	{
+		labelSelectedNotes.text = '${selectedNotes.length == 0 ? 'No' : Std.string(selectedNotes.length)} notes selected';
+
 		if (selectedNotes.length > 0) {
 			updateNoteSteps();
 
@@ -3622,6 +3659,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}
 
 		var strumStep:Float = Conductor.getSegmentFromTime(curSelectedEvent.strumTime).getStep(curSelectedEvent.strumTime);
+		var strumStep = Std.string(strumStep).substring(0, 16);
 		eventLabelStrumTime.text = 'Strum Time: (Step $strumStep)';
 	}
 	
@@ -4510,6 +4548,9 @@ private class ChangeSustainAction extends NoteAction {
 	public var change:Float;
 
 	public function new(noteData:NoteData, value:Float, isAbs:Bool = false) {
+		if (!NoteData.isNoteData(noteData))
+			return;
+
 		this.noteData = noteData;
 		this.change = isAbs ? value - noteData.sustainLength : value;
 		if (this.change < 0)
@@ -4831,12 +4872,14 @@ private class RemoveNoteAction extends NoteAction {
 		getSection(sectionNumber).sectionNotes.remove(noteData);
 		if (wasSelected) instance.selectedNotes.remove(noteData);
 		instance.doUpdateGridObjects = true;
+		instance.doUpdateNoteUI = true; // selected notes were changed
 	}
 
 	public function undo() {
 		getSection(sectionNumber).sectionNotes.push(noteData);
 		if (wasSelected) instance.selectedNotes.add(noteData);
 		instance.doUpdateGridObjects = true;
+		instance.doUpdateNoteUI = true;
 	}
 
 	public function toString() {

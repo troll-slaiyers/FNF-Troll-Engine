@@ -2375,7 +2375,7 @@ class PlayState extends MusicBeatState
 
 		////
 		if (noteHits.length > 0){
-			while (noteHits.length > 0 && (noteHits[0] + 2000) < Conductor.songPosition)
+			while (noteHits.length > 0 && (noteHits[0] + 2000 * Conductor.pitch) < Conductor.songPosition)
 				noteHits.shift();
 		}
 
@@ -3218,6 +3218,11 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	inline function playMissSound() {
+		if (ClientPrefs.missVolume > 0)
+			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume  * FlxG.random.float(0.9, 1));
+	}
+
 	function breakCombo() {
 		ratingGroup.killLastCombo();
 
@@ -3297,8 +3302,8 @@ class PlayState extends MusicBeatState
 		for(track in field.tracks)
 			track.volume = 0;
 
-		if (!daNote.isSustainNote && ClientPrefs.missVolume > 0)
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1));
+		if (!daNote.isSustainNote)
+			playMissSound();
 
 		if (!daNote.noMissAnimation) {
 			for (char in getNoteCharacters(daNote, field)) {
@@ -3339,8 +3344,7 @@ class PlayState extends MusicBeatState
 		//totalPlayed++;
 		//RecalculateRating();
 
-		if (ClientPrefs.missVolume > 0)
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume  * FlxG.random.float(0.9, 1));
+		playMissSound();
 
 		if (field != null) {
 			for (track in field.tracks)

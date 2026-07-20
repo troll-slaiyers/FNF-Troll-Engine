@@ -42,7 +42,21 @@ class Controls {
 	public var BACK(get, never):Bool; inline function get_BACK() return get("back", JUST_PRESSED);
 	public var PAUSE(get, never):Bool; inline function get_PAUSE() return get("pause", JUST_PRESSED);
 	public var RESET(get, never):Bool; inline function get_RESET() return get("reset", JUST_PRESSED);
+
+	public var UI_VERTICAL_P(get, never):Int; inline function get_UI_VERTICAL_P() {
+		var change:Int = 0;
+		if (UI_UP_P) change--;
+		if (UI_DOWN_P) change++;
+		return change;
+	}
 	
+	public var UI_HORIZONTAL_P(get, never):Int; inline function get_UI_HORIZONTAL_P() {
+		var change:Int = 0;
+		if (UI_LEFT_P) change--;
+		if (UI_RIGHT_P) change++;
+		return change;
+	}
+
 	////
 	public static var default_keyBinds:Map<String, Array<FlxKey>> = [
 		'note_left' => [A, LEFT],

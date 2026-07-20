@@ -42,12 +42,16 @@ class FunkinHScript extends FunkinScript
 		
 	}
 
-	public static function parseString(script:String, ?name:String = "Script"):Null<Expr>
+	public static function _parseString(script:String, ?name:String = "Script"):Expr
 	{
 		parser.line = 1;
+		return parser.parseString(script, name);
+	}
 
+	public static function parseString(script:String, ?name:String = "Script"):Null<Expr>
+	{
 		try {
-			return parser.parseString(script, name);
+			return _parseString(script, name);
 		}
 		catch (e:haxe.Exception) {
 			var errMsg = 'Error parsing hscript! ' #if hscriptPos + '$name:' + parser.line + ', ' #end + e.message;
@@ -67,7 +71,7 @@ class FunkinHScript extends FunkinScript
 			var fileContent = Paths.getContent(file);
 			if (fileContent != null) {
 				//print('Loading haxe script from: $file');
-				return parseString(fileContent, name ?? file);
+				return _parseString(fileContent, name ?? file);
 			}else {
 				//print('HScript file "$file" not found!');
 			}
@@ -261,6 +265,7 @@ class FunkinHScript extends FunkinScript
 		#if USING_FLXANIMATE
 		set("FlxAnimate", animate.FlxAnimate);
 		set("FlxAnimateFrames", animate.FlxAnimateFrames);
+		set("FlxSpriteElement", animate.internal.elements.FlxSpriteElement);
 		#end
 		#if VIDEOS_ALLOWED
 		set("FlxVideo", hxvlc.flixel.FlxVideo);

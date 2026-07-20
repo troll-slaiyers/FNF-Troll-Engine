@@ -186,7 +186,7 @@ class TitleState extends MusicBeatState
 		intro.queueNewLineOnBeat(0, 'riconuts', -8);
 		intro.queueNewLineOnBeat(0, 'nebula_zorua', -8);
 
-		intro.queueNewLineOnBeat(3, 'and more', -8);
+		intro.queueNewLineOnBeat(3, 'and many more', -8);
 		intro.queueOnBeat(4, intro.clearLines);
 
 		intro.queueNewLineOnBeat(5, 'Without any', 40);
