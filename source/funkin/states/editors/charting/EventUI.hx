@@ -136,7 +136,7 @@ class EventUI extends FlxSpriteGroup {
 		@returns A new `EventBunch` generated from the currently selected event and its values 
 	**/
 	public function generateEventBunch():EventBunch {
-		return currentEventBullshit?.generateBunch() ?? {strumTime: 0, eventData: [{eventId: ''}]};
+		return currentEventBullshit?.generateBunch() ?? EventBunch.fromValues(0.0, [{eventId: ''}]);
 	}
 
 	/** 
@@ -378,10 +378,7 @@ private class EventUIBullshit {
 	}
 
 	public function generateBunch():EventBunch {
-		return {
-			strumTime: 0,
-			eventData: [generateChild()],
-		};
+		return EventBunch.fromValues(0.0, [generateChild()]);
 	}
 
 	function generateChild():EventChildData {

@@ -1558,11 +1558,13 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 	function setSelectedEventType(typeName:String)
 	{
+		#if EVENT_TODO
 		if (curSelectedEvent != null) {
 			curSelectedEvent.subEventsData[subEventIdx][0] = typeName;
 
 			doUpdateGridObjects = true;
 		}
+		#end
 	}
 
 	// New event buttons
@@ -2414,17 +2416,19 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				case 'song_noteSplashes':
 					PlayState.splashSkin = _song.splashSkin = sender.text;
 
+				#if EVENT_TODO
 				case 'event_value1':
 					if (curSelectedEvent != null) {
-						curSelectedEvent.subEventsData[subEventIdx][1] = sender.text;
+						curSelectedEvent.subEventsData[subEventIdx].value1 = sender.text;
 						doUpdateGridObjects = true;
 					}
 
 				case 'event_value2':
 					if (curSelectedEvent != null) {
-						curSelectedEvent.subEventsData[subEventIdx][2] = sender.text;
+						curSelectedEvent.subEventsData[subEventIdx].value2 = sender.text;
 						doUpdateGridObjects = true;
 					}
+				#end
 
 				case 'metadata_songName':
 					_song.metadata.songName = sender.text;
@@ -3637,13 +3641,14 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	function updateEventsUI():Void
 	{
 		updateEventSteps();
-
+	
+		#if EVENT_TODO
 		if (curSelectedEvent != null) {
 			eventStepperStrumTime.value = curSelectedEvent.strumTime;
 
 			selectedEventText.text = 'Selected Event: ' + (subEventIdx + 1) + ' / ' + curSelectedEvent.subEventsData.length;
 
-			var eventData:PsychSubEventData = curSelectedEvent.subEventsData[subEventIdx];
+			var eventData:EventChildData = curSelectedEvent.subEventsData[subEventIdx];
 
 			eventDropDown.selectedLabel = eventNameInput.text = eventData.eventName;
 			value1InputText.text = eventData.value1;
@@ -3664,6 +3669,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}else {
 			selectedEventText.text = 'No event stack selected';
 		}
+		#end
 	}
 
 	function updateEventSteps() {
@@ -3899,14 +3905,14 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		return note;
 	}
 
-	function getEventName(names:Array<Array<String>>):String
+	function getEventName(names:Array<EventChildData>):String
 	{
 		var retStr:String = '';
 		var addedOne:Bool = false;
 		for (i in 0...names.length)
 		{
 			if(addedOne) retStr += ', ';
-			retStr += names[i][0];
+			retStr += names[i].eventId;
 			addedOne = true;
 		}
 		return retStr;
@@ -4031,7 +4037,10 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		var text1:String = value1InputText.text;
 		var text2:String = value2InputText.text;
 
-		var e = PsychEventNote.fromValues(noteStrum, [[eventType, text1, text2]]);
+		var child = {eventId: eventType};
+		(child:Dynamic).value1 = text1;
+		(child:Dynamic).value2 = text2;
+		var e = PsychEventNote.fromValues(noteStrum, [child]);
 		new AddEventNoteAction(e);
 	}
 
@@ -4835,7 +4844,7 @@ private class MoveSubEventAction extends ChartingAction {
 
 private class RemoveSubEventAction extends RemoveEventNoteAction {
 	//var eventData:PsychEventNote;
-	var subEventData:PsychSubEventData;
+	var subEventData:EventChildData;
 	var subEventIdx:Int;
 
 	public function new(eventData:PsychEventNote, subEventIdx:Int) {
@@ -4878,7 +4887,7 @@ private class RemoveSubEventAction extends RemoveEventNoteAction {
 private class AddNewSubEventAction extends ChartingAction {
 	var eventData:PsychEventNote;
 	var subEventIdx:Int;
-	var subEventData:PsychSubEventData;
+	var subEventData:EventChildData;
 
 	public function new(eventData:PsychEventNote, index:Int = -1) {
 		if (eventData == null)
@@ -4886,7 +4895,7 @@ private class AddNewSubEventAction extends ChartingAction {
 		
 		this.eventData = eventData;
 		this.subEventIdx = index < 0 ? eventData.subEventsData.length : index;
-		this.subEventData = ['', '', ''];
+		this.subEventData = {eventId: ''};
 
 		super();
 	}

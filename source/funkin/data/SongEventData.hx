@@ -113,21 +113,63 @@ class SongEventData {
 /** 
 	Event data structure used by `ChartingState` and the event chart format.
 **/
-typedef EventBunch = {
-	var strumTime:Float;
-	var eventData:Array<EventChildData>;
-	/** Layer in which this event is placed in the editor **/
-	// @:optional var layer:Int;
+abstract PsychEventNote(Array<Dynamic>) to funkin.data.ChartData.ChartObject// from Array<Dynamic> to Array<Dynamic>
+{
+	public var strumTime(get, set):Float;
+	public var subEventsData(get, set):Array<EventChildData>;
+
+	inline function get_strumTime() return this[0];
+	inline function set_strumTime(value:Float) return this[0] = value;
+
+	inline function get_subEventsData() return this[1];
+	inline function set_subEventsData(value:Array<EventChildData>) return this[1] = value;
+
+	public function clone():PsychEventNote {
+		var clonedSubEvents = [for (subEvent in subEventsData) subEvent.clone()];
+		return fromValues(strumTime, clonedSubEvents);
+	}
+
+	public function getEvents():Array<EventInstanceData> {
+		var events:Array<EventInstanceData> = [];
+		for (subEvent in subEventsData) {
+			var event:EventInstanceData = cast subEvent.clone();
+			event.strumTime = strumTime;
+			events.push(event);
+		}
+		return events;
+	}
+
+	private function new(data:Array<Dynamic>)
+		this = data;
+
+	public static function fromValues(strumTime:Float, subEventsData:Array<EventChildData>):PsychEventNote {
+		var data:Array<Dynamic> = [strumTime, subEventsData];
+		return new PsychEventNote(data);
+	}
+
+	public static function fromData(data:Array<Dynamic>):PsychEventNote
+		return isPsychEventNote(data) ? new PsychEventNote(data) : null;
+
+	public static function isPsychEventNote(data:Array<Dynamic>)
+		return data != null && Std.isOfType(data[0], Float) && Std.isOfType(data[1], Array);
 }
 
-/*
-@:forward
-abstract EventBunch(_EventBunch) from _EventBunch to _EventBunch {
-	public function new(strumTime:Float = 0, eventData:Array<EventChildData>) {
-		this = {strumTime: strumTime, eventData: eventData}
-	}
+/** 
+	Event data structure used by `ChartingState` and the event chart format.
+**/
+abstract EventBunch(PsychEventNote) from PsychEventNote to PsychEventNote
+{
+	public var strumTime(get, set):Float;
+	inline function get_strumTime() return this.strumTime;
+	inline function set_strumTime(v) return this.strumTime = v;
+	
+	public var eventData(get, set):Array<EventChildData>;
+	inline function get_eventData() return this.subEventsData;
+	inline function set_eventData(v) return this.subEventsData = v;
+
+	public static function fromValues(strumTime:Float, eventData:Array<EventChildData>):EventBunch
+		return PsychEventNote.fromValues(strumTime, eventData);
 }
-*/
 
 /** 
 	Dynamic structure containing field values for a specific event.

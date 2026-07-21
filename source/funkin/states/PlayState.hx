@@ -14,6 +14,7 @@ import funkin.data.BaseSong;
 import funkin.data.ChartData;
 import funkin.data.StageData;
 import funkin.data.CharacterData;
+import funkin.data.SongEventData;
 import funkin.objects.notes.Note;
 import funkin.objects.notes.NoteSplash;
 import funkin.objects.notes.StrumNote;
@@ -383,7 +384,7 @@ class PlayState extends MusicBeatState
 	public var notes = new FlxTypedGroup<Note>();
 	public var unspawnNotes:Array<Note> = [];
 	public var allNotes:Array<Note> = []; // all notes
-	public var eventNotes:Array<PsychEvent> = [];
+	public var eventNotes:Array<EventInstanceData> = [];
 
 	var speedChanges:Array<SpeedEvent> = [];
 	public var currentSV:SpeedEvent = {position: 0, startTime: 0, speed: 1, #if EASED_SVs startSpeed: 1, #end};
@@ -1516,16 +1517,16 @@ class PlayState extends MusicBeatState
 		callOnScripts('onSongStart');
 	}
 
-	function shouldPush(event:PsychEvent){
-		return eventManager.get(event.event)?.shouldPush(event) ?? true;
+	function shouldPush(event:EventInstanceData){
+		return eventManager.get(event.eventId)?.shouldPush(event) ?? true;
 	}
 
-	static function eventNoteSort(a:PsychEvent, b:PsychEvent)
+	static function eventNoteSort(a:EventInstanceData, b:EventInstanceData)
 		return Std.int(a.strumTime - b.strumTime);
 
-	function getSongEventNotes():Array<PsychEvent>
+	function getSongEventNotes():Array<EventInstanceData>
 	{
-		var allEvents:Array<PsychEvent> = [];
+		var allEvents:Array<EventInstanceData> = [];
 
 		if (song != null) {
 			var eventsJSON:JsonEvents = ChartData.parseEventsJson(song.getSongFile('events.json'));
@@ -1657,7 +1658,7 @@ class PlayState extends MusicBeatState
 
 		var eventPushedMap:Map<String, Bool> = [];
 		for (eventNote in daEvents)
-			eventPushedMap.set(eventNote.event, true);
+			eventPushedMap.set(eventNote.eventId, true);
 
 		// create note type scripts
 		for (notetype in noteTypeMap.keys()) {
@@ -1886,22 +1887,19 @@ class PlayState extends MusicBeatState
 		return event;
 	}
 
-	function eventNoteEarlyTrigger(event:PsychEvent):Float {
-		var ret:Dynamic = callOnAllScripts('eventEarlyTrigger', [event.event, event.value1, event.value2]);
+	function eventNoteEarlyTrigger(event:EventInstanceData):Float {
+		var ret:Dynamic = callOnAllScripts('eventEarlyTrigger', [event]);
 		if (ret != null && (ret is Int || ret is Float))
 			return ret;
 
-		return (eventManager.get(event.event)?.getOffset(event)) ?? 0.0;
+		return (eventManager.get(event.eventId)?.getOffset(event)) ?? 0.0;
 	}
 
 	// called for every event note
-	function eventPushed(event:PsychEvent)
+	function eventPushed(event:EventInstanceData)
 	{
-		if (event.value1 == null) event.value1 = '';
-		if (event.value2 == null) event.value2 = '';
-
-		eventManager.get(event.event)?.onPush(event);
-		callOnScripts("eventPushed", [event]);
+		eventManager.get(event.eventId)?.onPush(event);
+		callOnScripts("onEventPushed", [event]);
 	}
 
 	// called only once for each different event
@@ -2606,19 +2604,18 @@ class PlayState extends MusicBeatState
 	public static function getCharacterTypeFromString(str:String):CharacterType
 		return CharacterType.fromString(str);
 
-	public function triggerEventNote(eventName:String = "", value1:String = "", value2:String = "", ?time:Float) {
-		if (time==null)
-			time = Conductor.songPosition;
+	public function triggerEventNote(data:EventInstanceData, ?time:Float) {
+		time ??= Conductor.songPosition;
 
 		if(showDebugTraces)
-			trace('Event: ' + eventName + ', Value 1: ' + value1 + ', Value 2: ' + value2 + ', at Time: ' + time);
+			trace('Event: ' + data + ', at Time: ' + time);
 
-		callOnScripts('onEvent', [eventName, value1, value2, time]);
+		callOnScripts('onEvent', [data, time]);
 	}
 
-	public function triggerEvent(data:PsychEvent, ?time:Float) {
-		triggerEventNote(data.event, data.value1, data.value2, time);
-		eventManager.get(data.event)?.onTrigger(data, time);
+	public function triggerEvent(data:EventInstanceData, ?time:Float) {
+		triggerEventNote(data, time);
+		eventManager.get(data.eventId)?.onTrigger(data, time);
 	}
 
 	//// Kinda rewrote the camera shit so that its 'easier' to mod

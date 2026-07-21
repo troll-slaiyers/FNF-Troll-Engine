@@ -1,5 +1,8 @@
 package funkin.data;
 
+import funkin.data.SongEventData.PsychEventNote;
+import funkin.data.SongEventData.EventInstanceData;
+import funkin.data.SongEventData.EventChildData;
 import haxe.io.Path;
 import haxe.Json;
 
@@ -113,7 +116,8 @@ final defaultNoteTypeList:Array<String> = [
 enum abstract ChartVersion(String) from String to String {
 	var LEGACY_FNF = "l.0.0"; // legacy fnf format!
 	var LEGACY_V1 = "l.1.0"; // legacy fnf format, but mustHitSection doesn't swap note behaviour!
-	var CURRENT = LEGACY_V1;
+	var LEGACY_V2 = "l.2.0"; // New event structure format
+	var CURRENT = LEGACY_V2;
 }
 
 class ChartData
@@ -140,6 +144,7 @@ class ChartData
 		}
 	}
 
+	/** Unsafe version of `parseSongJson` **/
 	public static function _parseSongJson(filePath:String):SwagSong {
 		var uncastedJson:Dynamic = _parseJson(filePath);
 		var songJson:JsonSong;
@@ -182,6 +187,7 @@ class ChartData
 		}
 	}
 
+	/** Unsafe version of `parseEventsJson` **/
 	public static function _parseEventsJson(filePath:String):JsonEvents {
 		var uncastedJson:Dynamic = _parseJson(filePath);
 		var eventsJson:JsonEvents;
@@ -208,6 +214,11 @@ class ChartData
 			case null | LEGACY_FNF:
 				trace("Converting from LEGACY_FNF");
 				return updateChart(cast updateLegacyJson(songJson));
+			case LEGACY_V1:
+				trace("Converting from LEGACY_V1");
+				songJson.events = convertPsychEvents(cast songJson.events);
+				songJson.trollEngine = LEGACY_V2;
+				return updateChart(songJson);
 			case CURRENT:
 				trace('Loading chart version $version');
 				swagSong = songJson;
@@ -283,14 +294,45 @@ class ChartData
 			trace(songJson.tracks);
 		}
 
-		songJson.trollEngine = LEGACY_V1;
+		songJson.trollEngine = LEGACY_V2;
 
 		return songJson;
+	}
+
+	public static function convertPsychEvents(psychEvents:Array<Array<Dynamic>>):Array<PsychEventNote> {
+		var ray:Array<PsychEventNote> = [];
+
+		for (eventNote in psychEvents) {
+			var strumTime:Float = eventNote[0];
+			var psychSubEvents:Array<Array<String>> = cast eventNote[1];
+
+			////
+			if (strumTime is Float && psychSubEvents is Array && psychSubEvents[0] is Array && psychSubEvents[0][0] is String) {
+				// All's good
+			}else {
+				trace('Weird shit detected when converting Psych events, stopping. ($eventNote)');
+				break;
+			}
+			
+			var children:Array<EventChildData> = [];
+			for (subEvent in psychSubEvents) {
+				var child:EventChildData = {eventId: subEvent[0]};
+				(child:Dynamic).value1 = subEvent[1];
+				(child:Dynamic).value2 = subEvent[2];
+				children.push(child); 
+			}
+
+			ray.push(PsychEventNote.fromValues(strumTime, children));
+		}
+
+		return ray;
 	}
 
 	public static function onLoadEvents(songJson:JsonEvents, checkPsych:Bool = true) {
 		if (songJson.events == null){
 			songJson.events = [];
+		}else {
+			convertPsychEvents(cast songJson.events);
 		}
 
 		//// convert ancient psych event notes
@@ -304,7 +346,11 @@ class ChartData
 					var note:Array<Dynamic> = notes[i];
 					if (note[1] < 0)
 					{
-						songJson.events.push(PsychEventNote.fromValues(note[0], [[note[2], note[3], note[4]]]));
+						var subEvent:EventChildData = {eventId: note[2]};
+						(subEvent:Dynamic).value1 = note[3];
+						(subEvent:Dynamic).value2 = note[4];
+
+						songJson.events.push(PsychEventNote.fromValues(note[0], [subEvent]));
 						notes.remove(note);
 						len = notes.length;
 					}
@@ -316,7 +362,7 @@ class ChartData
 		return songJson;
 	}
 
-	public static function getEventNotes(rawEventsData:Array<PsychEventNote>, ?resultArray:Array<PsychEvent>):Array<PsychEvent>
+	public static function getEventNotes(rawEventsData:Array<PsychEventNote>, ?resultArray:Array<EventInstanceData>):Array<EventInstanceData>
 	{
 		if (resultArray==null) resultArray = [];
 		
@@ -461,51 +507,6 @@ abstract NoteData(Array<Dynamic>) to Array<Dynamic> to ChartObject
 		return data != null && Std.isOfType(data[0], Float) && Std.isOfType(data[1], Int) && data[1] >= 0;
 }
 
-abstract PsychEventNote(Array<Dynamic>) to ChartObject// from Array<Dynamic> to Array<Dynamic>
-{
-	public var strumTime(get, set):Float;
-	public var subEventsData(get, set):Array<PsychSubEventData>;
-
-	inline function get_strumTime() return this[0];
-	inline function set_strumTime(value:Float) return this[0] = value;
-
-	inline function get_subEventsData() return this[1];
-	inline function set_subEventsData(value:Array<PsychSubEventData>) return this[1] = value;
-
-	public function clone():PsychEventNote {
-		var clonedSubEvents = [for (subEvent in subEventsData) subEvent.clone()];
-		return fromValues(strumTime, clonedSubEvents);
-	}
-
-	public function getEvents():Array<PsychEvent> {
-		var events:Array<PsychEvent> = [];
-		for (subEvent in subEventsData) {
-			var event:PsychEvent = {
-				strumTime: strumTime,
-				event: subEvent.eventName,
-				value1: subEvent.value1,
-				value2: subEvent.value2
-			};
-			events.push(event);
-		}
-		return events;
-	}
-
-	private function new(data:Array<Dynamic>)
-		this = data;
-
-	public static function fromValues(strumTime:Float, subEventsData:Array<Array<String>>):PsychEventNote {
-		var data:Array<Dynamic> = [strumTime, subEventsData];
-		return new PsychEventNote(data);
-	}
-
-	public static function fromData(data:Array<Dynamic>):PsychEventNote
-		return isPsychEventNote(data) ? new PsychEventNote(data) : null;
-
-	public static function isPsychEventNote(data:Array<Dynamic>)
-		return data != null && Std.isOfType(data[0], Float) && Std.isOfType(data[1], Array);
-}
-
 abstract PsychSubEventData(Array<String>) from Array<String> to Array<String>
 {
 	inline function new(data:Array<String>)
@@ -526,4 +527,12 @@ abstract PsychSubEventData(Array<String>) from Array<String> to Array<String>
 
 	inline public function clone():PsychSubEventData
 		return this.copy();
+
+	inline public function toEventChildData():EventChildData
+	{
+		var cd:EventChildData = {eventId: eventName};
+		(cd:Dynamic).value1 = value1;
+		(cd:Dynamic).value2 = value2;
+		return cd;
+	}
 }
