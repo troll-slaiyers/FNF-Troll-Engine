@@ -110,23 +110,6 @@ class SongEventData {
 	}
 }
 
-// AHHHHHHHHHHHHHHHHH
-/*
-class PsychSongEvent extends ScriptedSongEvent {
-	public var description:String;
-
-	public function new(name:String, description:String = "", ?script:FunkinHScript) {
-		this.description = description;
-		super(name, script);
-	}
-
-	override function toString():String
-		return 'PsychSongEvent($id)';
-}
-*/
-
-
-
 /** 
 	Event data structure used by `ChartingState` and the event chart format.
 **/
