@@ -226,7 +226,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 	var selectedNotes = new NoteSelection();
 
-	var curSelectedEvent(default, set):PsychEventNote = null;
+	var curSelectedEvent(default, set):EventBunch = null;
 	var subEventIdx:Int = 0;
 
 	/** HELD NOTE FROM CLICKING **/
@@ -914,9 +914,9 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	}
 
 	function fixEvents(){
-		var rawEventsData:Array<PsychEventNote> = _song.events;
+		var rawEventsData:Array<EventBunch> = _song.events;
 		rawEventsData.sort((a, b) -> return Std.int(a.strumTime - b.strumTime));
-		var eventsData:Array<PsychEventNote> = [];
+		var eventsData:Array<EventBunch> = [];
 		for (event in rawEventsData)
 		{
 			var last = eventsData[eventsData.length - 1];
@@ -929,8 +929,8 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				if (Math.abs(last.strumTime - event.strumTime) <= Conductor.jackLimit)
 				{
 					var fuck = eventsData[eventsData.length - 1];
-					for (shit in event.subEventsData)
-						fuck.subEventsData.push(shit);
+					for (shit in event.eventData)
+						fuck.eventData.push(shit);
 				}
 				else
 				{
@@ -1117,8 +1117,8 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	inline function updateLastSectionLabel()
 		lastSectionLabel.text = '(Section ${curSection - stepperCopy.value})';
 
-	inline function getEventsInRange(startTime:Float, endTime:Float):Array<PsychEventNote> {
-		return _song.events.filter(function(event:PsychEventNote) {
+	inline function getEventsInRange(startTime:Float, endTime:Float):Array<EventBunch> {
+		return _song.events.filter(function(event:EventBunch) {
 			var strumTime:Float = fuckFloatingPoints(event.strumTime);
 			return startTime <= strumTime && strumTime < endTime;
 		});
@@ -1172,7 +1172,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			var sectionEvents = getEventsInRange(sectionStart, sectionEnd);
 
 			for (event in sectionEvents) {
-				var copiedEvent:PsychEventNote = event.clone();
+				var copiedEvent:EventBunch = event.clone();
 				copiedEvent.strumTime = fuckFloatingPoints(event.strumTime) + addToTime;
 				_song.events.push(copiedEvent);
 			}
@@ -1560,7 +1560,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	{
 		#if EVENT_TODO
 		if (curSelectedEvent != null) {
-			curSelectedEvent.subEventsData[subEventIdx][0] = typeName;
+			curSelectedEvent.eventData[subEventIdx][0] = typeName;
 
 			doUpdateGridObjects = true;
 		}
@@ -1610,8 +1610,8 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	{
 		if (curSelectedEvent != null) {
 			subEventIdx = isAbs ? value : subEventIdx + value;
-			if(subEventIdx < 0) subEventIdx = Std.int(curSelectedEvent.subEventsData.length) - 1;
-			else if(subEventIdx >= curSelectedEvent.subEventsData.length) subEventIdx = 0;
+			if(subEventIdx < 0) subEventIdx = Std.int(curSelectedEvent.eventData.length) - 1;
+			else if(subEventIdx >= curSelectedEvent.eventData.length) subEventIdx = 0;
 		}else {
 			subEventIdx = 0;
 		}
@@ -1622,7 +1622,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		if (curSelectedEvent == null)
 			return;
 
-		if (curSelectedEvent.subEventsData.length <= 1)
+		if (curSelectedEvent.eventData.length <= 1)
 			return;
 
 		new SeparateSubEventAction(curSelectedEvent, subEventIdx);
@@ -2419,13 +2419,13 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				#if EVENT_TODO
 				case 'event_value1':
 					if (curSelectedEvent != null) {
-						curSelectedEvent.subEventsData[subEventIdx].value1 = sender.text;
+						curSelectedEvent.eventData[subEventIdx].value1 = sender.text;
 						doUpdateGridObjects = true;
 					}
 
 				case 'event_value2':
 					if (curSelectedEvent != null) {
-						curSelectedEvent.subEventsData[subEventIdx].value2 = sender.text;
+						curSelectedEvent.eventData[subEventIdx].value2 = sender.text;
 						doUpdateGridObjects = true;
 					}
 				#end
@@ -3045,7 +3045,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		inline function selectObject(obj:Note, additional:Bool = false) {
 			if (obj.column < 0) {
 				curSelectedEvent = obj.chartData;
-				subEventIdx = Std.int(curSelectedEvent.subEventsData.length) - 1;
+				subEventIdx = Std.int(curSelectedEvent.eventData.length) - 1;
 				changeEventSelected();
 			}
 
@@ -3646,9 +3646,9 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		if (curSelectedEvent != null) {
 			eventStepperStrumTime.value = curSelectedEvent.strumTime;
 
-			selectedEventText.text = 'Selected Event: ' + (subEventIdx + 1) + ' / ' + curSelectedEvent.subEventsData.length;
+			selectedEventText.text = 'Selected Event: ' + (subEventIdx + 1) + ' / ' + curSelectedEvent.eventData.length;
 
-			var eventData:EventChildData = curSelectedEvent.subEventsData[subEventIdx];
+			var eventData:EventChildData = curSelectedEvent.eventData[subEventIdx];
 
 			eventDropDown.selectedLabel = eventNameInput.text = eventData.eventName;
 			value1InputText.text = eventData.value1;
@@ -3880,19 +3880,19 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
         return map.songTime + ((strumTime - map.songTime) / crochet * Conductor.crochet);
     }
 
-	function setupEventData(i:PsychEventNote, sectionNumber:Int) {
+	function setupEventData(i:EventBunch, sectionNumber:Int) {
 		var note:Note = new Note(i.strumTime, -1, null, -1, 0, true, hudSkin);
 		note.realColumn -1;
 		note.chartData = i;
 		note.usesDefaultColours = false;
 
 		note.loadGraphic(Paths.image('charteditor/eventArrow'));
-		note.eventName = getEventName(i.subEventsData);
-		note.eventLength = i.subEventsData.length;
-		if (i.subEventsData.length < 2)
+		note.eventName = getEventName(i.eventData);
+		note.eventLength = i.eventData.length;
+		if (i.eventData.length < 2)
 		{
-			note.eventVal1 = i.subEventsData[0].value1;
-			note.eventVal2 = i.subEventsData[0].value2;
+			note.eventVal1 = i.eventData[0].value1;
+			note.eventVal2 = i.eventData[0].value2;
 		}
 
 		//note.wasGoodHit = note.beat <= Conductor.curBeat;
@@ -4037,11 +4037,10 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		var text1:String = value1InputText.text;
 		var text2:String = value2InputText.text;
 
-		var child = {eventId: eventType};
-		(child:Dynamic).value1 = text1;
-		(child:Dynamic).value2 = text2;
-		var e = PsychEventNote.fromValues(noteStrum, [child]);
-		new AddEventNoteAction(e);
+		var child:EventChildData = {eventId: eventType};
+		child.setValue('value1', text1);
+		child.setValue('value2', text2);
+		new AddEventNoteAction(EventBunch.fromValues(noteStrum, [child]));
 	}
 
 	////
@@ -4193,7 +4192,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	function sortNotesByTime(Obj1:NoteData, Obj2:NoteData):Int
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
 	
-	function sortEventsByTime(Obj1:PsychEventNote, Obj2:PsychEventNote):Int
+	function sortEventsByTime(Obj1:EventBunch, Obj2:EventBunch):Int
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
 
 
@@ -4771,18 +4770,18 @@ private class ChangeSustainAction extends NoteAction {
 
 private class SeparateSubEventAction extends AddEventNoteAction {
 	var subEventIdx:Int;
-	var ogEventData:PsychEventNote;
+	var ogEventData:EventBunch;
 
-	public function new(eventData:PsychEventNote, subEventIdx:Int) {
+	public function new(eventData:EventBunch, subEventIdx:Int) {
 		this.ogEventData = eventData;
 		this.subEventIdx = subEventIdx;
 		super(null);
 	}
 
 	override function redo() {
-		var subEvents = ogEventData.subEventsData.splice(subEventIdx, 1);
+		var subEvents = ogEventData.eventData.splice(subEventIdx, 1);
 
-		eventData = PsychEventNote.fromValues(ogEventData.strumTime, subEvents);
+		eventData = EventBunch.fromValues(ogEventData.strumTime, subEvents);
 		super.redo();
 	}
 
@@ -4797,7 +4796,7 @@ private class SeparateSubEventAction extends AddEventNoteAction {
 			instance.changeEventSelected();
 		}
 
-		ogEventData.subEventsData.insert(subEventIdx, eventData.subEventsData[0]);
+		ogEventData.eventData.insert(subEventIdx, eventData.eventData[0]);
 		instance.doUpdateGridObjects = true;
 	}
 
@@ -4807,31 +4806,31 @@ private class SeparateSubEventAction extends AddEventNoteAction {
 }
 
 private class MoveSubEventAction extends ChartingAction {
-	var eventData:PsychEventNote;
+	var eventData:EventBunch;
 	var subEventIdx:Int;
 	var swapIdx:Int;
 
-	public function new(eventData:PsychEventNote, subEventIdx:Int, direction:Int) {
+	public function new(eventData:EventBunch, subEventIdx:Int, direction:Int) {
 		this.eventData = eventData;
 		this.subEventIdx = subEventIdx;
-		this.swapIdx = CoolUtil.updateIndex(subEventIdx, direction, eventData.subEventsData.length);
+		this.swapIdx = CoolUtil.updateIndex(subEventIdx, direction, eventData.eventData.length);
 
 		super();
 	}
 
 	public function redo() {
-		var temp = eventData.subEventsData[subEventIdx];
-		eventData.subEventsData[subEventIdx] = eventData.subEventsData[swapIdx];
-		eventData.subEventsData[swapIdx] = temp;
+		var temp = eventData.eventData[subEventIdx];
+		eventData.eventData[subEventIdx] = eventData.eventData[swapIdx];
+		eventData.eventData[swapIdx] = temp;
 
 		instance.changeEventSelected(swapIdx, true);
 		instance.doUpdateGridObjects = true;
 	}
 
 	public function undo() {
-		var temp = eventData.subEventsData[subEventIdx];
-		eventData.subEventsData[subEventIdx] = eventData.subEventsData[swapIdx];
-		eventData.subEventsData[swapIdx] = temp;
+		var temp = eventData.eventData[subEventIdx];
+		eventData.eventData[subEventIdx] = eventData.eventData[swapIdx];
+		eventData.eventData[swapIdx] = temp;
 
 		instance.changeEventSelected(subEventIdx, true);
 		instance.doUpdateGridObjects = true;
@@ -4843,13 +4842,13 @@ private class MoveSubEventAction extends ChartingAction {
 }
 
 private class RemoveSubEventAction extends RemoveEventNoteAction {
-	//var eventData:PsychEventNote;
+	//var eventData:EventBunch;
 	var subEventData:EventChildData;
 	var subEventIdx:Int;
 
-	public function new(eventData:PsychEventNote, subEventIdx:Int) {
+	public function new(eventData:EventBunch, subEventIdx:Int) {
 		this.subEventIdx = subEventIdx;
-		this.subEventData = eventData.subEventsData[subEventIdx];
+		this.subEventData = eventData.eventData[subEventIdx];
 
 		if (subEventData == null)
 			throw 'Sub-Event data cannot be null for RemoveSubEventAction (Index was $subEventIdx)';
@@ -4858,9 +4857,9 @@ private class RemoveSubEventAction extends RemoveEventNoteAction {
 	}
 
 	override function redo() {
-		eventData.subEventsData.remove(subEventData);
+		eventData.eventData.remove(subEventData);
 		
-		if (eventData.subEventsData.length == 0)
+		if (eventData.eventData.length == 0)
 			super.redo();
 		else {
 			instance.changeEventSelected(-1);
@@ -4869,11 +4868,11 @@ private class RemoveSubEventAction extends RemoveEventNoteAction {
 	}
 
 	override function undo() {
-		if (eventData.subEventsData.length == 0) {
-			eventData.subEventsData.push(subEventData);
+		if (eventData.eventData.length == 0) {
+			eventData.eventData.push(subEventData);
 			super.undo();
 		}else {
-			eventData.subEventsData.insert(subEventIdx, subEventData);
+			eventData.eventData.insert(subEventIdx, subEventData);
 			instance.changeEventSelected(subEventIdx, true);
 			instance.doUpdateGridObjects = true;
 		}
@@ -4885,29 +4884,29 @@ private class RemoveSubEventAction extends RemoveEventNoteAction {
 }
 
 private class AddNewSubEventAction extends ChartingAction {
-	var eventData:PsychEventNote;
+	var eventData:EventBunch;
 	var subEventIdx:Int;
 	var subEventData:EventChildData;
 
-	public function new(eventData:PsychEventNote, index:Int = -1) {
+	public function new(eventData:EventBunch, index:Int = -1) {
 		if (eventData == null)
 			throw 'Event data cannot be null for AddNewSubEventAction';
 		
 		this.eventData = eventData;
-		this.subEventIdx = index < 0 ? eventData.subEventsData.length : index;
+		this.subEventIdx = index < 0 ? eventData.eventData.length : index;
 		this.subEventData = {eventId: ''};
 
 		super();
 	}
 
 	public function redo() {
-		eventData.subEventsData.insert(subEventIdx, subEventData);
+		eventData.eventData.insert(subEventIdx, subEventData);
 		instance.changeEventSelected(subEventIdx, true);
 		instance.doUpdateGridObjects = true;
 	}
 
 	public function undo() {
-		eventData.subEventsData.remove(subEventData);
+		eventData.eventData.remove(subEventData);
 		instance.doUpdateGridObjects = true;
 	}
 
@@ -4917,9 +4916,9 @@ private class AddNewSubEventAction extends ChartingAction {
 }
 
 private class RemoveEventNoteAction extends ChartingAction {
-	var eventData:PsychEventNote;
+	var eventData:EventBunch;
 
-	public function new(eventData:PsychEventNote) {
+	public function new(eventData:EventBunch) {
 		this.eventData = eventData;
 		super();
 	}
@@ -4950,13 +4949,13 @@ private class RemoveEventNoteAction extends ChartingAction {
 }
 
 private class AddEventNoteAction extends ChartingAction {
-	var eventData:PsychEventNote;
+	var eventData:EventBunch;
 
 	////
 	var previousSelected:NoteSelection;
 	var newSelected:NoteSelection;
 
-	public function new(eventData:PsychEventNote) {
+	public function new(eventData:EventBunch) {
 		this.eventData = eventData;
 		////
 		this.newSelected = new NoteSelection(cast [eventData]);

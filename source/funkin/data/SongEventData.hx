@@ -108,30 +108,55 @@ class SongEventData {
 
 		return eventStuff;
 	}
+
+	public static function convertPsychEvents(psychEvents:Array<Array<Dynamic>>):Array<EventBunch> {
+		var ray:Array<EventBunch> = [];
+
+		for (eventNote in psychEvents) {
+			var strumTime:Float = eventNote[0];
+			var psychSubEvents:Array<Array<String>> = cast eventNote[1];
+
+			////
+			if (strumTime is Float && psychSubEvents is Array && psychSubEvents[0] is Array && psychSubEvents[0][0] is String) {
+				// All's good
+			}else {
+				trace('Weird shit detected when converting Psych events, stopping. ($eventNote)');
+				break;
+			}
+			
+			var children:Array<EventChildData> = [];
+			for (subEvent in psychSubEvents)
+				children.push((subEvent:PsychSubEventData).toEventChildData()); 
+
+			ray.push(EventBunch.fromValues(strumTime, children));
+		}
+
+		return ray;
+	}
 }
 
 /** 
 	Event data structure used by `ChartingState` and the event chart format.
 **/
-abstract PsychEventNote(Array<Dynamic>) to funkin.data.ChartData.ChartObject// from Array<Dynamic> to Array<Dynamic>
+abstract EventBunch(Array<Dynamic>) to funkin.data.ChartData.ChartObject// from Array<Dynamic> to Array<Dynamic>
 {
 	public var strumTime(get, set):Float;
-	public var subEventsData(get, set):Array<EventChildData>;
+	public var eventData(get, set):Array<EventChildData>;
 
 	inline function get_strumTime() return this[0];
 	inline function set_strumTime(value:Float) return this[0] = value;
 
-	inline function get_subEventsData() return this[1];
-	inline function set_subEventsData(value:Array<EventChildData>) return this[1] = value;
+	inline function get_eventData() return this[1];
+	inline function set_eventData(value:Array<EventChildData>) return this[1] = value;
 
-	public function clone():PsychEventNote {
-		var clonedSubEvents = [for (subEvent in subEventsData) subEvent.clone()];
+	public function clone():EventBunch {
+		var clonedSubEvents = [for (subEvent in eventData) subEvent.clone()];
 		return fromValues(strumTime, clonedSubEvents);
 	}
 
 	public function getEvents():Array<EventInstanceData> {
 		var events:Array<EventInstanceData> = [];
-		for (subEvent in subEventsData) {
+		for (subEvent in eventData) {
 			var event:EventInstanceData = cast subEvent.clone();
 			event.strumTime = strumTime;
 			events.push(event);
@@ -142,33 +167,16 @@ abstract PsychEventNote(Array<Dynamic>) to funkin.data.ChartData.ChartObject// f
 	private function new(data:Array<Dynamic>)
 		this = data;
 
-	public static function fromValues(strumTime:Float, subEventsData:Array<EventChildData>):PsychEventNote {
-		var data:Array<Dynamic> = [strumTime, subEventsData];
-		return new PsychEventNote(data);
+	public static function fromValues(strumTime:Float, eventData:Array<EventChildData>):EventBunch {
+		var data:Array<Dynamic> = [strumTime, eventData];
+		return new EventBunch(data);
 	}
 
-	public static function fromData(data:Array<Dynamic>):PsychEventNote
-		return isPsychEventNote(data) ? new PsychEventNote(data) : null;
+	public static function fromData(data:Array<Dynamic>):EventBunch
+		return isEventBunch(data) ? new EventBunch(data) : null;
 
-	public static function isPsychEventNote(data:Array<Dynamic>)
+	public static function isEventBunch(data:Array<Dynamic>)
 		return data != null && Std.isOfType(data[0], Float) && Std.isOfType(data[1], Array);
-}
-
-/** 
-	Event data structure used by `ChartingState` and the event chart format.
-**/
-abstract EventBunch(PsychEventNote) from PsychEventNote to PsychEventNote
-{
-	public var strumTime(get, set):Float;
-	inline function get_strumTime() return this.strumTime;
-	inline function set_strumTime(v) return this.strumTime = v;
-	
-	public var eventData(get, set):Array<EventChildData>;
-	inline function get_eventData() return this.subEventsData;
-	inline function set_eventData(v) return this.subEventsData = v;
-
-	public static function fromValues(strumTime:Float, eventData:Array<EventChildData>):EventBunch
-		return PsychEventNote.fromValues(strumTime, eventData);
 }
 
 /** 
@@ -213,6 +221,7 @@ typedef EventInstanceData = {
 	var strumTime:Float;
 }
 
+////
 typedef EventDefinitionJSON = {
 	@:optional var id:String;
 

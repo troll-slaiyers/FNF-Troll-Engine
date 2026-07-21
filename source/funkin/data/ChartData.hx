@@ -1,6 +1,6 @@
 package funkin.data;
 
-import funkin.data.SongEventData.PsychEventNote;
+import funkin.data.SongEventData.EventBunch;
 import funkin.data.SongEventData.EventInstanceData;
 import funkin.data.SongEventData.EventChildData;
 import haxe.io.Path;
@@ -55,7 +55,7 @@ typedef SwagSong = {
 
 	////
 	@:optional var trollEngine:ChartVersion;
-	@:optional var events:Array<PsychEventNote>;
+	@:optional var events:Array<EventBunch>;
 	
 	//// internal
 	@:optional var metadata:SongMetadata;
@@ -63,7 +63,7 @@ typedef SwagSong = {
 }
 
 typedef JsonEvents = {
-	@:optional var events:Array<PsychEventNote>;
+	@:optional var events:Array<EventBunch>;
 }
 
 typedef JsonSong = {
@@ -216,7 +216,7 @@ class ChartData
 				return updateChart(cast updateLegacyJson(songJson));
 			case LEGACY_V1:
 				trace("Converting from LEGACY_V1");
-				songJson.events = convertPsychEvents(cast songJson.events);
+				songJson.events = SongEventData.convertPsychEvents(cast songJson.events);
 				songJson.trollEngine = LEGACY_V2;
 				return updateChart(songJson);
 			case CURRENT:
@@ -299,40 +299,11 @@ class ChartData
 		return songJson;
 	}
 
-	public static function convertPsychEvents(psychEvents:Array<Array<Dynamic>>):Array<PsychEventNote> {
-		var ray:Array<PsychEventNote> = [];
-
-		for (eventNote in psychEvents) {
-			var strumTime:Float = eventNote[0];
-			var psychSubEvents:Array<Array<String>> = cast eventNote[1];
-
-			////
-			if (strumTime is Float && psychSubEvents is Array && psychSubEvents[0] is Array && psychSubEvents[0][0] is String) {
-				// All's good
-			}else {
-				trace('Weird shit detected when converting Psych events, stopping. ($eventNote)');
-				break;
-			}
-			
-			var children:Array<EventChildData> = [];
-			for (subEvent in psychSubEvents) {
-				var child:EventChildData = {eventId: subEvent[0]};
-				(child:Dynamic).value1 = subEvent[1];
-				(child:Dynamic).value2 = subEvent[2];
-				children.push(child); 
-			}
-
-			ray.push(PsychEventNote.fromValues(strumTime, children));
-		}
-
-		return ray;
-	}
-
 	public static function onLoadEvents(songJson:JsonEvents, checkPsych:Bool = true) {
 		if (songJson.events == null){
 			songJson.events = [];
 		}else {
-			convertPsychEvents(cast songJson.events);
+			SongEventData.convertPsychEvents(cast songJson.events);
 		}
 
 		//// convert ancient psych event notes
@@ -347,10 +318,10 @@ class ChartData
 					if (note[1] < 0)
 					{
 						var subEvent:EventChildData = {eventId: note[2]};
-						(subEvent:Dynamic).value1 = note[3];
-						(subEvent:Dynamic).value2 = note[4];
+						subEvent.setValue('value1', note[3]);
+						subEvent.setValue('value2', note[4]);
 
-						songJson.events.push(PsychEventNote.fromValues(note[0], [subEvent]));
+						songJson.events.push(EventBunch.fromValues(note[0], [subEvent]));
 						notes.remove(note);
 						len = notes.length;
 					}
@@ -362,11 +333,11 @@ class ChartData
 		return songJson;
 	}
 
-	public static function getEventNotes(rawEventsData:Array<PsychEventNote>, ?resultArray:Array<EventInstanceData>):Array<EventInstanceData>
+	public static function getEventNotes(rawEventsData:Array<EventBunch>, ?resultArray:Array<EventInstanceData>):Array<EventInstanceData>
 	{
 		if (resultArray==null) resultArray = [];
 		
-		var eventsData:Array<PsychEventNote> = [];
+		var eventsData:Array<EventBunch> = [];
 		
 		for (event in rawEventsData) {
 			// TODO: Probably just add a button in the chart editor to consolidate events, instead of automatically doing it
@@ -531,8 +502,8 @@ abstract PsychSubEventData(Array<String>) from Array<String> to Array<String>
 	inline public function toEventChildData():EventChildData
 	{
 		var cd:EventChildData = {eventId: eventName};
-		(cd:Dynamic).value1 = value1;
-		(cd:Dynamic).value2 = value2;
+		cd.setValue('value1', value1);
+		cd.setValue('value2', value2);
 		return cd;
 	}
 }
