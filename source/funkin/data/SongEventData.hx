@@ -109,29 +109,18 @@ class SongEventData {
 		return eventStuff;
 	}
 
-	public static function convertPsychEvents(psychEvents:Array<Array<Dynamic>>):Array<EventBunch> {
-		var ray:Array<EventBunch> = [];
+	public static function getEventInstanceData(bunches:Array<EventBunch>, ?resultArray:Array<EventInstanceData>):Array<EventInstanceData>
+	{
+		resultArray ??= [];		
 
-		for (eventNote in psychEvents) {
-			var strumTime:Float = eventNote[0];
-			var psychSubEvents:Array<Array<String>> = cast eventNote[1];
-
-			////
-			if (strumTime is Float && psychSubEvents is Array && psychSubEvents[0] is Array && psychSubEvents[0][0] is String) {
-				// All's good
-			}else {
-				trace('Weird shit detected when converting Psych events, stopping. ($eventNote)');
-				break;
+		for (event in bunches) {
+			for (event in event.getEvents()) {
+				event.strumTime += ClientPrefs.noteOffset;
+				resultArray.push(event);
 			}
-			
-			var children:Array<EventChildData> = [];
-			for (subEvent in psychSubEvents)
-				children.push((subEvent:PsychSubEventData).toEventChildData()); 
-
-			ray.push(EventBunch.fromValues(strumTime, children));
 		}
 
-		return ray;
+		return resultArray;
 	}
 }
 

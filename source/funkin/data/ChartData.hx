@@ -153,23 +153,10 @@ class ChartData
 		if (uncastedJson.format is String && (uncastedJson.format:String).startsWith("psych_v1"))
 		{
 			trace('Loading Psych Engine v1.0.0 Chart');
-
 			songJson = cast uncastedJson;
-			var stepCrotchet:Float = Conductor.calculateStepCrochet(songJson.bpm);
-			var keyCount:Int = songJson.keyCount ?? 4;
-			for (section in songJson.notes){
-				if (section.changeBPM)
-					stepCrotchet = Conductor.calculateStepCrochet(section.bpm);
-
-				for (note in section.sectionNotes){
-					var note:Array<Dynamic> = cast note;
-					note[1] = (section.mustHitSection ? note[1] : (note[1] + keyCount)) % (keyCount * 2);
-					note[2] -= stepCrotchet;
-					note[2] = note[2] > 0 ? note[2] : 0;
-				}
-			}
+			ChartUpdater.convertPsychV1Notes(songJson);
 			songJson._path = filePath;
-			return updateLegacyJson(songJson);
+			return ChartUpdater.updateLegacyJson(songJson);
 		}else
 			songJson = cast uncastedJson.song;
 
@@ -213,10 +200,10 @@ class ChartData
 		switch(version) {
 			case null | LEGACY_FNF:
 				trace("Converting from LEGACY_FNF");
-				return updateChart(cast updateLegacyJson(songJson));
+				return updateChart(cast ChartUpdater.updateLegacyJson(songJson));
 			case LEGACY_V1:
 				trace("Converting from LEGACY_V1");
-				songJson.events = SongEventData.convertPsychEvents(cast songJson.events);
+				songJson.events = ChartUpdater.convertPsychEvents(cast songJson.events);
 				songJson.trollEngine = LEGACY_V2;
 				return updateChart(songJson);
 			case CURRENT:
@@ -229,167 +216,28 @@ class ChartData
 		
 		return swagSong;
 	}
-		
-	public static function updateLegacyJson(songJson:JsonSong):JsonSong {
-		////
-		songJson.stage ??= 'stage';
-		/*
-		songJson.player1 ??= "bf";
-		songJson.player2 ??= "dad";
-		songJson.gfVersion ??= songJson.player3 ?? "gf";
-		*/
-
-		// If gfVersion isn't set on the json file, use player3 or default to gf
-		songJson.gfVersion = !Reflect.hasField(songJson, 'gfVersion') ? (songJson.player3 ?? "gf") : songJson.gfVersion;
-		
-		if (songJson.arrowSkin == null || songJson.arrowSkin.trim().length == 0)
-			songJson.arrowSkin = "NOTE_assets";
-
-		if (songJson.splashSkin == null || songJson.splashSkin.trim().length == 0)
-			songJson.splashSkin = "noteSplashes";
-
-		songJson.hudSkin ??= 'default';
-
-		songJson.offset ??= 0.0;
-		songJson.keyCount ??= switch(songJson.mania) {
-			case 3: 9;
-			case 2: 7;
-			case 1: 6;
-			default: 4;
-		}
-
-		if (songJson.notes == null || songJson.notes.length == 0) {		
-			//// must have at least one section
-			songJson.notes = [{
-				sectionNotes: [],
-				typeOfSection: 0,
-				mustHitSection: true,
-				gfSection: false,
-				bpm: 0,
-				changeBPM: false,
-				altAnim: false,
-				sectionBeats: 4
-			}];
-			
-		}else {
-			onLoadEvents(songJson);
-	
-		////
-		var keyCount:Int = songJson.keyCount ?? 4;
-		for (section in songJson.notes) {
-			if (null == Reflect.field(section, "sectionBeats"))
-				section.sectionBeats = 4;
-			
-			for (note in section.sectionNotes) {
-					var note:Array<Dynamic> = cast note;
-					note[1] = (section.mustHitSection ? note[1] : (note[1] + keyCount)) % (keyCount * 2);
-					note[3] = NoteData.resolveNoteType(note[3]);
-				}
-			}
-		}		
-		
-		//// new tracks system
-		if (songJson.tracks == null) {
-			songJson.tracks = makeTrackData(songJson);
-			trace(songJson.tracks);
-		}
-
-		songJson.trollEngine = LEGACY_V2;
-
-		return songJson;
-	}
 
 	public static function onLoadEvents(songJson:JsonEvents, checkPsych:Bool = true) {
 		if (songJson.events == null){
 			songJson.events = [];
 		}else {
-			SongEventData.convertPsychEvents(cast songJson.events);
+			ChartUpdater.convertPsychEvents(cast songJson.events);
 		}
 
-		//// convert ancient psych event notes
-		if (checkPsych && (cast songJson:JsonSong).notes != null) {
-			for (sec in (cast songJson:JsonSong).notes) {
-				var notes:Array<Dynamic> = sec.sectionNotes;
-				var len:Int = notes.length;
-				var i:Int = 0;
-				while(i < len)
-				{
-					var note:Array<Dynamic> = notes[i];
-					if (note[1] < 0)
-					{
-						var subEvent:EventChildData = {eventId: note[2]};
-						subEvent.setValue('value1', note[3]);
-						subEvent.setValue('value2', note[4]);
-
-						songJson.events.push(EventBunch.fromValues(note[0], [subEvent]));
-						notes.remove(note);
-						len = notes.length;
-					}
-					else i++;
-				}
+		//// remove and convert ancient psych event notes
+		if (checkPsych) {
+			var sections = (cast songJson:JsonSong).notes;
+			if (sections != null) {
+				ChartUpdater.convertPsychEventNotes(sections, songJson.events);
 			}
 		}	
 
 		return songJson;
 	}
 
-	public static function getEventNotes(rawEventsData:Array<EventBunch>, ?resultArray:Array<EventInstanceData>):Array<EventInstanceData>
+	public static inline function getEventNotes(bunches:Array<EventBunch>, ?resultArray:Array<EventInstanceData>):Array<EventInstanceData>
 	{
-		if (resultArray==null) resultArray = [];
-		
-		var eventsData:Array<EventBunch> = [];
-		
-		for (event in rawEventsData) {
-			// TODO: Probably just add a button in the chart editor to consolidate events, instead of automatically doing it
-			// As automatically doing this breaks some charts vv
-
-/* 			var last = eventsData[eventsData.length-1];
-			
-			if (last != null && Math.abs(last[0] - event[0]) <= Conductor.jackLimit){
-				var fuck:Array<Array<Dynamic>> = event[1];
-				for (shit in fuck) eventsData[eventsData.length - 1][1].push(shit);
-			}else */
-				eventsData.push(event);
-		}
-
-		for (event in eventsData) //Event Notes
-		{
-			for (event in event.getEvents()) {
-				event.strumTime += ClientPrefs.noteOffset;
-				resultArray.push(event);
-			}
-		}
-
-		return resultArray;
-	}
-
-	public static function makeTrackData(songJson:JsonSong):SongTracks {
-		var instTracks:Array<String> = ["Inst"];
-		if (songJson.extraTracks != null) {
-			for (name in songJson.extraTracks)
-				instTracks.push(name);
-		}
-
-		if (songJson.needsVoices == false) {
-			// Song doesn't play vocals
-			return {inst: instTracks, player: [], opponent: []};
-		}
-		else if (songJson._path == null) {
-			// Default
-			return {inst: instTracks, player: ["Voices-Player"], opponent: ["Voices-Opponent"]};
-		}
-		else {
-			var folderPath:String = new Path(songJson._path).dir;
-			inline function check(name:String):Null<String> // returns name if it exists, and null if not
-				return Paths.exists(Path.join([folderPath, name + "." + Paths.SOUND_EXT])) ? name : null;
-
-			inline function getVariantless(str):String
-				return str.split('-')[0];
-
-			var playerTrack:String = check('Voices-' + songJson.player1) ?? check('Voices-' + getVariantless(songJson.player1)) ?? check("Voices-Player") ?? 'Voices';
-			var opponentTrack:String =  check('Voices-' + songJson.player2) ?? check('Voices-' + getVariantless(songJson.player2)) ?? check("Voices-Opponent") ?? 'Voices';			
-			return {inst: instTracks, player: [playerTrack], opponent: [opponentTrack]};
-		}
+		return SongEventData.getEventInstanceData(bunches, resultArray);
 	}
 
 	/** Return an array of strings related to the song's credits **/
@@ -476,34 +324,4 @@ abstract NoteData(Array<Dynamic>) to Array<Dynamic> to ChartObject
 
 	public static function isNoteData(data:Array<Dynamic>):Bool
 		return data != null && Std.isOfType(data[0], Float) && Std.isOfType(data[1], Int) && data[1] >= 0;
-}
-
-abstract PsychSubEventData(Array<String>) from Array<String> to Array<String>
-{
-	inline function new(data:Array<String>)
-		this = data;
-
-	public var eventName(get, set):String;
-	public var value1(get, set):String;
-	public var value2(get, set):String;
-
-	inline function get_eventName() return this[0];
-	inline function set_eventName(value:String) return this[0] = value;
-
-	inline function get_value1() return this[1];
-	inline function set_value1(value:String) return this[1] = value;
-
-	inline function get_value2() return this[2];
-	inline function set_value2(value:String) return this[2] = value;
-
-	inline public function clone():PsychSubEventData
-		return this.copy();
-
-	inline public function toEventChildData():EventChildData
-	{
-		var cd:EventChildData = {eventId: eventName};
-		cd.setValue('value1', value1);
-		cd.setValue('value2', value2);
-		return cd;
-	}
 }
