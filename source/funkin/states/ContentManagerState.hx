@@ -175,8 +175,7 @@ class ContentManagerState extends MusicBeatState {
 		updateListBoxes();
 		listCamera.maxScrollY = maxScrollY;
 
-		listScrollBar = new ScrollBar(0, 0, listCamera.maxScrollY, listCamera.height);
-		listScrollBar.barSprite.setGraphicSize(8, listScrollBar.barSprite.height);
+		listScrollBar = new ScrollBar(0, 0, listCamera.maxScrollY, listCamera.height, 8);
 		listScrollBar.camera = listCamera;
 		listScrollBar.x = listCamera.width - listScrollBar.width;
 		listScrollBar.scrollFactor.set();
@@ -369,9 +368,9 @@ class ContentManagerState extends MusicBeatState {
 			packCardBanner.setGraphicSize(0, packCardBG.height);
 			packCardBanner.updateHitbox();
 		}else {
-			packCardBannerGroup.fadeTo(packCardBG.graphic);
+			packCardBannerGroup.fadeTo(Paths.whitePixel.parent);
 			packCardBanner = packCardBannerGroup.curSprite;
-			packCardBanner.scale.set(packCardBG.width, packCardBG.height);
+			packCardBanner.setGraphicSize(packCardBG.width, packCardBG.height);
 			packCardBanner.updateHitbox();
 		}
 		packCardBanner.x = packCardBG.x + packCardBG.width - packCardBanner.width;
