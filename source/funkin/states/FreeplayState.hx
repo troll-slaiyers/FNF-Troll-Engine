@@ -177,6 +177,8 @@ class FreeplayState extends MusicBeatSubstate
 					PlayState.loadPlaylist([selectedSongData], curChartId);
 					proceed = PlayState.SONG != null;
 				}catch(e) {
+					Main.printExceptionStack();
+
 					var txt = 'ERROR LOADING SONG';
 					txt += '\n${e.message}';
 
