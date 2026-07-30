@@ -406,9 +406,6 @@ class PlayState extends MusicBeatState
 
 	public var fish:Fish;
 
-	/** debugPrint text container **/
-	private var debugPrintGroup:FlxTypedGroup<DebugText> = new FlxTypedGroup<DebugText>();
-
 	////
 	public var generatedMusic:Bool = false;
 	public var startedSong:Bool = false;
@@ -1013,9 +1010,6 @@ class PlayState extends MusicBeatState
 		add(notefields);
 		add(timingTxt);
 
-		debugPrintGroup.cameras = [camOther];
-		add(debugPrintGroup);
-
 		#if FUNNY_ALLOWED
 		fish = new Fish(this);
 		fish.cameras = [camOther];
@@ -1175,15 +1169,12 @@ class PlayState extends MusicBeatState
 		gfGroup.y = GF_Y;
 	}
 
-	public function addTextToDebug(text:String, ?color:FlxColor = FlxColor.WHITE) {
-		debugPrintGroup.forEachAlive(function(spr:DebugText) {
-			spr.y += 20;
-		});
-
-		var txt = debugPrintGroup.recycle(DebugText, () -> new DebugText(debugPrintGroup));
-		txt.text = text;
-		txt.setPosition(10, 10);
+	#if ALLOW_DEPRECATION
+	@:deprecated("addTextToDebug is deprecated! Use `DebugLog.addMessage` instead")
+	public inline function addTextToDebug(text:String, ?color:FlxColor = FlxColor.WHITE) {
+		DebugLog.addMessage(text, color);
 	}
+	#end
 
 	public function reloadHealthBarColors() {
 		// TODO: fuck this move it to hud.changedCharacter

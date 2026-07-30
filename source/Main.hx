@@ -181,6 +181,8 @@ class Main extends Sprite
 		game = new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
 		addChild(game);
 
+		DebugLog.init();
+
 		fpsVar = new DebugDisplay(10, 3, 0xFFFFFF);
 		fpsVar.visible = false;
 		addChild(fpsVar);

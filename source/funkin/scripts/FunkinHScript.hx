@@ -185,6 +185,7 @@ class FunkinHScript extends FunkinScript
 		set("importEnum", importEnum);
 
 		set("print", print);
+		set("debugPrint", DebugLog.print);
 		
 		set("script", this);
 		set("funkinScript", this);
@@ -225,19 +226,6 @@ class FunkinHScript extends FunkinScript
 		
 		set("state", currentState);
 		set("game", PlayState.instance);
-		
-		if (currentState is PlayState){
-			var currentState:PlayState = cast currentState;
-			var debugPrint:Function = Reflect.makeVarArgs(function(toPrint) {
-				currentState.addTextToDebug(toPrint.join(', '));
-			});
-
-			set("debugPrint", debugPrint);
-
-		}else{
-			set("debugPrint", get("trace"));
-			
-		}
 	}
 
 	private function setFlixelVars() 
