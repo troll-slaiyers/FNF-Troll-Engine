@@ -1,5 +1,6 @@
 package funkin.states;
 
+import flixel.math.FlxPoint;
 import flixel.util.FlxTimer;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -43,8 +44,13 @@ class MainMenuState extends MusicBeatState
 	var bg:FlxSprite;
 	var magenta:FlxSprite;
 	var bgTweenFunction:Float -> Void;
-	var camFollow:FlxObject;
+
+	//// Camera is moved to scroll along the options if they don't fit on screen
+	var camFollow:FlxPoint = FlxPoint.get();
 	var camFollowPos:FlxObject;
+	var maxCamBottom:Float = 0;
+	var maxBGY:Float = 0;
+	
 	var debugKeys:Array<FlxKey>;
 
 	var selectedSomethin:Bool = false;
@@ -61,29 +67,73 @@ class MainMenuState extends MusicBeatState
 
 		persistentUpdate = persistentDraw = true;
 
-		camFollow = new FlxObject();
 		camFollowPos = new FlxObject();
-		add(camFollow);
 		add(camFollowPos);
 
 		FlxG.camera.follow(camFollowPos, null, 1);
 
 		////
-		var yScroll:Float = Math.max(0.1, 0.25 - (0.05 * (optionShit.length - 4)));
-		var bgScale = 1.175;
-		
 		bg = new FlxSprite(0, 0, Paths.image('menuBG'));
-		bg.scrollFactor.set(0, yScroll);
 		bg.screenCenter();
-		bg.scale.set(bgScale, bgScale);
 		add(bg);
-
+		
 		magenta = new FlxSprite(0, 0, Paths.image('menuBGMagenta'));
-		magenta.scrollFactor.set(0, yScroll);
 		magenta.screenCenter();
-		magenta.scale.set(bgScale, bgScale);
 		magenta.visible = false;
 		add(magenta);
+
+		////
+		menuItems = new FlxTypedGroup<FlxSprite>();
+		add(menuItems);
+
+		for (i => optionName in optionShit)
+		{
+			var menuItem:FlxSprite = new FlxSprite(0, 108 + (i * 140));
+			
+			menuItem.frames = Paths.sparrowAtlas('mainmenu/$optionName');
+			menuItem.animation.addByPrefix('idle', '$optionName idle', 24);
+			menuItem.animation.addByPrefix('selected', '$optionName selected', 24);
+			menuItem.animation.play('idle');
+
+			menuItem.updateHitbox();
+			menuItem.screenCenter(X);
+			menuItem.scrollFactor.x = 0;
+
+			menuItem.ID = i;
+			menuItems.add(menuItem);
+		}
+
+		//// Scroll Adjustments
+		var last = menuItems.members[menuItems.length - 1];
+		maxCamBottom = last.y + last.height + 108;
+
+		// Fit horizontally
+		bg.setGraphicSize(FlxG.width, 0);
+		if (bg.frameHeight * bg.scale.y < FlxG.height)
+			bg.setGraphicSize(0, FlxG.height);
+		bg.scale.copyTo(magenta.scale);
+
+		// If all options fit on screen
+		if (last.y + last.height <= FlxG.height - 84) {
+			for (obj in menuItems.members)
+				obj.scrollFactor.y = 0;
+			
+			//bg.scrollFactor.set();
+			//magenta.scrollFactor.set();
+		}
+		//else 
+		{
+			var bgScale = bg.scale.y * 1.175;
+			var camScrollRange = Math.max(0, maxCamBottom - FlxG.height);
+			var bgScrollRange = bg.frameHeight * bgScale;
+			var bgScroll = bgScrollRange / camScrollRange;
+
+			bg.scale.set(bgScale, bgScale);
+			magenta.scale.set(bgScale, bgScale);
+
+			bg.scrollFactor.set(bgScroll, bgScroll);
+			magenta.scrollFactor.set(bgScroll, bgScroll);
+		}
 
 		var bgScale = bg.scale.x;
 		var bgTargetScale = 1.0;//Math.max(FlxG.width / bg.frameWidth, FlxG.height / bg.frameHeight);
@@ -96,39 +146,16 @@ class MainMenuState extends MusicBeatState
 			magenta.scale.x = magenta.scale.y = bg.scale.x = bg.scale.y = scale;
 
 			var scroll = FlxMath.lerp(bgScroll, 0.0, progress);
-			bg.scrollFactor.y = magenta.scrollFactor.y = scroll;
+			maxBGY = scroll;
 		}
 
 		////
-		menuItems = new FlxTypedGroup<FlxSprite>();
-		add(menuItems);
-
-		var spacing:Float = 140;
-		var offset:Float = 108 - Math.max(optionShit.length - 4, 0) * 80;
-		var scr:Float = (optionShit.length < 6) ? 0 : (optionShit.length - 4) * 0.135;
-		for (i => optionName in optionShit)
-		{
-			var menuItem:FlxSprite = new FlxSprite(0, offset + (i * spacing));
-			
-			menuItem.frames = Paths.sparrowAtlas('mainmenu/$optionName');
-			menuItem.animation.addByPrefix('idle', '$optionName idle', 24);
-			menuItem.animation.addByPrefix('selected', '$optionName selected', 24);
-			menuItem.animation.play('idle');
-
-			menuItem.scrollFactor.set(0, scr);
-			menuItem.updateHitbox();
-			menuItem.screenCenter(X);
-
-			menuItem.ID = i;
-			menuItems.add(menuItem);
-		}
-
 		var versionShit:FlxText = new FlxText(12, FlxG.height - 24, 0, 'Troll Engine ' + Main.Version.displayedVersion, 12);
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
 		
-		changeItem();
+		changeSelection();
 
 		super.create();
 
@@ -141,6 +168,11 @@ class MainMenuState extends MusicBeatState
 		}
 
 		Paths.clearUnusedMemory();
+	}
+
+	override function destroy() {
+		camFollow.put();
+		super.destroy();
 	}
 
 	var magTwn:FlxTween = null;
@@ -373,10 +405,22 @@ class MainMenuState extends MusicBeatState
 				spr.animation.play('selected');
 				spr.centerOffsets();
 
-				var add:Float = (menuItems.length > 4) ? (menuItems.length * 8) : 0;
-				var mid = spr.getGraphicMidpoint();
-				camFollow.setPosition(mid.x, mid.y - add);
-				mid.put();
+				spr.getGraphicMidpoint(camFollow);
+				
+				if (spr.scrollFactor.y == 0) {
+					// menu items are locked in place, scroll the background anyways
+					camFollow.y = maxCamBottom * (spr.ID / menuItems.length);
+				}else {
+					var camHH = FlxG.camera.height / 2;
+					
+					var camBottom = camFollow.y + camHH;
+					if (camBottom > maxCamBottom)
+						camFollow.y = maxCamBottom - camHH;
+
+					var camTop = camFollow.y - camHH;
+					if (camTop < 0)
+						camFollow.y = camHH;
+				}
 			}else {
 				spr.animation.play('idle');
 				spr.updateHitbox();
