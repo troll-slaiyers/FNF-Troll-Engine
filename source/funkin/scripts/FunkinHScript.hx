@@ -158,8 +158,9 @@ class FunkinHScript extends FunkinScript
 	////
 	private var interpreter(default, null):Interp;
 
-	public function new(?parsed:Expr, ?name:String = "HScript", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp)
+	public function new(?parsed:Expr, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp)
 	{
+		name ??= parsed?.origin ?? "HScript";
 		interpreter = interp ??= new Interp();
 		super(name, ScriptType.HSCRIPT);
 
