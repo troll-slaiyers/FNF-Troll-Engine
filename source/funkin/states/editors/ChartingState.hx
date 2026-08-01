@@ -4228,7 +4228,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		if (_song.events != null && _song.events.length > 1)
 			_song.events.sort(sortEventsByTime);
 
-		var json = {"song": {"events": _song.events}}
+		var json = {"song": {"events": _song.events, "trollEngine": funkin.data.ChartData.ChartVersion.CURRENT}}
 		var data:String = Json.stringify(json, "\t");
 		FileUtil.showSaveDialog(data, 'Save Events', getSongPath('events.json'), ["JSON file", '*.json']);
 	}

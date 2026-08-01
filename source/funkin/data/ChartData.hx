@@ -217,22 +217,33 @@ class ChartData
 		return swagSong;
 	}
 
-	public static function onLoadEvents(songJson:JsonEvents, checkPsych:Bool = true) {
-		if (songJson.events == null){
-			songJson.events = [];
-		}else {
-			ChartUpdater.convertPsychEvents(cast songJson.events);
-		}
-
+	public static function onLoadEvents(json:JsonEvents, checkPsych:Bool = true) {
 		//// remove and convert ancient psych event notes
 		if (checkPsych) {
-			var sections = (cast songJson:JsonSong).notes;
-			if (sections != null) {
-				ChartUpdater.convertPsychEventNotes(sections, songJson.events);
-			}
-		}	
+			json.events ??= [];
+			var sections = (cast json:JsonSong).notes;
+			if (sections != null)
+				ChartUpdater.convertPsychEventNotes(sections, json.events);
+		}
+		
+		if (json.events == null) {
+			json.events = [];
+		}
+		else if (json.events.length > 0) {
+			var trollEngine:Null<ChartVersion> = Reflect.field(json, "trollEngine");
+			switch (trollEngine) {
+				case null | LEGACY_FNF | LEGACY_V1:
+					trace("Converting events file from Psych format");
+					ChartUpdater.convertPsychEvents(cast json.events);
+					Reflect.setField(json, "trollEngine", trollEngine = LEGACY_V2);
+				case LEGACY_V2:
 
-		return songJson;
+				default:
+					trace("Unknown events file");
+			}
+		}
+
+		return json;
 	}
 
 	public static inline function getEventNotes(bunches:Array<EventBunch>, ?resultArray:Array<EventInstanceData>):Array<EventInstanceData>
