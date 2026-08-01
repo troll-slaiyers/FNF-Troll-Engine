@@ -13,6 +13,9 @@ import funkin.api.Windows;
 
 import flixel.FlxG;
 
+#if linc_filedialogs
+import filedialogs.FileDialogs;
+#end
 import lime.app.Application;
 import haxe.Constraints.Function;
 
@@ -54,11 +57,11 @@ class FunkinHScript extends FunkinScript
 			return _parseString(script, name);
 		}
 		catch (e:haxe.Exception) {
-			var errMsg = 'Error parsing hscript! ' #if hscriptPos + '$name:' + parser.line + ', ' #end + e.message;
-			trace(errMsg);
+			final msg = e.message;
+			print(msg);
 
 			#if desktop
-			Application.current.window.alert(errMsg, "Error on haxe script!");
+			Application.current.window.alert(msg, "Error parsing script!");
 			#end
 		}
 
@@ -77,18 +80,20 @@ class FunkinHScript extends FunkinScript
 			}
 		}
 		catch(e:haxe.Exception) {
-			var msg = "Error parsing hscript! " + e.message;
+			final title = "Error parsing script!";
+			final msg = e.message;
 			print(e.message);
 
-			#if desktop
-			var title = "Error parsing haxe script!";
-
-			#if (cpp && windows)
+			#if WINDOWS_CRASH_HANDLER
 			if (Windows.msgBox(msg, title, RETRYCANCEL | ERROR) == RETRY)
 				return parseFile(file, name);
+			/* I get weird cpp compile errors so IDK
+			#elseif (UNIX_CRASH_HANDLER && linc_filedialogs)
+			if (FileDialogs.message(title, msg, Choice.Retry_Cancel, Icon.Error) == Button.Retry)
+				return parseFile(file, name);
+			*/
 			#else
 			Application.current.window.alert(msg, title);
-			#end
 			#end
 		}
 
@@ -397,14 +402,24 @@ class FunkinHScript extends FunkinScript
 		try {
 			return interpreter.execute(parsed);
 		}
-		catch (e:haxe.Exception)
+		catch (e:Dynamic)
 		{
-			var posInfo = interpreter.posInfos();
-			var message = trim_redundant_error_trace(e.message, posInfo);
-			
-			haxe.Log.trace(message, posInfo);
+			onError(e);
 		}
 		return null;
+	}
+
+	public dynamic function onError(e:Dynamic) {
+		traceException(e);
+	}
+
+	inline function traceException(e:Dynamic):Void {
+		print(e.toString());
+		/*
+		var posInfo = interpreter.posInfos();
+		var message = trim_redundant_error_trace(e.message, posInfo);
+		print(haxe.Log.formatOutput(message, posInfo));
+		*/
 	}
 
 	public function stop()
@@ -474,13 +489,10 @@ class FunkinHScript extends FunkinScript
 		try {
 			returnVal = Reflect.callMethod(parentObject, daFunc, parameters);
 		}
-		catch (e:haxe.Exception)
+		catch (e:Dynamic)
 		{
-			var posInfo = interpreter.posInfos();
-			var message = trim_redundant_error_trace(e.message, posInfo);
-
-			print('$scriptName: Error executing $funcName(${  parameters.join(', ')  })');
-			print(haxe.Log.formatOutput(message, posInfo));
+			print('$scriptName: Error executing `$funcName(${  parameters.join(', ')  })`');
+			onError(e);
 		}
 
 		if (prevVals != null) {
