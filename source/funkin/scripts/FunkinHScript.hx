@@ -414,7 +414,9 @@ class FunkinHScript extends FunkinScript
 	}
 
 	inline function traceException(e:Dynamic):Void {
-		print(e.toString());
+		final str = e.toString();
+		print(str);
+		DebugLog.addMessage(str, 0xFFFF0000);
 		/*
 		var posInfo = interpreter.posInfos();
 		var message = trim_redundant_error_trace(e.message, posInfo);
