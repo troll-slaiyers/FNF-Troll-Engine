@@ -67,7 +67,7 @@ class Stage extends FlxGroup
 
 		stageBuilt = true;
 		if (stageScript != null && stageScript.exists("buildStage"))
-			stageScript.call("buildStage", null, ["super" => _buildStage]);
+			stageScript.executeFunc("buildStage", [], null, ["super" => _buildStage]);
 		else
 			_buildStage();
 

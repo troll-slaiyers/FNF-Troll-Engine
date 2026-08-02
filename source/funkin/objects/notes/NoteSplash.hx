@@ -96,7 +96,7 @@ class NoteSplash extends NoteObject {
 
 		var ret:FunctionReturn = CONTINUE;
 		if (note?.genScript != null)
-			ret = note.genScript.call(funcName, args, vars);
+			ret = note.genScript.executeFunc(funcName, args, null, vars);
 		
 		var ret2:FunctionReturn = CONTINUE;
 		if (FlxG.state == PlayState.instance)

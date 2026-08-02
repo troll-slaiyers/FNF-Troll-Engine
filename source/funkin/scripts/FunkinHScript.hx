@@ -1,12 +1,13 @@
 package funkin.scripts;
 
-import funkin.scripts.FunkinScript.ScriptType;
 import funkin.scripts.*;
 import funkin.scripts.Globals.*;
 
 import funkin.states.PlayState;
 import funkin.states.base.MusicBeatState;
 import funkin.states.base.MusicBeatSubstate;
+import funkin.Conductor;
+import funkin.ClientPrefs;
 
 import funkin.input.Controls;
 import funkin.api.Windows;
@@ -23,7 +24,7 @@ import hscript.*;
 
 using StringTools;
 
-class FunkinHScript extends FunkinScript
+class FunkinHScript
 {
 	public static final parser:Parser = {
 		var parser = new Parser();
@@ -161,13 +162,15 @@ class FunkinHScript extends FunkinScript
 	}
 
 	////
+	public var scriptName:String;
+
 	private var interpreter(default, null):Interp;
 
 	public function new(?parsed:Expr, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true, ?interp:Interp)
 	{
 		name ??= parsed?.origin ?? "HScript";
 		interpreter = interp ??= new Interp();
-		super(name, ScriptType.HSCRIPT);
+		this.scriptName = name;
 
 		set("Std", Std);
 		set("Type", Type);
@@ -189,7 +192,7 @@ class FunkinHScript extends FunkinScript
 		set("importClass", importClass);
 		set("importEnum", importEnum);
 
-		set("print", print);
+		set("print", Print.print);
 		set("debugPrint", DebugLog.print);
 		
 		set("script", this);
@@ -224,16 +227,61 @@ class FunkinHScript extends FunkinScript
 		Helper function
 		Sets a bunch of basic variables for the script depending on the state
 	**/
-	override function setDefaultVars() {
-		super.setDefaultVars();
+	inline function setDefaultVars() {
+		set("scriptName", scriptName);
+
+		set('Function_Halt', Globals.Function_Halt);
+		set('Function_Stop', Globals.Function_Stop);
+		set('Function_Continue', Globals.Function_Continue);
+		set('Function_StopLua', Globals.Function_Halt); // DEPRECATED
+
+		set('teVersion', StringTools.trim(Main.Version.displayedVersion));
+		set("trollEngine", true); // so if any psych mods wanna add troll engine specific stuff well there they go
+
+		#if windows
+		set('buildTarget', 'windows');
+		#elseif linux
+		set('buildTarget', 'linux');
+		#elseif mac
+		set('buildTarget', 'mac');
+		#elseif html5
+		set('buildTarget', 'browser');
+		#elseif android
+		set('buildTarget', 'android');
+		#else
+		set('buildTarget', 'unknown');
+		#end
+		
+		set('curBpm', Conductor.bpm);
+		set('crochet', Conductor.crochet);
+		set('stepCrochet', Conductor.stepCrochet);
+
+		set('curBeat', 0);
+		set('curStep', 0);
+		set('curDecBeat', 0.0);
+		set('curDecStep', 0.0);
 
 		var currentState = flixel.FlxG.state;
+
+		set("inTitlescreen", (currentState is funkin.states.TitleState));
+		set('inGameOver', false);
+		set('inChartEditor', false);
+
+		if (currentState is PlayState && currentState == PlayState.instance) {
+			set("inPlaystate", true);
+			
+			set("curSection", -1);
+			set("sectionData", null);
+		}else{
+			set("inPlaystate", false);
+			set("showDebugTraces", Main.showDebugTraces);
+		}
 		
 		set("state", currentState);
 		set("game", PlayState.instance);
 	}
 
-	private function setFlixelVars() 
+	inline function setFlixelVars() 
 	{
 		set("FlxG", FlxG);
 		set("FlxSprite", FlxSprite);
@@ -283,25 +331,25 @@ class FunkinHScript extends FunkinScript
 		set("ShaderFilter", openfl.filters.ShaderFilter);
 	}
 
-	private function setFNFVars() {
+	inline function setFNFVars() {
 		// FNF-specific things
 		set("controls", Controls.firstActive);
 		set("get_controls", () -> return Controls.firstActive);
+		set("newShader", Paths.getShader);
 		
 		set("Paths", funkin.Paths);
-		set("Conductor", funkin.Conductor);
 		set("ClientPrefs", funkin.ClientPrefs);
 		set("CoolUtil", funkin.CoolUtil);
+		set("Conductor", funkin.Conductor);
+		set("Song", funkin.data.Song);
+		set("Highscore", funkin.data.Highscore); // Useful for stuff like levels showing diff songs before and after finishing (i.e Weekend 1)
 
-		set("newShader", Paths.getShader);
-
-		set("PlayState", PlayState);
 		set("MusicBeatState", MusicBeatState);
 		set("MusicBeatSubstate", MusicBeatSubstate);
+		set("HScriptedState", funkin.states.scripting.HScriptedState);
+		set("HScriptedSubstate", funkin.states.scripting.HScriptedSubstate);
+		set("PlayState", PlayState);
 		set("GameOverSubstate", funkin.states.GameOverSubstate);
-		set("Song", funkin.data.Song);
-		set("BGSprite", funkin.objects.BGSprite);
-		set("RatingSprite", funkin.objects.hud.RatingGroup.RatingSprite);
 
 		set("Note", funkin.objects.notes.Note);
 		set("NoteObject", funkin.objects.notes.NoteObject);
@@ -312,8 +360,9 @@ class FunkinHScript extends FunkinScript
 
 		set("ProxyField", funkin.objects.proxies.ProxyField);
 		set("ProxySprite", funkin.objects.proxies.ProxySprite);
-		set("AltBGSprite", funkin.objects.BGSprite.AltBGSprite);
 
+		set("BGSprite", funkin.objects.BGSprite);
+		set("AltBGSprite", funkin.objects.BGSprite.AltBGSprite);
 		set("FlxSprite3D", funkin.objects.FlxSprite3D);
 
 		set("AttachedSprite", funkin.objects.AttachedSprite);
@@ -321,11 +370,12 @@ class FunkinHScript extends FunkinScript
 
 		set("Character", funkin.objects.Character);
 		set("HealthIcon", funkin.objects.hud.HealthIcon);
+		set("RatingSprite", funkin.objects.hud.RatingGroup.RatingSprite);
 
-		set("Wife3", funkin.data.JudgmentManager.Wife3);
-		set("PBot", funkin.data.JudgmentManager.PBot);
 		set("JudgmentManager", funkin.data.JudgmentManager);
 		set("Judgement", Wrappers.Judgment);
+		set("Wife3", funkin.data.JudgmentManager.Wife3);
+		set("PBot", funkin.data.JudgmentManager.PBot);
 
 		set("ModManager", funkin.modchart.ModManager);
 		set("Modifier", funkin.modchart.Modifier);
@@ -340,11 +390,6 @@ class FunkinHScript extends FunkinScript
 
 		set("HScriptedHUD", funkin.objects.huds.HScriptedHUD);
 		set("HScriptModifier", funkin.modchart.HScriptModifier);
-
-		set("HScriptedState", funkin.states.scripting.HScriptedState);
-		set("HScriptedSubstate", funkin.states.scripting.HScriptedSubstate);
-
-		set("Highscore", funkin.data.Highscore); // Useful for stuff like levels showing diff songs before and after finishing (i.e Weekend 1)
 	} 
 
 	function importClass(className:String)
@@ -402,8 +447,7 @@ class FunkinHScript extends FunkinScript
 		try {
 			return interpreter.execute(parsed);
 		}
-		catch (e:Dynamic)
-		{
+		catch(e:Dynamic) {
 			onError(e);
 		}
 		return null;
@@ -424,17 +468,6 @@ class FunkinHScript extends FunkinScript
 		*/
 	}
 
-	public function stop()
-	{
-		//trace('stopping $scriptName');
-
-		// idk if there's really a stop function or anythin for hscript so
-		if (interpreter != null && interpreter.variables != null)
-			interpreter.variables.clear();
-
-		interpreter = null;
-	}
-
 	public function get(varName:String):Dynamic
 	{
 		return (interpreter == null) ? null : interpreter.variables.get(varName);
@@ -451,11 +484,29 @@ class FunkinHScript extends FunkinScript
 		return interpreter != null && interpreter.variables.exists(varName);
 	}
 
-	public function call(func:String, ?parameters:Array<Dynamic>, ?extraVars:Map<String, Dynamic>):Dynamic
+	/**
+	 * Calls a function within the script
+	**/
+	public function call(funcName:String, ?parameters:Array<Dynamic>):Dynamic
 	{
-		var returnValue:Dynamic = executeFunc(func, parameters, null, extraVars);
-		
-		return returnValue == null ? Function_Continue : returnValue;
+		var daFunc:Function = get(funcName);
+		if (daFunc == null)
+			return null;
+
+		if (parameters == null)
+			parameters = [];
+
+		var returnVal:Dynamic = null;
+		try {
+			returnVal = Reflect.callMethod(null, daFunc, parameters);
+		}
+		catch (e:Dynamic)
+		{
+			print('$scriptName: Error calling `$funcName(' +  parameters.join(', ') + ')`');
+			onError(e);
+		}
+
+		return returnVal;
 	}
 
 	/**
@@ -464,8 +515,7 @@ class FunkinHScript extends FunkinScript
 	public function executeFunc(funcName:String, ?parameters:Array<Dynamic>, ?parentObject:Any, ?extraVars:Map<String, Dynamic>):Dynamic
 	{
 		var daFunc:Function = get(funcName);
-
-		if (!Reflect.isFunction(daFunc))
+		if (daFunc == null)
 			return null;
 
 		if (parameters == null)
@@ -493,7 +543,7 @@ class FunkinHScript extends FunkinScript
 		}
 		catch (e:Dynamic)
 		{
-			print('$scriptName: Error executing `$funcName(${  parameters.join(', ')  })`');
+			print('$scriptName: Error executing `$funcName(' +  parameters.join(', ') + ')`');
 			onError(e);
 		}
 
@@ -503,5 +553,16 @@ class FunkinHScript extends FunkinScript
 		}
 
 		return returnVal;
+	}
+
+	public function stop()
+	{
+		//trace('stopping $scriptName');
+
+		// idk if there's really a stop function or anythin for hscript so
+		if (interpreter != null && interpreter.variables != null)
+			interpreter.variables.clear();
+
+		interpreter = null;
 	}
 }

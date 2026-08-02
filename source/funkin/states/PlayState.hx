@@ -3633,7 +3633,7 @@ class PlayState extends MusicBeatState
 			var script:FunkinScript = scriptArray[idx];
 			if (script==null || exclusions.contains(script.scriptName) || (ignoreSpecialShit && isSpecialScript(script)))
 				continue;
-			var ret:Dynamic = script.call(event, args, vars);
+			var ret:Dynamic = script.executeFunc(event, args, null, vars);
 			if (ret == Globals.Function_Halt){
 				ret = returnVal;
 				if (!ignoreStops)

@@ -3,7 +3,6 @@ package funkin.objects;
 import funkin.scripts.ScriptedClassShit.InstanceInterp;
 import flixel.graphics.frames.FlxAtlasFrames;
 import funkin.states.PlayState;
-import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.playfields.PlayField;
 import funkin.objects.notes.Note;
 import funkin.data.CharacterData;
@@ -362,7 +361,7 @@ class Character extends FlxSprite
 	public function setupCharacter()
 	{
 		var characterScript = characterScripts[0];
-		if (characterScript != null && characterScript.scriptType == HSCRIPT) {
+		if (characterScript != null) {
 			var characterScript:FunkinHScript = cast characterScript;
 			if (characterScript.exists('setupCharacter')) {
 				characterScript.executeFunc('setupCharacter', null, this, ["super" => _setupCharacter]);
@@ -730,20 +729,16 @@ class Character extends FlxSprite
 
 	public function startScript(script:FunkinScript){		
 		#if HSCRIPT_ALLOWED
-		if(script.scriptType == ScriptType.HSCRIPT){
-			callScript(script, "onLoad", [this]);
-		}
+		callScript(script, "onLoad", [this]);
 		#end
 	}
 
 	public function stopScript(script:FunkinScript, destroy:Bool=false){
 		#if HSCRIPT_ALLOWED
-		if (script.scriptType == ScriptType.HSCRIPT){
-			callScript(script, "onStop", [this]);
-			if(destroy){
-				script.call("onDestroy");
-				script.stop();
-			}
+		callScript(script, "onStop", [this]);
+		if(destroy){
+			script.call("onDestroy");
+			script.stop();
 		}
 		#end
 	}
@@ -809,9 +804,6 @@ class Character extends FlxSprite
 			if (ret != Globals.Function_Continue && ret != null)
 				returnVal = ret;
 		}
-
-		if (returnVal == null)
-			returnVal = Globals.Function_Continue;
 
 		return returnVal;
 		#else
