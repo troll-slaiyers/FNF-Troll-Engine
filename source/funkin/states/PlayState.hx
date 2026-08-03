@@ -756,7 +756,7 @@ class PlayState extends MusicBeatState
 		setDefaultHScripts("newPlayField", newPlayfield);
 		setDefaultHScripts("initPlayfield", initPlayfield);
 
-		//// GLOBAL SONG SCRIPTS
+		//// GLOBAL PLAYSTATE SCRIPTS
 		var filesPushed:Array<String> = [];
 		for (folder in Paths.getFolders('scripts')) {
 			//// Create scripts in order from the list file first
@@ -793,14 +793,10 @@ class PlayState extends MusicBeatState
 		setStageData(stageData);
 
 		// SONG SPECIFIC SCRIPTS
-		var filesPushed:Array<String> = [];
-		for (folder in Paths.getFolders('songs/$songId')) {
-			for (file in Paths.readDirectory(folder)) {
-				if (Paths.isHScript(file) && !filesPushed.contains(file)) {
-					createHScript(folder + file);
-					filesPushed.push(file);
-				}
-			}
+		var songPath = song.getSongFile('');
+		for (file in Paths.readDirectory(songPath)) {
+			if (Paths.isHScript(file))
+				createHScript(songPath + file);
 		}
 
 		//// Asset precaching start
