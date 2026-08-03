@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.data.content.PackManager;
 import funkin.objects.notes.NoteAnimations;
 import funkin.objects.cutscenes.Cutscene;
 #if VIDEOS_ALLOWED
@@ -3541,12 +3542,15 @@ class PlayState extends MusicBeatState
 		@returns A `FunkinHScript` instance
 	**/
 	public function createHScript(path:String, ?scriptName:String, ?ignoreCreateCall:Bool = false):FunkinHScript
-	{
-		var split = path.split("/");
-		var modName:String = split[0] == Paths.contentFolderName ? split[1] : 'assets';
-		var script = FunkinHScript.fromFile(path, scriptName, [
-			"modName" => modName
-		], ignoreCreateCall != true);
+	{		
+		var foundPack = null;
+		for (pack in PackManager.readList) {
+			if (path.startsWith(pack.path)) {
+				foundPack = pack;
+				break;
+			}
+		}
+		var script = FunkinHScript.fromFile(path, scriptName, ["modName" => foundPack?.id, "scriptPack" => foundPack], ignoreCreateCall != true);
 		funkyScripts.push(script);
 		return script;
 	}
