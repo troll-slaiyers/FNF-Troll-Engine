@@ -1121,7 +1121,8 @@ class PlayState extends MusicBeatState
 	}
 
 	inline function onCreatePost() {
-		callOnAllScripts("onCreatePost");
+		for (script in funkyScripts)
+			script.call("onCreatePost");
 		signals.onCreatePost.dispatch();
 	}
 
@@ -1876,7 +1877,7 @@ class PlayState extends MusicBeatState
 	}
 
 	function eventNoteEarlyTrigger(event:EventInstanceData):Float {
-		var ret:Dynamic = callOnAllScripts('eventEarlyTrigger', [event]);
+		var ret:Dynamic = callOnScripts('eventEarlyTrigger', [event]);
 		if (ret != null && (ret is Int || ret is Float))
 			return ret;
 
@@ -3606,10 +3607,6 @@ class PlayState extends MusicBeatState
 
 		callOnScripts("onSectionHit");
 	}
-
-	inline public function callOnAllScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
-			?vars:Map<String, Dynamic>):Dynamic
-			return callOnScripts(event, args, ignoreStops, exclusions, scriptArray, vars, false);
 
 	inline public function isSpecialScript(script:FunkinScript)
 		return notetypeScripts.exists(script.scriptName) || hudSkinMap.exists(script.scriptName);
