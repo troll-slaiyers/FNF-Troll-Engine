@@ -73,9 +73,9 @@ class Countdown extends FlxBasic {
 			// you might wanna replace it with something else and stuff @crowplexus
 			var ret:Dynamic = Globals.Function_Continue;
 			if (game != null && game.hudSkinScript != null)
-				ret = game.callScript(game.hudSkinScript, "makeCountdownSprite", [sprImage, curPos]);
+				ret = game.hudSkinScript.call("makeCountdownSprite", [sprImage, curPos]);
 
-			if (ret == Globals.Function_Continue)
+			if (ret != Globals.Function_Stop && ret != Globals.Function_Halt)
 			{
 				// default behaviour, create sprite w/ the specified sprImage
 				sprite = new FlxSprite(0, 0, sprImage);
@@ -148,9 +148,9 @@ class Countdown extends FlxBasic {
 		{
 			var ret:Dynamic = Globals.Function_Continue;
 			if (game != null && game.hudSkinScript != null)
-				ret = game.callScript(game.hudSkinScript, "playCountdownSound", [soundName, introSoundsSuffix, curPos]);
+				ret = game.hudSkinScript.call("playCountdownSound", [soundName, introSoundsSuffix, curPos]);
 
-			if (ret == Globals.Function_Continue)
+			if (ret != Globals.Function_Stop && ret != Globals.Function_Halt)
 			{
 				// default behaviour
 				var snd:FlxSound = null;

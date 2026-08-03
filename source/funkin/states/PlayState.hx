@@ -2488,12 +2488,10 @@ class PlayState extends MusicBeatState
 		return false;
 	}
 
-	function doGameOver()
+	function doGameOver():Bool
 	{
-		switch(callOnScripts('onGameOver')) {
-			case Globals.Function_Stop: return false;
-			case Globals.Function_Halt: return true;
-		}
+		if (callOnScripts('onGameOver') == Globals.Function_Stop)
+			return false;
 
 		isDead = true;
 		deathCounter++;
@@ -3611,10 +3609,7 @@ class PlayState extends MusicBeatState
 	inline public function isSpecialScript(script:FunkinScript)
 		return notetypeScripts.exists(script.scriptName) || hudSkinMap.exists(script.scriptName);
 
-	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
-			?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
-	{
-		#if (HSCRIPT_ALLOWED)
+	public function stopClosingScripts() {
 		while (scriptsToClose.length > 0){
 			var script = scriptsToClose.pop();
 
@@ -3622,28 +3617,47 @@ class PlayState extends MusicBeatState
 			funkyScripts.remove(script);
 			script.stop();
 		}
+	}
+
+	public function callOnScripts(funcName:String, ?args:Array<Dynamic>):Dynamic
+	{
+		#if (HSCRIPT_ALLOWED)
+		stopClosingScripts();
+
+		var scripts:Array<FunkinScript> = funkyScripts.filter(s -> !isSpecialScript(s));
+		return Globals.callOnScripts(scripts, funcName, args);
+		#else
+		return Globals.Function_Continue;
+		#end
+	}
+
+	public function callOnScriptsX(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<FunkinScript>,
+			?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
+	{
+		#if (HSCRIPT_ALLOWED)
+		stopClosingScripts();
 
 		if (args == null) args = [];
 		if (scriptArray == null) scriptArray = funkyScripts;
 		if (exclusions == null) exclusions = [];
 
 		var returnVal:Dynamic = Globals.Function_Continue;
-		for (idx in 0...scriptArray.length)
+		for (script in scriptArray)
 		{
-			var script:FunkinScript = scriptArray[idx];
 			if (script==null || exclusions.contains(script.scriptName) || (ignoreSpecialShit && isSpecialScript(script)))
 				continue;
 			var ret:Dynamic = script.executeFunc(event, args, null, vars);
-			if (ret == Globals.Function_Halt){
-				ret = returnVal;
+			if (ret == Globals.Function_Halt) {
+				//returnVal = ret;
+				returnVal = Globals.Function_Stop;
 				if (!ignoreStops)
-					return returnVal;
+					break;
 			};
 			if (ret != Globals.Function_Continue && ret!=null)
 				returnVal = ret;
 		}
 
-		return (returnVal == null) ? Globals.Function_Continue : returnVal;
+		return returnVal;
 		#else
 		return Globals.Function_Continue;
 		#end
@@ -3660,29 +3674,14 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public function callScript(script:Dynamic, event:String, ?args:Array<Dynamic>):Dynamic
+	public function callScript(scriptName:String, funcName:String, ?args:Array<Dynamic>):Dynamic
 	{
 		#if (HSCRIPT_ALLOWED) // no point in calling this code if you.. for whatever reason, disabled scripting.
-		if((script is FunkinScript)){
-			return callOnScripts(event, args, true, [], [script], [], false);
-		}
-		else if((script is Array)){
-			return callOnScripts(event, args, true, [], script, [], false);
-		}
-		else if((script is String)){
-			var scripts:Array<FunkinScript> = [];
-
-			for (idx in 0...funkyScripts.length)
-			{
-				var scr = funkyScripts[idx];
-				if(scr.scriptName == script)
-					scripts.push(scr);
-			}
-
-			return callOnScripts(event, args, true, [], scripts, [], false);
-		}
-		#end
+		var scripts:Array<FunkinScript> = funkyScripts.filter(scr -> scr.scriptName == scriptName);
+		return Globals.callOnScripts(scripts, funcName, args);
+		#else
 		return Globals.Function_Continue;
+		#end
 	}
 
 	#if HSCRIPT_ALLOWED

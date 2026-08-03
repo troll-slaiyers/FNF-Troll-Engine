@@ -729,13 +729,13 @@ class Character extends FlxSprite
 
 	public function startScript(script:FunkinScript){		
 		#if HSCRIPT_ALLOWED
-		callScript(script, "onLoad", [this]);
+		script.call("onLoad", [this]);
 		#end
 	}
 
 	public function stopScript(script:FunkinScript, destroy:Bool=false){
 		#if HSCRIPT_ALLOWED
-		callScript(script, "onStop", [this]);
+		script.call("onStop", [this]);
 		if(destroy){
 			script.call("onDestroy");
 			script.stop();
@@ -777,75 +777,26 @@ class Character extends FlxSprite
 		return this;
 	}
 
-	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>, ?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
+	public function callOnScripts(funcName:String, ?args:Array<Dynamic>):Dynamic
 	{
-		#if (HSCRIPT_ALLOWED)
-		if (args == null)
-			args = [];
-		if (exclusions == null)
-			exclusions = [];
-		if (scriptArray == null)
-			scriptArray = characterScripts;
-
-		var returnVal:Dynamic = Globals.Function_Continue;
-
-		for (script in scriptArray)
-		{
-			if (exclusions.contains(script.scriptName))
-				continue;
-			
-			var ret:Dynamic = script.call(event, args, vars);
-			if (ret == Globals.Function_Halt)
-			{
-				ret = returnVal;
-				if (!ignoreStops)
-					return returnVal;
-			};
-			if (ret != Globals.Function_Continue && ret != null)
-				returnVal = ret;
-		}
-
-		return returnVal;
-		#else
-		return Globals.Function_Continue;
-		#end
+		return Globals.callOnScripts(characterScripts, funcName, args);
 	}
 
-	public function setOnScripts(variable:String, value:Dynamic, ?scriptArray:Array<Dynamic>)
+	public function setOnScripts(variable:String, value:Dynamic)
 	{
-		if (scriptArray == null)
-			scriptArray = characterScripts;
-
-		for (script in scriptArray) {
+		for (script in characterScripts) {
 			script.set(variable, value);
 			// trace('set $variable, $value, on ${script.scriptName}');
 		}
 	}
 
-	public function callScript(script:Dynamic, event:String, ?args:Array<Dynamic>):Dynamic
+	public function callScript(scriptName:String, funcName:String, ?args:Array<Dynamic>):Dynamic
 	{
 		#if (HSCRIPT_ALLOWED) // no point in calling this code if you.. for whatever reason, disabled scripting.
-		if ((script is FunkinScript))
-		{
-			return callOnScripts(event, args, true, [], [script], [], false);
-		}
-		else if ((script is Array))
-		{
-			return callOnScripts(event, args, true, [], script, [], false);
-		}
-		else if ((script is String))
-		{
-			var scripts:Array<FunkinScript> = [];
-
-			for (scr in characterScripts)
-			{
-				if (scr.scriptName == script)
-					scripts.push(scr);
-			}
-
-			return callOnScripts(event, args, true, [], scripts, [], false);
-		}
-		#end
+		var scripts:Array<FunkinScript> = characterScripts.filter(script -> script.scriptName == scriptName);
+		return Globals.callOnScripts(scripts, funcName, args);
+		#else
 		return Globals.Function_Continue;
+		#end
 	}
 }

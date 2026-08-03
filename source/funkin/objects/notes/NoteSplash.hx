@@ -100,7 +100,7 @@ class NoteSplash extends NoteObject {
 		
 		var ret2:FunctionReturn = CONTINUE;
 		if (FlxG.state == PlayState.instance)
-			ret2 = PlayState.instance.callOnScripts(funcName, args, false, null, null, vars);
+			ret2 = PlayState.instance.callOnScriptsX(funcName, args, false, null, null, vars);
 
 		return (ret == STOP || ret2 == STOP) ? STOP : CONTINUE;
 	}

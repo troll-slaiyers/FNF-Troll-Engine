@@ -248,7 +248,7 @@ class NoteField extends FieldBase
 			// lets you do custom rendering in scripts, if needed
 			// one example would be reimplementing Die Batsards' original bullet mechanic
 			// if you need an example on how this all works just look at the tap note drawing portion
-			game.callOnScripts("notefieldPreDraw", [this], ["drawQueue" => drawQueue, "lookupMap" => lookupMap]);
+			game.callOnScriptsX("notefieldPreDraw", [this], ["drawQueue" => drawQueue, "lookupMap" => lookupMap]);
 		}
 
 		lookupMap.clear();

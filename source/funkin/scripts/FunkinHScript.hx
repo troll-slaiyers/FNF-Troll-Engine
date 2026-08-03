@@ -230,10 +230,10 @@ class FunkinHScript
 	inline function setDefaultVars() {
 		set("scriptName", scriptName);
 
-		set('Function_Halt', Globals.Function_Halt);
-		set('Function_Stop', Globals.Function_Stop);
 		set('Function_Continue', Globals.Function_Continue);
-		set('Function_StopLua', Globals.Function_Halt); // DEPRECATED
+		set('Function_Stop', Globals.Function_Stop);
+		set('Function_Halt', Globals.Function_Halt);
+		set('Function_StopAll', Globals.Function_Halt);
 
 		set('teVersion', StringTools.trim(Main.Version.displayedVersion));
 		set("trollEngine", true); // so if any psych mods wanna add troll engine specific stuff well there they go
