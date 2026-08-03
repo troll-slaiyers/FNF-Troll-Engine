@@ -217,7 +217,9 @@ class Paths
 			'${pack.path}/$dir/'
 		];
 
-	//public static function packFolderIterator(dir:String)
+	public static inline function getPaths(key:String)
+		return new PackPathsIterator(key);
+
 
 	/*
 	inline static public function txt(key:String):String
@@ -755,6 +757,24 @@ class Paths
 
 	public static inline function getString(key:String):Null<String>{
 		return currentStrings.get(key);
+	}
+}
+
+class PackPathsIterator {
+	var key:String;
+	var i:Int = 0;
+
+	public inline function new(key:String) {
+		this.key = key;
+		i = 0;
+	}
+
+	public inline function hasNext():Bool {
+		return i < PackManager.readList.length;
+	}
+
+	public inline function next():{k:Pack, v:String} {
+		return {k: PackManager.readList[i++], v: PackManager.readList[i].getPath(key)};
 	}
 }
 
