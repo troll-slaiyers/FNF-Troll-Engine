@@ -33,7 +33,7 @@ class CoolUtil {
 	public static function indexOfSong(songList:Array<BaseSong>, song:BaseSong):Int {
 		// return songList.indexOf(song);
 		if (song != null) for (i => s in songList) {
-			if (song.songId == s.songId && song.folder == s.folder) {
+			if (song.songId == s.songId && song.packId == s.packId) {
 				return i;
 			}
 		}

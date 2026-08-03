@@ -57,7 +57,7 @@ class SongSelectState extends funkin.states.base.DebugListState
 
 		songs ??= getEverySong();
 		this.textStrings = [for (song in songs) song.songId];
-		this.textStrings2 = [for (song in songs) song.folder];
+		this.textStrings2 = [for (song in songs) song.packId];
 
 		super.create();
 

@@ -18,10 +18,10 @@ class Song extends BaseSong
 	private var _charts:Array<String> = null;
 	private var metadataCache = new Map<String, SongMetadata>();
 
-	public function new(songId:String, ?folder:String)
+	public function new(songId:String, ?packId:String)
 	{
-		super(songId, folder);
-		this.songPath = Paths.getFolderPath(this.folder) + '/songs/$songId';
+		super(songId, packId);
+		this.songPath = Paths.getFolderPath(this.packId) + '/songs/$songId';
 	}
 
 	/**

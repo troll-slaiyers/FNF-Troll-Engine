@@ -9,16 +9,22 @@ inline final DEFAULT_CHART_ID = "normal";
 abstract class BaseSong
 {
 	public final songId:String;
-	public final folder:String = '';
+	public final packId:String;
 
-	public function new(songId:String, folder:String = '')
+	#if ALLOW_DEPRECATION
+	@:deprecated("`folder` is deprecated! Use `packId` instead!")
+	public var folder(get, never):String;
+	@:noCompletion inline function get_folder() return packId;
+	#end
+
+	public function new(songId:String, packId:String = '')
 	{
 		this.songId = songId;
-		this.folder = folder;
+		this.packId = packId;
 	}
 
 	public function toString():String
-		return '$folder:$songId';
+		return '$packId:$songId';
 
 	/**
 	 * Returns metadata for the requested chartId. 

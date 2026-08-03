@@ -154,7 +154,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public static function loadSong(song:BaseSong, chartId:String) {
-		Paths.currentPackId = song.folder;
+		Paths.currentPackId = song.packId;
 		PlayState.song = song;
 		PlayState.SONG = song.getSwagSong(chartId);
 		PlayState.difficultyName = chartId;
