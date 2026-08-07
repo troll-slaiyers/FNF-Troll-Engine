@@ -65,6 +65,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					"ghostTapping", 
 					"directionalCam", 
 					"noteOffset", 
+					"visualOffset", 
 					"ratingOffset",
 				]
 			],

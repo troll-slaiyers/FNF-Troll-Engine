@@ -376,7 +376,7 @@ class NoteField extends FieldBase
 
 		
 		
-		var strumDiff = (songPosition - hold.strumTime);
+		var strumDiff = (songPosition - ClientPrefs.visualOffset - hold.strumTime);
 		var visualDiff = (Conductor.visualPosition - hold.visualTime); // TODO: get the start and end visualDiff and interpolate so that changing speeds mid-hold will look better
 		var sv = game.getSV(hold.strumTime).speed;
 

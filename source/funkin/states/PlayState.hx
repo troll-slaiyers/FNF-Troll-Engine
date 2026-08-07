@@ -2233,11 +2233,12 @@ class PlayState extends MusicBeatState
 
 	private var svIndex:Int =0;
 	private inline function updateVisualPosition() {
+		final visualPos:Float = Conductor.songPosition - ClientPrefs.visualOffset;
 		var event:SpeedEvent = null;
 
 		for (i in svIndex+1...speedChanges.length) {
 			var nextEvent = speedChanges[i];
-			if (nextEvent.startTime > Conductor.songPosition)
+			if (nextEvent.startTime > visualPos)
 				break;
 
 			svIndex = i;
@@ -2245,7 +2246,7 @@ class PlayState extends MusicBeatState
 		}
 		event ??= speedChanges[svIndex];
 
-		Conductor.visualPosition = getTimeFromSV(Conductor.songPosition, event);
+		Conductor.visualPosition = getTimeFromSV(visualPos, event);
 		FlxG.watch.addQuick("visualPos", Conductor.visualPosition);
 	}
 
