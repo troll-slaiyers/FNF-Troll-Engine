@@ -209,24 +209,6 @@ class Util
 		Reflect.setProperty(leArray, variable, value);
 	}
 
-	public static function cancelTween(tag:String) {
-		if (game.modchartTweens.exists(tag)) {
-			var twn = game.modchartTweens.get(tag);
-			twn.cancel();
-			twn.destroy();
-			game.modchartTweens.remove(tag);
-		}
-	}
-
-	public static function cancelTimer(tag:String) {
-		if (game.modchartTimers.exists(tag)) {
-			var tmr = game.modchartTimers.get(tag);
-			tmr.cancel();
-			tmr.destroy();
-			game.modchartTimers.remove(tag);
-		}
-	}
-
 	public static function isOfTypes(value:Any, types:Array<Dynamic>):Bool {
 		for (type in types) {
 			if (Std.isOfType(value, type))

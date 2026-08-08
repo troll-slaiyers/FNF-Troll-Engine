@@ -3684,6 +3684,24 @@ class PlayState extends MusicBeatState
 		#end
 	}
 
+	public function cancelTween(tag:String) {
+		if (modchartTweens.exists(tag)) {
+			var twn = modchartTweens.get(tag);
+			twn.cancel();
+			twn.destroy();
+			modchartTweens.remove(tag);
+		}
+	}
+
+	public function cancelTimer(tag:String) {
+		if (modchartTimers.exists(tag)) {
+			var tmr = modchartTimers.get(tag);
+			tmr.cancel();
+			tmr.destroy();
+			modchartTimers.remove(tag);
+		}
+	}
+
 	#if HSCRIPT_ALLOWED
 	public function setDefaultHScripts(variable:String, arg:Dynamic){
 		FunkinHScript.defaultVars.set(variable, arg);
