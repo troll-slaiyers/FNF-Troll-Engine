@@ -8,6 +8,20 @@ import funkin.macros.ScriptingMacro.SUPER_WRAPPER_PREFIX;
 
 final superWrapperField:String = SUPER_WRAPPER_PREFIX + "wrapper";
 
+/**
+	Renames valid function fields (Ex. `funcName()`) to `OG_funcName()`  
+	then, the original `funcName` function is replaced by:   
+	```
+	function funcName(arg1, arg2) {
+		if (existsOnScript("funcName"))
+			return callOnScript("funcName", [arg1, arg2]);
+		else
+			return OG_funcName(arg1, arg2);
+	}
+	```
+	`OG_funcName` and other functions are stored on a structure.  
+	If they're used alongside `InstanceInterp`, they can be accessed through `super.funcName` on the script
+**/
 @:autoBuild(funkin.macros.ScriptingMacro.setupScriptedClass())
 interface IScriptedClass {
 	function callOnScript(name:String, ?args:Array<Dynamic>):Dynamic;
