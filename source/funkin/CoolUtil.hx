@@ -309,6 +309,26 @@ class CoolUtil {
 		}
 	}
 
+	public static function parseFloatArray(str:String):Array<Float> {
+		var arr = new Array<Float>();
+		for (s in str.split(',')) {
+			if (s.length != 0) {
+				arr.push(Std.parseFloat(s));
+			}
+		}
+		return arr;
+	}
+	
+	public static function parseIntArray(str:String):Array<Int> {
+		var arr = new Array<Int>();
+		for (s in str.split(',')) {
+			if (s.length != 0) {
+				arr.push(Std.parseInt(s));
+			}
+		}
+		return arr;
+	}
+
 	public static inline function browserLoad(site:String) {
 		flixel.FlxG.openURL(site);
 	}
