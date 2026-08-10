@@ -1,28 +1,11 @@
 package funkin.scripts;
 
-import flixel.tweens.FlxTween;
-import flixel.system.FlxAssets.FlxGraphicAsset;
-import flixel.util.FlxColor;
-import funkin.scripts.Globals.*;
-import funkin.states.PlayState;
 import funkin.states.PlayState.instance as game;
 import Type.ValueType;
 
-import openfl.display.BlendMode;
-import flixel.*;
-import flixel.text.FlxText;
-import flixel.math.FlxMath;
-import flixel.group.FlxGroup;
-import flixel.tweens.FlxEase;
-#if USING_FLXANIMATE
-import animate.FlxAnimate;
-import animate.FlxAnimateFrames;
-#end
-
-using SpriteTools;
 using StringTools;
 
-class Util
+class PropertyUtil
 {
 	public static function getProperty(variable:String) {
 		var killMe:Array<String> = variable.split('.');
@@ -31,6 +14,7 @@ class Util
 		else
 			return getVarInArray(game, variable);
 	}
+
 	public static function setProperty(variable:String, value:Dynamic) {
 		var killMe:Array<String> = variable.split('.');
 		if (killMe.length > 1)
@@ -39,58 +23,7 @@ class Util
 			setVarInArray(game, variable, value);
 	}
 
-	public static function getPropertyFromGroup(obj:String, index:Int, variable:Dynamic) {
-		var shitMyPants:Array<String> = obj.split('.');
-		var realObject:Dynamic = Reflect.getProperty(game, obj);
-		if(shitMyPants.length>1)
-			realObject = getPropertyLoopThingWhatever(shitMyPants, false);
-
-		if(Std.isOfType(realObject, FlxTypedGroup))
-			return getGroupStuff(realObject.members[index], variable);
-
-		var leArray:Dynamic = realObject[index];
-		if (leArray != null) {
-			if(Type.typeof(variable) == ValueType.TInt) {
-				return leArray[variable];
-			}
-			return getGroupStuff(leArray, variable);
-		}
-		trace("Object #" + index + " from group: " + obj + " doesn't exist!");
-		return null;
-	}
-	public static function setPropertyFromGroup(obj:String, index:Int, variable:Dynamic, value:Dynamic) {
-		var shitMyPants:Array<String> = obj.split('.');
-		var realObject:Dynamic = Reflect.getProperty(game, obj);
-		if(shitMyPants.length>1)
-			realObject = getPropertyLoopThingWhatever(shitMyPants, false);
-
-		if(Std.isOfType(realObject, FlxTypedGroup)) {
-			setGroupStuff(realObject.members[index], variable, value);
-			return;
-		}
-
-		var leArray:Dynamic = realObject[index];
-		if(leArray != null) {
-			if(Type.typeof(variable) == ValueType.TInt) {
-				leArray[variable] = value;
-				return;
-			}
-			setGroupStuff(leArray, variable, value);
-		}
-	}
-	public static function removeFromGroup(obj:String, index:Int, dontDestroy:Bool = false) {
-		if(Std.isOfType(Reflect.getProperty(game, obj), FlxTypedGroup)) {
-			var sex = Reflect.getProperty(game, obj).members[index];
-			if(!dontDestroy)
-				sex.kill();
-			Reflect.getProperty(game, obj).remove(sex, true);
-			if(!dontDestroy)
-				sex.destroy();
-			return;
-		}
-		Reflect.getProperty(game, obj).remove(Reflect.getProperty(game, obj)[index]);
-	}
-
+	////
 	public static function getPropertyFromClass(classVar:String, variable:String) {
 		var killMe:Array<String> = variable.split('.');
 		if(killMe.length > 1) {
@@ -102,6 +35,7 @@ class Util
 		}
 		return getVarInArray(Type.resolveClass(classVar), variable);
 	}
+
 	public static function setPropertyFromClass(classVar:String, variable:String, value:Dynamic) {
 		var killMe:Array<String> = variable.split('.');
 		if(killMe.length > 1) {
@@ -116,9 +50,10 @@ class Util
 		return true;
 	}
 
-	public static function getPropertyLoopThingWhatever(killMe:Array<String>, getProperty:Bool = true):Dynamic {
+	////
+	public static function getPropertyLoopThingWhatever(killMe:Array<String>):Dynamic {
 		var coverMeInPiss:Dynamic = getObjectDirectly(killMe[0]);
-		for (i in 1...(getProperty ? killMe.length-1 : killMe.length))
+		for (i in 1...killMe.length-1)
 			coverMeInPiss = getVarInArray(coverMeInPiss, killMe[i]);
 
 		return coverMeInPiss;
@@ -127,22 +62,19 @@ class Util
 	inline public static function getObjectDirectly(tag:String):Null<Dynamic>
 		return getVarInArray(game, tag);
 
-	public static function getObjectSimple(tag:String):Null<Dynamic>
-		return Reflect.getProperty(game, tag);
-
 	public static function getObject(tag:String):Null<Dynamic> {
 		var killMe:Array<String> = tag.split('.');
 		if (killMe.length > 1)
 			return getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
 		else
-			return getObjectSimple(killMe[0]);
+			return Reflect.getProperty(game, killMe[0]);
 	}
 
-	public static function setVarInArray(instance:Dynamic, variable:String, value:Dynamic):Any
+	public static function setVarInArray(obj:Dynamic, variable:String, value:Dynamic):Any
 	{
 		var shit:Array<String> = variable.split('[');
 		if (shit.length > 1) {
-			var blah:Dynamic = Reflect.getProperty(instance, shit[0]);
+			var blah:Dynamic = Reflect.getProperty(obj, shit[0]);
 			for (i in 1...shit.length) {
 				var leNum:Dynamic = shit[i].substr(0, shit[i].length - 1);
 				if (i >= shit.length-1) //Last array
@@ -153,18 +85,18 @@ class Util
 			return blah;
 		}
 
-		if (isMap(instance))
-			instance.set(variable, value);
+		if (isMap(obj))
+			obj.set(variable, value);
 		else
-			Reflect.setProperty(instance, variable, value);
+			Reflect.setProperty(obj, variable, value);
 
 		return true;
 	}
-	public static function getVarInArray(instance:Dynamic, variable:String):Any
+	public static function getVarInArray(obj:Dynamic, variable:String):Any
 	{
 		var shit:Array<String> = variable.split('[');
 		if (shit.length > 1) {
-			var blah:Dynamic = Reflect.getProperty(instance, shit[0]);
+			var blah:Dynamic = Reflect.getProperty(obj, shit[0]);
 			for (i in 1...shit.length) {
 				var leNum:Dynamic = shit[i].substr(0, shit[i].length - 1);
 				blah = blah[leNum];
@@ -172,10 +104,10 @@ class Util
 			return blah;
 		}
 		
-		if (isMap(instance))
-			return instance.get(variable);
+		if (isMap(obj))
+			return obj.get(variable);
 		else
-			return Reflect.getProperty(instance, variable);
+			return Reflect.getProperty(obj, variable);
 	}
 
 	public static function getGroupStuff(leArray:Dynamic, variable:String) {
@@ -196,6 +128,7 @@ class Util
 		else
 			return Reflect.getProperty(leArray, variable);
 	}
+
 	public static function setGroupStuff(leArray:Dynamic, variable:String, value:Dynamic) {
 		var killMe:Array<String> = variable.split('.');
 		if(killMe.length > 1) {

@@ -307,6 +307,7 @@ class DefaultSongEvent extends SongEvent {
 				}
 
 			case 'Set Property':
+				// Might replace this with the hscript interpreter :d
 				var value2:Dynamic = switch(value2){
 					case "true": true;
 					case "false": false;
@@ -314,7 +315,7 @@ class DefaultSongEvent extends SongEvent {
 				}
 
 				try{
-					funkin.scripts.Util.setProperty(value1, value2);					
+					funkin.scripts.PropertyUtil.setProperty(value1, value2);					
 				}catch (e:haxe.Exception){
 					trace('Set Property event error: $value1 | $value2');
 				}

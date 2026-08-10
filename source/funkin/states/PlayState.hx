@@ -36,7 +36,6 @@ import funkin.states.editors.CharacterEditorState;
 import funkin.states.editors.ChartingState;
 import funkin.states.options.OptionsSubstate;
 import funkin.scripts.*;
-import funkin.scripts.Util;
 import flixel.*;
 import flixel.util.*;
 import flixel.util.FlxSignal;
