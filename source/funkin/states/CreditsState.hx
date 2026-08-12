@@ -21,6 +21,10 @@ class CreditsState extends MusicBeatState
 
 	var hintBg:FlxSprite;
 	var descText:FlxText;
+	var moveTween:FlxTween;
+
+	var realLength:Int = 0;
+	var textSpacing = 240;
 
 	var camFollow = new FlxPoint(FlxG.width * 0.5, FlxG.height * 0.5);
 	var camFollowPos = new FlxObject();
@@ -30,6 +34,8 @@ class CreditsState extends MusicBeatState
 	var iconArray:Array<AttachedSprite> = [];
 
 	var curSelected:Int = 0;
+	var secsHolding:Float = 0;
+	var controlLock:Bool = false;
 
 	public dynamic function goBack()
 		MusicBeatState.switchState(new MainMenuState());
@@ -37,43 +43,7 @@ class CreditsState extends MusicBeatState
 	public function new(?options:Array<CreditsOption>) {
 		super();
 
-		this.dataArray = options ?? {
-			var creditsPath = Paths.getPath('data/credits.txt');
-			var rawList = Paths.getContent(creditsPath);
-			listFromString(rawList);
-		}
-	}
-
-	public static function listFromString(string:String):Array<CreditsOption>
-	{
-		var options = [];
-
-		for (line in CoolUtil.listFromString(string)) {
-			if (line.length == 0)
-				continue;
-			
-			options.push(optionFromString(line));
-		}
-
-		return options;
-	}
-
-	public static function optionFromString(string:String):CreditsOption
-	{
-		var option = new CreditsOption();
-		var data = string.split("::");
-
-		option.text = data[0] ?? '';
-		option.icon = data[1] ?? '';
-		option.description = data[2] ?? '';
-		option.link = data[3] ?? '';
-
-		var isTitle = data.length <= 1;
-		option.bold = isTitle;
-		option.centered = isTitle;
-		option.selectable = !isTitle;
-
-		return option;
+		this.dataArray = options ?? listFromPath(Paths.getPath('data/credits.txt'));
 	}
 
 	override function create()
@@ -171,11 +141,9 @@ class CreditsState extends MusicBeatState
 		setDescriptionText(dataArray[curSelected].description);
 	}
 
-	var realLength:Int = 0;
-	var margin = 240;
 	public function createOption(data:CreditsOption) {
 		var id = realLength++;
-		var songTitle = new Alphabet(0, margin * id, data.text, data.bold);
+		var songTitle = new Alphabet(0, textSpacing * id, data.text, data.bold);
 		songTitle.ID = id;
 		titleArray[id] = songTitle;
 		
@@ -202,8 +170,6 @@ class CreditsState extends MusicBeatState
 
 		add(songTitle);
 	}
-
-	var moveTween:FlxTween;
 
 	function setDescriptionText(text:Null<String>) {
 		if (text == null || text.length == 0) {
@@ -235,8 +201,6 @@ class CreditsState extends MusicBeatState
 		}
 	}
 	
-	var secsHolding:Float = 0;
-	var controlLock:Bool = false;
 	override function update(elapsed:Float)
 	{
 		if (FlxG.sound.music != null) {
@@ -303,5 +267,46 @@ class CreditsState extends MusicBeatState
 		}
 		
 		super.update(elapsed);
+	}
+
+	////
+	public static function listFromPath(path:String):Array<CreditsOption>
+	{
+		var str:Null<String> = Paths.getContent(path);
+		return (str != null) ? listFromString(str) : [];
+	}
+
+	public static function listFromString(string:String):Array<CreditsOption>
+	{
+		var options:Array<CreditsOption> = [];
+
+		for (line in CoolUtil.listFromString(string)) {
+			if (line.length != 0) {
+				options.push(optionFromString(line));
+			}			
+		}
+
+		return options;
+	}
+
+	/** 
+		Parse a string in `text::icon::description::link` format
+	**/
+	public static function optionFromString(string:String):CreditsOption
+	{
+		var option = new CreditsOption();
+		var data = string.split("::");
+
+		option.text = data[0] ?? '';
+		option.icon = data[1] ?? '';
+		option.description = data[2] ?? '';
+		option.link = data[3] ?? '';
+
+		var isTitle = data.length <= 1;
+		option.bold = isTitle;
+		option.centered = isTitle;
+		option.selectable = !isTitle;
+
+		return option;
 	}
 }
