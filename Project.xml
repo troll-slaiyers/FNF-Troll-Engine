@@ -115,7 +115,7 @@
 	</section>	
 
 	<assets path="assets" />
-	<assets path='default_content' rename='content' unless='NO_DEFAULT_CONTENT' embed='false' exclude="*.mp3" />
+	<assets path='content' unless='NO_DEFAULT_CONTENT' embed='false' exclude="*.mp3" />
 
 	<icon path="art/iconOG.png" />
 	<icon path="art/icon64.png" size='64' />
