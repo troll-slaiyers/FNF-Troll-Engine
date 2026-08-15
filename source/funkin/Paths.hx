@@ -23,7 +23,7 @@ import sys.FileSystem;
 import sys.io.File;
 #end
 
-//// idgaf about libraries
+//// idgaf about asset libraries
 @:access(openfl.display.BitmapData)
 class Paths
 {
@@ -38,41 +38,6 @@ class Paths
 		"hscript",
 		"hxs",
 	];
-
-
-	public static function getFileWithExtensions(scriptPath:String, extensions:Array<String>):Null<String> {
-		for (fileExt in extensions) {
-			var fullPath = getPath('$scriptPath.$fileExt');
-			if (fullPath != null)
-				return fullPath;
-		}
-
-		return null;
-	}
-
-	public static function isHScript(file:String){
-		for(ext in Paths.HSCRIPT_EXTENSIONS)
-			if(file.endsWith('.$ext'))
-				return true;
-		
-		return false;
-	}
-	public inline static function getHScriptPath(scriptPath:String):Null<String>
-	{
-		#if HSCRIPT_ALLOWED
-		return getFileWithExtensions(scriptPath, Paths.HSCRIPT_EXTENSIONS);
-		#else
-		return null;
-		#end
-	}
-
-	public inline static function hscript(key:String):Null<String> {
-		#if HSCRIPT_ALLOWED
-		return getFileWithExtensions(key, Paths.HSCRIPT_EXTENSIONS);
-		#else
-		return null;
-		#end
-	}
 
 	public static var localTrackedAssets:Array<String> = [];
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
@@ -92,12 +57,6 @@ class Paths
 
 	public static var whitePixel:flixel.graphics.frames.FlxFrame;
 
-	public static function excludeAsset(key:String)
-	{
-		if (!dumpExclusions.contains(key))
-			dumpExclusions.push(key);
-	}
-
 	public static function init() {
 		{ //ACTUAL white pixel, instead of 10x10 white pixels fuck flixel piece of shit good for nothing
 			var bd = new BitmapData(1, 1, true, 0xFFFFFFFF);
@@ -114,6 +73,12 @@ class Paths
 
 		PackManager.reloadPackList();
 		PackManager.refreshReadList();
+	}
+
+	public static function excludeAsset(path:String)
+	{
+		if (!dumpExclusions.contains(path))
+			dumpExclusions.push(path);
 	}
 
 	/// haya I love you for the base cache dump I took to the max
@@ -223,6 +188,15 @@ class Paths
 	public static inline function getPaths(key:String)
 		return new PackPathsIterator(key);
 
+	public static function getFileWithExtensions(scriptPath:String, extensions:Array<String>):Null<String> {
+		for (fileExt in extensions) {
+			var fullPath = getPath('$scriptPath.$fileExt');
+			if (fullPath != null)
+				return fullPath;
+		}
+
+		return null;
+	}
 
 	/*
 	inline static public function txt(key:String):String
@@ -249,19 +223,36 @@ class Paths
 		return getPath('fonts/$key');
 	}
 
-	static public function video(key:String, ext:String = "mp4"):String
+	public inline static function video(key:String, ext:String = "mp4"):String
 	{
 		return getPath('videos/$key.$ext');
 	}
 
-	static public function getShaderFragment(name:String):Null<String>
+	public inline static function getShaderFragment(name:String):Null<String>
 	{
 		return getPath('shaders/$name.frag');
 	}
 	
-	static public function getShaderVertex(name:String):Null<String>
+	public inline static function getShaderVertex(name:String):Null<String>
 	{
 		return getPath('shaders/$name.vert');
+	}
+
+	public inline static function getHScriptPath(scriptPath:String):Null<String>
+	{
+		#if HSCRIPT_ALLOWED
+		return getFileWithExtensions(scriptPath, Paths.HSCRIPT_EXTENSIONS);
+		#else
+		return null;
+		#end
+	}
+
+	public inline static function hscript(key:String):Null<String> {
+		#if HSCRIPT_ALLOWED
+		return getFileWithExtensions(key, Paths.HSCRIPT_EXTENSIONS);
+		#else
+		return null;
+		#end
 	}
 
 	inline static public function sound(key:String, ?library:String):Null<Sound>
@@ -294,6 +285,14 @@ class Paths
 		return track(song, "Inst");
 	}
 
+	public static function isHScript(file:String){
+		for(ext in Paths.HSCRIPT_EXTENSIONS)
+			if(file.endsWith('.$ext'))
+				return true;
+		
+		return false;
+	}
+		
 	inline static public function withoutEndingSlash(path:String)
 		return path.endsWith("/") ? path.substr(0, -1) : path;
 
@@ -394,12 +393,12 @@ class Paths
 	}
 	static public function getJson(path:String):Null<Dynamic>
 	{
-		var parsed:Null<Dynamic> = null;
 		var raw = Paths.getContent(path);
+		if (raw == null)
+			return null;
 
 		try {
-			if (raw != null)
-				parsed = Json.parse(raw);
+			return Json.parse(raw);
 		}
 		catch(e:haxe.Exception) {
 			var e = e.message;
@@ -429,7 +428,7 @@ class Paths
 			print('$path: $e');
 		}
 
-		return parsed;
+		return null;
 	}
 
 	inline static public function sparrowAtlas(key:String, ?library:String, allowGPU:Bool = true):FlxAtlasFrames
