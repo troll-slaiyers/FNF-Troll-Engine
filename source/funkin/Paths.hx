@@ -27,8 +27,11 @@ import sys.io.File;
 @:access(openfl.display.BitmapData)
 class Paths
 {
-	inline public static var IMAGE_EXT = "png";
-	inline public static var SOUND_EXT = "ogg";
+	inline public static final ASSETS_PATH:String = 'assets';
+	inline public static final CONTENT_PATH:String = 'content';
+
+	inline public static final IMAGE_EXT = "png";
+	inline public static final SOUND_EXT = "ogg";
 
 	public static final HSCRIPT_EXTENSIONS:Array<String> = ["hscript", "hxs",];
 	public static final SCRIPT_EXTENSIONS:Array<String> = [
@@ -76,13 +79,13 @@ class Paths
 	public static var currentTrackedSounds:Map<String, Sound> = [];
 
 	public static var dumpExclusions:Array<String> = [
-		'assets/music/freakyIntro.$SOUND_EXT',
-		'assets/music/freakyMenu.$SOUND_EXT',
-		'assets/music/breakfast.$SOUND_EXT',
-		'$contentFolderName/global/music/freakyIntro.$SOUND_EXT',
-		'$contentFolderName/global/music/freakyMenu.$SOUND_EXT',
-		'$contentFolderName/global/music/breakfast.$SOUND_EXT',
-		'assets/images/Garlic-Bread-PNG-Images.$IMAGE_EXT'
+		'$ASSETS_PATH/music/freakyIntro.$SOUND_EXT',
+		'$ASSETS_PATH/music/freakyMenu.$SOUND_EXT',
+		'$ASSETS_PATH/music/breakfast.$SOUND_EXT',
+		'$CONTENT_PATH/global/music/freakyIntro.$SOUND_EXT',
+		'$CONTENT_PATH/global/music/freakyMenu.$SOUND_EXT',
+		'$CONTENT_PATH/global/music/breakfast.$SOUND_EXT',
+		'$ASSETS_PATH/images/Garlic-Bread-PNG-Images.$IMAGE_EXT'
 	];
 	public static var graphicDumpExclusions:Array<FlxGraphic> = [];
 	public static var soundDumpExclusions:Array<Sound> = [];
@@ -703,7 +706,6 @@ class Paths
 	public static var currentPackId(get, set):String;
 	public static var packList(get, never):Array<String>;
 	public static var packMap(get, never):Map<String, Pack>;
-	public static var contentFolderName(get, never):String;
 
 	static inline function get_currentPack() return PackManager.currentPack;
 	static inline function set_currentPack(v:Pack) return PackManager.currentPack = v;
@@ -711,9 +713,12 @@ class Paths
 	static inline function set_currentPackId(v:String) return PackManager.currentPackId = v;
 	static inline function get_packList() return PackManager.packList;
 	static inline function get_packMap() return PackManager.packMap;
-	static inline function get_contentFolderName() return PackManager.CONTENT_PATH;
 	
 	#if ALLOW_DEPRECATION
+	@:deprecated('contentFolderName is deprecated! Use CONTENT_PATH instead.')
+	public static var contentFolderName(get, never):String;
+	static inline function get_contentFolderName() return CONTENT_PATH;
+
 	@:deprecated('currentModDirectory is deprecated! Use currentPackId instead.')
 	public static var currentModDirectory(get, set):String;
 	static inline function get_currentModDirectory() return currentPackId;

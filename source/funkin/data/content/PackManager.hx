@@ -1,6 +1,7 @@
 package funkin.data.content;
 
 import funkin.util.FileUtil;
+import funkin.Paths.CONTENT_PATH;
 
 // I chose to call them PACKS because of conflicts with functions from Paths (getContent, getFolders)
 // Here comes packman
@@ -8,8 +9,6 @@ import funkin.util.FileUtil;
 /** :v **/
 @:noScripting
 class PackManager {
-	public static final CONTENT_PATH:String = 'content';
-
 	public static var engineAssets(default, null):Pack = null;
 
 	public static var currentPackId(default, set):String = '';
@@ -136,7 +135,7 @@ class PackManager {
 		var list:Array<Pack> = [];
 
 		//// "assets" folder
-		engineAssets = new ContentFolder('assets', 'assets');
+		engineAssets = new ContentFolder('assets', Paths.ASSETS_PATH);
 		engineAssets.runsGlobally = true;
 		list.push(engineAssets);
 
