@@ -60,7 +60,10 @@ class TitleState extends MusicBeatState
 			Paths.clearStoredMemory();
 
 		persistentUpdate = true;
-		transIn = null; // No in transition it looks bad
+		
+		// No in transition it looks bad
+		// (if the game directly starts on the title screen, but since I added a loading screen that's not the case anymore)
+		// transIn = null; 
 
 		////
 		camFollow = new FlxPoint(640, 360);
