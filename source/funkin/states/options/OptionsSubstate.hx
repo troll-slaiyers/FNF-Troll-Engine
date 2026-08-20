@@ -73,6 +73,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				[
 					"masterVolume",
 					"songVolume",
+					"pauseVolume",
 					'sfxVolume',
 					"missVolume",
 					"hitsoundVolume", 
@@ -508,13 +509,17 @@ class OptionsSubstate extends MusicBeatSubstate
 					lastFlixelVolume = snappedVol;
 					FlxG.sound.showSoundTray(snappedVol > prevVol);
 				}
-
 			case 'sfxVolume':
 				playPreviewSound("scrollMenu", newVal * 0.01);
 			case 'missVolume':
 				playPreviewSound('missnote${1+Std.random(3)}', newVal * 0.01);
 			case 'hitsoundVolume':
 				playPreviewSound("hitsound", newVal * 0.01);
+			case 'pauseVolume':
+				if (PauseSubState.instance != null){
+					PauseSubState.instance.pauseMusic.fadeTween.cancel();
+					PauseSubState.instance.pauseMusic.volume = newVal * 0.01;
+				}
 		}
 	}
 

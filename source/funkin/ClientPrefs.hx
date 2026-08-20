@@ -198,6 +198,19 @@ class ClientPrefs {
 					"type" => "percent" // saved value is value / 100
 				]
 			},
+			"pauseVolume" => {
+				display: "Pause Volume",
+				desc: "The volume of pause menu music",
+				type: Number,
+				value: 0.75,
+				data: [
+					"suffix" => "%",
+					"min" => 0,
+					"max" => 100,
+					"step" => 1,
+					"type" => "percent" // saved value is value / 100
+				]
+			},
 			"masterVolume" => {
 				display: "Master Volume",
 				desc: "The volume of the game.",
