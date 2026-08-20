@@ -73,11 +73,12 @@ class NotefieldRenderer extends FlxBasic {
 	
 
 	override function draw(){
-		fieldTimer += FlxG.elapsed;
+		@:privateAccess
+		fieldTimer -= FlxG.game._elapsedMS;
 
-		if (fieldTimer >= 1.0/ClientPrefs.fieldFramerate) {
+		if (fieldTimer <= 0 || (ClientPrefs.fieldFramerate >= FlxG.stage.frameRate)) {
 			finalDrawQueue.resize(0);
-			fieldTimer = 0;
+			fieldTimer = 1.0 / ClientPrefs.fieldFramerate;
 			// Get all the drawing stuff from the fields
 			for(field in members){
 				if ((!field.exists || !field.visible) && !field.forcePreDraw) // maybe rename forcePreDraw to something that makes more sense (i.e forceDrawQueuing or some shit)
@@ -120,9 +121,9 @@ class NotefieldRenderer extends FlxBasic {
 						cameras: field.cameras
 					});
 				}
-		}
+			}
 
-		finalDrawQueue.sort(drawQueueSort); // TODO: Sort the *individual vertices* for better looking z-sorting
+			finalDrawQueue.sort(drawQueueSort); // TODO: Sort the *individual vertices* for better looking z-sorting
 		}
 
 		// Now that it's all sorted, it's rendering time!

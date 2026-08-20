@@ -145,8 +145,6 @@ class CutsceneSequence {
 @:noScripting
 class PlayState extends MusicBeatState
 {
-	public var disableCameraMovement:Bool = false;
-
 	public static function loadPlaylist(playlist:Array<BaseSong>, chartId:String) {
 		PlayState.loadSong(playlist[0], chartId);
 		PlayState.playlistSongs = playlist;
@@ -164,13 +162,6 @@ class PlayState extends MusicBeatState
 	public var endCutscenes:CutsceneSequence = new CutsceneSequence();
 
 	public var extraData:Map<String, Dynamic> = [];
-
-	#if ALLOW_DEPRECATION
-	var legacyOnCreatePost:Bool = false; // Can be set by scripts to make onCreatePost be called where it used to be (before the countdown and super.create)
-	// NOTE: Make this false probably before 1.0 or 1.1 releases
-	// true by default rn just for the sake of not breaking things
-	// You can set it to false in a script if you wanna make sure things dont break when its false tho
-	#end
 
 	public static var instance:PlayState;
 
@@ -233,42 +224,70 @@ class PlayState extends MusicBeatState
 
 	/** Songs can force this off prior to countdown start and modchart generation **/
 	public var centerNotefield:Bool = false;
+
 	/** 
 		Whether to save the score.  
 		Modcharted songs should set this to false if disableModcharts is true
 	**/
 	public var saveScore:Bool = true;
 
-	#if ALLOW_DEPRECATION
-	@:deprecated public var midScroll(get, set):Bool;
-	@:noCompletion function get_midScroll() return centerNotefield;
-	@:noCompletion function set_midScroll(v) return centerNotefield = v;
-	#end
-
 	////
-	public var worldCombos(default, set):Bool = false;
-
 	public var lastJudge(get, never):RatingSprite;
 	public var lastCombo(get, never):Array<RatingSprite>;
 
+	/** 
+		Where to display combo, judge and timing sprites.
+
+		If set to `true` sprites will be shown on `camGame` and sprite positions will be centered on the x and y values of their template.  
+
+		If set to `false` sprites will be shown on `camHUD` and sprite positions will be centered on the x and y values set on `ClientPrefs`  
+	**/
+	public var worldCombos(default, set):Bool = false;
+
+	/** 
+		Cameras used by `ratingGroup` and `timingTxt` by default.  
+	**/
 	private var defaultComboCameras:Array<FlxCamera> = [];
-
-	function set_worldCombos(v:Bool) {
-		defaultComboCameras[0] = v ? camGame : camHUD;
-		return worldCombos = v;
-	}
-
-	inline function get_lastJudge() return ratingGroup.lastJudge;
-	inline function get_lastCombo() return ratingGroup.lastCombo;
 
 	////
 	public var skipCountdown:Bool = false;
 	public var skipArrowStartTween:Bool = false;
 
 	////
+	/**
+		Id of the currently played song, should match the name of the song's folder
+	**/
+	public var songId:String = "";
+
+	/**
+		Length of the currently played song, in milliseconds.  
+	**/
+	public var songLength:Float = 0;
+
+	/**
+		Highscore of the currently played song.
+	**/
+	public var songHighscore:Int = 0;
+
+	/** 
+		Song tracks to be generated on `generateSong`
+	**/
+	public var songTrackNames:Array<String> = [];
+
+	////
+	/**
+		Display name of the currently played song.  
+		Name is read from `metadata.songName`, otherwise a capitalized version of `songId` is used.
+	**/
 	public var displayedSong:String;
+
+	/**
+		Display name of the chart of the current played song.
+	**/
 	public var displayedDifficulty:String;
-	public var metadata:SongMetadata; // metadata for the songs (artist, etc)
+
+	/** metadata for the songs (artist, charter, etc) **/
+	public var metadata:SongMetadata;
 
 	public var stats:Stats;
 	public var noteHits:Array<Float> = [];
@@ -305,6 +324,9 @@ class PlayState extends MusicBeatState
 	public var camZooming:Bool = false;
 	public var camZoomingMult:Float = 1.0;
 	public var camZoomingDecay:Float = 1.0;
+
+	/** Disable movement of `camFollowPos` **/
+	public var disableCameraMovement:Bool = false;
 
 	/**
 		Every how many beats should the camera bump.
@@ -386,19 +408,6 @@ class PlayState extends MusicBeatState
 	private var debugPrintGroup:FlxTypedGroup<DebugText> = new FlxTypedGroup<DebugText>();
 
 	////
-	public var songId:String = "";
-	public var songLength:Float = 0;
-	public var songHighscore:Int = 0;
-	public var songTrackNames:Array<String> = [];
-
-	#if ALLOW_DEPRECATION
-	/** Formatted song name **/
-	@:deprecated("songName is deprecated! use songId instead!")
-	public var songName(get, never):String;
-	function get_songName() return songId;
-	#end
-
-	////
 	public var generatedMusic:Bool = false;
 	public var startedSong:Bool = false;
 	public var startedCountdown:Bool = false;
@@ -419,9 +428,6 @@ class PlayState extends MusicBeatState
 
 	public var canReset:Bool = true;
 	public var canPause:Bool = true;
-
-	public var songHits:Int = 0;
-	public var songMisses:Int = 0;
 
 	var finishTimer:FlxTimer = null;
 	public var curCountdown:Countdown;
@@ -447,6 +453,9 @@ class PlayState extends MusicBeatState
 	private var buttonsArray:Array<Array<FlxGamepadInputID>>;
 
 	////
+	public var songHits:Int = 0;
+	public var songMisses:Int = 0;
+
 	public var songScore(get, set):Int;
 	public var totalPlayed(get, set):Float;
 	public var totalNotesHit(get, set):Float;
@@ -457,28 +466,6 @@ class PlayState extends MusicBeatState
 	public var ratingFC(get, set):String;
 	public var ratingStuff(get, set):Array<Array<Dynamic>>;
 	public var nps(get, set):Int;
-
-	@:noCompletion inline function get_songScore() return stats.score;
-	@:noCompletion inline function get_totalPlayed()return stats.totalPlayed;
-	@:noCompletion inline function get_totalNotesHit()return stats.totalNotesHit;
-	@:noCompletion inline function get_combo()return stats.combo;
-	@:noCompletion inline function get_cbCombo()return stats.cbCombo;
-	@:noCompletion inline function get_ratingName()return stats.grade;
-	@:noCompletion inline function get_ratingPercent()return stats.ratingPercent;
-	@:noCompletion inline function get_ratingFC()return stats.clearType;
-	@:noCompletion inline function get_ratingStuff() return stats.gradeSet;
-	@:noCompletion inline function get_nps()return stats.nps;
-
-	@:noCompletion inline function set_songScore(val:Int)return stats.score = val;
-	@:noCompletion inline function set_totalPlayed(val:Float)return stats.totalPlayed = val;
-	@:noCompletion inline function set_totalNotesHit(val:Float)return stats.totalNotesHit = val;
-	@:noCompletion inline function set_combo(val:Int)return stats.combo = val;
-	@:noCompletion inline function set_cbCombo(val:Int)return stats.cbCombo = val;
-	@:noCompletion inline function set_ratingName(val:String)return stats.grade = val;
-	@:noCompletion inline function set_ratingPercent(val:Float)return stats.ratingPercent = val;
-	@:noCompletion inline function set_ratingFC(val:String)return stats.clearType = val;
-	@:noCompletion inline function set_ratingStuff(val) return stats.gradeSet = val;
-	@:noCompletion inline function set_nps(val:Int)return stats.nps = val;
 
 	#if DISCORD_ALLOWED
 	// Discord RPC variables
@@ -508,6 +495,54 @@ class PlayState extends MusicBeatState
 	public var hudSkinMap:Map<String, FunkinHScript> = []; // Doing this so you can do shit like i.e having it swap between pixel and normal HUD
 
 	////
+	#if ALLOW_DEPRECATION
+	@:deprecated("midScroll is deprecated! use centerNotefield instead!")
+	@:noCompletion public var midScroll(get, set):Bool;
+	@:noCompletion function get_midScroll() return centerNotefield;
+	@:noCompletion function set_midScroll(v) return centerNotefield = v;
+
+	/** Formatted song name **/
+	@:deprecated("songName is deprecated! use songId instead!")
+	@:noCompletion public var songName(get, never):String;
+	@:noCompletion function get_songName() return songId;
+
+	var legacyOnCreatePost:Bool = false; // Can be set by scripts to make onCreatePost be called where it used to be (before the countdown and super.create)
+	// NOTE: Make this false probably before 1.0 or 1.1 releases
+	// true by default rn just for the sake of not breaking things
+	// You can set it to false in a script if you wanna make sure things dont break when its false tho
+	#end
+
+	////
+	@:noCompletion inline function get_songScore() return stats.score;
+	@:noCompletion inline function get_totalPlayed()return stats.totalPlayed;
+	@:noCompletion inline function get_totalNotesHit()return stats.totalNotesHit;
+	@:noCompletion inline function get_combo()return stats.combo;
+	@:noCompletion inline function get_cbCombo()return stats.cbCombo;
+	@:noCompletion inline function get_ratingName()return stats.grade;
+	@:noCompletion inline function get_ratingPercent()return stats.ratingPercent;
+	@:noCompletion inline function get_ratingFC()return stats.clearType;
+	@:noCompletion inline function get_ratingStuff() return stats.gradeSet;
+	@:noCompletion inline function get_nps()return stats.nps;
+
+	@:noCompletion inline function set_songScore(val:Int)return stats.score = val;
+	@:noCompletion inline function set_totalPlayed(val:Float)return stats.totalPlayed = val;
+	@:noCompletion inline function set_totalNotesHit(val:Float)return stats.totalNotesHit = val;
+	@:noCompletion inline function set_combo(val:Int)return stats.combo = val;
+	@:noCompletion inline function set_cbCombo(val:Int)return stats.cbCombo = val;
+	@:noCompletion inline function set_ratingName(val:String)return stats.grade = val;
+	@:noCompletion inline function set_ratingPercent(val:Float)return stats.ratingPercent = val;
+	@:noCompletion inline function set_ratingFC(val:String)return stats.clearType = val;
+	@:noCompletion inline function set_ratingStuff(val) return stats.gradeSet = val;
+	@:noCompletion inline function set_nps(val:Int)return stats.nps = val;
+
+	@:noCompletion function set_worldCombos(v:Bool) {
+		defaultComboCameras[0] = v ? camGame : camHUD;
+		return worldCombos = v;
+	}
+
+	@:noCompletion inline function get_lastJudge() return ratingGroup.lastJudge;
+	@:noCompletion inline function get_lastCombo() return ratingGroup.lastCombo;
+
 	@:noCompletion function set_hudSkin(value:String){		
 		hudSkinScript?.call("onSkinUnload");
 		hudSkinScript = getHudSkinScript(value);
@@ -546,6 +581,12 @@ class PlayState extends MusicBeatState
 		songSpeed = value;
 		noteKillOffset = 350 / songSpeed;
 		return value;
+	}
+
+	@:noCompletion function set_playbackRate(pitch:Float):Float {
+		FlxG.timeScale = pitch;
+		Conductor.changePitch(pitch);
+		return playbackRate = pitch;
 	}
 
 	// Loading
@@ -1513,13 +1554,6 @@ class PlayState extends MusicBeatState
 		}
 
 		return null;
-	}
-
-	@:noCompletion
-	private function set_playbackRate(pitch:Float):Float {
-		FlxG.timeScale = pitch;
-		Conductor.changePitch(pitch);
-		return playbackRate = pitch;
 	}
 
 	private function addTrack(trackName:String, ?sndAsset:FlxSoundAsset):FlxSound {
@@ -3011,7 +3045,10 @@ class PlayState extends MusicBeatState
 		callOnScripts("onDisplayComboPost", [combo]);
 	}
 
-	private function applyJudgmentData(judgeData:JudgmentData, hitData:HitResult, show:Bool = true) {
+	/**
+		@param show Whether the resulting judgment and combo sprites can be shown
+	**/
+	private function applyJudgmentData(judgeData:JudgmentData, hitData:HitResult, show:Bool = true):Void {
 		if(judgeData==null){
 			trace("You didnt give a valid JudgmentData to applyJudgmentData!");
 			return;
@@ -3020,14 +3057,13 @@ class PlayState extends MusicBeatState
 			return;
 
 		stats.score += Math.floor(judgeData.score * playbackRate);
-		health += (judgeData.health * 0.02) * (judgeData.health < 0 ? healthLoss : healthGain);
-		songHits++;
-
 		stats.calculateAccuracy(judgeData, hitData.hitDiff); // deals with accuracy calculations
 
-		if (perfectMode && stats.totalNotesHit < stats.totalPlayed)
-			doDeathCheck(true);
+		if (!stats.judgements.exists(judgeData.internalName))
+			stats.judgements[judgeData.internalName] = 0;
 
+		stats.judgements[judgeData.internalName]++;
+		stats.judged.push(hitData);
 
 		switch(judgeData.comboBehaviour){
 			default:
@@ -3038,37 +3074,40 @@ class PlayState extends MusicBeatState
 			case IGNORE:
 		}
 
-		if (!stats.judgements.exists(judgeData.internalName))
-			stats.judgements.set(judgeData.internalName, 0);
+		////
+		health += (judgeData.health * 0.02) * (judgeData.health < 0 ? healthLoss : healthGain);
+		songHits++;
 
-		stats.judgements.set(judgeData.internalName, stats.judgements.get(judgeData.internalName) + 1);
-		stats.judged.push(hitData);
+		if (perfectMode && stats.totalNotesHit < stats.totalPlayed)
+			doDeathCheck(true);
 
 		RecalculateRating();
 
 		hudSkinScript?.call("onApplyJudgmentDataPost", [judgeData, hitData, show]);
 		callOnScripts("onApplyJudgmentDataPost", [judgeData, hitData, show]);
 
-		if(show){
-			if(judgeData.hideJudge!=true)
+		if (show) {
+			if (judgeData.hideJudge != true)
 				displayJudgment(judgeData.internalName);
-			if(judgeData.comboBehaviour != IGNORE)
-				displayCombo(judgeData.comboBehaviour == BREAK ? (stats.cbCombo > 0 ? -stats.cbCombo : 0) : stats.combo);
+			if (judgeData.comboBehaviour != IGNORE)
+				displayCombo(judgeData.comboBehaviour == BREAK ? -stats.cbCombo : stats.combo);
 		}
 	}
 
 	private function applyNoteJudgment(note:Note):Null<JudgmentData>
 	{
-		if(note.hitResult.judgment == UNJUDGED)return null;
+		if (note.hitResult.judgment == UNJUDGED)
+			return null;
+		
 		var judgeData:JudgmentData = judgeManager.judgmentData.get(note.hitResult.judgment);
-		if(judgeData==null)return null;
+		if (judgeData == null)
+			return null;
 
 		var mutatedJudgeData:JudgmentData =  note.transformJudgeData(Reflect.copy(judgeData));
 
 		var ret:Dynamic = callOnScripts("transformJudgeData", [note, mutatedJudgeData]);
 		if (ret != null && ret != Globals.Function_Continue)
 			mutatedJudgeData = cast ret;
-		
 
 		applyJudgmentData(mutatedJudgeData, note.hitResult, true);
 
@@ -3083,8 +3122,11 @@ class PlayState extends MusicBeatState
 
 		note.ratingMod = judgeData.accuracy * 0.01;
 		note.rating = judgeData.internalName;
-		if (!note.noteSplashDisabled && judgeData.noteSplash)
-			spawnNoteSplashOnNote(note, field);
+
+		if (ClientPrefs.noteSplashes && !note.noteSplashDisabled && judgeData.noteSplash)
+			note.noteSplash = spawnNoteSplashOnNote(note, field);
+		else
+			note.noteSplash = null;
 
 		if (ClientPrefs.showMS && !note.hitResult.bot && !judgeData.hideJudge)
 		{
@@ -3493,14 +3535,11 @@ class PlayState extends MusicBeatState
 	}
 
 	public function spawnNoteSplashOnNote(note:Note, ?field:PlayField) {
-		if (ClientPrefs.noteSplashes && note != null) {
-			field ??= getFieldFromNote(note);
-
-			var strum:StrumNote = field.strumNotes[note.column];
-			if(strum != null) {
-				field.spawnSplash(note, splashSkin);
-			}
-		}
+		field ??= getFieldFromNote(note);
+		if (field.strumNotes[note.column] != null)
+			return field.spawnSplash(note, splashSkin)
+		else
+			return null;
 	}
 
 	#if HSCRIPT_ALLOWED

@@ -1200,12 +1200,13 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			doUpdateGridObjects = true;
 	}
 
-	function swapNoteSides(notes:Array<NoteData>) {
+	function swapNoteSides(notes:Array<ChartObject>) {
 		var shitToDo:Array<ChartingAction> = [];
 
 		for (note in notes) {
 			if (!NoteData.isNoteData(note))
 				continue;
+			var note:NoteData = cast note;
 
 			var ogCol = note.column;
 			var nuCol = (note.column + _song.keyCount) % (_song.keyCount * 2);
@@ -1220,12 +1221,12 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}
 	}
 
-	function duetNotes(toCopy:Array<NoteData>) {
+	function duetNotes(toCopy:Array<ChartObject>) {
 		if (toCopy.length == 0)
 			return;
 
 		//var copiedNotes:Array<NoteData> = [for (note in toCopy) note.clone()];
-		var copiedNotes:Array<NoteData> = [for (note in toCopy) if (NoteData.isNoteData(note)) note.clone()];
+		var copiedNotes:Array<NoteData> = [for (note in toCopy) if (NoteData.isNoteData(note)) (cast note:NoteData).clone()];
 		
 		for (note in copiedNotes) {
 			if (Math.floor(note.column / _song.keyCount) % 2 == 1)
@@ -1258,12 +1259,13 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		note.column += fieldIndex * _song.keyCount;
 	}
 
-	function mirrorNotes(notes:Array<NoteData>) {
+	function mirrorNotes(notes:Array<ChartObject>) {
 		var shitToDo:Array<ChartingAction> = [];
 		for (note in notes) {
 			if (!NoteData.isNoteData(note))
 				continue;
 
+			var note:NoteData = cast note;
 			var f = _mirrorNote.bind(note);
 			shitToDo.push(new DynamicAction(f, f));
 		}
@@ -2660,7 +2662,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 		playedSound.resize(0);
 		curRenderedNotes.forEachAlive(function(note:Note) {
-			if (selectedNotes.contains(note.chartData) || note.chartData == curSelectedEvent)
+			if (selectedNotes.contains(note.chartData) /*|| note.chartData == curSelectedEvent*/)
 				note.color = sineColor;
 			else
 				note.color = 0xFFFFFFFF;
@@ -2757,7 +2759,12 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			if (FlxG.keys.justPressed.DELETE) {
 				new GroupAction(
 					"Remove Notes",
-					[for (note in selectedNotes.copy()) new RemoveNoteAction(curSection, note)]
+					[for (obj in selectedNotes.copy()) {
+						if (NoteData.isNoteData(obj))
+							new RemoveNoteAction(curSection, cast obj);
+						else
+							new RemoveEventNoteAction(cast obj);
+					}]
 				);
 			}
 		}
@@ -3128,7 +3135,10 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				if (FlxG.keys.pressed.CONTROL) {
 					// Add
 					list = selectedNotes.copy();
-					for (data in overlapped) list.add(data);
+					for (data in overlapped) {
+						if (!list.contains(data))
+							list.add(data);
+					}
 				}
 				else if (FlxG.keys.pressed.ALT) {
 					// Subtract
@@ -3555,28 +3565,42 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 		var strumTime = selectedNotes.strumTime;
 		var strumStep:Float = Conductor.getStep(strumTime);
-		var endStep:Float = strumStep;
-		var sustainSteps:Float = 0;
+		var commonSustainLength:Null<Float> = selectedNotes.commonSustainLength;
 
-		if (selectedNotes.length > 0) {
-			var endTime = selectedNotes.endTime;
-			if (endTime != strumTime) {
-				endStep = Conductor.getStep(selectedNotes.endTime);
-				sustainSteps = endStep - strumStep;
+		////
+		var endStep:Float = {
+			var endTime:Float = strumTime;
+			for (note in selectedNotes) {
+				var noteEnd = note.strumTime;
+				if (NoteData.isNoteData(note))
+					noteEnd += (cast note:NoteData).sustainLength;
+				if (noteEnd > endTime)
+					endTime = noteEnd;
 			}
-		}
+			(endTime == strumTime) ? strumStep : Conductor.getStep(endTime);
+		};
 
-		labelSusLength.text = 'Sustain Length: (${Math.round(sustainSteps)} Steps)';
-		labelStrumTime.text = 'Strum Time: (Step ${sustainSteps > 0 ? '$strumStep - $endStep' : '$strumStep'})';
+		labelStrumTime.text = 'Strum Time: (Step ${endStep != strumStep ? '$strumStep - $endStep' : '$strumStep'})';
+
+		////
+		if (commonSustainLength == 0) {
+			labelSusLength.text = 'Sustain Length: (0 Steps)';
+		}
+		else if (commonSustainLength == null || strumStep != endStep) {
+			labelSusLength.text = 'Sustain Length: (---)';
+		}
+		else {
+			var endStep:Float = Conductor.getStep(strumTime + commonSustainLength);
+			labelSusLength.text = 'Sustain Length: (${Math.round(endStep - strumStep)} Steps)';
+		}
 	}
 
 	function updateNoteUI():Void
 	{
 		labelSelectedNotes.text = '${selectedNotes.length == 0 ? 'No' : Std.string(selectedNotes.length)} notes selected';
+		updateNoteSteps();
 
 		if (selectedNotes.length > 0) {
-			updateNoteSteps();
-
 			stepperStrumTime.value = selectedNotes.strumTime;
 			if (selectedNotes.commonSustainLength != null)
 				stepperSusLength.value = selectedNotes.commonSustainLength;
@@ -3947,7 +3971,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			var currentSection = _song.notes[curSection];
 			for (i in currentSection.sectionNotes) {
 				if (i != note.chartData) continue;
-				new RemoveNoteAction(curSection, i);
+				new RemoveNoteAction(curSection, cast i);
 				break;
 			}
 		}else {
@@ -4289,8 +4313,8 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	}
 }
 
-private abstract NoteSelection(Array<NoteData>) to Array<NoteData> {
-	public var array(get, never):Array<NoteData>;
+private abstract NoteSelection(Array<ChartObject>) to Array<ChartObject> {
+	public var array(get, never):Array<ChartObject>;
 	
 	public var length(get, never):Int;
 
@@ -4301,10 +4325,14 @@ private abstract NoteSelection(Array<NoteData>) to Array<NoteData> {
 	public var strumTime(get, set):Float;
 
 	/**
-		`lastNote.strumTime + lastNote.sustainLength`
+		Latest strum time between selected notes.
 	**/
-	public var endTime(get, never):Float;
+	public var lastStrumTime(get, set):Float;
 
+	/** 
+		Sustain length shared by all selected notes.  
+		If the selected notes don't have the same sustain length, this will be null.
+	**/
 	public var commonSustainLength(get, never):Null<Float>;
 
 	/** 
@@ -4314,21 +4342,25 @@ private abstract NoteSelection(Array<NoteData>) to Array<NoteData> {
 	public var noteType(get, never):Null<String>;
 
 	#if true
-	public function new(?arr:Array<NoteData>) {
+	public function new(?arr:Array<ChartObject>) {
 		this = arr ?? [];
 		sort();
 	}
 
-	public inline function add(note:NoteData) {
+	public inline function add(note:ChartObject) {
 		var i:Int = 0;
 		while (i < this.length && this[i].strumTime < note.strumTime) i++;
 		this.insert(i, note);
 	}
 
-	public inline function remove(note:NoteData)
+	public inline function applyOffset(timeOffset:Float)
+		for (note in this)
+			note.strumTime += timeOffset;
+
+	public inline function remove(note:ChartObject)
 		this.remove(note);
 
-	public inline function contains(note:NoteData):Bool
+	public inline function contains(note:ChartObject):Bool
 		return this.indexOf(note) >= 0;
 
 	public inline function copy():NoteSelection
@@ -4342,7 +4374,7 @@ private abstract NoteSelection(Array<NoteData>) to Array<NoteData> {
 	#end
 
 	#if true
-	inline function get_array():Array<NoteData>
+	inline function get_array():Array<ChartObject>
 		return this;
 
 	inline function get_length():Int
@@ -4352,37 +4384,64 @@ private abstract NoteSelection(Array<NoteData>) to Array<NoteData> {
 		return this[0].strumTime; // ARRAY SHOULD BE SORTED BY TIME
 
 	inline function set_strumTime(v:Float):Float {
-		var delta:Float = v - this[0].strumTime;
-		for (note in this)
-			note.strumTime += delta;
+		applyOffset(v - strumTime);
 		return v;
 	}
 
-	inline function get_commonSustainLength():Null<Float> {
-		var common:Null<Float> = this[0]?.sustainLength;
+	inline function get_lastStrumTime():Float
+		return this[this.length - 1].strumTime; // ARRAY SHOULD BE SORTED BY TIME
 
-		for (note in this) {
-			if (note.sustainLength != common) {
-				common = null;
-				break;
+	inline function set_lastStrumTime(v:Float):Float {
+		applyOffset(v - lastStrumTime);
+		return v;	
+	}
+
+	inline function get_commonSustainLength():Null<Float> {
+		var startIdx = -1;
+		var common:Null<Float> = null;
+
+		for (i => obj in this) {
+			if (NoteData.isNoteData(obj)) {
+				var obj:NoteData = cast obj;
+				startIdx = i;
+				common = obj.sustainLength;
+				break;	
+			}
+		}
+
+		if (startIdx != -1) {
+			for (i in startIdx...this.length) {
+				var note:NoteData = cast this[i];
+				if (NoteData.isNoteData(note) && note.sustainLength != common) {
+					common = null;
+					break;
+				}
 			}
 		}
 
 		return common;
 	}
 
-	inline function get_endTime():Float {
-		var lastNote = this[this.length - 1];
-		return lastNote.strumTime + lastNote.sustainLength;
-	}
-
 	inline function get_noteType():Null<String> {
-		var common:Null<String> = this[0]?.noteType;
+		var startIdx = -1;
+		var common:Null<String> = null;
 
-		for (note in this) {
-			if (note.noteType != common) {
-				common = null;
-				break;
+		for (i => obj in this) {
+			if (NoteData.isNoteData(obj)) {
+				var obj:NoteData = cast obj;
+				startIdx = i;
+				common = obj.noteType;
+				break;	
+			}
+		}
+
+		if (startIdx != -1) {
+			for (i in startIdx...this.length) {
+				var note:NoteData = cast this[i];
+				if (NoteData.isNoteData(note) && note.noteType != common) {
+					common = null;
+					break;
+				}
 			}
 		}
 
@@ -4391,7 +4450,7 @@ private abstract NoteSelection(Array<NoteData>) to Array<NoteData> {
 	#end
 
 	////
-	function _sort(a:NoteData, b:NoteData):Int
+	function _sort(a:ChartObject, b:ChartObject):Int
 		return FlxSort.byValues(FlxSort.ASCENDING, a.strumTime, b.strumTime);
 }
 
@@ -4572,10 +4631,11 @@ private class ChangeMustHitSectionAction extends ChartingAction {
 private class ChangeSustainAction extends NoteAction {
 	public var change:Float;
 
-	public function new(noteData:NoteData, value:Float, isAbs:Bool = false) {
+	public function new(noteData:ChartObject, value:Float, isAbs:Bool = false) {
 		if (!NoteData.isNoteData(noteData))
 			return;
 
+		var noteData:NoteData = cast noteData;
 		this.noteData = noteData;
 		this.change = isAbs ? value - noteData.sustainLength : value;
 		if (this.change < 0)
@@ -4784,8 +4844,16 @@ private class RemoveEventNoteAction extends ChartingAction {
 private class AddEventNoteAction extends ChartingAction {
 	var eventData:PsychEventNote;
 
+	////
+	var previousSelected:NoteSelection;
+	var newSelected:NoteSelection;
+
 	public function new(eventData:PsychEventNote) {
 		this.eventData = eventData;
+		////
+		this.newSelected = new NoteSelection(cast [eventData]);
+		this.previousSelected = instance.selectedNotes;
+		////
 		super();
 	}
 
@@ -4796,6 +4864,11 @@ private class AddEventNoteAction extends ChartingAction {
 		instance.subEventIdx = 0;
 		instance.curSelectedEvent = eventData;
 		instance.changeEventSelected();
+
+		////
+		instance.selectedNotes = newSelected;
+		instance.colorSine = 0.0;
+		instance.doUpdateNoteUI = true;
 	}
 
 	public function undo() {
@@ -4807,6 +4880,11 @@ private class AddEventNoteAction extends ChartingAction {
 			instance.curSelectedEvent = null;
 			instance.changeEventSelected();
 		}
+
+		////
+		instance.selectedNotes = previousSelected;
+		instance.colorSine = 0.0;
+		instance.doUpdateNoteUI = true;
 	}
 
 	public function toString() {
@@ -4850,7 +4928,7 @@ private class SelectNotesAction extends ChartingAction {
 	public var prevSelected:NoteSelection;
 	public var prevNoteType:String;
 
-	public function new(list:Array<NoteData>) {
+	public function new(list:Array<ChartObject>) {
 		// if selecting notes, or deselecting notes
 		if (list.length > 0 || instance.selectedNotes.length > 0) {
 			this.list = new NoteSelection(list);
@@ -4957,7 +5035,11 @@ private class ChangeNoteTypeAction extends NoteAction {
 	public var newType:String;
 	public var prevType:String;
 
-	public function new(noteData:NoteData, newType:String) {
+	public function new(noteData:ChartObject, newType:String) {
+		if (!NoteData.isNoteData(noteData))
+			return;
+
+		var noteData:NoteData = cast noteData;
 		this.noteData = noteData;
 		this.newType = newType;
 		this.prevType = noteData.noteType;
@@ -5039,12 +5121,10 @@ private class GroupAction extends ChartingAction {
 	final name:String;
 	
 	public function new(name:String, actions:Array<ChartingAction>) {
-		if (actions.length > 0) {
-			if (actions.length > 1) {
-				this.name = name;
-				for (action in actions)
-					action.silent = true;
-			}
+		if (actions.length > 1) {
+			this.name = name;
+			for (action in actions)
+				action.silent = true;
 			super();
 		}
 	}

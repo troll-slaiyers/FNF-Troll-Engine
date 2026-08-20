@@ -205,13 +205,29 @@ class MainMenuState extends MusicBeatState
 		{
 			if (controls.UI_UP_P)
 			{
-				changeItem(-1);
+				#if FLX_MOUSE
+				FlxG.mouse.visible = false;
+				#end
+				changeSelection(-1);
 			}
 
 			if (controls.UI_DOWN_P)
 			{
-				changeItem(1);
+				#if FLX_MOUSE
+				FlxG.mouse.visible = false;
+				#end
+				changeSelection(1);
 			}
+
+			#if FLX_MOUSE
+			if (FlxG.mouse.deltaScreenX != 0 || FlxG.mouse.deltaScreenY != 0)
+			{
+				FlxG.mouse.visible = true;
+				var newIndex = checkMouseOverlap();
+				if (newIndex != -1 && newIndex != curSelected)
+					changeSelection(newIndex, true);
+			}
+			#end
 
 			if (controls.BACK)
 			{
@@ -223,6 +239,17 @@ class MainMenuState extends MusicBeatState
 			{
 				onSelected();
 			}
+			#if FLX_MOUSE
+			else if (FlxG.mouse.justPressed)
+			{
+				var newIndex = checkMouseOverlap();
+				if (newIndex != -1) {
+					if (newIndex != curSelected)
+						changeSelection(newIndex, true);
+					onSelected();
+				}
+			}
+			#end
 			#if desktop
 			else if (FlxG.keys.anyJustPressed(debugKeys))
 			{
@@ -246,20 +273,56 @@ class MainMenuState extends MusicBeatState
 			}
 		}
 
+		#if FLX_MOUSE
+		if (selectedSomethin)
+			FlxG.mouse.visible = false;
+		#end
+
 		super.update(elapsed);
 	}
 
-	function changeItem(huh:Int = 0)
-	{
-		if (huh != 0)
-			FlxG.sound.play(Paths.sound('scrollMenu'));
-		
-		curSelected += huh;
+	function checkMouseOverlap():Int {
+		var newIndex:Int = -1;
 
-		if (curSelected >= menuItems.length)
-			curSelected = 0;
-		if (curSelected < 0)
-			curSelected = menuItems.length - 1;
+		#if FLX_MOUSE
+		var closestDistance:Float = -1;
+		var mousePos = FlxG.mouse.getPositionInCameraView();
+		var objBounds = flixel.math.FlxRect.get();
+		var objPos = flixel.math.FlxPoint.get();
+
+		for (obj in menuItems) {
+			obj.getScreenBounds(objBounds);
+
+			// Check if the mouse overlaps the object
+			if (!objBounds.containsPoint(mousePos))
+				continue;
+
+			// Get object midpoint
+			objPos.set(objBounds.x + objBounds.width * 0.5, objBounds.y + objBounds.height * 0.5);
+
+			var distance = objPos.distanceTo(mousePos);
+			if (closestDistance == -1 || distance < closestDistance) {
+				newIndex = obj.ID;
+				closestDistance = distance;
+			}
+		}
+
+		mousePos.put();
+		objBounds.put();
+		objPos.put();
+		#end
+
+		return newIndex;
+	}
+
+	function changeSelection(value:Int = 0, isAbs:Bool = false)
+	{
+		var prevSelected = curSelected;
+
+		curSelected = isAbs ? value : CoolUtil.updateIndex(curSelected, value, menuItems.length);
+
+		if (curSelected != prevSelected)
+			FlxG.sound.play(Paths.sound('scrollMenu'));
 
 		menuItems.forEach((spr:FlxSprite)->{
 			if (spr.ID == curSelected) {
@@ -267,11 +330,18 @@ class MainMenuState extends MusicBeatState
 				spr.centerOffsets();
 
 				var add:Float = (menuItems.length > 4) ? (menuItems.length * 8) : 0;
-				camFollow.setPosition(spr.getGraphicMidpoint().x, spr.getGraphicMidpoint().y - add);
+				var mid = spr.getGraphicMidpoint();
+				camFollow.setPosition(mid.x, mid.y - add);
+				mid.put();
 			}else {
 				spr.animation.play('idle');
 				spr.updateHitbox();
 			}
 		});
 	}
+
+	#if ALLOW_DEPRECATION
+	@:deprecated inline function changeItem(huh:Int = 0)
+		changeSelection(huh);
+	#end
 }

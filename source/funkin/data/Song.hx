@@ -95,10 +95,8 @@ class Song extends BaseSong
 	public function getCharts():Array<String>
 		return _charts ?? (_charts = _getCharts());
 
-	@:deprecated
-	public function play(chartId:String = '')
-		Song.playSong(this, getChartId(chartId));
-
+	public inline function play(chartId:String = ''):Void
+		Song.playSong(this, chartId);
 
 	private function _getCharts():Array<String>
 	{		
@@ -126,66 +124,28 @@ class Song extends BaseSong
 		return (diff=="" || diff=="normal") ? "" : '-$diff';
 	}
 
-	public static function sortChartDifficulties(a:String, b:String) {
-		// stolen from v-slice lol!
-
-		a = a.toLowerCase();
-		b = b.toLowerCase();
-		if(a==b)return 0;
-
-		var aHasDefault = defaultDifficultyOrdering.contains(a);
-		var bHasDefault = defaultDifficultyOrdering.contains(b);
-		if (aHasDefault && bHasDefault)
-			return defaultDifficultyOrdering.indexOf(a) - defaultDifficultyOrdering.indexOf(b);
-		else if(aHasDefault)
-			return 1;
-		else if(bHasDefault)
-			return -1;
-
-		return a > b ? -1 : 1;
+	public inline static function sortChartDifficulties(a:String, b:String) {
+		return CoolUtil.stringSort(defaultDifficultyOrdering, a.toLowerCase(), b.toLowerCase());
 	}
 
 	/** Return an array of strings related to the song's credits **/
-	public static function getMetadataInfo(metadata:SongMetadata):Array<String> {
-		var info:Array<String> = [];
-		
-		inline function pushInfo(str:String) {
-			for (string in str.split('\n'))
-				info.push(string);
-		}
-
-		if (metadata != null) {
-			if (metadata.artist != null && metadata.artist.length > 0)		
-				pushInfo("Artist: " + metadata.artist);
-
-			if (metadata.charter != null && metadata.charter.length > 0)
-				pushInfo("Chart: " + metadata.charter);
-
-			if (metadata.modcharter != null && metadata.modcharter.length > 0)
-				pushInfo("Modchart: " + metadata.modcharter);
-		}
-
-		if (metadata != null && metadata.extraInfo != null) {
-			for (extraInfo in metadata.extraInfo)
-				pushInfo(extraInfo);
-		}
-
-		return info;
+	public inline static function getMetadataInfo(metadata:SongMetadata):Array<String> {
+		return ChartData.getMetadataInfo(metadata);
 	}
 
 	/** Loads a singular song to be played on PlayState **/
-	static public function loadSong(song:BaseSong, ?difficulty:String) {
-		PlayState.loadPlaylist([song], difficulty);
+	public inline static function loadSong(song:BaseSong, chartId:String = "") {
+		PlayState.loadPlaylist([song], song.getChartId(chartId));
 	}
 
 	/** Loads a singular song to be played on PlayState, then switches to it **/
-	static public function playSong(song:BaseSong, ?difficulty:String)
+	public inline static function playSong(song:BaseSong, chartId:String = "")
 	{
-		loadSong(song, difficulty);
+		loadSong(song, chartId);
 		switchToPlayState();
 	}
 
-	static public function switchToPlayState()
+	public inline static function switchToPlayState()
 	{
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.volume = 0;

@@ -85,6 +85,8 @@ class Paths
 	public static var graphicDumpExclusions:Array<FlxGraphic> = [];
 	public static var soundDumpExclusions:Array<Sound> = [];
 
+	public static var whitePixel:flixel.graphics.frames.FlxFrame;
+
 	public static function excludeAsset(key:String)
 	{
 		if (!dumpExclusions.contains(key))
@@ -92,6 +94,13 @@ class Paths
 	}
 
 	public static function init() {
+		{ //ACTUAL white pixel, instead of 10x10 white pixels fuck flixel piece of shit good for nothing
+			var bd = new BitmapData(1, 1, true, 0xFFFFFFFF);
+			var graphic:FlxGraphic = FlxG.bitmap.add(bd, true, "whitePixel");
+			graphic.persist = true;
+			whitePixel = graphic.imageFrame.frame;
+			graphicDumpExclusions.push(graphic);
+		}
 		graphicDumpExclusions.push(FlxG.bitmap.whitePixel.parent);
 
 		#if READ_EMBEDDED_ASSETS

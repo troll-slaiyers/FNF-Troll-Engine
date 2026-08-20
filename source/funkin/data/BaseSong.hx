@@ -17,7 +17,7 @@ abstract class BaseSong
 		this.folder = folder;
 	}
 
-	public function toString()
+	public function toString():String
 		return '$folder:$songId';
 
 	/**

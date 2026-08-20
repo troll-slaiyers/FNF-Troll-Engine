@@ -12,8 +12,9 @@ class HScriptModifier extends Modifier implements IScriptedClass
 	public var script:FunkinHScript = null;
 	public var name:String = "unknown";
 
-	public function new(modMgr:ModManager, ?parent:Modifier)
+	public function new(modMgr:ModManager, ?parent:Modifier, expr:hscript.Expr, name:String)
 	{
+		this.script = FunkinHScript.fromExpr(expr, expr.origin, _scriptEnums, false, new InstanceInterp(this));
 		super(modMgr, parent);
 	}
 
@@ -27,38 +28,35 @@ class HScriptModifier extends Modifier implements IScriptedClass
 		return script != null && script.exists(call);
 	}
 
-	@:noCompletion
-	private static final _scriptEnums:Map<String, Dynamic> = [
-		"NOTE_MOD" => NOTE_MOD,
-		"MISC_MOD" => MISC_MOD,
-
-		"FIRST" => FIRST,
-		"PRE_REVERSE" => PRE_REVERSE,
-		"REVERSE" => REVERSE,
-		"POST_REVERSE" => POST_REVERSE,
-		"DEFAULT" => DEFAULT,
-		"LAST" => LAST
-	];
-
-	public static function fromString(modMgr:ModManager, ?parent:Modifier, scriptSource:String):HScriptModifier
+	public static function fromString(modMgr:ModManager, ?parent:Modifier, scriptSource:String, scriptName:String = "HScriptModifier"):HScriptModifier
 	{
-		var mod = new HScriptModifier(modMgr, parent);
-		mod.script = FunkinHScript.fromString(scriptSource, "HScriptModifier", _scriptEnums, false, new InstanceInterp(mod));
-		return mod; 
+		var expr = FunkinHScript.parseString(scriptSource, scriptName);
+		return new HScriptModifier(modMgr, parent, expr, scriptName);
 	}
 
 	public static function fromName(modMgr:ModManager, ?parent:Modifier, scriptName:String):Null<HScriptModifier>
 	{		
-		var filePath:String = Paths.getHScriptPath('modifiers/$scriptName');
-		if(filePath == null){
+		var filePath:Null<String> = Paths.getHScriptPath('modifiers/$scriptName');
+		if (filePath == null) {
 			trace('Modifier script: $scriptName not found!');
 			return null;
 		}
 
-		var mod = new HScriptModifier(modMgr, parent);
-		mod.name = scriptName;
-		mod.script = FunkinHScript.fromFile(filePath, filePath, _scriptEnums, false, new InstanceInterp(mod));
-		return mod;
+		var expr = FunkinHScript.parseFile(filePath);
+		if (expr == null) return null;
 
+		return new HScriptModifier(modMgr, parent, expr, scriptName);
 	}
 }
+
+private final _scriptEnums:Map<String, Dynamic> = [
+	"NOTE_MOD" => NOTE_MOD,
+	"MISC_MOD" => MISC_MOD,
+
+	"FIRST" => FIRST,
+	"PRE_REVERSE" => PRE_REVERSE,
+	"REVERSE" => REVERSE,
+	"POST_REVERSE" => POST_REVERSE,
+	"DEFAULT" => DEFAULT,
+	"LAST" => LAST
+];

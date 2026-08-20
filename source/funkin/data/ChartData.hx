@@ -374,9 +374,43 @@ class ChartData
 			return {inst: instTracks, player: [playerTrack], opponent: [opponentTrack]};
 		}
 	}
+
+	/** Return an array of strings related to the song's credits **/
+	public static function getMetadataInfo(metadata:SongMetadata):Array<String> {
+		var info:Array<String> = [];
+		
+		inline function pushInfo(str:String) {
+			for (string in str.split('\n'))
+				info.push(string);
+		}
+
+		if (metadata != null) {
+			if (metadata.artist != null && metadata.artist.length > 0)		
+				pushInfo("Artist: " + metadata.artist);
+
+			if (metadata.charter != null && metadata.charter.length > 0)
+				pushInfo("Chart: " + metadata.charter);
+
+			if (metadata.modcharter != null && metadata.modcharter.length > 0)
+				pushInfo("Modchart: " + metadata.modcharter);
+		}
+
+		if (metadata != null && metadata.extraInfo != null) {
+			for (extraInfo in metadata.extraInfo)
+				pushInfo(extraInfo);
+		}
+
+		return info;
+	}
 }
 
-abstract NoteData(Array<Dynamic>) to Array<Dynamic>
+abstract ChartObject(Array<Dynamic>) to Array<Dynamic> from Array<Dynamic> {
+	public var strumTime(get, set):Float;
+	inline function get_strumTime() return this[0];
+	inline function set_strumTime(value:Float) return this[0] = value;
+}
+
+abstract NoteData(Array<Dynamic>) to Array<Dynamic> to ChartObject
 {
 	public var strumTime(get, set):Float;
 	public var column(get, set):Int;
@@ -427,7 +461,7 @@ abstract NoteData(Array<Dynamic>) to Array<Dynamic>
 		return data != null && Std.isOfType(data[0], Float) && Std.isOfType(data[1], Int) && data[1] >= 0;
 }
 
-abstract PsychEventNote(Array<Dynamic>)// from Array<Dynamic> to Array<Dynamic>
+abstract PsychEventNote(Array<Dynamic>) to ChartObject// from Array<Dynamic> to Array<Dynamic>
 {
 	public var strumTime(get, set):Float;
 	public var subEventsData(get, set):Array<PsychSubEventData>;
