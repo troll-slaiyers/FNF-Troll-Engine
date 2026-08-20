@@ -167,15 +167,6 @@ class PauseSubState extends MusicBeatSubstate
 		regenMenu();
 		regenInfo();
 		playMusic();
-
-		/*if(game != null) {
-			game.signals.optionsChanged.add((options) -> {
-				if (options.contains("pauseVolume")) {
-					pauseMusic.fadeTween.cancel();
-					pauseMusic.volume = ClientPrefs.pauseVolume;
-				}
-			});
-		}*/
 	}
 
 	override public function update(elapsed:Float) {
