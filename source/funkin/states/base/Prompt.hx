@@ -36,8 +36,7 @@ class Prompt extends MusicBeatSubstate
 		super.create();
 
 		var textshit = new ScrollText(0, 0, 0);
-		textshit.font = "troll-ui/fonts/ibmplexmono/semibold.ttf";
-		textshit.size = 12;
+		textshit.size = 16;
 		textshit.text = theText;
 		textshit.alignment = LEFT;
 		textshit.scrollFactor.set();
