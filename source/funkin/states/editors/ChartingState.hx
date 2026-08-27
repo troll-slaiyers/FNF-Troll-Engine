@@ -148,6 +148,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 	public static var GRID_SIZE:Int = 40;
 	public static var GRID_HALF:Float = GRID_SIZE * 0.5;
+	public static var SUS_WIDTH:Float = 8;
 
 	var _session(get, set):ChartingStateSession;
 	function set__session(s:ChartingStateSession) {Reflect.setField(_song, "_chartEditor", s); return s;}
@@ -202,15 +203,19 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 	var dummyArrow:FlxSprite;
 
+	var noteObjCache = new haxe.ds.ObjectMap<NoteData, EditorNote>();
+	/** Group used for recycling hold sprites **/
+	var sustainRecycleBin = new FlxTypedGroup<FlxSprite>();
+
 	var prevRenderedSustains:FlxTypedGroup<FlxSprite>;
-	var prevRenderedNotes:FlxTypedGroup<Note>;
+	var prevRenderedNotes:FlxTypedGroup<EditorNote>;
 
 	var curRenderedSustains:FlxTypedGroup<FlxSprite>;
-	var curRenderedNotes:FlxTypedGroup<Note>;
-	var curRenderedNoteType:FlxTypedGroup<FlxText>;
+	var curRenderedNotes:FlxTypedGroup<EditorNote>;
+	var curRenderedNoteType:FlxTypedGroup<AttachedFlxText>;
 
 	var nextRenderedSustains:FlxTypedGroup<FlxSprite>;
-	var nextRenderedNotes:FlxTypedGroup<Note>;
+	var nextRenderedNotes:FlxTypedGroup<EditorNote>;
 
 	var prevGridBG:FlxSprite;
 	var gridBG:FlxSprite;
@@ -415,15 +420,20 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		dummyArrow = CoolUtil.blankSprite(GRID_SIZE, GRID_SIZE);
 		dummyArrow.visible = false;
 
+		// adding it to the state so that the objects can get destroyed
+		sustainRecycleBin = new FlxTypedGroup();
+		sustainRecycleBin.exists = false;
+		add(sustainRecycleBin);
+
 		prevRenderedSustains = new FlxTypedGroup<FlxSprite>();
-		prevRenderedNotes = new FlxTypedGroup<Note>();
+		prevRenderedNotes = new FlxTypedGroup();
 
 		curRenderedSustains = new FlxTypedGroup<FlxSprite>();
-		curRenderedNotes = new FlxTypedGroup<Note>();
-		curRenderedNoteType = new FlxTypedGroup<FlxText>();
+		curRenderedNotes = new FlxTypedGroup();
+		curRenderedNoteType = new FlxTypedGroup();
 
 		nextRenderedSustains = new FlxTypedGroup<FlxSprite>();
-		nextRenderedNotes = new FlxTypedGroup<Note>();
+		nextRenderedNotes = new FlxTypedGroup();
 
 		selectionBoxSpr = new FlxSprite();
 		selectionBoxSpr.makeGraphic(1, 1, 0xFF87BDD9);
@@ -2683,7 +2693,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		colorSine += elapsed;
 
 		playedSound.resize(0);
-		curRenderedNotes.forEachAlive(function(note:Note) {
+		curRenderedNotes.forEachAlive(function(note:EditorNote) {
 			if (selectedNotes.contains(note.chartData) /*|| note.chartData == curSelectedEvent*/) {
 				note.setColorTransform(sineCol.redFloat, sineCol.greenFloat, sineCol.blueFloat, 1.0, sineBrt, sineBrt, sineBrt, 0);
 			}
@@ -3022,11 +3032,11 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			curDummyY = null;
 		}
 
-		var overlappedObj:Note = null;
+		var overlappedObj:EditorNote = null;
 		var startSelectionBox:Bool = false;
 
-		inline function getOverlappedNote():Note {
-			var note:Note = null;
+		inline function getOverlappedNote():EditorNote {
+			var note:EditorNote = null;
 			for (obj in curRenderedNotes) {
 				if (FlxG.mouse.overlaps(obj)) {
 					note = obj;
@@ -3036,13 +3046,13 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			return note;
 		}
 
-		inline function setNoteNoteType(note:Note, noteType:String) {
+		inline function setNoteNoteType(note:EditorNote, noteType:String) {
 			if (note.column < 0)
 				return;
 			new ChangeNoteTypeAction(note.chartData, noteType);
 		}
 
-		inline function selectObject(obj:Note, additional:Bool = false) {
+		inline function selectObject(obj:EditorNote, additional:Bool = false) {
 			if (obj.column < 0) {
 				curSelectedEvent = obj.chartData;
 				subEventIdx = Std.int(curSelectedEvent.eventData.length) - 1;
@@ -3222,7 +3232,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	/** Creates the currently visible sections grid background and their objects (notes, events, waveform) **/
 	function reloadGridLayer(updateWaveform:Bool = false) 
 	{
-		wipeGroup(gridLayer);
+		nukeGroup(gridLayer);
 		
 		////
 		var gridWidth:Int = 1 + _song.keyCount * 2;
@@ -3692,9 +3702,15 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		return '$mins:${secs.length < 2 ? '0' + secs : secs}';
 	}
 
-	inline function wipeGroup(group:FlxTypedGroup<Dynamic>)
+	inline function nukeGroup(group:FlxTypedGroup<Dynamic>)
 	{
 		for (obj in group) obj.destroy();
+		group.clear();
+	}
+
+	inline function genocideGroup(group:FlxTypedGroup<Dynamic>)
+	{
+		for (obj in group) obj.kill();
 		group.clear();
 	}
 
@@ -3703,13 +3719,15 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 	/** Creates the notes and event sprites from the currently visible sections **/
 	function updateGridObjects():Void
 	{
-		wipeGroup(curRenderedNotes);
-		wipeGroup(curRenderedSustains);
-		wipeGroup(curRenderedNoteType);
-		wipeGroup(nextRenderedNotes);
-		wipeGroup(nextRenderedSustains);
-		wipeGroup(prevRenderedNotes);
-		wipeGroup(prevRenderedSustains);
+		genocideGroup(curRenderedSustains);
+		genocideGroup(nextRenderedSustains);
+		genocideGroup(prevRenderedSustains);
+
+		nukeGroup(curRenderedNotes);
+		nukeGroup(nextRenderedNotes);
+		nukeGroup(prevRenderedNotes);
+
+		genocideGroup(curRenderedNoteType);
 
 		// get last bpm
 		var daBPM:Float = _song.bpm;
@@ -3732,7 +3750,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			var prevSection = curSection-1;
 			for (i in _song.notes[prevSection].sectionNotes)
 			{
-				var note:Note = setupNoteData(i, prevSection);
+				var note:EditorNote = setupNoteData(i, prevSection);
 				note.alpha = 0.6;
 				nextRenderedNotes.add(note);
 				if (note.sustainLength > 0)
@@ -3745,7 +3763,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		// CURRENT SECTION
 		for (i in _song.notes[curSection].sectionNotes)
 		{
-			var note:Note = setupNoteData(i, curSection);
+			var note:EditorNote = setupNoteData(i, curSection);
 			curRenderedNotes.add(note);
 			if (note.sustainLength > 0)
 			{
@@ -3757,9 +3775,11 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 				var displayString:String = (typeIdx > 0) ? Std.string(typeIdx) : note.noteType;
 				var size = (typeIdx > 0) ? 24 : 16;
 
-				var daText:AttachedFlxText = new AttachedFlxText(0, 0, GRID_SIZE + GRID_HALF, displayString, 24);
+				var daText:AttachedFlxText = curRenderedNoteType.recycle(null, AttachedFlxText.new.bind(0, 0, 0, null, 8, true));
+				daText.text = displayString;
+				daText.fieldWidth = GRID_SIZE + GRID_HALF;
 				daText.setFormat(Paths.font("vcr.ttf"), size, FlxColor.WHITE, CENTER);
-				daText.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1);
+				daText.setBorderStyle(FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK, 1);
 				if (daText.height > daText.fieldWidth) {
 					daText.setGraphicSize(daText.width, daText.fieldWidth);
 					daText.updateHitbox();
@@ -3778,13 +3798,15 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			var t = fuckFloatingPoints(i.strumTime);
 			if (startThing <= t && t < endThing)
 			{
-				var note:Note = setupEventData(i, curSection);
+				var note:EditorNote = setupEventData(i, curSection);
 				curRenderedNotes.add(note);
 
 				var text:String = 'Event: ' + note.eventName + ' (' + Math.floor(note.strumTime) + ' ms)' + '\nValue 1: ' + note.eventVal1 + '\nValue 2: ' + note.eventVal2;
 				if(note.eventLength > 1) text = note.eventLength + ' Events:\n' + note.eventName;
 
-				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 400, text, 12);
+				var daText:AttachedFlxText = curRenderedNoteType.recycle(null, AttachedFlxText.new.bind(0, 0, 0, null, 8, true));
+				daText.text = text;
+				daText.fieldWidth = 400;
 				daText.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, RIGHT);
 				daText.setBorderStyle(FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK, 1);
 				daText.xAdd = -410;
@@ -3801,7 +3823,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		if (curSection < _song.notes.length-1) {
 			for (i in _song.notes[nextSection].sectionNotes)
 			{
-				var note:Note = setupNoteData(i, nextSection);
+				var note:EditorNote = setupNoteData(i, nextSection);
 				note.alpha = 0.6;
 				nextRenderedNotes.add(note);
 				if (note.sustainLength > 0)
@@ -3819,7 +3841,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			var t:Float = fuckFloatingPoints(i.strumTime);
 			if(t >= startThing && t < endThing)
 			{
-				var note:Note = setupEventData(i, nextSection);
+				var note:EditorNote = setupEventData(i, nextSection);
 				note.alpha = 0.6;
 				nextRenderedNotes.add(note);
 			}
@@ -3837,9 +3859,9 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		}
 	}
 
-	function setupNoteData(i:NoteData, sectionNumber:Int):Note {
+	function setupNoteData(i:NoteData, sectionNumber:Int):EditorNote {
 		var daField:Int = Math.floor(i.column / _song.keyCount);
-		var note:Note = new Note(i.strumTime, i.column % _song.keyCount, null, daField, (i.sustainLength <= 0 ? TAP : HEAD), true, hudSkin);
+		var note = new EditorNote(i.strumTime, i.column % _song.keyCount, null, daField, (i.sustainLength <= 0 ? TAP : HEAD), true, hudSkin);
 		note.chartData = i;
 		note.realColumn = i.column;
 		note.mustPress = i.column < _song.keyCount;
@@ -3881,7 +3903,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
     }
 
 	function setupEventData(i:EventBunch, sectionNumber:Int) {
-		var note:Note = new Note(i.strumTime, -1, null, -1, 0, true, hudSkin);
+		var note = new EditorNote(i.strumTime, -1, null, -1, 0, true, hudSkin);
 		note.realColumn -1;
 		note.chartData = i;
 		note.usesDefaultColours = false;
@@ -3920,11 +3942,10 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 	var defaultNoteColours:Array<FlxColor> = [0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F, 0xFF69608F];
 	var noteColours:Array<FlxColor> = [];
-	var susWidth:Float = 8;
 	var showSusTail:Bool = true; // to visualise the head/cap/end of the tail
 	// because they looked WAY too short
 	
-	function setupSusNote(note:Note):Null<FlxSprite> 
+	function setupSusNote(note:EditorNote):Null<FlxSprite> 
 	{
 		final stepLength = (Conductor.getBPMFromSeconds(note.strumTime).stepCrochet);
 		final tailSteps:Float = note.sustainLength / stepLength;
@@ -3935,18 +3956,19 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		if (height <= 0)
 			return null;
 
-		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE - susWidth) * 0.5, note.y + GRID_HALF);
-
 		var color:FlxColor = note.isQuant ? 0xFFFF0000 : noteColours[note.column % noteColours.length];
-		color.setHSB((
-			(color.hue + note.colorSwap.hue * 360) % 360 + 360) % 360,
+		color.setHSB(
+			((color.hue + note.colorSwap.hue * 360) % 360 + 360) % 360,
 			color.saturation * (1.0 + note.colorSwap.saturation),
 			color.brightness * (1.0 + note.colorSwap.brightness),
 			color.alphaFloat
 		);
-		spr.makeGraphic(1, 1, color);
-		spr.scale.set(susWidth, height);
+
+		var spr:FlxSprite = sustainRecycleBin.recycle(null, CoolUtil.blankSprite.bind(SUS_WIDTH, height, color));
+		spr.setPosition(note.x + (GRID_SIZE - SUS_WIDTH) * 0.5, note.y + GRID_HALF);
+		spr.scale.set(SUS_WIDTH, height);
 		spr.updateHitbox();
+		spr.color = color;
 		
 		return spr;
 	}
@@ -3983,7 +4005,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		_song.notes.insert(idx, sec);
 	}
 
-	function deleteNote(note:Note):Void
+	function deleteNote(note:EditorNote):Void
 	{
 		if (note.column > -1) {
 			//Normal Notes
@@ -4332,6 +4354,11 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		colorSine = 0.0;
 		return curSelectedEvent = v;
 	}
+}
+
+private class EditorNote extends Note {
+	public var chartData:Dynamic = null;
+	public var editorHitBeat:Float = 0;
 }
 
 private abstract NoteSelection(Array<ChartObject>) to Array<ChartObject> {

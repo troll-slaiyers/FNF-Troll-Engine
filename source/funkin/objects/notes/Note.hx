@@ -278,9 +278,7 @@ class Note extends NoteObject {
 
 	// editor stuff
 	public var inEditor:Bool = false;
-	public var chartData:Dynamic = null;
 	public var realColumn:Int;
-	public var editorHitBeat:Float = 0;
 	public var mustPress:Bool = true; // perhaps make this a getter for field.isPlayer
 
 	// mod manager
