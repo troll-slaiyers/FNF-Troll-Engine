@@ -4593,7 +4593,7 @@ private class HistoryDisplay extends FlxSpriteGroup {
 	public var uaHeight = 16;
 
 	public var curIdx:Int = -1;
-	public var scrollIdx:Int = 0;
+	public var scrollOffset:Int = 0;
 
 	public var bgs:Array<FlxSprite> = [];
 	public var txts:Array<FlxText> = [];
@@ -4629,34 +4629,30 @@ private class HistoryDisplay extends FlxSpriteGroup {
 
 	public function updateDisplay() {
 		final utRay = ChartingState.instance.utRay;
+		
 		final indices:Array<Int> = [];
-
-		for (i => action in utRay) {
-			if (!action.silent)
-				indices.push(i);
+		
+		var idx:Int = curIdx - scrollOffset;
+		while (idx < utRay.length && indices.length < txts.length) {
+			var action = utRay[idx];
+			if (action == null || !action.silent)
+				indices.push(idx);
+			idx++;
 		}
 
-		var half = Math.floor(txts.length / 2);
-		var offi = (indices.length - curIdx);
-		var offi2 = FlxMath.maxInt(0, offi - half);
-		var scrollIdx = scrollIdx + offi2;
-
-		for (i in 1...txts.length + 1) {
-			var actionIdx = indices.length - i - scrollIdx;
+		for (txtIdx in 0...txts.length) {
+			var actionIdx:Int;
 			var action:ChartingAction;
 			
-			if (actionIdx >= 0 && actionIdx < indices.length) {
-				actionIdx = indices[actionIdx];
-				action = utRay[actionIdx];
-			}else {
+			if (txtIdx < 0 || txtIdx >= indices.length) {
+				actionIdx = indices[txtIdx];
 				action = null;
-				actionIdx = -1;
+			}else {
+				actionIdx = indices[txtIdx];
+				action = utRay[actionIdx];
 			}
 
-			var txtIdx = txts.length - i;
-			var txt = (txtIdx < 0) ? null : txts[txtIdx];
-			if (txt == null) continue;
-
+			var txt = txts[txtIdx];
 			var bg = bgs[txtIdx];
 			var action_reverted = actionIdx > curIdx;
 
@@ -4668,10 +4664,13 @@ private class HistoryDisplay extends FlxSpriteGroup {
 			txt.color = action_reverted ? 0xFF000000 : 0xFFFFFFFF;
 			txt.text = (action == null) ? " " : Std.string(action);
 			txt.ID = actionIdx;
+
+			//trace('$actionIdx: "${txt.text}"');
 		}
 	}
 
 	override function update(elapsed:Float) {
+		var doUpdate = false;
 		var scrollChange:Int = FlxG.mouse.overlaps(this) ? FlxG.mouse.wheel : 0;
 
 		if (FlxG.keys.justPressed.V)
@@ -4681,13 +4680,30 @@ private class HistoryDisplay extends FlxSpriteGroup {
 			scrollChange++;
 		
 		if (scrollChange != 0) {
-			scrollIdx += scrollChange;
-			updateDisplay();
+			scrollOffset += scrollChange;
+			//trace("user", scrollOffset);
+			doUpdate = true;			
 		}
 
 		if (curIdx != ChartingState.instance.utIdx) {
 			curIdx = ChartingState.instance.utIdx;
-			scrollIdx = 0;
+			scrollOffset = Math.floor(txts.length / 2);
+			//trace("change", scrollOffset);
+			doUpdate = true;
+		}
+
+		if (doUpdate) {
+			/*
+			// bottom cap
+			if (curIdx - scrollOffset + txts.length > ChartingState.instance.utRay.length)
+				scrollOffset = curIdx - ChartingState.instance.utRay.length + txts.length;
+
+			// top cap
+			if (curIdx - 1 - scrollOffset < 0)
+				scrollOffset = curIdx;
+
+			trace("result offset", scrollOffset);
+			*/
 			updateDisplay();
 		}
 
