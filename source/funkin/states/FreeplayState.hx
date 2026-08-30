@@ -6,7 +6,7 @@ import flixel.util.FlxColor;
 import funkin.objects.hud.HealthIcon;
 import funkin.objects.ChangingMenuBG;
 
-import funkin.data.BaseSong;
+import funkin.data.Song;
 import funkin.data.Level;
 import funkin.data.Highscore;
 
@@ -31,7 +31,7 @@ class FreeplayState extends MusicBeatSubstate
 	public static var comingFromPlayState:Bool = false;
 
 	var menu:FreeplayMenu;
-	var songList:Array<BaseSong>;
+	var songList:Array<Song>;
 
 	var bgManager:ChangingMenuBG;
 
@@ -52,14 +52,14 @@ class FreeplayState extends MusicBeatSubstate
 	var curChartId:String = "";
 	var curChartIdx:Int = -1;
 
-	var selectedSongData:BaseSong;
+	var selectedSongData:Song;
 	var selectedSongCharts:Array<String>;
 	
 	var hintBG:FlxSprite;
 	var hintText:FlxText;
 
-	public static function getFreeplaySongs():Array<BaseSong> {
-		var list:Array<BaseSong> = [];
+	public static function getFreeplaySongs():Array<Song> {
+		var list:Array<Song> = [];
 		for (contentId in Paths.packList) {
 			var folder = Paths.packMap.get(contentId);
 			for (song in folder.getFreeplaySongs())
@@ -69,7 +69,7 @@ class FreeplayState extends MusicBeatSubstate
 		return list;
 	} 
 
-	public function new(?songList:Array<BaseSong>) {
+	public function new(?songList:Array<Song>) {
 		this.songList = songList;
 		super();
 	}
@@ -317,7 +317,7 @@ class FreeplayState extends MusicBeatSubstate
 		});
 	}
 
-	function onSelectSong(data:BaseSong)
+	function onSelectSong(data:Song)
 	{	
 		Paths.currentPackId = data.packId;
 
@@ -433,18 +433,18 @@ class FreeplayState extends MusicBeatSubstate
 
 private class FreeplayMenu extends AlphabetMenu
 {
-	public var songList(default, null):Array<BaseSong> = [];
+	public var songList(default, null):Array<Song> = [];
 
 	private var iconGrp = new FlxTypedGroup<FreeplayIcon>();
 
-	public function setSongList(songs:Array<BaseSong>) {
+	public function setSongList(songs:Array<Song>) {
 		this.clear();
 		this.songList = songs;
 		for (song in songList)
 			addSong(song);
 	}
 
-	public function addSong(song:BaseSong) {
+	public function addSong(song:Song) {
 		var metadata = song.getMetadata();
 		var songName:String = metadata.songName;
 		var iconId:Null<String> = metadata.freeplayIcon;

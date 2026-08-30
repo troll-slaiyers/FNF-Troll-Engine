@@ -1,6 +1,6 @@
 package funkin;
 
-import funkin.data.BaseSong;
+import funkin.data.Song;
 
 import funkin.util.FileUtil;
 import haxe.io.Bytes;
@@ -30,7 +30,7 @@ class CoolUtil {
 	}
 
 	// TODO: reuse song instances n get rid of this
-	public static function indexOfSong(songList:Array<BaseSong>, song:BaseSong):Int {
+	public static function indexOfSong(songList:Array<Song>, song:Song):Int {
 		// return songList.indexOf(song);
 		if (song != null) for (i => s in songList) {
 			if (song.songId == s.songId && song.packId == s.packId) {

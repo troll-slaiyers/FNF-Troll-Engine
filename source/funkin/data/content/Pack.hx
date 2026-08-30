@@ -61,11 +61,11 @@ class Pack {
 		return '$path/$key'; 
 
 	/** Returns a list EVERY song belonging to this AssetFolder **/
-	public function getSongs():Array<BaseSong>
+	public function getSongs():Array<Song>
 		return [];
 
 	/** Returns a list of songs to be displayed in the freeplay menus **/
-	public function getFreeplaySongs():Array<BaseSong>
+	public function getFreeplaySongs():Array<Song>
 		return [];
 
 	/** Returns a list of levels to be displayed in the story mode menus**/

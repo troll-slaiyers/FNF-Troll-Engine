@@ -3,7 +3,7 @@ package funkin.states;
 import funkin.states.options.OptionsSubstate;
 import funkin.states.base.TransitionableState;
 import flixel.text.FlxText;
-import funkin.data.BaseSong;
+import funkin.data.Song;
 import funkin.data.Highscore;
 import funkin.states.options.OptionsState;
 import funkin.states.editors.MasterEditorMenu;
@@ -20,11 +20,11 @@ using StringTools;
 **/
 class SongSelectState extends funkin.states.base.DebugListState
 {	
-	public var songs:Array<BaseSong> = null;
+	public var songs:Array<Song> = null;
 
-	public static function getEverySong():Array<BaseSong>
+	public static function getEverySong():Array<Song>
 	{
-		var songList:Array<BaseSong> = [];
+		var songList:Array<Song> = [];
 
 		for (contentId in Paths.packList){
 			var folder = Paths.packMap.get(contentId);
@@ -88,7 +88,7 @@ class SongSelectState extends funkin.states.base.DebugListState
 		super.update(e);
 	}
 	
-	dynamic public function onSelectChart(song:BaseSong, chart:String) {
+	dynamic public function onSelectChart(song:Song, chart:String) {
 		PlayState.loadPlaylist([song], chart);
 		PlayState.isStoryMode = false;
 
@@ -127,7 +127,7 @@ class SongSelectState extends funkin.states.base.DebugListState
 
 class ChartSelectSubstate extends MusicBeatSubstate
 {
-	var song:BaseSong;
+	var song:Song;
 	var charts:Array<String>;
 
 	var curSelected:Int = 0;
@@ -135,9 +135,9 @@ class ChartSelectSubstate extends MusicBeatSubstate
 	var chartTxts:Array<FlxText> = [];
 	var scoreTxts:Array<FlxText> = [];
 
-	public var onSelect:(BaseSong, String) -> Void;
+	public var onSelect:(Song, String) -> Void;
 
-	public function new(song:BaseSong, ?charts:Array<String>, ?onSelect:(BaseSong, String) -> Void)
+	public function new(song:Song, ?charts:Array<String>, ?onSelect:(Song, String) -> Void)
 	{
 		super();
 		this.song = song;

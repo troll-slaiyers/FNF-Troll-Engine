@@ -1,7 +1,7 @@
 package funkin.data;
 
 #if USING_MOONCHART
-import funkin.data.BaseSong;
+import funkin.data.Song;
 import funkin.data.ChartData;
 
 import moonchart.formats.fnf.legacy.FNFTroll as SupportedFormat;
@@ -24,7 +24,7 @@ typedef StepManiaDynamic = moonchart.formats.StepMania.StepManiaBasic<moonchart.
 final SM_DIFFICULTIES = ["Beginner", "Easy", "Medium", "Hard", "Challenge"]; // idk I don't play Stepmania
 final FNF_DIFFICULTIES = ["easy", "normal", "hard", "erect", "nightmare"];
 
-class MoonchartSong extends BaseSong
+class MoonchartSong extends Song
 {
 	final ss:SowySongData;
 	final diffList:Array<String>;

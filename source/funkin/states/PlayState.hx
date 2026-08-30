@@ -11,7 +11,7 @@ import funkin.objects.cutscenes.DialogueCutscene;
 import funkin.objects.playfields.PlayField.NoteCallback;
 import funkin.data.Cache;
 import funkin.data.Level;
-import funkin.data.BaseSong;
+import funkin.data.Song;
 import funkin.data.ChartData;
 import funkin.data.StageData;
 import funkin.data.CharacterData;
@@ -146,13 +146,13 @@ class CutsceneSequence {
 @:noScripting
 class PlayState extends MusicBeatState
 {
-	public static function loadPlaylist(playlist:Array<BaseSong>, chartId:String) {
+	public static function loadPlaylist(playlist:Array<Song>, chartId:String) {
 		PlayState.loadSong(playlist[0], chartId);
 		PlayState.playlistSongs = playlist;
 		PlayState.playlistIndex = 0;
 	}
 
-	public static function loadSong(song:BaseSong, chartId:String) {
+	public static function loadSong(song:Song, chartId:String) {
 		Paths.currentPackId = song.packId;
 		PlayState.song = song;
 		PlayState.SONG = song.getSwagSong(chartId);
@@ -166,7 +166,7 @@ class PlayState extends MusicBeatState
 
 	public static var instance:PlayState;
 
-	public static var playlistSongs:Array<BaseSong> = [];
+	public static var playlistSongs:Array<Song> = [];
 	public static var playlistIndex:Int = 0;
 	public static var difficultyName:String = 'normal'; // should NOT be set to "" when playing normal diff!!!!!
 
@@ -175,7 +175,7 @@ class PlayState extends MusicBeatState
 	public static var campaignMisses:Int = 0;
 	public static var deathCounter:Int = 0;
 
-	public static var song:BaseSong;
+	public static var song:Song;
 	public static var level:Level;
 
 	public static var SONG:SwagSong = null;
@@ -2761,7 +2761,7 @@ class PlayState extends MusicBeatState
 
 		////
 		var gotoNextThing:Void -> Void = gotoMenus;
-		var nextSong:BaseSong = playlistSongs[playlistIndex + 1];
+		var nextSong:Song = playlistSongs[playlistIndex + 1];
 
 		if (nextSong != null) {
 			prevCamFollow = camFollow;

@@ -3,7 +3,7 @@ package funkin.data;
 import funkin.states.LoadingState;
 import funkin.states.PlayState;
 import funkin.data.ChartData;
-import funkin.data.BaseSong;
+import funkin.data.Song;
 import haxe.io.Path;
 
 using CoolerStringTools;
@@ -11,7 +11,7 @@ using StringTools;
 
 final defaultDifficultyOrdering:Array<String>  = ["easy", "normal", "hard", "erect", "nightmare"];
 
-class FNFSong extends BaseSong
+class FNFSong extends Song
 {
 	public var songPath:String;
 
@@ -134,12 +134,12 @@ class FNFSong extends BaseSong
 	}
 
 	/** Loads a singular song to be played on PlayState **/
-	public inline static function loadSong(song:BaseSong, chartId:String = "") {
+	public inline static function loadSong(song:Song, chartId:String = "") {
 		PlayState.loadPlaylist([song], song.getChartId(chartId));
 	}
 
 	/** Loads a singular song to be played on PlayState, then switches to it **/
-	public inline static function playSong(song:BaseSong, chartId:String = "")
+	public inline static function playSong(song:Song, chartId:String = "")
 	{
 		loadSong(song, chartId);
 		switchToPlayState();

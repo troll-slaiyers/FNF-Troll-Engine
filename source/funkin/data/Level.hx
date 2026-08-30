@@ -1,7 +1,7 @@
 package funkin.data;
 
 import funkin.scripts.ScriptedClassShit.InstanceInterp;
-import funkin.data.BaseSong;
+import funkin.data.Song;
 import funkin.data.FNFSong;
 import funkin.states.StoryModeState;
 import funkin.scripts.FunkinHScript;
@@ -69,7 +69,7 @@ class Level {
 	public var name:String = "PLACEHOLDER";
 	public var asset:String = "storymenu/titles/week1";
 	public var songList:Array<String> = [];
-	public var songs:Array<BaseSong> = [];
+	public var songs:Array<Song> = [];
 	public var difficulties:Array<String> = ["easy", "normal", "hard"];
 	public var props:Array<LevelPropData> = [];
 	public var appearsInStory:Bool = true;
@@ -107,7 +107,7 @@ class Level {
 	/**
 	 * Returns an array of songs to be played during the level
 	**/
-	public function getPlaylist(difficultyId:String = 'normal'):Array<BaseSong>
+	public function getPlaylist(difficultyId:String = 'normal'):Array<Song>
 	{
 		return songs;
 	}
@@ -125,7 +125,7 @@ class Level {
 	/**
 	 * Returns an array of song data to be shown in freeplay. 
 	**/
-	public function getFreeplaySongs():Array<BaseSong>
+	public function getFreeplaySongs():Array<Song>
 	{
 		return songs;
 	}

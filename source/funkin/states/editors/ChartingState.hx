@@ -13,7 +13,7 @@ import funkin.objects.AttachedFlxText;
 import funkin.objects.hud.HealthIcon;
 import funkin.scripts.FunkinHScript;
 import funkin.data.ChartData;
-import funkin.data.BaseSong;
+import funkin.data.Song;
 import funkin.data.FNFSong;
 
 import funkin.objects.notes.*;
@@ -639,7 +639,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		if (_song == null) {
 			var ss = new SongSelectState();
 			ss.bgColor = FlxColor.fromRGB(0,0,0,240);
-			ss.onSelectChart = function(song:BaseSong, chartId:String) {
+			ss.onSelectChart = function(song:Song, chartId:String) {
 				FNFSong.loadSong(song, chartId);
 				_song = PlayState.SONG;
 				ss.close();
@@ -3205,7 +3205,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		ss.songs = SongSelectState.getEverySong();
 		ss.curSelected = CoolUtil.indexOfSong(ss.songs, PlayState.song);
 		if (ss.curSelected == -1) ss.curSelected = 0;
-		ss.onSelectChart = function(song:BaseSong, chartId:String) {
+		ss.onSelectChart = function(song:Song, chartId:String) {
 			FNFSong.loadSong(song, chartId);
 			_song = PlayState.SONG;
 			if (this.songId == song.songId) {

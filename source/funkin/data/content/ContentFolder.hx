@@ -19,8 +19,8 @@ class ContentFolder extends Pack {
 			metaJson.bgColor = CoolUtil.colorFromString(cast metaJson.bgColor);
 	}
 
-	override function getSongs():Array<BaseSong> {
-		var songList:Array<BaseSong> = [];
+	override function getSongs():Array<Song> {
+		var songList:Array<Song> = [];
 
 		var songsPath = '$path/songs/';
 		for (folderName in Paths.readDirectory(songsPath)) {
@@ -33,8 +33,8 @@ class ContentFolder extends Pack {
 		return songList;
 	}
 
-	override function getFreeplaySongs():Array<BaseSong> {
-		var list:Array<BaseSong> = [];
+	override function getFreeplaySongs():Array<Song> {
+		var list:Array<Song> = [];
 		var songIdMap:Map<String, Bool> = [];
 
 		//// level songs

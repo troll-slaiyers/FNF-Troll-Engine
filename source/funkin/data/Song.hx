@@ -6,7 +6,7 @@ import flixel.system.FlxAssets.FlxSoundAsset;
 
 inline final DEFAULT_CHART_ID = "normal";
 
-abstract class BaseSong
+abstract class Song
 {
 	public final songId:String;
 	public final packId:String;
