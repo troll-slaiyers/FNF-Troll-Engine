@@ -4628,13 +4628,15 @@ private class HistoryDisplay extends FlxSpriteGroup {
 	}
 
 	public function updateDisplay() {
-		final utRay = ChartingState.instance.utRay;
-		
 		final indices:Array<Int> = [];
+
+		// Top cap
+		if (curIdx - 1 - scrollOffset < 0)
+			scrollOffset = curIdx;
 		
 		var idx:Int = curIdx - scrollOffset;
-		while (idx < utRay.length && indices.length < txts.length) {
-			var action = utRay[idx];
+		while (idx < ChartingState.instance.utRay.length && indices.length < txts.length) {
+			var action = ChartingState.instance.utRay[idx];
 			if (action == null || !action.silent)
 				indices.push(idx);
 			idx++;
@@ -4649,7 +4651,7 @@ private class HistoryDisplay extends FlxSpriteGroup {
 				action = null;
 			}else {
 				actionIdx = indices[txtIdx];
-				action = utRay[actionIdx];
+				action = ChartingState.instance.utRay[actionIdx];
 			}
 
 			var txt = txts[txtIdx];
@@ -4699,8 +4701,7 @@ private class HistoryDisplay extends FlxSpriteGroup {
 				scrollOffset = curIdx - ChartingState.instance.utRay.length + txts.length;
 
 			// top cap
-			if (curIdx - 1 - scrollOffset < 0)
-				scrollOffset = curIdx;
+
 
 			trace("result offset", scrollOffset);
 			*/
