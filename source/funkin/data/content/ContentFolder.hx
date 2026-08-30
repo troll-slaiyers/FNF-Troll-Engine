@@ -26,7 +26,7 @@ class ContentFolder extends Pack {
 		for (folderName in Paths.readDirectory(songsPath)) {
 			if (Paths.isDirectory(songsPath + folderName)) {
 				// trace(songList.length, folderName);
-				songList.push(new Song(folderName, this.id));
+				songList.push(new FNFSong(folderName, this.id));
 			}
 		}
 
@@ -54,7 +54,7 @@ class ContentFolder extends Pack {
 			for (songId in CoolUtil.listFromString(rawList)) {
 				if (!songIdMap.exists(songId)) {
 					songIdMap.set(songId, true);
-					list.push(new Song(songId, this.id));
+					list.push(new FNFSong(songId, this.id));
 				}
 			}
 		}else {

@@ -14,7 +14,7 @@ import funkin.objects.hud.HealthIcon;
 import funkin.scripts.FunkinHScript;
 import funkin.data.ChartData;
 import funkin.data.BaseSong;
-import funkin.data.Song;
+import funkin.data.FNFSong;
 
 import funkin.objects.notes.*;
 import funkin.objects.ui.CustomFlxUI;
@@ -640,7 +640,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			var ss = new SongSelectState();
 			ss.bgColor = FlxColor.fromRGB(0,0,0,240);
 			ss.onSelectChart = function(song:BaseSong, chartId:String) {
-				Song.loadSong(song, chartId);
+				FNFSong.loadSong(song, chartId);
 				_song = PlayState.SONG;
 				ss.close();
 				onChartLoaded();
@@ -3206,7 +3206,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		ss.curSelected = CoolUtil.indexOfSong(ss.songs, PlayState.song);
 		if (ss.curSelected == -1) ss.curSelected = 0;
 		ss.onSelectChart = function(song:BaseSong, chartId:String) {
-			Song.loadSong(song, chartId);
+			FNFSong.loadSong(song, chartId);
 			_song = PlayState.SONG;
 			if (this.songId == song.songId) {
 				_session ??= makeSession();
@@ -4144,7 +4144,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 	function loadJson(songId:String):Void
 	{
-		var song = new Song(songId, Paths.currentPackId);
+		var song = new FNFSong(songId, Paths.currentPackId);
 		var charts:Array<String> = song.getCharts();
 
 		if (charts.length == 0) {

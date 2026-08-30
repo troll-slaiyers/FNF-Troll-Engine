@@ -2,7 +2,7 @@ package funkin.data;
 
 import funkin.scripts.ScriptedClassShit.InstanceInterp;
 import funkin.data.BaseSong;
-import funkin.data.Song;
+import funkin.data.FNFSong;
 import funkin.states.StoryModeState;
 import funkin.scripts.FunkinHScript;
 import funkin.scripts.Globals;
@@ -43,7 +43,7 @@ class Level {
 		level.id = id ?? json?.id;
 		level.packId = packId;
 		level.songList = json?.songs ?? ["Test"];
-		level.songs = [for (songId in level.songList) new Song(songId, packId)];
+		level.songs = [for (songId in level.songList) new FNFSong(songId, packId)];
 		level.difficulties = json?.difficulties ?? level.difficulties;
 		level.name = json?.name ?? "NAME DOESNT EXIST IDIOT";
 		level.asset = json?.asset ?? "storymenu/titles/week1";

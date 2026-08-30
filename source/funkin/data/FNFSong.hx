@@ -11,7 +11,7 @@ using StringTools;
 
 final defaultDifficultyOrdering:Array<String>  = ["easy", "normal", "hard", "erect", "nightmare"];
 
-class Song extends BaseSong
+class FNFSong extends BaseSong
 {
 	public var songPath:String;
 
@@ -96,7 +96,7 @@ class Song extends BaseSong
 		return _charts ?? (_charts = _getCharts());
 
 	public inline function play(chartId:String = ''):Void
-		Song.playSong(this, chartId);
+		FNFSong.playSong(this, chartId);
 
 	private function _getCharts():Array<String>
 	{		

@@ -341,7 +341,7 @@ class FunkinHScript
 		set("ClientPrefs", funkin.ClientPrefs);
 		set("CoolUtil", funkin.CoolUtil);
 		set("Conductor", funkin.Conductor);
-		set("Song", funkin.data.Song);
+		set("Song", funkin.data.FNFSong);
 		set("Highscore", funkin.data.Highscore); // Useful for stuff like levels showing diff songs before and after finishing (i.e Weekend 1)
 
 		set("MusicBeatState", MusicBeatState);

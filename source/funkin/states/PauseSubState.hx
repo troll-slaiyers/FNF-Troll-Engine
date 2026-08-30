@@ -1,7 +1,7 @@
 package funkin.states;
 
 import funkin.data.MusicData;
-import funkin.data.Song;
+import funkin.data.FNFSong;
 import funkin.data.PauseMenuOption;
 import funkin.input.Controls;
 import funkin.objects.hud.Countdown;
@@ -121,7 +121,7 @@ class PauseSubState extends MusicBeatSubstate
 
 		songInfo.push(game.displayedSong);
 
-		for (info in Song.getMetadataInfo(game.metadata))
+		for (info in FNFSong.getMetadataInfo(game.metadata))
 			songInfo.push(info);
 
 		var charts = (PlayState.song==null) ? null : PlayState.song.getCharts(); 
