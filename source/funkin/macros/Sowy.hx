@@ -22,6 +22,14 @@ class Sowy
 	}
 
 	/**
+		Returns the absolute path of this project
+	**/
+	public static macro function getProjectDirectory()
+	{
+		return macro $v{haxe.io.Path.normalize(Sys.getCwd())};
+	}
+
+	/**
 		Returns the contents of a file at compile time
 	**/
 	public static macro function readFile(path:String, throwException:Bool = true) {

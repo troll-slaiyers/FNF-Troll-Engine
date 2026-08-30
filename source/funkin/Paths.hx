@@ -27,8 +27,13 @@ import sys.io.File;
 @:access(openfl.display.BitmapData)
 class Paths
 {
+	#if ASSET_REDIRECT
+	inline public static final ASSETS_PATH:String = '${funkin.macros.Sowy.getProjectDirectory()}/assets';
+	inline public static final CONTENT_PATH:String = '${funkin.macros.Sowy.getProjectDirectory()}/content';
+	#else
 	inline public static final ASSETS_PATH:String = 'assets';
 	inline public static final CONTENT_PATH:String = 'content';
+	#end
 
 	inline public static final IMAGE_EXT = "png";
 	inline public static final SOUND_EXT = "ogg";
