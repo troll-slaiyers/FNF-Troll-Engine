@@ -6,8 +6,6 @@ import flixel.util.FlxColor;
 import funkin.objects.hud.HealthIcon;
 import funkin.objects.ChangingMenuBG;
 
-import sys.FileSystem;
-import funkin.data.Song;
 import funkin.data.BaseSong;
 import funkin.data.Level;
 import funkin.data.Highscore;

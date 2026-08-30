@@ -3,7 +3,6 @@ package funkin.states;
 import funkin.states.options.OptionsSubstate;
 import funkin.states.base.TransitionableState;
 import flixel.text.FlxText;
-import funkin.data.Song;
 import funkin.data.BaseSong;
 import funkin.data.Highscore;
 import funkin.states.options.OptionsState;
