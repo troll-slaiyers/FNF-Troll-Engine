@@ -50,8 +50,8 @@ class Main extends Sprite
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var adjustGameSize:Bool = true; // If true, the game size is adjusted to fit within the screen resolution
-	var initialState:Class<FlxState> = InitState; // The FlxState the game starts with.
-	var nextState:Class<FlxState> = funkin.states.TitleState; 
+	var initialState:Class<FlxState> = funkin.states.editors.DragAndDropTest; // The FlxState the game starts with.
+	var nextState:Class<FlxState> = funkin.states.editors.DragAndDropTest; // The FlxState the game will go to after the InitState. This is usually set to PlayState, but you can change it to whatever you want.
 	var framerate:Int = 60; // How many frames per second the game should run at.
 	var skipSplash:Bool = Std.random(1000) != 1; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Null<Bool> = null; // Whether to start the game in fullscreen on desktop targets
