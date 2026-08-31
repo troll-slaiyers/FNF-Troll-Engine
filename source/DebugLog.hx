@@ -27,9 +27,9 @@ class DebugLog {
 			return;
 
 		// I don't want to rely on the last added camera (zooming)
-		// I don't want to add zoomFactor
-		// I don't want to be constantly making a new camera
-		// I don't want to use OpenFL texts (text borders)
+		// I don't want to add zoomFactor (right now, just for this)
+		// I don't want to be constantly making a new camera (i'll revise transitions once again soon)
+		// I don't want to use OpenFL texts (no text borders)
 		// fgsfds
 		var camera = new FlxCamera();
 
@@ -51,7 +51,7 @@ class DebugLog {
 		////
 		instance = new DebugLogGroup();
 		instance.camera = camera;
-		FlxG.plugins.addPlugin(camera); // so camera.update gets called
+		FlxG.plugins.addPlugin(camera); // so that camera.update gets called... for whatever that might be needed for
 		FlxG.plugins.addPlugin(instance);
 
 		print = Reflect.makeVarArgs(function(ray:Array<Dynamic>) {
