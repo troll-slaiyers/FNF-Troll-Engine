@@ -39,10 +39,6 @@ class Paths
 	inline public static final SOUND_EXT = "ogg";
 
 	public static final HSCRIPT_EXTENSIONS:Array<String> = ["hscript", "hxs",];
-	public static final SCRIPT_EXTENSIONS:Array<String> = [
-		"hscript",
-		"hxs",
-	];
 
 	public static var localTrackedAssets:Array<String> = [];
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
