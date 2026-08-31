@@ -50,6 +50,7 @@ class DebugLog {
 
 		////
 		instance = new DebugLogGroup();
+		instance.camera = camera;
 		FlxG.plugins.addPlugin(camera); // so camera.update gets called
 		FlxG.plugins.addPlugin(instance);
 
