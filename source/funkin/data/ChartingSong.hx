@@ -1,7 +1,62 @@
 package funkin.data;
 
+import funkin.data.Song;
+import funkin.data.ChartData;
+import flixel.system.FlxAssets.FlxSoundAsset;
+import funkin.api.Native;
+import haxe.io.Path;
+
+/** 
+	Song class used for a temporary song that only exist in memory.
+**/
+@:inheritDoc
 class ChartingSong extends Song {
-	private var localTrackPaths:Map<String, String>;
+	private static var path:String = Path.join([Native.getTempDirectory(), "ChartingSong"]);
+	private var localTrackPaths:Map<String, String> = [];
+	private var chartData:SwagSong;
+
+	public function new(chartData:SwagSong) {
+		this.chartData = chartData;
+		super('ChartingSong', Paths.currentPackId);
+	}
+
+	public function addSongFile(filePath:String) {
+		localTrackPaths.set(filePath, filePath);
+	}
+
+	public function getMetadata(chartId:String = DEFAULT_CHART_ID):SongMetadata
+	{
+		return null;
+	}
+
+	public function getSwagSong(chartId:String = DEFAULT_CHART_ID):Null<SwagSong>
+	{
+		return chartData;
+	}
+
+	public function getSongFile(fileName:String):String
+	{
+		return '$path/$fileName';
+	}
+
+	public function getCharts():Array<String>
+	{
+		return [];
+	}
+
+	override function getTrackSound(trackName:String):FlxSoundAsset
+	{
+		if (localTrackPaths.exists(trackName)) 
+			return Paths.returnSound(localTrackPaths.get(trackName));
+		else
+			return null;
+	}	
+}
+
+/*
+@:inheritDoc
+class ChartingSong extends Song {
+	private var localTrackPaths:Map<String, String> = [];
 	private var bitch:Song;
 
 	public function new(song:Song) {
@@ -13,52 +68,31 @@ class ChartingSong extends Song {
 		return 'ChartingSong[${bitch.toString()}]';
 	}
 
-	/**
-	 * Returns metadata for the requested chartId. 
-	 * If it doesn't exist, metadata for the default chart is returned instead
-	 * 
-	 * @param chartId The song chart for which you want to request metadata
-	**/
 	public function getMetadata(chartId:String = DEFAULT_CHART_ID):SongMetadata
 	{
 		return bitch.getMetadata(chartId);
 	}
 
-	/**
-	 * Returns chart data for the requested chartId. 
-	 * If it doesn't exist, null is returned instead
-	 * 
-	 * @param chartId The song chart for which you want to request chart data
-	**/
 	public function getSwagSong(chartId:String = DEFAULT_CHART_ID):Null<SwagSong>
 	{
 		return bitch.getSwagSong(chartId);
 	}
 
-	/**
-	 * Returns a path to a file of name fileName that belongs to this song
-	**/
 	public function getSongFile(fileName:String):String
 	{
 		return bitch.getSongFile(fileName);
 	}
 
-	/**
-	 * Returns an array of charts available for this song
-	**/
 	public function getCharts():Array<String>
 	{
 		return bitch.getCharts();
 	}
 
-	public function getChartId(id:String = ""):String
+	override function getChartId(id:String = ""):String
 	{
 		return bitch.getChartId(id);
 	}
 
-	/**
-		Returns an FlxSoundAsset for the track of name trackName
-	**/
 	override function getTrackSound(trackName:String):FlxSoundAsset
 	{
 		if (localTrackPaths.exists(trackName)) 
@@ -67,3 +101,4 @@ class ChartingSong extends Song {
 			return super.getTrackSound(trackName);		
 	}
 }
+*/

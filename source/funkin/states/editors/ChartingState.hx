@@ -359,6 +359,12 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			notes: [],
 			events: [],
 		});
+
+		if (PlayState.song == null)
+			throw "Please enter the chart editor through PlayState";
+
+		if (!(PlayState.song is funkin.data.ChartingSong))
+			PlayState.song = new funkin.data.ChartingSong(this._song);
 	}
 
 	override function create()
