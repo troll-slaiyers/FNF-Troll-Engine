@@ -260,6 +260,7 @@ opt_label_misc=Miscellaneous
 opt_label_discord=Discord
 opt_tabName_game=Game
 opt_tabName_ui=UI
+opt_tabName_sound=Sound
 opt_tabName_video=Video
 opt_tabName_controls=Controls
 opt_tabName_updating=Updating

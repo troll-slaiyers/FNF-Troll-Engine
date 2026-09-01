@@ -48,6 +48,7 @@ class OptionsSubstate extends MusicBeatSubstate
 	static var tabOrder:Array<String> = [
 		"game",
 		"ui",
+		"sound",
 		"video",
 		"controls",
 		"misc", 
@@ -67,19 +68,6 @@ class OptionsSubstate extends MusicBeatSubstate
 					"noteOffset", 
 					"visualOffset", 
 					"ratingOffset",
-				]
-			],
-			[
-				"audio", 
-				[
-					"masterVolume",
-					"songVolume",
-					"pauseVolume",
-					'sfxVolume',
-					"missVolume",
-					"hitsoundVolume", 
-					"hitsoundBehav",
-					#if tgt "ruin", #end
 				]
 			],
 			[
@@ -150,6 +138,21 @@ class OptionsSubstate extends MusicBeatSubstate
 					"showWifeScore"
 				]
 			]
+		],
+		"sound" => [
+			[
+				"audio", 
+				[
+					"masterVolume",
+					"songVolume",
+					"pauseVolume",
+					'sfxVolume',
+					"missVolume",
+					"hitsoundVolume", 
+					"hitsoundBehav",
+					#if tgt "ruin", #end
+				]
+			],
 		],
 		"video" => [
 			[

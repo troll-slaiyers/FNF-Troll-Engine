@@ -39,6 +39,7 @@ opt_label_accessibility=Accesibilidad
 opt_label_discord=Discord
 opt_tabName_game=Juego
 opt_tabName_ui=IU
+opt_tabName_sound=Sonido
 opt_tabName_video=Video
 opt_tabName_controls=Controles
 opt_tabName_updating=Actualizaciones
