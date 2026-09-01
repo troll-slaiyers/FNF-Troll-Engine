@@ -572,6 +572,10 @@ class OptionsSubstate extends MusicBeatSubstate
 	@:noCompletion var _mousePoint:FlxPoint = FlxPoint.get();
 
 	var optionDesc:FlxText;
+	
+	var tabLabel:FlxText;
+	var tabLabelIdx:Int = -1;
+	var tabButtonsHitbox:FlxObject;
 
 	public var camerasToRemove:Array<FlxCamera> = [];
 
@@ -656,22 +660,21 @@ class OptionsSubstate extends MusicBeatSubstate
 		optionCamera.follow(camFollowPos);
 
 		////
-		final tabButtonHeight = 44;
+		final tabButtonWidth = 72;
+		final tabButtonHeight = 48;
 		final tabButtonPadding = 3;
 
 		var tabY:Float = optionMenu.y - tabButtonPadding - tabButtonHeight;
 		var tabX:Float = optionMenu.x;
 		inline function newTabButton(tabName:String)
 		{
-			var text = new FlxText(0, 0, 0, (Paths.getString('opt_tabName_$tabName') ?? tabName).toUpperCase());
-			text.applyFormat(TextFormats.TAB_NAME);
-			text.fieldWidth = Math.max(86, text.width) + 8;
-			@:privateAccess text.regenGraphic();
+			var text = new FlxSprite(0, 0, Paths.image('optionsMenu/tab_icons/$tabName'));
+			text.setGraphicSize(0, tabButtonHeight);
 			text.updateHitbox();
-			text.x = tabX;
+			text.x = tabX + (tabButtonWidth - text.width) / 2;
 			text.y = tabY + (tabButtonHeight - text.height) / 2;
 
-			var button = CoolUtil.blankSprite(text.fieldWidth, tabButtonHeight);
+			var button = CoolUtil.blankSprite(tabButtonWidth, tabButtonHeight);
 			button.alpha = 0.75;
 			button.x = tabX;
 			button.y = tabY;
@@ -682,6 +685,8 @@ class OptionsSubstate extends MusicBeatSubstate
 			tabButtons.push(button);
 		}
 
+		tabButtonsHitbox = new FlxObject(tabX, tabY, 0, tabButtonHeight);
+
 		for (tabName in tabOrder)
 		{
 			var tab = new TabInstance(tabName, tabLayouts.get(tabName));
@@ -689,6 +694,17 @@ class OptionsSubstate extends MusicBeatSubstate
 
 			newTabButton(tabName);
 		}
+
+		tabButtonsHitbox.width = tabX - tabButtonsHitbox.x;
+		add(tabButtonsHitbox);
+
+		tabLabel = new FlxText(5, FlxG.height - 48, 0);
+		tabLabel.applyFormat(TextFormats.TAB_NAME);
+		tabLabel.textField.background = true;
+		tabLabel.textField.backgroundColor = FlxColor.BLACK;
+		tabLabel.cameras = [overlayCamera];
+		tabLabel.alpha = 0;
+		add(tabLabel);
 
 		dropdown = new Dropdown();
 		add(dropdown);
@@ -1526,14 +1542,40 @@ class OptionsSubstate extends MusicBeatSubstate
 			else if (FlxG.mouse.justPressed)
 			{
 				doUpdate = true;
+			}
+
+			if (FlxG.mouse.overlaps(tabButtonsHitbox, mainCamera)) {
 				for (idx => button in tabButtons) {
-					if (FlxG.mouse.overlaps(button, mainCamera)) {
+					if (!FlxG.mouse.overlaps(button, mainCamera))
+						continue;
+
+					if (FlxG.mouse.justPressed) {
 						changeTab(idx, true);
 						doUpdate = true;
 						pHov = null;
-						break;
 					}
+					
+					if (idx != tabLabelIdx) {
+						tabLabelIdx = idx;
+
+						var tabId:String = tabOrder[idx];
+						tabLabel.text = Paths.getString('opt_tabName_$tabId') ?? tabId;
+						tabLabel.updateHitbox();
+						tabLabel.setPosition(button.x + (button.width - tabLabel.width) / 2, button.y + button.height);			
+						tabLabel.alpha = 0;
+					}
+
+					break;
 				}
+			}else {
+				tabLabelIdx = -1;
+			}
+
+			if (tabLabelIdx != -1) {
+				tabLabel.alpha += elapsed / 0.2;
+				//tabLabel.setPosition(FlxG.mouse.screenX, FlxG.mouse.screenY - tabLabel.height - 4);
+			}else {
+				tabLabel.alpha -= elapsed / 0.2;
 			}
 
 			var movedMouse = FlxG.mouse.wheel != 0 || getMouseMoved();
@@ -1996,11 +2038,13 @@ class Checkbox extends WidgetSprite
 class TextFormats {
 	public static final TAB_NAME:FlxTextFormatData = {
 		font: "vcr.ttf",
-		pixelPerfectRender: true,
-
-		size: 32,
+		pixelPerfectRender: true,	
+		size: 18,
 		color: 0xFFFFFFFF,
-		alignment: CENTER
+		alignment: CENTER,
+	
+		borderStyle: OUTLINE,
+		borderColor: 0xFF000000
 	};
 	
 	public static final OPT_LABEL:FlxTextFormatData = {
