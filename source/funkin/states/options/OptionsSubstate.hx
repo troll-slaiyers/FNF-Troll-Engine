@@ -2017,7 +2017,6 @@ class Checkbox extends WidgetSprite
 	function set_toggled(val:Bool)
 	{
 		animation.play(val ? "toggled" : "idle", true);
-		offset.set(val ? 2.25 : 0, val ? 4.35 : 0);
 		return toggled = val;
 	}
 
