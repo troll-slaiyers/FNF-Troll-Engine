@@ -1,5 +1,6 @@
 package funkin.states.options;
 
+import funkin.objects.ui.ScrollBar;
 import funkin.states.options.IBindsMenu;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.input.keyboard.FlxKey;
@@ -559,6 +560,8 @@ class OptionsSubstate extends MusicBeatSubstate
 	var optionCamera:FlxCamera;
 	var overlayCamera:FlxCamera;
 
+	var listScrollBar:ScrollBar;
+
 	var camFollow = new FlxPoint(0, 0);
 	var camFollowPos = new FlxObject(0, 0);
 
@@ -655,6 +658,17 @@ class OptionsSubstate extends MusicBeatSubstate
 		optionCamera.targetOffset.y = optionCamera.height / 2;
 
 		optionCamera.follow(camFollowPos);
+
+		////
+		listScrollBar = new ScrollBar(0, 0, optionCamera.maxScrollY, optionCamera.height, 8);
+		listScrollBar.camera = optionCamera;
+		listScrollBar.scrollFactor.set();
+		add(listScrollBar);
+
+		listScrollBar.callback = function(perc:Float) {
+			camFollow.y = CoolMath.scale(perc, 0, 1, 0, currentTab.height - optionCamera.height);
+			camFollowPos.y = camFollow.y;
+		}
 
 		////
 		final tabButtonWidth = 72;
@@ -812,7 +826,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		}
 
 		daY += 4;
-		tab.height = daY > optionCamera.height ? daY - optionCamera.height : 0;
+		tab.height = Math.max(0, daY);
 	}
 
 	function createWidget(name:String, drop:FlxSprite, text:FlxText, data:OptionData):Widget
@@ -1021,6 +1035,9 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		camFollow = currentTab.cameraPosition;
 		camFollowPos.setPosition(camFollow.x, camFollow.y);
+
+		listScrollBar.setPageSize(currentTab.height, optionCamera.height, 6);
+		listScrollBar.x = optionCamera.width - listScrollBar.width;
 
 		////
 		selectableWidgetObjects = [
@@ -1633,15 +1650,17 @@ class OptionsSubstate extends MusicBeatSubstate
 				camFollowPos.y += movement;
 			}
 
-			var height = currentTab.height;
-			camFollow.y = FlxMath.bound(camFollow.y, 0, height);
+			var maxY = Math.max(currentTab.height - optionCamera.height, 0);
+			camFollow.y = FlxMath.bound(camFollow.y, 0, maxY);
 
 			var lerpVal = Math.exp(-elapsed * 12);
 			camFollowPos.setPosition(
 				FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal), 
 				FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal)
 			);
-			camFollowPos.y = FlxMath.bound(camFollowPos.y, 0, height);
+			camFollowPos.y = FlxMath.bound(camFollowPos.y, 0, maxY);
+
+			listScrollBar.progress = CoolMath.scale(camFollowPos.y, 0, currentTab.height - optionCamera.height, 0, 1);
 
 			if (controls.BACK)
 			{
