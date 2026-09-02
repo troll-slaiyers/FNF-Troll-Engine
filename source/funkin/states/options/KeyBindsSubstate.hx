@@ -138,7 +138,7 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 
 		var backdropGraphic = Paths.image("optionsMenu/backdrop");
 
-		var optionMenu = new FlxSprite(84, 80, CoolUtil.makeOutlinedGraphic(920, 570, FlxColor.fromRGB(82, 82, 82), 2, FlxColor.fromRGB(70, 70, 70)));
+		var optionMenu = new FlxSprite(84, 80, CoolUtil.makeOutlinedGraphic(920, 570, MenuStyle.WINDOW_COLOR1, 2, MenuStyle.WINDOW_COLOR2));
 		optionMenu.alpha = 0.8;
 		optionMenu.cameras = [cam];
 		optionMenu.screenCenter(XY);
