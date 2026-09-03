@@ -4,13 +4,13 @@ import flixel.util.FlxColor;
 import funkin.data.FlxTextFormatData;
 
 class MenuStyle {
-	public static final WINDOW_COLOR1 = FlxColor.fromRGB(58, 58, 58);
-	public static final WINDOW_COLOR2 = FlxColor.fromRGB(52, 52, 52);
+	public static final WINDOW_COLOR1 = 0xFF353B3E;
+	public static final WINDOW_COLOR2 = 0xFF2F3538;
 
 	/** Normal tab color **/
-	public static final TAB_COLOR1 = FlxColor.fromRGB(58, 58, 58);
+	public static final TAB_COLOR1 = 0xFF353B3E;
 	/** Selected tab color **/
-	public static final TAB_COLOR2 = FlxColor.fromRGB(58, 58, 58) + FlxColor.fromRGB(60, 60, 60);
+	public static final TAB_COLOR2 = 0xFF353B3E + FlxColor.fromRGB(60, 60, 60);
 
 	/** Normal name color **/
 	public static final OPT_NAME_COLOR1 = 0xFFFFFFFF;
