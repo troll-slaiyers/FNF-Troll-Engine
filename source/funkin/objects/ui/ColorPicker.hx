@@ -124,7 +124,7 @@ class ColorPickerSubstate extends FlxSubState {
 			bmpBrt.setPixel32(0, v, FlxColor.fromRGB(v, v, v));
 		}
 
-		var bg = CoolUtil.blankSprite(480, 360, 0xff999999);
+		var bg = new trollui.SlicedSprite(0, 0, 480, 360, "flixel/flixel-ui/img/chrome.png", [3, 3, 3, 3]);
 		bg.scrollFactor.set();
 		bg.screenCenter();
 
@@ -227,7 +227,6 @@ class ColorPickerSubstate extends FlxSubState {
 		acceptButton.y = cancelButton.y;
 
 		////
-		add(makeOutline(bg));
 		add(bg);
 		add(titleTxt);
 		add(makeOutline(hueSatSpr));
