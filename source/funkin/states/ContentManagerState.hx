@@ -205,7 +205,7 @@ class ContentManagerState extends MusicBeatState {
 		}
 
 		////
-		var topB = new SlicedSprite(
+		var listTopCard = new SlicedSprite(
 			listCamera.x, 
 			borderVPadding,
 			listCamera.width, 
@@ -213,20 +213,20 @@ class ContentManagerState extends MusicBeatState {
 			"contentmenu/9slice_top",
 			[4, 4, 24, 28]
 		);
-		topB.y -= topB.height;
-		add(topB);
+		listTopCard.y -= listTopCard.height;
+		add(listTopCard);
 
-		var titleText = new FlxText(topB.x + 16, 0, topB.width - 16 * 2, "Content Manager");
+		var titleText = new FlxText(listTopCard.x + 16, 0, listTopCard.width - 16 * 2, "Content Manager");
 		titleText.setFormat(Paths.font("quanticob.ttf"), 24, 0xFF000000, LEFT);
 		//titleText.setBorderStyle(OUTLINE, 0xFF000000, 1);
 		titleText.pixelPerfectRender = true; // suck ya dad
 		titleText.drawFrame();
 		titleText.updateHitbox();
-		SpriteTools.objectCenter(titleText, topB);
+		SpriteTools.objectCenter(titleText, listTopCard);
 		add(titleText);
 
 		////
-		var botB = new SlicedSprite(
+		var listBottomCard = new SlicedSprite(
 			listCamera.x, 
 			listCamera.y + listCamera.height,
 			listCamera.width, 
@@ -234,7 +234,7 @@ class ContentManagerState extends MusicBeatState {
 			"contentmenu/9slice_bot",
 			[4, 4, 24, 28]
 		);
-		add(botB);
+		add(listBottomCard);
 
 		var TOGGLE_BIND = InputFormatter.getBindString('accept').toUpperCase();
 		var OPTIONS_BIND = 'CTRL';
@@ -244,21 +244,21 @@ class ContentManagerState extends MusicBeatState {
 		str += '\n[$OPTIONS_BIND] Mod options';
 		str += '\n[$SHIFT_BIND] Change order';
 
-		var hintText = new FlxText(botB.x + 8, 0, (botB.width - 8 * 2), str);
+		var hintText = new FlxText(listBottomCard.x + 8, 0, (listBottomCard.width - 8 * 2), str);
 		hintText.setFormat(Paths.font("vcr.ttf"), 16, 0xFF000000, LEFT);
 		//hintText.setBorderStyle(OUTLINE, 0xFF000000, 1);
 		hintText.drawFrame();
 		hintText.updateHitbox();
 		add(hintText);
 
-		SpriteTools.objectCenter(hintText, botB, Y);
+		SpriteTools.objectCenter(hintText, listBottomCard, Y);
 		hintText.y -= 1;
 
 		////
 		rightCamera = new FlxCamera();
 		rightCamera.bgColor = 0;
 		rightCamera.x = listCamera.x + listCamera.width + 56;
-		rightCamera.y = topB.y;
+		rightCamera.y = listTopCard.y;
 		rightCamera.width = Std.int(FlxG.width - rightCamera.x - borderHPadding);
 		rightCamera.height = Std.int(FlxG.height - rightCamera.y * 2);
 		FlxG.cameras.add(rightCamera, false);
@@ -289,7 +289,7 @@ class ContentManagerState extends MusicBeatState {
 		add(packCardAuthor);		
 
 		var offy = Std.int(packCardBGBorder.height + 16);
-		offy += Std.int((rightCamera.height - offy) - packCardBGBorder.height); // copy pack height lol
+		//offy += Std.int((rightCamera.height - offy) - packCardBGBorder.height); // copy pack height lol
 
 		rightCamera.y += offy;
 		rightCamera.height -= offy;
@@ -395,10 +395,8 @@ class ContentManagerState extends MusicBeatState {
 		SpriteTools.objectCenter(packCardBanner, packCardBG, Y);
 
 		var descStr = displayData.description;
-		/*
 		if (displayData.runsGlobally)
-			descStr += '\n\nNOTE: This pack runs globally';
-		*/
+			descStr += '\n\nNOTE: This content pack runs globally';
 
 		packDescriptionText.text = descStr;
 
