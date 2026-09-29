@@ -863,10 +863,7 @@ private class AltFilePaths {
 	}
 
 	public static inline function _readDirectory(path:String):Null<Array<String>> {
-		if (dirMap.exists(dir))
-			dirMap.get(dir);
-		else	
-			null;
+		return if (dirMap.exists(path)) dirMap.get(path) else null;
 	}
 	#end
 }
