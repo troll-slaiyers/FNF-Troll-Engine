@@ -323,33 +323,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 
 	public function new(data:SwagSong = null) {
 		super();
-		this._song = data ?? (PlayState.SONG ??= {
-			song: 'test',
-			bpm: 150.0,
-			speed: 1,
-			offset: 0,
-
-			stage: 'stage',
-			player1: 'bf',
-			player2: 'dad',
-			gfVersion: 'gf',
-
-			arrowSkin: 'NOTE_assets',
-			splashSkin: 'noteSplashes',
-			hudSkin: 'default',
-
-			tracks: {
-				inst: ["Inst"],
-				player: ["Voices"],
-				opponent: ["Voices"]
-			},
-
-			validScore: false,
-
-			keyCount: 4,
-			notes: [],
-			events: [],
-		});
+		this._song = data ?? (PlayState.SONG ??= ChartData.makeSwagSong());
 	}
 
 	override function create()
