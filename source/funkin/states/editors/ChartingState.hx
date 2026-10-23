@@ -4617,10 +4617,10 @@ private class HistoryDisplay extends FlxSpriteGroup {
 			var bg = bgs[txtIdx];
 			var action_reverted = actionIdx > curIdx;
 
-			if (action == null) bg.color = 0xFF262626; // none
+			if (action == null) bg.color = 0xFF383A46; // none
 			else if (actionIdx == curIdx) bg.color = 0xFF195BA0; // is current
 			else if (action_reverted) bg.color = 0xFF8C8C8C; // was reverted
-			else bg.color = 0xFF262626; // is past
+			else bg.color = 0xFF383A46; // is past
 
 			txt.color = action_reverted ? 0xFF000000 : 0xFFFFFFFF;
 			txt.text = (action == null) ? " " : Std.string(action);
@@ -4665,11 +4665,17 @@ private class HistoryDisplay extends FlxSpriteGroup {
 			}
 		}
 
+		windowBorder.update(elapsed);
+		titleBar.update(elapsed);
+		titleTxt.update(elapsed);
 		for (obj in bgs) obj.update(elapsed);
 		for (obj in txts) obj.update(elapsed);
 	}
 
 	override function draw() {
+		windowBorder.draw();
+		titleBar.draw();
+		titleTxt.draw();
 		for (obj in bgs) obj.draw();
 		for (obj in txts) obj.draw();
 	}
