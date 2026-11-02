@@ -2720,7 +2720,6 @@ class PlayState extends MusicBeatState
 
 		// MusicBeatState.switchState(new MainMenuState());
 		if (isStoryMode){
-			MusicBeatState.playMenuMusic(true);
 			MusicBeatState.switchState(new StoryModeState());
 		}else{
 			FreeplayState.comingFromPlayState = true;
