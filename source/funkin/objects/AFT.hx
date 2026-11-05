@@ -1,74 +1,65 @@
 package funkin.objects;
 
-import openfl.geom.ColorTransform;
-import flixel.math.FlxMatrix;
-import openfl.display.BlendMode;
 import openfl.geom.Rectangle;
-import openfl.display.BitmapData;
+import flixel.math.FlxMatrix;
+import flixel.math.FlxRect;
 import flixel.util.FlxColor;
-import flixel.system.FlxAssets;
+import openfl.display.BlendMode;
+import openfl.display.BitmapData;
+import openfl.geom.ColorTransform;
 
 class AFT extends FlxSprite {
-	public var framerate:Float;
+	public var framerate:Float = 60;
 	public var aftBlend:BlendMode = NORMAL;
-	public var aftMatrix:FlxMatrix = new FlxMatrix();
-	public var aftClipRect:Rectangle;
+	public var srcRect:Rectangle;
+	public var dstMatrix:FlxMatrix = new FlxMatrix();
 	public var aftColorTransform:ColorTransform;
 	public var recursive:Bool = false;
+	public var autoUpdate:Bool = false;
+	public var backgroundColor:FlxColor = FlxColor.TRANSPARENT;
 
-	var aftShader:AFTShader = new AFTShader();
 	var bitmapData:BitmapData;
 	var targetCamera:FlxCamera;
 
-	override public function new(targetCamera:FlxCamera, x:Float, y:Float) {
+	override public function new(targetCamera:FlxCamera, x:Float = 0, y:Float = 0, autoUpdate:Bool = false) {
 		super(x, y);
-		//shader = aftShader;
+
 		makeGraphic(targetCamera.width, targetCamera.height, FlxColor.TRANSPARENT);
 		bitmapData = new BitmapData(Std.int(width), Std.int(height), true, FlxColor.TRANSPARENT);
 		bitmapData.disposeImage();
-		aftClipRect = new Rectangle(0, 0, width, height);
+		srcRect = new Rectangle(0, 0, targetCamera.width, targetCamera.height);
+		dstMatrix.identity();
 		aftColorTransform = new ColorTransform();
 
 		this.targetCamera = targetCamera;
+		this.autoUpdate = autoUpdate;
 
 		framerate = ClientPrefs.framerate;
-		aftMatrix.identity();
 	}
 
 	public function clear() {
-		bitmapData.fillRect(aftClipRect, FlxColor.TRANSPARENT);
+		bitmapData.fillRect(srcRect, backgroundColor);
+	}
+
+	public function drawAFT() {
+		if (!recursive) {
+			inline clear();
+		}
+		bitmapData.draw(targetCamera.canvas, dstMatrix, aftColorTransform, aftBlend, srcRect, antialiasing);
+		pixels = bitmapData;
+		updateTimer = 0;
 	}
 
 	var updateTimer:Float = 0;
 
-
 	override function update(elapsed:Float) {
 		super.update(elapsed);
+		if (!autoUpdate) {
+			return;
+		}
 		updateTimer += elapsed;
 		if (framerate != 0 && updateTimer >= 1 / framerate) {
-			if(!recursive){
-				inline clear();
-			}
-			bitmapData.draw(targetCamera.canvas, aftMatrix, aftColorTransform, aftBlend, aftClipRect, antialiasing);
-			pixels = bitmapData;
-			updateTimer = 0;
+			drawAFT();
 		}
-		//aftShader.sourceBitmap.input = bitmapData;
-	}
-}
-
-private class AFTShader extends FlxShader {
-	@:glFragmentSource('
-        #pragma header
-
-        uniform sampler2D sourceBitmap;
-
-        void main()
-        {
-            gl_FragColor = flixel_texture2D(sourceBitmap, openfl_TextureCoordv.xy);
-        }
-    ')
-	public function new() {
-		super();
 	}
 }
