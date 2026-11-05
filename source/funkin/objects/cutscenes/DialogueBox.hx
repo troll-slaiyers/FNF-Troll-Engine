@@ -25,21 +25,21 @@ typedef DialogueLine = {
 	var line_sound:Array<String>;
 	var box_animation:String;
 }
-
+//todo::: add support for scripting events within the dialogue system, smntg like how vs cord does it would be good!!!!! imppP!!!!
 class DialogueBox extends FlxTypedGroup<FlxBasic> {
-	/**
-	 * How long it should take until the dialogue first starts
-	 * Set to 0 for instant start time.
-	 */
+	/** Duration until the first dialogue box appears. **/
 	public var introDelay:Float = 2;
+	/** Duration until the dialogue box gets destroyed **/
+	public var outroDelay:Float = 1;
 
 	/** Whether the player is able to progress the dialogue. **/
+	// todo: rename this, not at home rn im jus spitballing stuff i need to do
 	public var canProgressDialogue:Bool = false;
 
 	/** Variable that allows you to keep all characters on screen if needed. **/
 	public var keepAllCharactersOnScreen:Bool = false;
 
-	/** Array that will be filled with all the dialogue characters. **/
+	/** Array that will be filled with all the dialogue characters, used for preloading. **/
 	var characters:Array<DialogueCharacter> = [];
 
 	public var curLine:Int = 0;
@@ -47,11 +47,14 @@ class DialogueBox extends FlxTypedGroup<FlxBasic> {
 	public var dialogueFile:DialogueFile;
 
 	var dialogueText:Dynamic;
+
+	//mayb rename this?
 	var box:DialogueBoxSprite;
+	//maybe this should be an array? or better yet ur able to specify multiple characters with a comma, i think thats better actually
 	var curCharacter:DialogueCharacter;
 
 	var finishedLine:Bool = false;
-
+	
 	public function new(dialoguePath:String) {
 		super();
 		try {
@@ -67,7 +70,7 @@ class DialogueBox extends FlxTypedGroup<FlxBasic> {
 		box.visible = false;
 		add(box);
 
-		box.script?.call("onCreatePost");
+		box?.script?.call("onCreate");
 		#if USING_TEXTBOX
 		var settings:Settings = {
 			font: Paths.font(box.font),
@@ -97,14 +100,18 @@ class DialogueBox extends FlxTypedGroup<FlxBasic> {
 			createNewLine();
 		});
 
+		//spr attachements since the week 6 hand doesnt work rn
+		box?.script?.call("onCreatePost");
+
 		this.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 	}
 
 	public function finishLine() {
 		finishedLine = true;
-		box.script?.call("onFinishLineDialogue");
+		box.script?.call("onFinishCurLine");
 	}
 
+	// todo: mayb redo??? idk
 	function loadCharacters() {
 		var characterMap:Map<String, Bool> = new Map<String, Bool>();
 		// Does a loop through the entire dialogue file and checks for characters
@@ -130,6 +137,7 @@ class DialogueBox extends FlxTypedGroup<FlxBasic> {
 		// controls.accept wasnt working so i jst gave up ngl
 		// i got u homie
 		// thnk u
+		// lol
 
 		// todo: maybe have a proper log book for dialogue.
 		super.update(elapsed);
@@ -168,8 +176,8 @@ class DialogueBox extends FlxTypedGroup<FlxBasic> {
 	 * Creates a new line of dialogue.
 	 */
 	public function createNewLine() {
-		FlxG.sound.play(Paths.sound(box.dialoguePressedSound), 0.7);
 		box?.script?.call("onNewLine");
+		FlxG.sound.play(Paths.sound(box.dialoguePressedSound), 0.7);
 
 		if (curLine >= dialogueFile.dialogue.length) {
 			endDialogue(false);
@@ -187,10 +195,12 @@ class DialogueBox extends FlxTypedGroup<FlxBasic> {
 				break;
 			}
 		}
+		
+		// todo:redo this
 		if (!keepAllCharactersOnScreen)
-			for (i in 0...characters.length) {
-				characters[i].alpha = 0;
-				if (characters[i] == characters[curCharcter]) {
+			for (character in characters) {
+				character.alpha = 0; // dont draw char if it isnt usede.
+				if (character == characters[curCharcter]) {
 					characters[curCharcter].alpha = 1;
 				}
 			}
@@ -207,6 +217,7 @@ class DialogueBox extends FlxTypedGroup<FlxBasic> {
 		dialogueText.resetText(curDialogueLine.text);
 		dialogueText.start(curDialogueLine.text_speed);
 		#end
+		box?.script?.call("onNewLinePost");
 	}
 
 	/**
@@ -216,28 +227,29 @@ class DialogueBox extends FlxTypedGroup<FlxBasic> {
 	public function endDialogue(wasSkipped:Bool) {
 		box?.script?.call("onDialogueEnded");
 
-		// new FlxTimer().start(1, function(tmr:FlxTimer) {
-		//		destroy();
-		//	});
+		 new FlxTimer().start(outroDelay, function(tmr:FlxTimer) {
+			 kill();
+			//destroy();
+		});
 	}
 
 	/**
 	 * Returns Text Size for the current line.
-	 * This is done so we can use custom text sizes for each line.
 	 * @param _lineTextSize
 	 * @return Int
 	 */
 	inline function getTextSize(_lineTextSize:Int):Int
 		return _lineTextSize > 0 ? _lineTextSize : box.textSize;
-
+	
 	public function restart() {
 		curLine = 0;
 		createNewLine();
 	}
 
 	/**
-	 * Function thats called to retrieve text sound.
-	 * Leaving all fields empty, will not play a sound.
+	 * Function that retrieves text sound.
+	 * If all fields are empty, will not play a sound.
+	 * todo: add support for textbox sounds..... scary...
 	 */
 	private function getTextSound() {
 		var dialogueTalkSound:Array<String> = null;
@@ -255,8 +267,8 @@ class DialogueBox extends FlxTypedGroup<FlxBasic> {
 				];
 		 */
 	}
-
-	public inline function getTextSpeed():Int // return dialogueFile.dialogue[curLine].text_speed;
+	public inline function getTextSpeed():Int#
+	// return dialogueFile.dialogue[curLine].text_speed;
 		return 12;
 
 	/**
