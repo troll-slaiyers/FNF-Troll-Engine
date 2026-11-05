@@ -199,7 +199,7 @@ class DialogueBox extends FlxTypedGroup<FlxBasic> {
 		// todo:redo this
 		if (!keepAllCharactersOnScreen)
 			for (character in characters) {
-				character.alpha = 0; // dont draw char if it isnt usede.
+				character.alpha = 0; // dont draw char if it isnt usede. //unused* im 100% sped
 				if (character == characters[curCharcter]) {
 					characters[curCharcter].alpha = 1;
 				}
