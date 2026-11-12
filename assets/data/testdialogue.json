@@ -1,0 +1,23 @@
+{
+    "dialogue": [
+        {
+            "text_speed": 0.06,
+            "character": "senpai",
+            "character_anim": "normal",
+            "text": "Hello im senpai!!!"
+        },
+        {
+            "text_speed": 0.06,
+            "character": "senpai-angry",
+            "character_anim": "talk",
+            "text": "I know what you did"
+        },
+        {
+            "text_speed": 0.2,
+            "character": "bf-pixel",
+            "character_anim": "normal",
+            "text": "e"
+        }
+    ],
+    "box_style": "pixel"
+}

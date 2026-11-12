@@ -1,103 +1,110 @@
 {
-	"dependencies": [
-		{
-			"name": "openfl",
-			"type": "haxelib",
-			"version": "9.4.2"
-		},
-		{
-			"name": "lime",
-			"type": "haxelib",
-			"version": "8.2.3"
-		},
-		{
-			"name": "flixel",
-			"type": "git",
-			"dir": null,
-			"ref": "dev",
-			"url": "https://github.com/troll-slaiyers/flixel"
-		},
-		{
-			"name": "flixel-ui",
-			"type": "haxelib",
-			"version": "2.6.1"
-		},
-		{
-			"name": "flixel-addons",
-			"type": "haxelib",
-			"version": "3.2.3"
-		},
-		{
-			"name": "troll-ui",
-			"type": "git",
-			"dir": null,
-			"url": "https://github.com/troll-slaiyers/Troll-UI",
-			"ref": "7a96093017a0964ddd3c0cd8d6a5c9d6b70b41e6"
-		},
-		{
-		  "name": "hxcpp",
-		  "type": "git",
-		  "dir": null,
-		  "ref": "troll-engine",
-		  "url": "https://github.com/moxie-coder/hxcpp-funkin"
-		},
-		{
-			"name": "hxcpp-debug-server",
-			"type": "haxelib",
-			"version": null
-		},
-		{
-			"name": "hscript",
-			"type": "git",
-			"dir": null,
-			"ref": "master",
-			"url": "https://github.com/troll-slaiyers/t-hscript"
-		},
-		{
-			"name": "no-spoon",
-			"type": "haxelib",
-			"version": "0.2.0"
-		},
-		{
-			"name": "hxvlc",
-			"type": "haxelib",
-			"version": "2.3.0"
-		},
-		{
-			"name": "flixel-animate",
-			"type": "haxelib",
-			"version": "1.5.0"
-		},
-		{
-			"name": "hxdiscord_rpc",
-			"type": "haxelib",
-			"version": "1.1.1"
-		},
-		{
-			"name": "moonchart",
-			"type": "haxelib",
-			"version": "0.5.1"
-		},
-		{
-			"name": "funkin.vis",
-			"type": "git",
-			"dir": null,
-			"ref": "main",
-			"url": "https://github.com/nebulazorua/trollVis.git"
-		},
-		{
-			"name": "grig.audio",
-			"type": "git",
-			"dir": "src",
-			"ref": "main",
-			"url": "https://gitlab.com/haxe-grig/grig.audio.git"
-		},
-		{
-			"name": "linc_filedialogs",
-			"type": "git",
-			"dir": null,
-			"ref": "main",
-			"url": "https://github.com/dazKind/linc_filedialogs"
-		}
-	]
+    "dependencies": [
+        {
+            "name": "openfl",
+            "type": "haxelib",
+            "version": "9.4.2"
+        },
+        {
+            "name": "lime",
+            "type": "haxelib",
+            "version": "8.2.3"
+        },
+        {
+            "name": "flixel",
+            "type": "git",
+            "dir": null,
+            "ref": "dev",
+            "url": "https://github.com/troll-slaiyers/flixel"
+        },
+        {
+            "name": "flixel-ui",
+            "type": "haxelib",
+            "version": "2.6.1"
+        },
+        {
+            "name": "flixel-addons",
+            "type": "haxelib",
+            "version": "3.2.3"
+        },
+        {
+            "name": "troll-ui",
+            "type": "git",
+            "dir": null,
+            "url": "https://github.com/troll-slaiyers/Troll-UI",
+            "ref": "7a96093017a0964ddd3c0cd8d6a5c9d6b70b41e6"
+        },
+        {
+            "name": "hxcpp",
+            "type": "git",
+            "dir": null,
+            "ref": "troll-engine",
+            "url": "https://github.com/moxie-coder/hxcpp-funkin"
+        },
+        {
+            "name": "hxcpp-debug-server",
+            "type": "haxelib",
+            "version": null
+        },
+        {
+            "name": "hscript",
+            "type": "git",
+            "dir": null,
+            "ref": "master",
+            "url": "https://github.com/troll-slaiyers/t-hscript"
+        },
+        {
+            "name": "no-spoon",
+            "type": "haxelib",
+            "version": "0.2.0"
+        },
+        {
+            "name": "hxvlc",
+            "type": "haxelib",
+            "version": "2.3.0"
+        },
+        {
+            "name": "flixel-animate",
+            "type": "haxelib",
+            "version": "1.5.0"
+        },
+        {
+            "name": "hxdiscord_rpc",
+            "type": "haxelib",
+            "version": "1.1.1"
+        },
+        {
+            "name": "moonchart",
+            "type": "haxelib",
+            "version": "0.5.1"
+        },
+        {
+            "name": "funkin.vis",
+            "type": "git",
+            "dir": null,
+            "ref": "main",
+            "url": "https://github.com/nebulazorua/trollVis.git"
+        },
+        {
+            "name": "grig.audio",
+            "type": "git",
+            "dir": "src",
+            "ref": "main",
+            "url": "https://gitlab.com/haxe-grig/grig.audio.git"
+        },
+        {
+            "name": "linc_filedialogs",
+            "type": "git",
+            "dir": null,
+            "ref": "main",
+            "url": "https://github.com/dazKind/linc_filedialogs"
+        },
+        {
+            "name": "textbox",
+            "type": "git",
+            "dir": null,
+            "ref": "main",
+            "url": "https://github.com/ShadzXD/Textbox"
+        }
+    ]
 }

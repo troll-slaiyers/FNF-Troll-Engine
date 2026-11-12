@@ -35,27 +35,27 @@
 
 	<!--
 		Allows the Paths class to get assets using Lime/OpenFL's assets systems
-		Note: If FILESYSTEM_ALLOWED is defined then the Paths will try to get assets using the file system first.  
+		Note: If FILESYSTEM_ALLOWED is defined then the Paths will try to get assets using the file system first.
 	-->
 	<define name="READ_EMBEDDED_ASSETS" unless="FILESYSTEM_ALLOWED" />
 
 	<!--
 		Allows reading content folders and for the "content" option to show up on the engine's main menu.
 		The engine's "assets" folder works identically to a content folder.
-		if you wish to add more assets folders to the engine, check out the getHardcodedPacks function from PackManager 
+		if you wish to add more assets folders to the engine, check out the getHardcodedPacks function from PackManager
 	-->
 	<define name="MODS_ALLOWED" if="desktop FILESYSTEM_ALLOWED" />
 
 	<define name="DISCORD_ALLOWED" if="desktop cpp" unless="display false" />
-	
+
 	<!--I don't recommend turning on MULTICORE_LOADING until we rewrite it to be less crashy -Neb-->
 	<!-- <define name="MULTICORE_LOADING" if="native" /> -->
-	
+
 	<define name="CRASH_HANDLER" />
 
 	<!--Allows funny shit like Ruin the Mod and Garlic Bread-->
 	<define name="FUNNY_ALLOWED" />
-	
+
 	<!-- Remove if you don't want extra key counts to be displayed on the keybinds menu by default -->
 	<define name="USE_EXTRA_KEYS" if="true"/>
 
@@ -64,6 +64,9 @@
 
 	<!--Remove if you don't want to use FlxAnimate-->
 	<define name="USING_FLXANIMATE" />
+
+	<!--Remove if you don't want to use Textbox-->
+	<!--define name="USING_TEXTBOX"-->
 
 	<!--Remove if you don't want to use Moonchart, which allows usage of chart formats from other rhythm games and fnf engines-->
 	<define name="USING_MOONCHART" if="native MODS_ALLOWED" />
@@ -77,7 +80,7 @@
 
 	<!--Remove if you don't want options for the game to continue running after a crash (Windows) -->
 	<define name="WINDOWS_CRASH_HANDLER" if="windows cpp" />
-	
+
 	<!--Remove if you don't want options for the game to continue running after a crash (macOS & Linux) -->
 	<define name="UNIX_CRASH_HANDLER" if="desktop cpp" unless="windows" />
 
@@ -112,7 +115,7 @@
 	<section if="desktop">
 		<assets path="alsoft.txt" rename="alsoft.ini" if="windows" />
 		<assets path="alsoft.txt" rename="alsoft.conf" unless="windows" />
-	</section>	
+	</section>
 
 	<assets path="assets" />
 	<assets path='default_content' rename='content' unless='NO_DEFAULT_CONTENT' embed='false' exclude="*.mp3" />
@@ -137,6 +140,10 @@
 
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/>
+
+	<section if="USING_TEXTBOX">
+		<haxelib name="textbox" version="git"/>
+	</section>
 
 	<section if="USING_MOONCHART">
 		<haxelib name="moonchart" version="0.5.1" unless="USING_NEW_MOONCHART"/>
@@ -168,9 +175,9 @@
 
 	<haxelib name="hxdr_libs" if="cpp false"/>
 
-	<haxelib name="no-spoon" />	
+	<haxelib name="no-spoon" />
 	<haxeflag name="--macro" value="Spork.stuff()" />
-		
+
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
 	<assets path="flixel/flixel-ui/img" embed="true"/>
@@ -188,7 +195,7 @@
 	</section>
 
 	<haxedef name="HXCPP_CPP17" if="cpp" />
-		
+
 	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />
 
 	<!-- <haxedef name="no_traces" if="final"/> -->
