@@ -3159,6 +3159,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		zoomTxt.text = 'Zoom: ${zoomList[curZoom] * 100}%';
 		doUpdateGridLayer = true;
 		doUpdateGridObjects = true;
+		doUpdateWaveform = true;
 	} 
 
 	/** The length of the current section, in beats **/
@@ -3311,16 +3312,16 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			return;
 		}
 
-		var gSize:Int = Std.int(GRID_SIZE * _song.keyCount * 2);
-		var hSize:Int = Std.int(gSize * 0.5);
+		var bmpWidth:Int = Std.int(GRID_SIZE * _song.keyCount * 2);
+		var bmpHalfWidth:Int = Std.int(bmpWidth * 0.5);
+		var bmpHeight:Int = Std.int(gridBG.height);
 
-		var steps:Int = Math.round(currentSectionBeats * 4);
 		var st:Float = currentSectionStart;
-		var et:Float = st + (Conductor.stepCrochet * steps);
+		var et:Float = currentSectionEnd;
 
 		waveformSprite.visible = true;
-		waveformSprite.x = GRID_SIZE + GRID_SIZE * _song.keyCount - hSize;
-		waveformSprite.makeGraphic(gSize, Std.int(gridBG.height), 0, false, 'waveformSprite');
+		waveformSprite.x = GRID_SIZE * (1 + _song.keyCount) - bmpHalfWidth;
+		waveformSprite.makeGraphic(bmpWidth, bmpHeight, 0, false, 'waveformSprite(${bmpWidth}x${bmpHeight})');
 
 		bitchRect.setTo(0, 0, waveformSprite.pixels.width, waveformSprite.pixels.height);
 		waveformSprite.pixels.fillRect(bitchRect, 0);
@@ -3335,7 +3336,7 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 			et,
 			1,
 			wavData,
-			waveformSprite.frameHeight
+			waveformSprite.pixels.height
 		);
 
 		// Draws
@@ -3344,15 +3345,15 @@ class ChartingState extends funkin.states.base.CustomFlxUIState
 		var length:Int = FlxMath.maxInt(leftLength, rightLength);
 
 		for (i in 0...length) {
-			var lmin = FlxMath.bound((i < wavData[0][0].length ? wavData[0][0][i] : 0) * (gSize / 1.12), -hSize, hSize) * 0.5;
-			var lmax = FlxMath.bound((i < wavData[0][1].length ? wavData[0][1][i] : 0) * (gSize / 1.12), -hSize, hSize) * 0.5;
+			var lmin = FlxMath.bound((i < wavData[0][0].length ? wavData[0][0][i] : 0) * (bmpWidth / 1.12), -bmpHalfWidth, bmpHalfWidth) * 0.5;
+			var lmax = FlxMath.bound((i < wavData[0][1].length ? wavData[0][1][i] : 0) * (bmpWidth / 1.12), -bmpHalfWidth, bmpHalfWidth) * 0.5;
 
-			var rmin = FlxMath.bound((i < wavData[1][0].length ? wavData[1][0][i] : 0) * (gSize / 1.12), -hSize, hSize) * 0.5;
-			var rmax = FlxMath.bound((i < wavData[1][1].length ? wavData[1][1][i] : 0) * (gSize / 1.12), -hSize, hSize) * 0.5;
+			var rmin = FlxMath.bound((i < wavData[1][0].length ? wavData[1][0][i] : 0) * (bmpWidth / 1.12), -bmpHalfWidth, bmpHalfWidth) * 0.5;
+			var rmax = FlxMath.bound((i < wavData[1][1].length ? wavData[1][1][i] : 0) * (bmpWidth / 1.12), -bmpHalfWidth, bmpHalfWidth) * 0.5;
 
 			final scale:Float = 1;
 			bitchRect.setTo(
-				hSize - (lmin + rmin), 
+				bmpHalfWidth - (lmin + rmin), 
 				i * scale, 
 				(lmin + rmin) + (lmax + rmax), 
 				scale
