@@ -7,13 +7,11 @@ import lime.app.Application.current as application;
 import lime.graphics.Image;
 import flixel.FlxG;
 import flixel.FlxState;
-
 import funkin.*;
 import funkin.api.Github;
 import funkin.macros.Sowy;
 import funkin.data.SemanticVersion;
 import funkin.objects.DebugDisplay;
-
 #if sys
 import sys.FileSystem;
 import sys.io.Process;
@@ -22,8 +20,7 @@ import haxe.io.BytesOutput;
 
 using StringTools;
 
-final class Version
-{
+final class Version {
 	public static final engineVersion:String = '0.4.0'; // Used for autoupdating n stuff
 	public static final betaVersion:String = 'alpha'; // beta version, set it to 0 if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
 	public static final isBeta:Bool = betaVersion != '0';
@@ -32,34 +29,31 @@ final class Version
 	public static final githubRepo:RepoInfo = Github.getCompiledRepoInfo();
 	public static final branchName:String = Github.getGitBranchName();
 	public static final gitHash:String = Github.getGitCommitHash();
-	
+
 	public static final semanticVersion:SemanticVersion = isBeta ? '$engineVersion-$betaVersion' : engineVersion;
 	public static final displayedVersion:String = {
 		var version = 'v$semanticVersion';
-		
 		#if !OFFICIAL_BUILD
-		if (gitHash.length > 0) version += ' [$branchName:${Github.getGitCommitHash(true)}]';
+		if (gitHash.length > 0)
+			version += ' [$branchName:${Github.getGitCommitHash(true)}]';
 		#end
-
 		version;
 	};
 }
 
-class Main extends Sprite
-{
+class Main extends Sprite {
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var adjustGameSize:Bool = true; // If true, the game size is adjusted to fit within the screen resolution
 	var initialState:Class<FlxState> = InitState; // The FlxState the game starts with.
-	var nextState:Class<FlxState> = funkin.states.TitleState; 
+	var nextState:Class<FlxState> = funkin.states.editors.TestDState;
 	var framerate:Int = 60; // How many frames per second the game should run at.
 	var skipSplash:Bool = Std.random(1000) != 1; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Null<Bool> = null; // Whether to start the game in fullscreen on desktop targets
 
 	public static final UserAgent:String = 'TrollEngine/${Version.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
-	
-	//// You can pretty much ignore everything from here on - your code should go in your states.
 
+	//// You can pretty much ignore everything from here on - your code should go in your states.
 	public static var showDebugTraces:Bool = #if (debug || SHOW_DEBUG_TRACES) true #else false #end;
 	public static var downloadBetas:Bool = Version.isBeta;
 	public static var outOfDate:Bool = false;
@@ -72,16 +66,17 @@ class Main extends Sprite
 	public static var bread:Bitmap;
 
 	#if ALLOW_DEPRECATION
-	@:noCompletion @:deprecated("volumeChangedEvent is deprecated, use FlxG.sound.onVolumeChange, instead") 
-	public static var volumeChangedEvent(get, never):flixel.util.FlxSignal.FlxTypedSignal<Float -> Void>;
-	@:noCompletion inline static function get_volumeChangedEvent() return FlxG.sound.onVolumeChange;
+	@:noCompletion @:deprecated("volumeChangedEvent is deprecated, use FlxG.sound.onVolumeChange, instead")
+	public static var volumeChangedEvent(get, never):flixel.util.FlxSignal.FlxTypedSignal<Float->Void>;
+
+	@:noCompletion inline static function get_volumeChangedEvent()
+		return FlxG.sound.onVolumeChange;
 	#end
 
 	////
-
 	#if desktop
 	// stolen from psych engine lol
-	static function __init__(){
+	static function __init__() {
 		var configPath:String = Path.directory(Path.withoutExtension(#if hl Sys.getCwd() #else Sys.programPath() #end));
 
 		#if windows
@@ -116,13 +111,13 @@ class Main extends Sprite
 		hxvlc.util.Handle.init(["--no-audio-time-stretch"]); // Makes it so videos when slowed/sped up have their audio pitch up/down
 		// imo better than with time stretch but remove if thats what u prefer lol
 		#end
-				
+
 		////
 		#if sys
 		var args = Sys.args();
 		trace(args);
 		for (arg in args) {
-			switch(arg) {
+			switch (arg) {
 				case "traceSowy":
 					trace("sowy");
 
@@ -156,7 +151,7 @@ class Main extends Sprite
 			if (screenWidth < gameWidth && screenHeight < gameWidth) {
 				var ratioX:Float = screenWidth / gameWidth;
 				var ratioY:Float = screenHeight / gameHeight;
-				
+
 				var zoom = Math.min(ratioX, ratioY);
 				gameWidth = Math.ceil(screenWidth / zoom);
 				gameHeight = Math.ceil(screenHeight / zoom);
@@ -168,14 +163,14 @@ class Main extends Sprite
 		if (scaleModifier > 1) {
 			var scaleModifier = Math.floor(scaleModifier);
 			resizeWindow(gameWidth * scaleModifier, gameHeight * scaleModifier);
-		}else 
+		} else
 			scaleWindow(scaleModifier);
 
 		#if windows
 		centerWindow(); // if you have multiple monitors on linux it just goes inbetween the monitors, very annoying
 		#end
-		
-		////		
+
+		////
 		InitState.nextState = nextState;
 
 		game = new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
@@ -199,8 +194,7 @@ class Main extends Sprite
 		return flash.Lib.getTimer();
 		#elseif (js || electron)
 		return js.Browser.window.performance.now();
-		#elseif (lime_cffi && !macro && !neko)
-		@:privateAccess
+		#elseif (lime_cffi && !macro && !neko) @:privateAccess
 		#if lime_funkin
 		return lime._internal.backend.native.NativeCFFI.lime_system_get_timer() / 1e+6;
 		#else
@@ -219,17 +213,12 @@ class Main extends Sprite
 		application.window.resize(width, height);
 
 	public static function centerWindow() {
-		application.window.move(
-			Std.int((application.window.display.bounds.width - application.window.width) / 2),
-			Std.int((application.window.display.bounds.height - application.window.height) / 2)
-		);
+		application.window.move(Std.int((application.window.display.bounds.width - application.window.width) / 2),
+			Std.int((application.window.display.bounds.height - application.window.height) / 2));
 	}
 
 	public static function scaleWindow(scale:Float) {
-		application.window.resize(
-			Math.floor(application.window.display.bounds.width * scale), 
-			Math.floor(application.window.display.bounds.height * scale)
-		);
+		application.window.resize(Math.floor(application.window.display.bounds.width * scale), Math.floor(application.window.display.bounds.height * scale));
 	}
 
 	public static function resetSpriteCache(sprite:Sprite):Void {
@@ -284,7 +273,7 @@ class Main extends Sprite
 		} else {
 			process.close();
 		}
-		
+
 		return retVal;
 	}
 	#end
