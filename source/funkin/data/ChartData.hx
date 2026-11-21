@@ -118,16 +118,40 @@ enum abstract ChartVersion(String) from String to String {
 
 class ChartData
 {
-	public static function _parseJson(filePath:String):Null<Dynamic> {
-		var rawJson:Null<String> = Paths.getContent(filePath);
+	public static function makeSwagSong():SwagSong {
+		return {
+			song: 'test',
+			bpm: 150.0,
+			speed: 1,
+			offset: 0,
+
+			stage: 'stage',
+			player1: 'bf',
+			player2: 'dad',
+			gfVersion: 'gf',
+
+			arrowSkin: 'NOTE_assets',
+			splashSkin: 'noteSplashes',
+			hudSkin: 'default',
+
+			tracks: {
+				inst: ["Inst"],
+				player: ["Voices"],
+				opponent: ["Voices"]
+			},
+
+			validScore: false,
+
+			keyCount: 4,
+			notes: [],
+			events: [],
+		}
+	}
+
+	static inline function _parseJson(filePath:String):Null<Dynamic> {
+		var rawJson:Null<Dynamic> = Paths.getJson(filePath);
 		if (rawJson == null) throw 'File not found';
-
-		// LOL GOING THROUGH THE BULLSHIT TO CLEAN IDK WHATS STRANGE
-		rawJson = rawJson.trim();
-		while (!rawJson.endsWith("}"))
-			rawJson = rawJson.substr(0, rawJson.length - 1);
-
-		return Json.parse(rawJson);
+		return rawJson;
 	}
 
 	public static function parseSongJson(filePath:String):Null<SwagSong> {

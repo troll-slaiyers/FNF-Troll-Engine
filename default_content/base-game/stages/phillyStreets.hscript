@@ -1,6 +1,8 @@
 import flixel.addons.display.FlxTiledSprite;
 import openfl.filters.ShaderFilter;
 
+var tweenMan = game.tweenManager;
+
 var scrollingSky:FlxTiledSprite;
 
 var rainShaderStartIntensity:Float = 0.2;
@@ -21,7 +23,9 @@ function getNamedProp(n)
 
 function buildStage(){
 	super();
-	game.gf.scrollFactor.set(1, 1);
+	
+	if (game.gf != null)
+		game.gf.scrollFactor.set(1, 1);
 
 	scrollingSky = new FlxTiledSprite(Paths.image('stages/phillyStreets/phillySkybox'), 2922, 718, true, false);
 	scrollingSky.setPosition(-650, -375);
@@ -86,7 +90,7 @@ function resetCar(left:Bool, right:Bool){
 		carInterruptable = true;
 		var cars = getNamedProp('phillyCars');
 		if (cars != null) {
-			FlxTween.cancelTweensOf(cars);
+			tweenMan.cancelTweensOf(cars);
 			cars.x = 1200;
 			cars.y = 818;
 			cars.angle = 0;
@@ -97,7 +101,7 @@ function resetCar(left:Bool, right:Bool){
 		car2Interruptable = true;
 		var cars2 = getNamedProp('phillyCars2');
 		if (cars2 != null) {
-			FlxTween.cancelTweensOf(cars2);
+			tweenMan.cancelTweensOf(cars2);
 			getNamedProp('phillyCars2').x = 1200;
 			getNamedProp('phillyCars2').y = 818;
 			getNamedProp('phillyCars2').angle = 0;
@@ -118,8 +122,8 @@ function finishCarLights(sprite:FlxSprite):Void{
 		FlxPoint.get(3102 - offset[0], 1127 - offset[1] + 40)
 	];
 
-	FlxTween.angle(sprite, rotations[0], rotations[1], duration, {ease: FlxEase.sineIn, startDelay: startdelay} );
-	FlxTween.quadPath(sprite, path, duration, true, {
+	tweenMan.angle(sprite, rotations[0], rotations[1], duration, {ease: FlxEase.sineIn, startDelay: startdelay} );
+	tweenMan.quadPath(sprite, path, duration, true, {
 		ease: FlxEase.sineIn,
 		startDelay: startdelay,
 		onComplete: function(_) {
@@ -134,7 +138,7 @@ function finishCarLights(sprite:FlxSprite):Void{
 */
 function driveCarLights(sprite:FlxSprite):Void{
 	carInterruptable = false;
-	FlxTween.cancelTweensOf(sprite);
+	tweenMan.cancelTweensOf(sprite);
 	var variant:Int = FlxG.random.int(1,4);
 	sprite.animation.play('car' + variant);
 	var extraOffset = [0, 0];
@@ -164,8 +168,8 @@ function driveCarLights(sprite:FlxSprite):Void{
 	];
 	visualizePath(path);
 
-	FlxTween.angle(sprite, rotations[0], rotations[1], duration, {ease: FlxEase.cubeOut} );
-	FlxTween.quadPath(sprite, path, duration, true, {
+	tweenMan.angle(sprite, rotations[0], rotations[1], duration, {ease: FlxEase.cubeOut} );
+	tweenMan.quadPath(sprite, path, duration, true, {
 		ease: FlxEase.cubeOut,
 		onComplete: function(_) {
 			carWaiting = true;
@@ -180,7 +184,7 @@ function driveCarLights(sprite:FlxSprite):Void{
 */
 function driveCar(sprite:FlxSprite):Void{
 	carInterruptable = false;
-	FlxTween.cancelTweensOf(sprite);
+	tweenMan.cancelTweensOf(sprite);
 	var variant:Int = FlxG.random.int(1,4);
 	sprite.animation.play('car' + variant);
 	// setting an offset here because the current implementation of stage prop offsets was not working at all for me
@@ -215,8 +219,8 @@ function driveCar(sprite:FlxSprite):Void{
 	];
 	visualizePath(path);
 
-	FlxTween.angle(sprite, rotations[0], rotations[1], duration, null );
-	FlxTween.quadPath(sprite, path, duration, true, {
+	tweenMan.angle(sprite, rotations[0], rotations[1], duration, null );
+	tweenMan.quadPath(sprite, path, duration, true, {
 		ease: null,
 		onComplete: function(_) {
 			carInterruptable = true;
@@ -226,7 +230,7 @@ function driveCar(sprite:FlxSprite):Void{
 
 function driveCarBack(sprite:FlxSprite):Void{
 	car2Interruptable = false;
-	FlxTween.cancelTweensOf(sprite);
+	tweenMan.cancelTweensOf(sprite);
 	var variant:Int = FlxG.random.int(1,4);
 	sprite.animation.play('car' + variant);
 	// setting an offset here because the current implementation of stage prop offsets was not working at all for me
@@ -261,8 +265,8 @@ function driveCarBack(sprite:FlxSprite):Void{
 	];
 	visualizePath(path);
 
-	FlxTween.angle(sprite, rotations[0], rotations[1], duration, null );
-	FlxTween.quadPath(sprite, path, duration, true, {
+	tweenMan.angle(sprite, rotations[0], rotations[1], duration, null );
+	tweenMan.quadPath(sprite, path, duration, true, {
 		ease: null,
 		onComplete: function(_) {
 			car2Interruptable = true;
@@ -302,49 +306,10 @@ function onBeatHit(){
 
 // debug shit!!! keeping it here just in case
 function visualizePath(path) {
+	/*
 	for(point in path){
 		var debug:FlxSprite = new FlxSprite(point.x - 5, point.y - 5).makeGraphic(10, 10, 0xFFFF0000);
 		add(debug);
 	}
+	*/
 }
-
-function pauseTween(tween:FlxTween):Void
-	{
-	  if (tween != null)
-	  {
-		tween.active = false;
-	  }
-	}
-  
-	function resumeTween(tween:FlxTween):Void
-	{
-	  if (tween != null)
-	  {
-		tween.active = true;
-	  }
-	}
-
-function onPause():Void {
-	var cars = getNamedProp('phillyCars');
-	if (cars != null) {
-		FlxTween.globalManager.forEachTweensOf(cars, null, pauseTween);
-	}
-
-	var cars2 = getNamedProp('phillyCars2');
-	if (cars2 != null) {
-		FlxTween.globalManager.forEachTweensOf(cars2, null, pauseTween);
-	}
-}
-
-function onResume():Void {
-	var cars = getNamedProp('phillyCars');
-	if (cars != null) {
-		FlxTween.globalManager.forEachTweensOf(cars, null, resumeTween);
-	}
-
-	var cars2 = getNamedProp('phillyCars2');
-	if (cars2 != null) {
-		FlxTween.globalManager.forEachTweensOf(cars2, null, resumeTween);
-	}
-}
-

@@ -54,7 +54,7 @@ function acceptSelection() {
 		case "options":
 			MusicBeatState.switchState(new funkin.states.options.OptionsState());
 		case "funny":
-			MusicBeatState.switchState(HScriptedState.fromFile("funny.CustomState"));
+			MusicBeatState.switchState(HScriptedState.fromName("funny.CustomState"));
 	}
 }
 

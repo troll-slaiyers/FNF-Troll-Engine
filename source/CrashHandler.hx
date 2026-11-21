@@ -46,7 +46,7 @@ class CrashHandler {
 		return 'logs/' + FileUtil.getDateFileName() + '.txt';
 	}
 
-	private static function onCrash(errorName:String):Void {
+	public static function onCrash(errorName:String):Void {
 		print("\nCall stack starts below");
 
 		final callstack:String = callstackToString(CallStack.exceptionStack(true));
@@ -84,8 +84,16 @@ class CrashHandler {
 	}
 
 	inline private static function showCrashBox(errorName:String, boxMessage:String):HandlerChoice {
-		#if WINDOWS_CRASH_HANDLER
-		boxMessage += "\nWould you like to go to the main menu?";
+		#if lime_funkin
+		final ret = FlxG.stage.window.alert(lime.ui.MessageBoxType.ERROR, boxMessage, errorName, ["Main Menu", "Close Program", "Continue"]);
+		return switch(ret) {
+			case 0: YES;
+			case 1: NO;
+			case 2: CANCEL;
+			default: NO;
+		}
+		#elseif WINDOWS_CRASH_HANDLER
+		boxMessage += "\n\n[YES] Main menu\n[NO] Close Program\n[CANCEL] Continue";
 		final ret:MessageBoxReturnValue = Windows.msgBox(boxMessage, errorName, MessageBoxIcon.ERROR | MessageBoxOptions.YESNOCANCEL | MessageBoxDefaultButton.BUTTON3);
 		return switch(ret) {
 			case YES: YES;
@@ -93,7 +101,7 @@ class CrashHandler {
 			default: NO;
 		}
 		#elseif (UNIX_CRASH_HANDLER && linc_filedialogs)
-		boxMessage += "\nWould you like to go to the main menu?";
+		boxMessage += "\n\n[YES] Main menu\n[NO] Close Program\n[CANCEL] Continue";
 		final btn:Button = FileDialogs.message(errorName, boxMessage, Choice.Yes_No_Cancel, Icon.Error);
 		return switch(btn) {
 			case Yes: YES;
@@ -101,12 +109,11 @@ class CrashHandler {
 			default: NO;
 		}
 		#else
-		application.window.alert(callstack, errorName); // this shit barely works on linux!
+		lime.app.Application.current.window.alert(boxMessage, errorName); // this shit barely works on linux!
 		return NO;
 		#end
 	}
 
-	#if (WINDOWS_CRASH_HANDLER || UNIX_CRASH_HANDLER)
 	@:unreflective static inline function toMainMenu() @:privateAccess {
 		try{
 			if (FlxG.game._state != null) {
@@ -120,7 +127,6 @@ class CrashHandler {
 		FlxG.game._nextState = new funkin.states.MainMenuState();
 		FlxG.game.switchState();
 	}
-	#end
 
 	public static function callstackToString(callstack:Array<StackItem>):String {
 		var buf = new StringBuf();

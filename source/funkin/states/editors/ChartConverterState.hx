@@ -102,8 +102,20 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 
 		grp.add(convertFilesButt);
 
-		grp.x = Std.int((FlxG.width - grp.width) / 2);
-		grp.y = Std.int((FlxG.height - (fromFormatDD.y + fromFormatDD.height)) / 2);
+		var grpWidth = grp.width;
+		var grpHeight = (fromFormatDD.y + fromFormatDD.header.height);
+		grp.x = Std.int((FlxG.width - grpWidth) / 2);
+		grp.y = Std.int((FlxG.height - grpHeight) / 2);
+
+		var minY = grp.findMinY();
+		var maxY = selectChartsButt.y + selectChartsButt.height + 15;//grp.findMaxY();
+
+		var bd = new trollui.SlicedSprite(0, 0, grpWidth + 16, (maxY - minY) + 16, "flixel/flixel-ui/img/chrome.png", [3, 3, 3, 3]);
+		grp.insert(0, bd);
+		bd.x = grp.x - 8;
+		bd.y = minY - 8;
+		grp.y = Std.int((FlxG.height - bd.height) / 2);
+
 		this.add(grp);
 	}
 
@@ -112,37 +124,6 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 		str += 'Metadata:\n$metaPath\n';
 		str += 'Chart:\n${chartPaths?.join('\n')}\n';
 		infoText.text = str;
-	}
-
-	static function getCommonStringsStart(strings:Array<String>):String {
-		var commonCharacters:Int = 0;
-		var longest:String = "";
-
-		for (str in strings) {
-			var l = str.length;
-			if (l > commonCharacters) {
-				commonCharacters = l;
-				longest = str;
-			}
-		}
-
-		for (str1 in strings) {
-			for (str2 in strings) {
-				var commonCharacters2:Int = 0;
-
-				for (i in 0...str1.length) {
-					if (str1.charCodeAt(i) == str2.charCodeAt(i))
-						commonCharacters2++;
-					else
-						break;
-				}
-
-				if (commonCharacters2 < commonCharacters)
-					commonCharacters = commonCharacters2;
-			}
-		}
-
-		return longest.substr(0, commonCharacters);
 	}
 
 	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>)
@@ -245,7 +226,7 @@ class ChartConverterState extends funkin.states.base.CustomFlxUIState
 			//chartPaths.sort((a:String,b:String) -> a.length-b.length);
 
 			var fileNames:Array<String> = [for (path in chartPaths) new Path(path).file];
-			var songName:String = getCommonStringsStart(fileNames);
+			var songName:String = CoolUtil.getCommonStringsStart(fileNames);
 			
 			for (i in 0...chartPaths.length) 
 			{

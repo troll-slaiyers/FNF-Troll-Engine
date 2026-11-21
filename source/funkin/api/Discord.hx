@@ -15,7 +15,7 @@ typedef DiscordRPCInfo = {
 }
 
 private final defaultRPCInfo:DiscordRPCInfo = {
-	applicationId: '814588678700924999',
+	applicationId: '1529628135908184194',
 	allowedImageKeys: ["icon"],
 
 	defaultPresence: {

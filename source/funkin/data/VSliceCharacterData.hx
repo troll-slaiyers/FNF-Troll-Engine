@@ -13,11 +13,21 @@ class VSliceCharacterData {
 	#if true // Functions to convert to Psych format
 	static function toPsychData(data:Dynamic):CharacterFile {
 		var data: VSliceCharJson = data;
+
+		var assetPaths:Array<String> = [data.assetPath];
+		var animations = [
+			for (anim in data.animations) {
+				if (anim.assetPath != null && !assetPaths.contains(anim.assetPath))
+					assetPaths.push(anim.assetPath);
+				toPsychAnim(anim);
+			}
+		];
+
 		// TODO: render type shit
 		return {
 			script_name: "vslice",
-			animations: [for(anim in data.animations) toPsychAnim(anim)],
-			image: data.assetPath,
+			animations: animations,
+			image: assetPaths.join(','),
 			scale: (data?.scale ?? 1) * ((data?.isPixel ?? false) ? 6 : 1),
 			sing_duration: data?.singTime ?? 4,
 			
@@ -50,7 +60,14 @@ class VSliceCharacterData {
 
 			"name": char.characterId,
 			"assetPath": char.imageFile,
-			"renderType": CharacterData.getImageFileType(char.imageFile),
+			"renderType": {
+				var str = Paths.getImageFileType(char.imageFile);
+				if (str == ANIMATE)
+					str = "textureatlas";
+				else
+					str = "sparrow";
+				str;
+			},
 			"flipX": char.originalFlipX,
 			"scale": char.baseScale,
 			"isPixel": char.noAntialiasing == true, // i think // isPixel also assumes its scaled up by 6 so

@@ -1,9 +1,9 @@
-package funkin.objects.cutscenes;
+package funkin.objects.cutscenes.components;
 
 import funkin.scripts.*;
 
 typedef BoxData = {
-	var graphic:String;
+	var image:String;
 	var antialiasing:Bool;
 	var scale:Float;
 	var offsets:Array<Int>;
@@ -34,8 +34,7 @@ typedef AnimsArray = {
 	var offsets:Array<Int>;
 }
 
-class DialogueBox extends FlxSprite
-{
+class DialogueBox extends FlxSprite {
 	var jsonFile:BoxData;
 
 	public var font:String = 'pixel.ttf';
@@ -45,35 +44,35 @@ class DialogueBox extends FlxSprite
 	public var dialogueTalkSound:Array<String> = null;
 	public var dialoguePressedSound:String = 'dialogue';
 	public var script:FunkinHScript;
+
 	var currentBoxStyle:String;
+
 	public var shadowWidth:Float;
-	public var textOffsets:Array<Int>= [170, 450];
+	public var textOffsets:Array<Int> = [170, 450];
 	public var textWidth:Int = 700;
-	
-	public function new(_boxtype:String)
-	{
+
+	public function new(_boxtype:String) {
 		super();
 		jsonFile = Paths.json('boxes/$_boxtype.json');
 
 		if (jsonFile != null) {
 			currentBoxStyle = _boxtype;
 			loadJSON();
-		}else
+		} else
 			trace('Couldnt load $_boxtype dialogue box!');
 	}
 
-	function loadJSON()
-	{	
-		frames = Paths.sparrowAtlas(jsonFile.graphic);
+	function loadJSON() {
+		frames = Paths.sparrowAtlas(jsonFile.image);
 
-		for (anim in jsonFile.animations) 
+		for (anim in jsonFile.animations)
 			animation.addByPrefix(anim.animName, anim.animPrefix, anim.fps, anim.looped);
 
 		x = jsonFile.offsets[0];
 		y = jsonFile.offsets[1];
-		scale.set(jsonFile.scale,jsonFile.scale);
+		scale.set(jsonFile.scale, jsonFile.scale);
 
-		//this can probably be fixed, i dont think we need all ts
+		// this can probably be fixed, i dont think we need all ts
 		antialiasing = jsonFile.antialiasing;
 		font = jsonFile.text.font;
 		textSize = jsonFile.text.size;
@@ -92,12 +91,11 @@ class DialogueBox extends FlxSprite
 		startScript();
 	}
 
-	public function startScript()
-	{
+	public function startScript() {
 		if (script != null) {
 			trace("Script already started!");
 			return;
-		}   
+		}
 
 		var file = Paths.getHScriptPath('boxes/$currentBoxStyle');
 		if (file == null) {
@@ -106,18 +104,16 @@ class DialogueBox extends FlxSprite
 		}
 
 		script = FunkinHScript.fromFile(file);
-		//variables
+		// variables
 		script.set("this", this);
 	}
 
-	override function destroy()
-	{
-		if (script != null){
+	override function destroy() {
+		if (script != null) {
 			script.call("onDestroy");
 			script.stop();
 			script = null;
 		}
 		super.destroy();
 	}
-   
 }

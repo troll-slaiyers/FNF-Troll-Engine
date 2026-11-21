@@ -4,7 +4,7 @@ function onCreate()
 	GameOverSubstate.loopSoundName = 'gameOver-pixel';
 	GameOverSubstate.endSoundName = 'gameOverEnd-pixel';
 
-    if(game.hudSkin == 'default')
+    if (game?.hudSkin == 'default')
         game.hudSkin = 'pixel';
 }
 

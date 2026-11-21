@@ -3,11 +3,9 @@ package funkin.objects;
 import funkin.scripts.ScriptedClassShit.InstanceInterp;
 import flixel.graphics.frames.FlxAtlasFrames;
 import funkin.states.PlayState;
-import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.playfields.PlayField;
 import funkin.objects.notes.Note;
 import funkin.data.CharacterData;
-import funkin.data.CharacterData.*;
 import funkin.scripts.*;
 import flixel.animation.FlxAnimation;
 import flixel.tweens.FlxTween;
@@ -24,11 +22,7 @@ import animate.FlxAnimateController;
 using flixel.util.FlxColorTransformUtil;
 using StringTools;
 
-#if USING_FLXANIMATE
-class Character extends FlxAnimate
-#else
-class Character extends FlxSprite
-#end
+class Character extends FunkinSprite
 {
 	/**Character to use if the requested one fails to load**/
 	public static final DEFAULT_CHARACTER:String = 'bf';
@@ -212,32 +206,9 @@ class Character extends FlxSprite
 
 		////
 		imageFile = json.image;
-
-		var fileType: String = getImageFileType(imageFile);
-		var atlases:Array<String> = [json.image];
-		switch (fileType)
-		{
-			case "texture":	
-				frames = Paths.animateAtlas(imageFile);
-				isAnimate = true;
-			case "packer":	frames = Paths.packerAtlas(imageFile);
-			case "sparrow":	
-				var frames:FlxAtlasFrames = Paths.sparrowAtlas(imageFile);
-				if(json.images != null && json.images.length > 0){
-					for(i in json.images){
-						if (!atlases.contains(i)) {
-							atlases.push(i);
-							var subAtlas:FlxAtlasFrames = Paths.sparrowAtlas(i);
-							if (subAtlas==null)continue;
-							@:privateAccess
-							if (!frames.usedGraphics.contains(subAtlas.parent))
-								frames.addAtlas(subAtlas, true);
-						}
-					}
-				}
-				this.frames = frames;
-		}
-		
+		animationsArray = json.animations;
+		loadAtlas(imageFile);
+		addAnimations();
 
 		////
 		baseScale = Math.isNaN(json.scale) ? 1.0 : json.scale;
@@ -259,22 +230,16 @@ class Character extends FlxSprite
 
 		if (json.healthbar_colors != null && json.healthbar_colors.length > 2)
 			healthColorArray = json.healthbar_colors;
+	}
 
-		animationsArray = json.animations;
-
+	public function addAnimations() {
 		if (animationsArray != null && animationsArray.length > 0)
 		{
-			if(fileType == 'sparrow'){
-				for(anim in animationsArray){
-					if(anim.image == null)continue;
-					if(!atlases.contains(anim.image)){
-						atlases.push(anim.image);
-						var subAtlas:FlxAtlasFrames = Paths.sparrowAtlas(anim.image);
-						var frames: FlxAtlasFrames = cast frames;
-						@:privateAccess
-						if (!frames.usedGraphics.contains(subAtlas.parent))
-							frames.addAtlas(subAtlas, true);
-					}
+			// I might remove anim.image
+			if (!isAnimate) {
+				for (anim in animationsArray) {
+					if (anim.image != null && !imageFile.contains(anim.image))
+						addSubAtlas(anim.image);
 				}
 			}
 			
@@ -293,20 +258,21 @@ class Character extends FlxSprite
 				}
 
 				////
-				if (!isAnimate) {
-					if (animIndices != null && animIndices.length > 0)
-						animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
-					else
-						animation.addByPrefix(animAnim, animName, animFps, animLoop);
-				}
 				#if USING_FLXANIMATE
-				else {
+				if (isAnimate) {
 					if (animIndices != null && animIndices.length > 0)
 						anim.addBySymbolIndices(animAnim, animName, animIndices, animFps, animLoop);
 					else
 						anim.addBySymbol(animAnim, animName, animFps, animLoop);
 				}
+				else
 				#end
+				{
+					if (animIndices != null && animIndices.length > 0)
+						animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+					else
+						animation.addByPrefix(animAnim, animName, animFps, animLoop);
+				}
 				////
 				if (animData.offsets != null && animData.offsets.length > 1)
 					addOffset(animData.anim, animData.offsets[0], animData.offsets[1]);
@@ -331,14 +297,14 @@ class Character extends FlxSprite
 
 
 	function getMyCharacterFile(){
-		return getCharacterFile(characterId);
+		return CharacterData.getCharacterFile(characterId);
 	}
 
 	function _setupCharacter() {
 		var json = getMyCharacterFile();
 		if (json == null) {
 			trace('Character file: $characterId not found.');
-			json = getCharacterFile(DEFAULT_CHARACTER);
+			json = CharacterData.getCharacterFile(DEFAULT_CHARACTER);
 			characterId = DEFAULT_CHARACTER;
 		}
 		
@@ -358,7 +324,7 @@ class Character extends FlxSprite
 	public function setupCharacter()
 	{
 		var characterScript = characterScripts[0];
-		if (characterScript != null && characterScript.scriptType == HSCRIPT) {
+		if (characterScript != null) {
 			var characterScript:FunkinHScript = cast characterScript;
 			if (characterScript.exists('setupCharacter')) {
 				characterScript.executeFunc('setupCharacter', null, this, ["super" => _setupCharacter]);
@@ -720,20 +686,16 @@ class Character extends FlxSprite
 
 	public function startScript(script:FunkinScript){		
 		#if HSCRIPT_ALLOWED
-		if(script.scriptType == ScriptType.HSCRIPT){
-			callScript(script, "onLoad", [this]);
-		}
+		script.call("onLoad", [this]);
 		#end
 	}
 
 	public function stopScript(script:FunkinScript, destroy:Bool=false){
 		#if HSCRIPT_ALLOWED
-		if (script.scriptType == ScriptType.HSCRIPT){
-			callScript(script, "onStop", [this]);
-			if(destroy){
-				script.call("onDestroy");
-				script.stop();
-			}
+		script.call("onStop", [this]);
+		if(destroy){
+			script.call("onDestroy");
+			script.stop();
 		}
 		#end
 	}
@@ -772,78 +734,26 @@ class Character extends FlxSprite
 		return this;
 	}
 
-	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>, ?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
+	public function callOnScripts(funcName:String, ?args:Array<Dynamic>):Dynamic
 	{
-		#if (HSCRIPT_ALLOWED)
-		if (args == null)
-			args = [];
-		if (exclusions == null)
-			exclusions = [];
-		if (scriptArray == null)
-			scriptArray = characterScripts;
-
-		var returnVal:Dynamic = Globals.Function_Continue;
-
-		for (script in scriptArray)
-		{
-			if (exclusions.contains(script.scriptName))
-				continue;
-			
-			var ret:Dynamic = script.call(event, args, vars);
-			if (ret == Globals.Function_Halt)
-			{
-				ret = returnVal;
-				if (!ignoreStops)
-					return returnVal;
-			};
-			if (ret != Globals.Function_Continue && ret != null)
-				returnVal = ret;
-		}
-
-		if (returnVal == null)
-			returnVal = Globals.Function_Continue;
-
-		return returnVal;
-		#else
-		return Globals.Function_Continue;
-		#end
+		return Globals.callOnScripts(characterScripts, funcName, args);
 	}
 
-	public function setOnScripts(variable:String, value:Dynamic, ?scriptArray:Array<Dynamic>)
+	public function setOnScripts(variable:String, value:Dynamic)
 	{
-		if (scriptArray == null)
-			scriptArray = characterScripts;
-
-		for (script in scriptArray) {
+		for (script in characterScripts) {
 			script.set(variable, value);
 			// trace('set $variable, $value, on ${script.scriptName}');
 		}
 	}
 
-	public function callScript(script:Dynamic, event:String, ?args:Array<Dynamic>):Dynamic
+	public function callScript(scriptName:String, funcName:String, ?args:Array<Dynamic>):Dynamic
 	{
 		#if (HSCRIPT_ALLOWED) // no point in calling this code if you.. for whatever reason, disabled scripting.
-		if ((script is FunkinScript))
-		{
-			return callOnScripts(event, args, true, [], [script], [], false);
-		}
-		else if ((script is Array))
-		{
-			return callOnScripts(event, args, true, [], script, [], false);
-		}
-		else if ((script is String))
-		{
-			var scripts:Array<FunkinScript> = [];
-
-			for (scr in characterScripts)
-			{
-				if (scr.scriptName == script)
-					scripts.push(scr);
-			}
-
-			return callOnScripts(event, args, true, [], scripts, [], false);
-		}
-		#end
+		var scripts:Array<FunkinScript> = characterScripts.filter(script -> script.scriptName == scriptName);
+		return Globals.callOnScripts(scripts, funcName, args);
+		#else
 		return Globals.Function_Continue;
+		#end
 	}
 }

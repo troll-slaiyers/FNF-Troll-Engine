@@ -1,18 +1,19 @@
 var bg:FlxSprite;
 var alphaIn:FlxTimer;
-function onCreate()
-{    	
+function onCreate() {    	
 	game.camFollowPos.x = 650;
 	game.camFollowPos.y =  500;
 	game.camFollow.x = game.camFollowPos.x;
 	game.camFollow.y = game.camFollowPos.y;
+
+	game.gf.skipDance = true;
+	
 	bg = CoolUtil.blankSprite(FlxG.width, FlxG.height, 0xFFB3DFd8);
 	bg.camera = game.camOther;
 	bg.alpha = 0;
 	game.add(bg);
 	
-	alphaIn = new FlxTimer().start(0.83, function(tmr:FlxTimer)
-	{
+	alphaIn = new FlxTimer().start(0.83, function(tmr:FlxTimer) {
 		bg.alpha += (1 / 5) * 0.7;
 		if (bg.alpha > 0.7)
 		{
@@ -22,15 +23,20 @@ function onCreate()
 }
 
 function onDialogueEnded() {
-	if(alphaIn!= null)alphaIn.cancel();
+	if(alphaIn != null)
+		alphaIn.cancel();
+
+	game.canPause = false;
+	
 	new FlxTimer().start(0.2, function(tmr:FlxTimer)
 	{
+		game.gf.skipDance = false;
+		game.canPause = true;
 		bg.alpha -= 1 / 5 * 0.7;
 	}, 5);
 }
 
 
-function onNewLine()
-{
+function onNewLine() {
 	this.animation.play('pressed');
 }

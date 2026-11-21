@@ -75,7 +75,7 @@ class DebugDisplay extends TextField {
 		if (_updateClock >= 1000) {
 			currentFPS = (canLie && FlxG.drawFramerate > 0) ? FlxMath.minInt(_framesPassed, FlxG.drawFramerate) : _framesPassed;
 
-			if (currentFPS <= FlxG.drawFramerate * 0.5)
+			if (!FNFGame.uncappedFramerate && currentFPS <= FlxG.drawFramerate * 0.5)
 				textColor = 0xFFFF0000;
 			else
 				textColor = 0xFFFFFFFF;

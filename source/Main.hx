@@ -24,8 +24,8 @@ using StringTools;
 
 final class Version
 {
-	public static final engineVersion:String = '0.3.2'; // Used for autoupdating n stuff
-	public static final betaVersion:String = '0'; // beta version, set it to 0 if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
+	public static final engineVersion:String = '0.4.0'; // Used for autoupdating n stuff
+	public static final betaVersion:String = 'alpha.1'; // beta version, set it to 0 if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
 	public static final isBeta:Bool = betaVersion != '0';
 
 	public static final buildDate:String = Sowy.getBuildDate();
@@ -50,7 +50,7 @@ class Main extends Sprite
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var adjustGameSize:Bool = true; // If true, the game size is adjusted to fit within the screen resolution
-	var initialState:Class<FlxState> = StartupState; // The FlxState the game starts with.
+	var initialState:Class<FlxState> = InitState; // The FlxState the game starts with.
 	var nextState:Class<FlxState> = funkin.states.TitleState; 
 	var framerate:Int = 60; // How many frames per second the game should run at.
 	var skipSplash:Bool = Std.random(1000) != 1; // Whether to skip the flixel splash screen that appears in release mode.
@@ -176,10 +176,12 @@ class Main extends Sprite
 		#end
 		
 		////		
-		StartupState.nextState = nextState;
+		InitState.nextState = nextState;
 
 		game = new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
 		addChild(game);
+
+		DebugLog.init();
 
 		fpsVar = new DebugDisplay(10, 3, 0xFFFFFF);
 		fpsVar.visible = false;
@@ -195,15 +197,19 @@ class Main extends Sprite
 	public static function getTime():Float {
 		#if flash
 		return flash.Lib.getTimer();
-		#elseif ((js && !nodejs) || electron)
+		#elseif (js || electron)
 		return js.Browser.window.performance.now();
-		#elseif sys
-		return Sys.time() * 1000;
-		#elseif (lime_cffi && !macro)
+		#elseif (lime_cffi && !macro && !neko)
 		@:privateAccess
+		#if lime_funkin
+		return lime._internal.backend.native.NativeCFFI.lime_system_get_timer() / 1e+6;
+		#else
 		return cast lime._internal.backend.native.NativeCFFI.lime_system_get_timer();
+		#end
 		#elseif cpp
 		return untyped __global__.__time_stamp() * 1000;
+		#elseif sys
+		return Sys.time() * 1000;
 		#else
 		return 0;
 		#end

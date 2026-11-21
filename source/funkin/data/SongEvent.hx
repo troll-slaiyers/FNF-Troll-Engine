@@ -60,7 +60,7 @@ class ScriptedSongEvent extends SongEvent implements IScriptedClass {
 	}
 
 	public function callOnScript(func:String, ?args:Array<Dynamic>):Dynamic
-		return script.executeFunc(func, args);
+		return script.call(func, args);
 	
 	public function existsOnScript(func:String):Bool
 		return script.exists(func);
@@ -294,7 +294,7 @@ class DefaultSongEvent extends SongEvent {
 					game.songSpeed = newValue;
 				else{
 					@:privateAccess
-					game.songSpeedTween = FlxTween.num(
+					game.songSpeedTween = game.tweenManager.num(
 						game.songSpeed, newValue, val2, 
 						{
 							ease: FlxEase.linear, 
@@ -305,6 +305,7 @@ class DefaultSongEvent extends SongEvent {
 				}
 
 			case 'Set Property':
+				// Might replace this with the hscript interpreter :d
 				var value2:Dynamic = switch(value2){
 					case "true": true;
 					case "false": false;
@@ -312,7 +313,7 @@ class DefaultSongEvent extends SongEvent {
 				}
 
 				try{
-					funkin.scripts.Util.setProperty(value1, value2);					
+					funkin.scripts.PropertyUtil.setProperty(value1, value2);					
 				}catch (e:haxe.Exception){
 					trace('Set Property event error: $value1 | $value2');
 				}

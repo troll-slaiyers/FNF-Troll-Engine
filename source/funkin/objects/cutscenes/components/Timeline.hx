@@ -1,4 +1,4 @@
-package funkin.objects.cutscenes;
+package funkin.objects.cutscenes.components;
 
 import flixel.util.typeLimit.OneOfTwo;
 import flixel.util.FlxSignal.FlxTypedSignal;

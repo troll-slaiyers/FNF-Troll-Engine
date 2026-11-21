@@ -1,4 +1,4 @@
-package funkin.objects.cutscenes;
+package funkin.objects.cutscenes.components;
 
 import funkin.data.CharacterData;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -8,8 +8,7 @@ import animate.FlxAnimate;
 #end
 
 typedef DialogueCharacterFile = {
-	var graphic:String;
-	var extra_graphics:Array<String>;
+	var image:String;
 	var offsets:Array<Int>;
 	var antialiasing:Bool;
 	var scale:Float;
@@ -24,11 +23,8 @@ typedef DialogueAnimArray = {
 	var prefix:String;
 	var looped:Bool;
 }
-#if USING_FLXANIMATE
-class DialogueCharacter extends FlxAnimate
-#else
-class DialogueCharacter extends FlxSprite
-#end
+
+class DialogueCharacter extends FunkinSprite
 {
 	/**
 	 * JSON file to be used.
@@ -57,36 +53,8 @@ class DialogueCharacter extends FlxSprite
 
 	private function loadJSON()
 	{
-		var fileType:String = CharacterData.getImageFileType(jsonFile.graphic);
-		var isAnimateAtlas:Bool = false;
-		var atlases:Array<String> = [jsonFile.graphic];
-
-		switch (fileType)
-		{
-			case "texture":	
-				frames = Paths.animateAtlas(jsonFile.graphic);
-				isAnimateAtlas = true;
-			case "packer":	
-				frames = Paths.packerAtlas(jsonFile.graphic);
-			case "sparrow":	
-				//this probably be something in a diff file tbh
-				var frames:FlxAtlasFrames = Paths.sparrowAtlas(jsonFile.graphic);
-				if(jsonFile.extra_graphics != null && jsonFile.extra_graphics.length > 0){
-					for(i in jsonFile.extra_graphics){
-						if (!atlases.contains(i)) {
-							atlases.push(i);
-							var subAtlas:FlxAtlasFrames = Paths.sparrowAtlas(i);
-							if (subAtlas==null)continue;
-							@:privateAccess
-							if (!frames.usedGraphics.contains(subAtlas.parent))
-								frames.addAtlas(subAtlas, true);
-						}
-					}
-				}
-				this.frames = frames;
-
-
-		}
+		loadAtlas(jsonFile.image);
+		
 		x = jsonFile.offsets[0];
 		y = jsonFile.offsets[1];
 
@@ -96,9 +64,10 @@ class DialogueCharacter extends FlxSprite
 		for (curAnim in jsonFile.animations)
 		{
 			#if USING_FLXANIMATE
-			if(isAnimateAtlas)
+			if (isAnimate)
 				anim.addBySymbol(curAnim.name, curAnim.prefix, curAnim.fps, curAnim.looped);
-			else  #end anim.addByPrefix(curAnim.name, curAnim.prefix, curAnim.fps, curAnim.looped);
+			else #end 
+				anim.addByPrefix(curAnim.name, curAnim.prefix, curAnim.fps, curAnim.looped);
 		}
 	}
 }

@@ -3,12 +3,7 @@ package funkin.objects;
 import funkin.data.StageData;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 
-#if USING_FLXANIMATE
-import animate.FlxAnimate;
-import animate.FlxAnimateFrames;
-#end
-
-class StageProp extends FlxSprite {
+class StageProp extends FunkinSprite {
 	public var canDance:Bool = true;
 	public var bopTime:Float = 0;
 	public var idleSequence:Array<String> = ['idle'];
@@ -57,30 +52,36 @@ class StageProp extends FlxSprite {
 	public static function buildFromData(propData:StagePropData) {
 		var prop:StageProp = new StageProp(propData.x ?? 0.0, propData.y ?? 0.0);
 
-		#if (USING_FLXANIMATE && false)
-		if (Paths.fileExists('images/${propData.graphic}/Animation.json', TEXT))
-			prop.frames = FlxAnimateFrames.fromAnimate(Paths.animateAtlasPath(propData.graphic));
-		else
-		#end
-		if (Paths.fileExists('images/${propData.graphic}.txt', TEXT))
-			prop.frames = Paths.packerAtlas(propData.graphic);
-		else if (Paths.fileExists('images/${propData.graphic}.xml', TEXT))
-			prop.frames = Paths.sparrowAtlas(propData.graphic);
-		else
+		prop.loadAtlas(propData.graphic);
+		if (prop.frames == null)
 			prop.loadGraphic(Paths.image(propData.graphic));
 
 		if (propData.scale != null)
 			prop.scale.set(propData.scale[0], propData.scale[1]);
 		prop.updateHitbox();
 
-		// TODO: allow FlxAnimate and multisparrow
 		if (propData.animations != null) {
 			for (animation in propData.animations) {
-				if (animation.indices != null)
-					prop.animation.addByIndices(animation.name, animation.prefix, animation.indices, '', animation.fps ?? 24, animation.looped ?? false,
-						animation?.flipX ?? false, animation?.flipY ?? false);
+				var fps:Float = animation.fps ?? 24;
+				var looped:Bool = animation.looped ?? false;
+				var flipX:Bool = animation.flipX ?? false;
+				var flipY:Bool = animation.flipY ?? false;
+
+				#if USING_FLXANIMATE
+				if (prop.isAnimate) {
+					if (animation.indices != null)
+						prop.anim.addBySymbolIndices(animation.name, animation.prefix, animation.indices, fps, looped);
+					else
+						prop.anim.addBySymbol(animation.name, animation.prefix, fps, looped);
+				}
 				else
-					prop.animation.addByPrefix(animation.name, animation.prefix, animation.fps ?? 24, animation.looped ?? false, animation?.flipX ?? false, animation?.flipY ?? false);
+				#end
+				{	
+					if (animation.indices != null)
+						prop.animation.addByIndices(animation.name, animation.prefix, animation.indices, '', fps, looped, flipX, flipY);
+					else
+						prop.animation.addByPrefix(animation.name, animation.prefix, fps, looped, flipX, flipY);
+				}
 
 				if (animation.offset != null && animation.offset.length == 2)
 					prop.offsets.set(animation.name, animation.offset);
@@ -104,14 +105,14 @@ class StageProp extends FlxSprite {
 			prop.playAnim(prop.idleSequence[0], true);
 		}
 
-		prop.alpha = propData?.alpha ?? 1.0;
-		prop.flipX = propData?.flipX ?? false;
-		prop.flipY = propData?.flipY ?? false;
+		prop.alpha = propData.alpha ?? 1.0;
+		prop.flipX = propData.flipX ?? false;
+		prop.flipY = propData.flipY ?? false;
 
 		if(propData.scrollFactor != null)
 			prop.scrollFactor.set(propData.scrollFactor[0], propData.scrollFactor[1]);
 
-		prop.antialiasing = propData?.antialiasing ?? false;
+		prop.antialiasing = propData.antialiasing ?? false;
 
 		return prop;
 	}

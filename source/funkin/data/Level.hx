@@ -1,8 +1,8 @@
 package funkin.data;
 
 import funkin.scripts.ScriptedClassShit.InstanceInterp;
-import funkin.data.BaseSong;
 import funkin.data.Song;
+import funkin.data.FNFSong;
 import funkin.states.StoryModeState;
 import funkin.scripts.FunkinHScript;
 import funkin.scripts.Globals;
@@ -15,7 +15,7 @@ using CoolerStringTools;
 using StringTools;
 
 class Level {
-	public static function fromFile(fileName:String, ?id:String, folder:String = "", index:Int = 0){
+	public static function fromFile(fileName:String, ?id:String, packId:String = "", index:Int = 0){
 		var json:Null<JSONLevelData> = Paths.exists(fileName + ".json") ? Json.parse(Paths.getContent(fileName + ".json")) : null;
 
 
@@ -41,15 +41,21 @@ class Level {
 		var level = scriptedLevel ?? new Level();
 
 		level.id = id ?? json?.id;
-		level.folder = folder;
+		level.packId = packId;
 		level.songList = json?.songs ?? ["Test"];
-		level.songs = [for (songId in level.songList) new Song(songId, folder)];
+		
+		level.songs = [];
+		for (songId in level.songList) {
+			var song = Song.get(songId, packId);
+			if (song != null)
+				level.songs.push(song);
+		}
+
 		level.difficulties = json?.difficulties ?? level.difficulties;
 		level.name = json?.name ?? "NAME DOESNT EXIST IDIOT";
 		level.asset = json?.asset ?? "storymenu/titles/week1";
 		level.props = json?.props ?? level.props;
 		level.appearsInStory = json?.appearsInStory ?? true;
-		level.index = json?.index ?? index;
 		level.bgColor = CoolUtil.colorFromString(json?.bgColor ?? "#F9CF51");
 
 		if (scriptedLevel != null) {
@@ -62,19 +68,24 @@ class Level {
 	public function new(){}
 
 	public function toString()
-		return '$folder:$id';
+		return '$packId:$id';
 
 	public var id:String = 'broken';
-	public var folder:String = '';
+	public var packId:String = '';
 	public var bgColor:FlxColor = 0xFFF9CF51;
-	public var index:Int = 0;
 	public var name:String = "PLACEHOLDER";
 	public var asset:String = "storymenu/titles/week1";
 	public var songList:Array<String> = [];
-	public var songs:Array<BaseSong> = [];
+	public var songs:Array<Song> = [];
 	public var difficulties:Array<String> = ["easy", "normal", "hard"];
 	public var props:Array<LevelPropData> = [];
 	public var appearsInStory:Bool = true;
+
+	#if ALLOW_DEPRECATION
+	@:deprecated("`folder` is deprecated! Use `packId` instead!")
+	public var folder(get, never):String;
+	@:noCompletion inline function get_folder() return packId;
+	#end
 
 	/**
 	 * Returns a file path to the title asset
@@ -82,14 +93,6 @@ class Level {
 	public function getAsset():String
 	{
 		return asset;
-	}
-
-	/**
-	 * Returns an integer to decide placement of the level
-	**/
-	public function getIndex():Int
-	{
-		return index;
 	}
 
 	/**
@@ -111,7 +114,7 @@ class Level {
 	/**
 	 * Returns an array of songs to be played during the level
 	**/
-	public function getPlaylist(difficultyId:String = 'normal'):Array<BaseSong>
+	public function getPlaylist(difficultyId:String = 'normal'):Array<Song>
 	{
 		return songs;
 	}
@@ -129,7 +132,7 @@ class Level {
 	/**
 	 * Returns an array of song data to be shown in freeplay. 
 	**/
-	public function getFreeplaySongs():Array<BaseSong>
+	public function getFreeplaySongs():Array<Song>
 	{
 		return songs;
 	}

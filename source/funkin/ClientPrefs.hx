@@ -40,6 +40,17 @@ private inline function getRefreshRate() {
 @:build(funkin.macros.OptionMacro.build())
 #end
 class ClientPrefs {
+	/**	
+		You can force the value of an option by declaring it outside of the option definitions  
+		This will also remove it from the options menu.  
+
+		For example:  
+		```
+		public static inline final directionalCam = false;
+		public static inline final ghostTapping = false;
+		```
+	**/ /** **/
+
 	#if !USE_EPIC_JUDGEMENT
 	public static inline final useEpics:Bool = false;
 	public static inline final epicWindow:Float = -1;
@@ -49,14 +60,6 @@ class ClientPrefs {
 	public static inline final multicoreLoading:Bool = false;
 	#end
 
-	/*	
-		* You can force the value of an option by declaring it outside of the option definitions
-		* This will also remove it from the options menu.
-
-		* For example:
-		// public static inline final directionalCam = false;
-		// public static inline final ghostTapping = false;
-	 */
 	static var defaultOptionDefinitions = getOptionDefinitions();
 	static var manualLoads = ["gameplaySettings", "quantHSV", "arrowHSV", "comboOffset", "ratingPlacement"];
 
@@ -681,6 +684,22 @@ class ClientPrefs {
 				value: ClientPrefs.getRefreshRate(),
 				data:["suffix" => " FPS", "min" => 10, "max" => 360, "step" => 1,]
 			},
+			"uncappedFramerate" => {
+				display: "Uncapped Framerate",
+				desc: "",
+				type: Toggle,
+				value: false,
+				data: []
+			},
+			#if VSYNC_ALLOWED
+			"vsyncMode" => {
+				display: "V-Sync Mode",
+				desc: "",
+				type: Dropdown,
+				value: "Off",
+				data: ["options" => ["Off", "On", "Adaptive"]],
+			},
+			#end
 			"lowQuality" => {
 				display: "Low Quality",
 				desc: "When toggled, many assets won't be loaded to try to reduce strain on lower-end PCs.",
@@ -930,8 +949,8 @@ class ClientPrefs {
 			}
 		}
 
-		FlxU.clearArraySoft(keyDirections);
-		FlxU.clearArraySoft(buttonDirections);
+		keyDirections.resize(0);
+		buttonDirections.resize(0);
 
 		defaultKeys = keyBinds.copy();
 		defaultButtons = buttonBinds.copy();
@@ -1035,8 +1054,12 @@ class ClientPrefs {
 		FlxG.sound.volume = ClientPrefs.masterVolume;
 		FlxG.autoPause = ClientPrefs.autoPause;
 
-		Main.game.set_antialiasing(globalAntialiasing);
-		Main.game.set_framerate(framerate);
+		FNFGame.antialiasing = (globalAntialiasing);
+		FNFGame.framerate = framerate;
+		FNFGame.uncappedFramerate = uncappedFramerate;
+		#if VSYNC_ALLOWED
+		FNFGame.vsyncMode = vsyncMode;
+		#end
 
 		#if DISCORD_ALLOWED
 		DiscordClient.hideDetails = discordRPC_hideDetails;

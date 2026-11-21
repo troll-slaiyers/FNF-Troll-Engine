@@ -121,8 +121,8 @@ class FNFHealthBar extends FlxBar{
 
 	public var iconScale(default, set) = 1.0;
 	function set_iconScale(value:Float){
-		iconP1.scale.set(value, value);
-		iconP2.scale.set(value, value);
+		iconP1.scale.x = iconP1.scale.y = value * iconP1.baseScale;
+		iconP2.scale.x = iconP2.scale.y = value * iconP2.baseScale;
 
 		iconP1.updateHitbox();
 		iconP2.updateHitbox();
@@ -210,8 +210,8 @@ class ShittyBar extends FNFHealthBar {
 
 
 	override function updateIcons(elapsed:Float) {
-		iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.5)));
-		iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.5)));	
+		iconP1.scale.x = iconP1.scale.y = FlxMath.lerp(iconP1.baseScale, iconP1.scale.x, 0.5);
+		iconP2.scale.x = iconP2.scale.y = FlxMath.lerp(iconP2.baseScale, iconP2.scale.x, 0.5);
 		
 		iconP1.updateHitbox();
 		iconP2.updateHitbox();
@@ -327,8 +327,8 @@ class VSliceBar extends ShittyBar {
 
 	override function updateIcons(elapsed:Float) {
 		var frameFix = elapsed * 60;
-		iconP1.setGraphicSize(Std.int(FlxMath.lerp(iconP1.width, 150, 0.15 * frameFix)));
-		iconP2.setGraphicSize(Std.int(FlxMath.lerp(iconP2.width, 150, 0.15 * frameFix)));
+		iconP1.scale.x = iconP1.scale.y = FlxMath.lerp(iconP1.baseScale, iconP1.scale.x, Math.exp(-frameFix * 0.5));
+		iconP2.scale.x = iconP2.scale.y = FlxMath.lerp(iconP2.baseScale, iconP2.scale.x, Math.exp(-frameFix * 0.5));
 
 		iconP1.updateHitbox();
 		iconP2.updateHitbox();

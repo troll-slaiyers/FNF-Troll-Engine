@@ -1,5 +1,6 @@
 export/*
 *.swf
+*.lnk
 
 # why does hmm install it here what the fuuck why not install it into my main haxelib
 .haxelib

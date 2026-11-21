@@ -1,17 +1,19 @@
-package funkin.objects.cutscenes;
+package funkin.states.editors;
 
+#if false
 import funkin.states.CutscenePauseSubstate;
-import flixel.tweens.FlxEase;
+import funkin.objects.cutscenes.Cutscene;
+import funkin.objects.cutscenes.TimelineCutscene;
 import funkin.states.base.MusicBeatState;
 
 class CutsceneTestState extends MusicBeatState
 {
-	var cutscene: Cutscene;
+	var cutscene:Cutscene;
 	var camGame:FlxCamera;
 	var camOther:FlxCamera;
 
 	override function create(){
-		Paths.currentModDirectory = 'base-game';
+		Paths.currentPackId = 'base-game';
 
 		camGame = new FlxCamera();
 		camOther = new FlxCamera();
@@ -42,3 +44,4 @@ class CutsceneTestState extends MusicBeatState
 		}
 	}
 }
+#end

@@ -889,11 +889,6 @@ class FlxText extends FlxSprite
 			newHeight = oldHeight;
 		}
 
-
-		#if (flixel <= "5.9.0")
-		if (graphic != null && graphic.isDumped)graphic.undump();
-		#end
-
 		if (oldWidth != newWidth || oldHeight != newHeight)
 		{
 			// Need to generate a new buffer to store the text graphic
@@ -943,10 +938,6 @@ class FlxText extends FlxSprite
 
 			drawTextFieldTo(graphic.bitmap);
 		}
-
-		#if (flixel <= "5.9.0")
-        if(graphic.canBeDumped)graphic.dump();
-		#end
         
 		_regen = false;
 		resetFrame();

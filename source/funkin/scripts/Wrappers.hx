@@ -23,10 +23,10 @@ class FlxTweenType {}
 #end
 
 class FlxPoint extends flixel.math.FlxPoint.FlxBasePoint {
-	public static function get()
-		return flixel.math.FlxPoint.get();
-	public static function weak()
-		return flixel.math.FlxPoint.weak();
+	public static function get(x:Float = 0.0, y:Float = 0.0)
+		return flixel.math.FlxPoint.get(x, y);
+	public static function weak(x:Float = 0.0, y:Float = 0.0)
+		return flixel.math.FlxPoint.weak(x, y);
 }
 
 // stupidity

@@ -110,7 +110,7 @@ function updateTrainPos(){
 		}
 		if(phillyTrain.x < -4000 && trainFinishing)
 			resetTrain();
-		else if (game.gf != null && game.gf != null)
+		else if (game != null && game.gf != null)
 			game.gf.playAnim("hairBlow");
 	}
 }

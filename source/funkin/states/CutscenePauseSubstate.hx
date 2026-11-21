@@ -38,8 +38,6 @@ class CutscenePauseSubstate extends MusicBeatSubstate {
 		prevTimeScale = FlxG.timeScale;
 		FlxG.timeScale = 1;
 
-		@:privateAccess
-		this._bgSprite._cameras = this._cameras;
 		_bgSprite.alpha = 0;
 		FlxTween.tween(_bgSprite, {alpha: 0.4}, 1, {ease: FlxEase.quadInOut});
 

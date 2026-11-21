@@ -60,7 +60,10 @@ class TitleState extends MusicBeatState
 			Paths.clearStoredMemory();
 
 		persistentUpdate = true;
-		transIn = null; // No in transition it looks bad
+		
+		// No in transition it looks bad
+		// (if the game directly starts on the title screen, but since I added a loading screen that's not the case anymore)
+		// transIn = null; 
 
 		////
 		camFollow = new FlxPoint(640, 360);
@@ -84,10 +87,17 @@ class TitleState extends MusicBeatState
 		super.create();
 
 		////
-		var stages = StageData.getTitleStages();
-		var stageId = FlxG.random.getObject(stages);
-		if (stageId != null) {
-			bg = new Stage(stageId, true);
+		var titleStages = if (Paths.currentPack == null)
+			StageData.getTitleStages();
+		else [
+			for (stageId in Paths.currentPack.getTitleStages()) 
+				{id:stageId, packId: Paths.currentPack.id}
+		];
+		var chosenStage = FlxG.random.getObject(titleStages);
+		if (chosenStage != null) {
+			trace('Title stage $chosenStage');
+			Paths.currentPackId = chosenStage.packId;
+			bg = new Stage(chosenStage.id, true);
 			
 			#if MULTICORE_LOADING
 			var shitToLoad = bg.stageData.preload;

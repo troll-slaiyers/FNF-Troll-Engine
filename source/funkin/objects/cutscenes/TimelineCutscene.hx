@@ -1,7 +1,6 @@
 package funkin.objects.cutscenes;
 
-import funkin.objects.cutscenes.Timeline.SoundAction;
-
+import funkin.objects.cutscenes.components.Timeline;
 
 // Could do a TimelineCutscene/ScriptedTimelineCutscene
 // but until we have a json format for this they should ALL be scripted lmao

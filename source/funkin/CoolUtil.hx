@@ -1,6 +1,6 @@
 package funkin;
 
-import funkin.data.BaseSong;
+import funkin.data.Song;
 
 import funkin.util.FileUtil;
 import haxe.io.Bytes;
@@ -30,10 +30,10 @@ class CoolUtil {
 	}
 
 	// TODO: reuse song instances n get rid of this
-	public static function indexOfSong(songList:Array<BaseSong>, song:BaseSong):Int {
+	public static function indexOfSong(songList:Array<Song>, song:Song):Int {
 		// return songList.indexOf(song);
 		if (song != null) for (i => s in songList) {
-			if (song.songId == s.songId && song.folder == s.folder) {
+			if (song.songId == s.songId && song.packId == s.packId) {
 				return i;
 			}
 		}
@@ -96,6 +96,37 @@ class CoolUtil {
 				k => Reflect.field(st, k);
 			}
 		];
+	}
+
+	public static function getCommonStringsStart(strings:Array<String>):String {
+		var commonCharacters:Int = 0;
+		var longest:String = "";
+
+		for (str in strings) {
+			var l = str.length;
+			if (l > commonCharacters) {
+				commonCharacters = l;
+				longest = str;
+			}
+		}
+
+		for (str1 in strings) {
+			for (str2 in strings) {
+				var commonCharacters2:Int = 0;
+
+				for (i in 0...str1.length) {
+					if (str1.fastCodeAt(i) == str2.fastCodeAt(i))
+						commonCharacters2++;
+					else
+						break;
+				}
+
+				if (commonCharacters2 < commonCharacters)
+					commonCharacters = commonCharacters2;
+			}
+		}
+
+		return longest.substr(0, commonCharacters);
 	}
 
 	public static function alphabeticalSort(a:String, b:String):Int {
@@ -307,6 +338,26 @@ class CoolUtil {
  			case "instant": (t:Float) -> return 1.0;
 			default: FlxEase.linear;
 		}
+	}
+
+	public static function parseFloatArray(str:String):Array<Float> {
+		var arr = new Array<Float>();
+		for (s in str.split(',')) {
+			if (s.length != 0) {
+				arr.push(Std.parseFloat(s));
+			}
+		}
+		return arr;
+	}
+	
+	public static function parseIntArray(str:String):Array<Int> {
+		var arr = new Array<Int>();
+		for (s in str.split(',')) {
+			if (s.length != 0) {
+				arr.push(Std.parseInt(s));
+			}
+		}
+		return arr;
 	}
 
 	public static inline function browserLoad(site:String) {

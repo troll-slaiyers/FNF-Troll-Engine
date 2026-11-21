@@ -11,6 +11,9 @@ class Spork {
 	public static function stuff() {
 		#if display
 		#else
+		if (Sys.args().indexOf("--no-output") != -1) 
+			return; // code completion
+		
 		final DEFINES = haxe.macro.Context.getDefines();
 
 		// FlxColor pisses it's stupid little pants if I don't do this

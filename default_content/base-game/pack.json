@@ -1,0 +1,8 @@
+{
+	"title": "Friday Night Funkin'",
+	"author": "Funkin Crew",
+	"description": "Base game content for Troll Engine",
+	"bgColor": "#FFAA00",
+	
+	"runsGlobally": true
+}
