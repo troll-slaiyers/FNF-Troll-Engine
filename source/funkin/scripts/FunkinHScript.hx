@@ -364,6 +364,7 @@ class FunkinHScript
 		set("BGSprite", funkin.objects.BGSprite);
 		set("AltBGSprite", funkin.objects.BGSprite.AltBGSprite);
 		set("FlxSprite3D", funkin.objects.FlxSprite3D);
+		set("AFT", funkin.objects.AFT);
 
 		set("AttachedSprite", funkin.objects.AttachedSprite);
 		set("AttachedText", funkin.objects.AttachedText);
