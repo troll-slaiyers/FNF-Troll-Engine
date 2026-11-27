@@ -33,7 +33,7 @@ function onCreateCutscene()
 	game.add(whiteFlash);
 
 	game.camHUD.visible = false;
-	
+
 	timeline.playAnimation(40, senpaiEvil, "idle");
 	this.sound(40, "Senpai_Dies", false);
 
@@ -41,22 +41,22 @@ function onCreateCutscene()
 	timeline.once(200, ()-> {
 		senpaiEvil.visible = false;
 		redBG.visible = false;
-	
+
 	});
 	timeline.easeProperties(200, 240, whiteFlash, {alpha: 0}, FlxEase.linear);
 
 	timeline.finish(240);
 }
 function onCutsceneEnd(wasSkipped: Bool){
-	
-	
+
+
 	senpaiEvil.visible = false;
 	redBG.visible = false;
 	whiteFlash.visible = false;
-	
+
 	game.camHUD.visible = true;
 	game.startCutscenes.push(new DialogueCutscene('songs/thorns/dialogue.json'));
-	
+
 	FlxG.sound.playMusic(Paths.music('LunchboxScary'), 0);
 	FlxG.sound.music.fadeIn(1, 0, 0.8);
 

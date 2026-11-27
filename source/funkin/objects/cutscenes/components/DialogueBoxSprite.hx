@@ -34,7 +34,7 @@ typedef AnimsArray = {
 	var offsets:Array<Int>;
 }
 
-class DialogueBox extends FlxSprite {
+class DialogueBoxSprite extends FlxSprite {
 	var jsonFile:BoxData;
 
 	public var font:String = 'pixel.ttf';
